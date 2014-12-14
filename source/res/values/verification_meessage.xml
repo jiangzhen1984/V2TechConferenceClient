@@ -37,10 +37,7 @@
     <!-- 好友 -->
      <string name="friend_has_added">已添加你为好友</string>
      <string name="friend_apply_add_you_friend">申请加你为好友</string>
-     
-     <string name="friend_apply_add">申请加</string>
-     <string name="friend_add_you_waiting_verify">为好友等待对方验证</string>
-     
+     <string name="friend_apply_add_waiting_verify">等待%1$s的好友验证</string>
      <string name="friend_relation">你和</string>
      <string name="friend_becomed">成为了好友</string>
      

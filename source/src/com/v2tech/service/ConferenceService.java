@@ -86,6 +86,7 @@ public class ConferenceService extends DeviceService {
 	private static final int KEY_PERMISSION_CHANGED_LISTNER = 104;
 	private static final int KEY_MIXED_VIDEO_LISTNER = 105;
 	private static final int KEY_HOST_REQUEST_LISTNER = 106;
+	private static final int KEY_VOICEACTIVATION_LISTNER = 207;
 
 	private VideoRequestCB videoCallback;
 	private ConfRequestCB confCallback;
@@ -239,7 +240,8 @@ public class ConferenceService extends DeviceService {
 		}
 		String sXml = XmlAttributeExtractor.buildAttendeeUsersXml(list);
 		GroupRequest.getInstance().inviteJoinGroup(
-				GroupType.CONFERENCE.intValue(), conf.getConferenceConfigXml(), sXml, "");
+				GroupType.CONFERENCE.intValue(), conf.getConferenceConfigXml(),
+				sXml, "");
 
 		// send response to caller because invite attendee no call back from JNI
 		JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
@@ -302,10 +304,9 @@ public class ConferenceService extends DeviceService {
 		this.sendMessageDelayed(res, 300);
 	}
 
-	
-	
 	/**
 	 * grant user permission.
+	 * 
 	 * @param user
 	 * @param type
 	 * @param state
@@ -321,29 +322,32 @@ public class ConferenceService extends DeviceService {
 			}
 			return;
 		}
-		
+
 		initTimeoutMessage(JNI_REQUEST_GRANT_PERMISSION, DEFAULT_TIME_OUT_SECS,
 				caller);
 
-		ConfRequest.getInstance().grantPermission(user.getmUserId(), type.intValue(), state.intValue());
+		ConfRequest.getInstance().grantPermission(user.getmUserId(),
+				type.intValue(), state.intValue());
 
 		JNIResponse jniRes = new RequestPermissionResponse(
 				RequestPermissionResponse.Result.SUCCESS);
 
 		// send delayed message for that make sure send response after JNI
-		Message res = Message.obtain(this, JNI_REQUEST_GRANT_PERMISSION, jniRes);
+		Message res = Message
+				.obtain(this, JNI_REQUEST_GRANT_PERMISSION, jniRes);
 		this.sendMessageDelayed(res, 300);
 	}
-	
-	
+
 	/**
 	 * Update conference attribute
+	 * 
 	 * @param conf
 	 * @param isSync
 	 * @param invitation
 	 * @param caller
 	 */
-	public void updateConferenceAttribute(Conference conf, boolean isSync, boolean invitation, MessageListener caller) {
+	public void updateConferenceAttribute(Conference conf, boolean isSync,
+			boolean invitation, MessageListener caller) {
 		if (conf == null) {
 			if (caller != null) {
 				JNIResponse jniRes = new JNIResponse(
@@ -352,7 +356,7 @@ public class ConferenceService extends DeviceService {
 			}
 			return;
 		}
-		
+
 		GroupRequest.getInstance().modifyGroupInfo(
 				GroupType.CONFERENCE.intValue(),
 				conf.getId(),
@@ -443,6 +447,14 @@ public class ConferenceService extends DeviceService {
 		unRegisterListener(KEY_SYNC_LISTNER, h, what, obj);
 	}
 
+	public void registerVoiceActivationListener(Handler h, int what, Object obj) {
+		registerListener(KEY_VOICEACTIVATION_LISTNER, h, what, obj);
+	}
+
+	public void removeVoiceActivationListener(Handler h, int what, Object obj) {
+		unRegisterListener(KEY_VOICEACTIVATION_LISTNER, h, what, obj);
+	}
+
 	/**
 	 * Register listener for permission changed
 	 * 
@@ -505,6 +517,12 @@ public class ConferenceService extends DeviceService {
 		@Override
 		public void OnEnterConfCallback(long nConfID, long nTime,
 				String szConfData, int nJoinResult) {
+
+			V2Log.d(V2Log.SERVICE_CALLBACK, "CLASS = ConferenceService"
+					+ " METHOD = OnEnterConfCallback()" + " nConfID = "
+					+ nConfID + " nTime = " + nTime + " szConfData = "
+					+ szConfData + " nJoinResult = " + nJoinResult);
+
 			ConferenceGroup cache = (ConferenceGroup) GlobalHolder
 					.getInstance().findGroupById(nConfID);
 			if (cache != null) {
@@ -622,32 +640,93 @@ public class ConferenceService extends DeviceService {
 
 		@Override
 		public void OnModifyGroupInfoCallback(V2Group group) {
-			if (group == null) {
+			if (group == null || group.xml == null) {
+				V2Log.d(V2Log.SERVICE_CALLBACK,
+						"CLASS = ConferenceService.GroupRequestCB"
+								+ " METHOD = OnModifyGroupInfoCallback()"
+								+ " group = " + " null");
 				return;
 			}
+
+			V2Log.d(V2Log.SERVICE_CALLBACK,
+					"CLASS = ConferenceService.GroupRequestCB"
+							+ " METHOD = OnModifyGroupInfoCallback()"
+							+ " group = " + group.toString());
+
 			if (group.type == Group.GroupType.CONFERENCE.intValue()) {
-				ConferenceGroup cache = (ConferenceGroup) GlobalHolder
+				ConferenceGroup conferenceGroup = (ConferenceGroup) GlobalHolder
 						.getInstance().findGroupById(group.id);
 
-				// if doesn't find matched group, mean this is new group
-				if (cache == null) {
+				if (conferenceGroup == null) {
+					// if doesn't find matched group, mean this is new group
+					return;
+				}
 
-				} else {
-					if (group.isUpdateSync) {
-						cache.setSyn(group.isSync);
-						notifyListenerWithPending(KEY_SYNC_LISTNER,
-								(cache.isSyn() ? 1 : 0), 0, null);
-					} else if (group.isUpdateInvitate) {
-						cache.setCanInvitation(group.canInvitation);
-						notifyListenerWithPending(KEY_SYNC_LISTNER,
-								(group.canInvitation ? 1 : 0), 1, null);
+				// 检测邀请
+				String invite = XmlAttributeExtractor.extractAttribute(
+						group.xml, "inviteuser");
+
+				if (invite != null) {
+					if ("0".equalsIgnoreCase(invite)) {
+						group.canInvitation = false;
+					} else if ("1".equalsIgnoreCase(invite)) {
+						group.canInvitation = true;
+					} else {
+						V2Log.e("inviteuser value illegality");
+						return;
 					}
+
+					conferenceGroup.setCanInvitation(group.canInvitation);
+					notifyListenerWithPending(KEY_SYNC_LISTNER,
+							(group.canInvitation ? 1 : 0), 1, null);
+
+				}
+
+				// 检测同步
+				String sync = XmlAttributeExtractor.extract(group.xml,
+						" syncdesktop='", "'");
+				if (sync != null) {
+					if ("0".equalsIgnoreCase(sync)) {
+						// 关闭了同步
+						group.isSync = false;
+					} else if ("1".equalsIgnoreCase(sync)) {
+						// 开启了同步
+						group.isSync = true;
+					} else {
+						V2Log.e("syncdesktop value illegality");
+						return;
+					}
+
+					conferenceGroup.setSyn(group.isSync);
+					notifyListenerWithPending(KEY_SYNC_LISTNER,
+							(conferenceGroup.isSyn() ? 1 : 0), 0, null);
+
+				}
+
+				// 检测语音激励
+				String voiceActivation = XmlAttributeExtractor.extract(
+						group.xml, " voiceactivation='", "'");
+				if (voiceActivation != null) {
+					if ("0".equalsIgnoreCase(voiceActivation)) {
+						// 关闭了语音激励
+						group.isVoiceActivation = false;
+					} else if ("1".equalsIgnoreCase(voiceActivation)) {
+						// 开启了语音激励
+						group.isVoiceActivation = true;
+					} else {
+						V2Log.e("voiceactivation value illegality");
+						return;
+					}
+
+					conferenceGroup.setVoiceActivation(group.isVoiceActivation);
+					notifyListenerWithPending(KEY_VOICEACTIVATION_LISTNER,
+							(group.isVoiceActivation ? 1 : 0), 0, null);
 
 				}
 
 			}
-		}
 
+		}
 	}
 
 	class MixerRequestCB implements VideoMixerRequestCallback {

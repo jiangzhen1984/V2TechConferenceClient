@@ -30,8 +30,6 @@ import com.v2tech.vo.User;
 
 public class XmlAttributeExtractor {
 
-	
-	
 	public static String extract(String str, String startStr, String endStr) {
 		if (startStr == null || endStr == null || startStr.isEmpty()
 				|| endStr.isEmpty()) {

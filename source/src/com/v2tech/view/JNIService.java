@@ -132,12 +132,17 @@ public class JNIService extends Service implements
 	public static final String JNI_BROADCAST_NEW_CONF_MESSAGE = "com.v2tech.jni.broadcast.new.conf.message";
 	public static final String JNI_BROADCAST_CONFERENCE_INVATITION = "com.v2tech.jni.broadcast.conference_invatition_new";
 	public static final String JNI_BROADCAST_CONFERENCE_REMOVED = "com.v2tech.jni.broadcast.conference_removed";
+	public static final String JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO = "com.v2tech.jni.broadcast.conference_confSyncOpenVideo";
+	public static final String JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO = "com.v2tech.jni.broadcast.conference_confSyncCloseVideo";
 	public static final String JNI_BROADCAST_GROUP_USER_REMOVED = "com.v2tech.jni.broadcast.group_user_removed";
 	public static final String JNI_BROADCAST_GROUP_USER_ADDED = "com.v2tech.jni.broadcast.group_user_added";
 	public static final String JNI_BROADCAST_VIDEO_CALL_CLOSED = "com.v2tech.jni.broadcast.video_call_closed";
 	public static final String JNI_BROADCAST_CONTACTS_AUTHENTICATION = "com.v2tech.jni.broadcast.friend_authentication";
 	public static final String JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE = "com.v2tech.jni.broadcast.new.qualification_message";
 	public static final String BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION = "com.v2tech.jni.broadcast.new.upload_crowd_file_message";
+	public static final String JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE="com.v2tech.jni.broadcast.conference_OnConfSyncCloseVideoToMobile";
+	public static final String JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE="com.v2tech.jni.broadcast.conference_OnConfSyncOpenVideoToMobile";
+	
 	
 	public static final String JNI_BROADCAST_GROUPS_LOADED = "com.v2tech.jni.broadcast.groups_loaded";
 	/**
@@ -374,8 +379,7 @@ public class JNIService extends Service implements
 
 				if (gl != null && gl.size() > 0) {
 					GlobalHolder.getInstance().updateGroupList(msg.arg1, gl);
-					if (((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD) ||
-							(msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT))
+					if (((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD) || (msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT))
 							&& !noNeedBroadcast) {
 						V2Log.d(TAG,
 								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
@@ -399,11 +403,16 @@ public class JNIService extends Service implements
 					for (User tu : lu) {
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
-                        if(existU.isDirty() && GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
-                            V2Log.e(TAG , "The User that id is : " + existU.getmUserId() + " dirty!" +
-                                    " Need to get user base infos");
-                            ImRequest.getInstance().getUserBaseInfo(existU.getmUserId());
-                        }
+						if (existU.isDirty()
+								&& !GlobalHolder.getInstance().getGlobalState()
+										.isGroupLoaded()) {
+							V2Log.e(TAG,
+									"The User that id is : "
+											+ existU.getmUserId() + " dirty!"
+											+ " Need to get user base infos");
+							ImRequest.getInstance().getUserBaseInfo(
+									existU.getmUserId());
+						}
 						if (existU.getmUserId() == GlobalHolder.getInstance()
 								.getCurrentUserId()) {
 							// Update logged user object.
@@ -452,7 +461,8 @@ public class JNIService extends Service implements
 				// conference already in cache list
 				if (cache != null && g.getmGId() != 0) {
 					V2Log.i("Current user conference in group:"
-							+ cache.getName() + "  " + cache.getmGId() + " only send Broadcast!");
+							+ cache.getName() + "  " + cache.getmGId()
+							+ " only send Broadcast!");
 					Intent i = new Intent();
 					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -600,8 +610,8 @@ public class JNIService extends Service implements
 			}
 			User u = convertUser(user);
 			GlobalHolder.getInstance().putUser(u.getmUserId(), u);
-//			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO, u)
-//					.sendToTarget();
+			// Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO, u)
+			// .sendToTarget();
 		}
 
 		@Override
@@ -626,7 +636,6 @@ public class JNIService extends Service implements
 			mContext.sendBroadcast(iun);
 
 		}
-		
 
 		@Override
 		public void OnChangeAvatarCallback(int nAvatarType, long nUserID,
@@ -652,19 +661,17 @@ public class JNIService extends Service implements
 			i.putExtra("avatar", new UserAvatarObject(nUserID, AvatarName));
 			sendBroadcast(i);
 		}
-		
 
 		@Override
 		public void OnGroupsLoaded() {
-			//Update group loaded state
+			// Update group loaded state
 			GlobalHolder.getInstance().setGroupLoaded();
-			
+
 			Intent i = new Intent();
 			i.addCategory(JNI_BROADCAST_CATEGROY);
 			i.setAction(JNI_BROADCAST_GROUPS_LOADED);
 			sendBroadcast(i);
 		}
-		
 
 	}
 
@@ -703,7 +710,7 @@ public class JNIService extends Service implements
 			}
 
 			if (group.type == GroupType.CONFERENCE.intValue()) {
-
+				// 此处不处理，处理在ConferenceService
 			} else if (group.type == GroupType.CHATING.intValue()) {
 				CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
 						.getGroupById(group.id);
@@ -903,16 +910,17 @@ public class JNIService extends Service implements
 			if (user == null)
 				V2Log.e(TAG,
 						"OnRequestCreateRelationCallback ---> Create relation failed...get user is null");
-			
+
 			boolean isOutORG = false;
 			User vUser = GlobalHolder.getInstance().getUser(user.uid);
-			if(!vUser.isDirty()){
+			if (!vUser.isDirty()) {
 				AddFriendHistroysHandler.addMeNeedAuthentication(
 						getApplicationContext(), vUser, additInfo);
-			} else{ //组织外的用户
+			} else { // 组织外的用户
 				isOutORG = true;
 				User newUser = convertUser(user);
-				GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
+				GlobalHolder.getInstance().putUser(newUser.getmUserId(),
+						newUser);
 				AddFriendHistroysHandler.addMeNeedAuthentication(
 						getApplicationContext(), newUser, additInfo);
 			}
@@ -958,7 +966,9 @@ public class JNIService extends Service implements
 					Notificator
 							.updateSystemNotification(
 									mContext,
-                                    mContext.getText(R.string.requesting_delete_conference).toString(),
+									mContext.getText(
+											R.string.requesting_delete_conference)
+											.toString(),
 									gName
 											+ mContext
 													.getText(R.string.confs_is_deleted_notification),
@@ -966,19 +976,25 @@ public class JNIService extends Service implements
 									PublicIntent.VIDEO_NOTIFICATION_ID);
 				}
 			} else if (groupType == GroupType.CHATING.intValue()) {
-				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_CROWD), nGroupID);
+				GlobalHolder.getInstance().removeGroup(
+						GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_CROWD),
+						nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
+				i.putExtra("group", new GroupUserObject(
+						V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
 				sendBroadcast(i, null);
 
 			} else if (groupType == GroupType.DISCUSSION.intValue()) {
-				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_DISCUSSION), nGroupID);
+				GlobalHolder.getInstance().removeGroup(
+						GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_DISCUSSION),
+						nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_DISCUSSION, nGroupID, -1));
+				i.putExtra("group", new GroupUserObject(
+						V2GlobalEnum.GROUP_TYPE_DISCUSSION, nGroupID, -1));
 				sendBroadcast(i);
 
 			}
@@ -998,21 +1014,27 @@ public class JNIService extends Service implements
 						nGroupID = gg.getmGId();
 					}
 				}
-			} else if(groupType == GroupType.CHATING.intValue() && 
-					GlobalHolder.getInstance().getCurrentUserId() == nUserID){
-				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_CROWD), nGroupID);
+			} else if (groupType == GroupType.CHATING.intValue()
+					&& GlobalHolder.getInstance().getCurrentUserId() == nUserID) {
+				GlobalHolder.getInstance().removeGroup(
+						GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_CROWD),
+						nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
+				i.putExtra("group", new GroupUserObject(
+						V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
 				sendBroadcast(i);
-			} else if(groupType == GroupType.DISCUSSION.intValue()  && 
-					GlobalHolder.getInstance().getCurrentUserId() == nUserID){
-				GlobalHolder.getInstance().removeGroup(GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_DISCUSSION), nGroupID);
+			} else if (groupType == GroupType.DISCUSSION.intValue()
+					&& GlobalHolder.getInstance().getCurrentUserId() == nUserID) {
+				GlobalHolder.getInstance().removeGroup(
+						GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_DISCUSSION),
+						nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_DISCUSSION, nGroupID, -1));
+				i.putExtra("group", new GroupUserObject(
+						V2GlobalEnum.GROUP_TYPE_DISCUSSION, nGroupID, -1));
 				sendBroadcast(i);
 			}
 
@@ -1049,14 +1071,15 @@ public class JNIService extends Service implements
 
 			User newUser = convertUser(user);
 			GroupType gType = GroupType.fromInt(groupType);
-			newUser=GlobalHolder.getInstance().putUser(newUser.getmUserId(), newUser);
+			newUser = GlobalHolder.getInstance().putUser(newUser.getmUserId(),
+					newUser);
 			GlobalHolder.getInstance().addUserToGroup(newUser, nGroupID);
-//			if (gType == GroupType.CONTACT) {
-//				Set<Group> groupSet = newUser.getBelongsGroup();
-//				for (Group gg : groupSet) {
-//					Log.i("20141201 2", gg.getName());
-//				}
-//			}
+			// if (gType == GroupType.CONTACT) {
+			// Set<Group> groupSet = newUser.getBelongsGroup();
+			// for (Group gg : groupSet) {
+			// Log.i("20141201 2", gg.getName());
+			// }
+			// }
 
 			if (gType == GroupType.CONTACT) {
 				contactsGroupHandler.OnAddContactsGroupUserInfoCallback(
@@ -1080,7 +1103,8 @@ public class JNIService extends Service implements
 										QualificationState.BE_ACCEPTED, null,
 										ReadState.UNREAD, true));
 					} else {
-						V2Log.e("CrowdCreateActivity  -->Not found  VMessageQualification Cache Object ! user id is : " + user.uid);
+						V2Log.e("CrowdCreateActivity  -->Not found  VMessageQualification Cache Object ! user id is : "
+								+ user.uid);
 						Group group = GlobalHolder.getInstance().getGroupById(
 								groupType, nGroupID);
 						if (group == null) {
@@ -1248,13 +1272,15 @@ public class JNIService extends Service implements
 
 		@Override
 		public void onAddGroupInfo(V2Group crowd) {
-			if (crowd == null){
-				V2Log.e(TAG, "onAddGroupInfo--> Given V2Group Object is null ... please check!");
+			if (crowd == null) {
+				V2Log.e(TAG,
+						"onAddGroupInfo--> Given V2Group Object is null ... please check!");
 				return;
 			}
 
-			if (crowd.creator == null){
-				V2Log.e(TAG, "onAddGroupInfo--> The Creator of V2Group Object is null ... please check!");
+			if (crowd.creator == null) {
+				V2Log.e(TAG,
+						"onAddGroupInfo--> The Creator of V2Group Object is null ... please check!");
 				return;
 			}
 
@@ -1289,12 +1315,14 @@ public class JNIService extends Service implements
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.id, -1));
+				i.putExtra("group", new GroupUserObject(
+						V2GlobalEnum.GROUP_TYPE_CROWD, crowd.id, -1));
 				sendBroadcast(i);
-			} else if(crowd.type == V2Group.TYPE_DISCUSSION_BOARD
-					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.creator.uid){
-				V2Log.e(TAG, "onAddGroupInfo--> add a new discussion group , id is : "
-						+ crowd.id);
+			} else if (crowd.type == V2Group.TYPE_DISCUSSION_BOARD
+					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.creator.uid) {
+				V2Log.e(TAG,
+						"onAddGroupInfo--> add a new discussion group , id is : "
+								+ crowd.id);
 				User user = GlobalHolder.getInstance().getUser(
 						crowd.creator.uid);
 				if (user == null) {
@@ -1303,13 +1331,15 @@ public class JNIService extends Service implements
 									+ crowd.creator.uid);
 					return;
 				}
-				DiscussionGroup g = new DiscussionGroup(crowd.id, crowd.name, user, null);
+				DiscussionGroup g = new DiscussionGroup(crowd.id, crowd.name,
+						user, null);
 				GlobalHolder.getInstance().addGroupToList(
 						GroupType.DISCUSSION.intValue(), g);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_DISCUSSION, crowd.id, -1));
+				i.putExtra("group", new GroupUserObject(
+						V2GlobalEnum.GROUP_TYPE_DISCUSSION, crowd.id, -1));
 				sendBroadcast(i);
 			}
 		}
@@ -1360,11 +1390,13 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnKickGroupUser(int groupType, long groupId, long nUserId) {
-			GlobalHolder.getInstance().removeGroup(GroupType.fromInt(groupType), groupId);
+			GlobalHolder.getInstance().removeGroup(
+					GroupType.fromInt(groupType), groupId);
 			Intent kick = new Intent();
 			kick.setAction(JNI_BROADCAST_KICED_CROWD);
 			kick.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			kick.putExtra("group" , new GroupUserObject(groupType , groupId , nUserId));
+			kick.putExtra("group", new GroupUserObject(groupType, groupId,
+					nUserId));
 			sendBroadcast(kick);
 		}
 	}
@@ -1445,7 +1477,7 @@ public class JNIService extends Service implements
 			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 			MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
-			
+
 			Intent intent = new Intent();
 			intent.setAction(ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE);
 			intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -1547,7 +1579,7 @@ public class JNIService extends Service implements
 			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
 			currentVideoBean.mediaState = AudioVideoMessageBean.STATE_NO_ANSWER_CALL;
 			MessageBuilder.saveMediaChatHistories(mContext, currentVideoBean);
-			
+
 			Intent intent = new Intent();
 			intent.setAction(ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE);
 			intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -1582,6 +1614,79 @@ public class JNIService extends Service implements
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			i.putExtra("gid", g.getmGId());
 			sendBroadcast(i);
+		}
+
+		@Override
+		public void OnConfSyncOpenVideo(String str) {
+			V2Log.d(V2Log.JNISERVICE_CALLBACK,
+					"CLASS = JNIService.ConfRequestCB METHOD = OnConfSyncOpenVideo()"
+							+ " str = " + str);
+
+			// 广播给界面
+
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("xml", str);
+			sendBroadcast(i);
+
+		}
+
+		@Override
+		public void OnConfSyncCloseVideoToMobile(long nDstUserID,
+				String sDstMediaID) {
+			V2Log.d(V2Log.JNISERVICE_CALLBACK,
+					"CLASS = JNIService.ConfRequestCB METHOD = OnConfSyncCloseVideoToMobile()"
+							+ " nDstUserID = " + nDstUserID + " sDstMediaID = "
+							+ sDstMediaID);
+			
+			V2Log.d("20141211 2",
+					"CLASS = JNIService.ConfRequestCB METHOD = OnConfSyncCloseVideoToMobile()"
+							+ " nDstUserID = " + nDstUserID + " sDstMediaID = "
+							+ sDstMediaID);
+
+			// 广播给界面
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("nDstUserID", nDstUserID);
+			i.putExtra("sDstMediaID", sDstMediaID);
+			sendBroadcast(i);
+
+		}
+
+		@Override
+		public void OnConfSyncOpenVideoToMobile(String sSyncVideoMsgXML) {
+			V2Log.d(V2Log.JNISERVICE_CALLBACK,
+					"CLASS = JNIService.ConfRequestCB METHOD = OnConfSyncOpenVideoToMobile()"
+							+ " sSyncVideoMsgXML = " + sSyncVideoMsgXML);
+			
+			V2Log.d("20141211 2",
+					"CLASS = JNIService.ConfRequestCB METHOD = OnConfSyncOpenVideoToMobile()"
+							+ " sSyncVideoMsgXML = " + sSyncVideoMsgXML);
+			
+			// 广播给界面
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("sSyncVideoMsgXML", sSyncVideoMsgXML);
+			sendBroadcast(i);
+		}
+
+		@Override
+		public void OnConfSyncCloseVideo(long gid, String str) {
+			V2Log.d(V2Log.JNISERVICE_CALLBACK,
+					"CLASS = JNIService.ConfRequestCB METHOD = OnConfSyncCloseVideo()"
+							+ " gid = " + gid + " str = " + str);
+
+			// 广播给界面
+			Intent i = new Intent();
+			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("gid", gid);
+			i.putExtra("dstDeviceID", str);
+			sendBroadcast(i);
+
 		}
 
 	}
@@ -1884,17 +1989,18 @@ public class JNIService extends Service implements
 					"There is no broadcast in delayBroadcast collections , mean no callback!");
 		} else {
 			synchronized (JNIService.class) {
-				for (int i = 0 ; i < delayBroadcast.size() ; i++) {
+				for (int i = 0; i < delayBroadcast.size(); i++) {
 					int type = delayBroadcast.get(i);
-					V2Log.d(TAG, "The delay broadcast was sending now , type is : "
-							+ type);
+					V2Log.d(TAG,
+							"The delay broadcast was sending now , type is : "
+									+ type);
 					Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
 					gi.putExtra("gtype", type);
 					gi.addCategory(JNI_BROADCAST_CATEGROY);
 					mContext.sendBroadcast(gi);
 				}
-	
-				for(int i = 0 ; i < delayUserBroadcast.size() ; i++){
+
+				for (int i = 0; i < delayUserBroadcast.size(); i++) {
 					GroupUserInfoOrig go = delayUserBroadcast.get(i);
 					V2Log.d(TAG,
 							"The delay user broadcast was sending now , type is : "

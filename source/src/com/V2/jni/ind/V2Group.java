@@ -52,7 +52,9 @@ public class V2Group {
 	//remote user update sync attribute or note
 	public boolean isUpdateSync;
 	public boolean isSync;
+	public boolean isVoiceActivation;
 	//remote user update invitation attribute or note
+
 	public boolean isUpdateInvitate;
 	public boolean canInvitation;
 	
@@ -65,6 +67,9 @@ public class V2Group {
 	
 	//for contact group
 	public boolean isDefault;
+	
+	//for xml
+	public String xml;
 	
 	
 	public V2Group(int type) {

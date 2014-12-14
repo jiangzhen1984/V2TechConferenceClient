@@ -6,6 +6,7 @@ public class ConferenceGroup extends Group {
 
 	private User mChairMan;
 	private boolean isSyn;
+	private boolean isVoiceActivation;
 	private boolean isCanInvitation = true;
 
 
@@ -15,6 +16,14 @@ public class ConferenceGroup extends Group {
 		this.mChairMan = chairMan;
 	}
 
+	public void setVoiceActivation(boolean isVoiceActivation) {
+		this.isVoiceActivation = isVoiceActivation;
+	}
+	
+	public boolean isVoiceActivation() {
+		return isVoiceActivation;
+	}
+	
 	public boolean isSyn() {
 		return isSyn;
 	}

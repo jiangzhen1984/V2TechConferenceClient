@@ -18,8 +18,8 @@ import com.V2.jni.util.XmlAttributeExtractor;
 
 public class GroupRequest {
 
-    private static final String TAG = "GroupRequest UI";
-    public boolean loginResult;
+	private static final String TAG = "GroupRequest UI";
+	public boolean loginResult;
 	private static GroupRequest mGroupRequest;
 
 	private List<WeakReference<GroupRequestCallback>> mCallbacks;
@@ -38,7 +38,6 @@ public class GroupRequest {
 		}
 		return mGroupRequest;
 	}
-
 
 	public native boolean initialize(GroupRequest request);
 
@@ -159,13 +158,13 @@ public class GroupRequest {
 	public native void refuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String reason);
 
-    /**
-     * send application of join group
-     *
-     * @param groupType
-     * @param nGroupID
-     * @param sAdditInfo
-     */
+	/**
+	 * send application of join group
+	 * 
+	 * @param groupType
+	 * @param nGroupID
+	 * @param sAdditInfo
+	 */
 	public native void applyJoinGroup(int groupType, long nGroupID,
 			String sAdditInfo);
 
@@ -201,11 +200,12 @@ public class GroupRequest {
 	public native void groupCreateWBoard(int groupType, long groupId,
 			int nWhiteIndex);
 
-    /**
-     * 销毁白板
-     * @param groupId
-     * @param szMediaID
-     */
+	/**
+	 * 销毁白板
+	 * 
+	 * @param groupId
+	 * @param szMediaID
+	 */
 	public native void groupDestroyWBoard(long groupId, String szMediaID);
 
 	/**
@@ -222,12 +222,13 @@ public class GroupRequest {
 	public native void groupCreateDocShare(int eGroupType, long nGroupID,
 			String sFileName, int eWhiteShowType, boolean bStorePersonalSpace);
 
-    /**
-     * accept the invitation that join group
-     * @param groupType
-     * @param groupId
-     * @param nUserID
-     */
+	/**
+	 * accept the invitation that join group
+	 * 
+	 * @param groupType
+	 * @param groupId
+	 * @param nUserID
+	 */
 	private void OnAcceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID) {
 		V2Log.d("Group Request  OnAcceptInviteJoinGroup  ==>" + groupType
@@ -245,14 +246,14 @@ public class GroupRequest {
 
 	}
 
-    /**
-     * Reject application of join group
-     *
-     * @param groupType
-     * @param nGroupId
-     * @param nUserID
-     * @param sReason
-     */
+	/**
+	 * Reject application of join group
+	 * 
+	 * @param groupType
+	 * @param nGroupId
+	 * @param nUserID
+	 * @param sReason
+	 */
 	public native void refuseApplyJoinGroup(int groupType, long nGroupId,
 			long nUserID, String sReason);
 
@@ -398,8 +399,8 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'
-	 * / > < / f i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.g
+	 * i f ' / > < / f i l e l i s t >
 	 * 
 	 * @param groupType
 	 * @param nGroupId
@@ -504,21 +505,22 @@ public class GroupRequest {
 	private void OnAddGroupUserInfo(int groupType, long nGroupID, String sXml) {
 		V2Log.d("OnAddGroupUserInfo ->" + groupType + ":" + nGroupID + ":"
 				+ sXml);
-		
+
 		V2User remoteUser = XmlAttributeExtractor.fromGroupXml(sXml);
-		if(remoteUser == null){
-			V2Log.e("OnAddGroupUserInfo -> parse xml failed ...get null user : " + sXml);
-			return ;
+		if (remoteUser == null) {
+			V2Log.e("OnAddGroupUserInfo -> parse xml failed ...get null user : "
+					+ sXml);
+			return;
 		}
-		
-	
+
 		ImRequest.getInstance().getUserBaseInfo(remoteUser.uid);
-		
+
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnAddGroupUserInfoCallback(groupType, nGroupID, remoteUser);
+				callback.OnAddGroupUserInfoCallback(groupType, nGroupID,
+						remoteUser);
 			}
 		}
 	}
@@ -537,42 +539,46 @@ public class GroupRequest {
 
 	/**
 	 * <ul>
-	 * Crowd: {@code <crowd announcement='abcde' authtype='1' creatoruserid='11113231'
-     *                  id='411152' name='qqq' size='500' summary=''/>}
+	 * Crowd:
+	 * {@code <crowd announcement='abcde' authtype='1' creatoruserid='11113231'
+	 *                  id='411152' name='qqq' size='500' summary=''/>}
 	 * </ul>
 	 * 
 	 * @param groupType
 	 * @param nParentID
 	 * @param nGroupID
 	 * @param sXml
-     *
+	 * 
 	 */
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
-		V2Log.e(TAG , "OnAddGroupInfo ---> groupType :"
-                + groupType + " | nParentID: " + nParentID + " | nGroupID: "
-                + nGroupID + " | sXml: " + sXml);
+		V2Log.e(TAG, "OnAddGroupInfo ---> groupType :" + groupType
+				+ " | nParentID: " + nParentID + " | nGroupID: " + nGroupID
+				+ " | sXml: " + sXml);
 
 		String gid = XmlAttributeExtractor.extract(sXml, " id='", "'");
 		String name = XmlAttributeExtractor.extract(sXml, " name='", "'");
-        String announcement = XmlAttributeExtractor.extract(sXml, " announcement='", "'");
-        String brief = XmlAttributeExtractor.extract(sXml, " summary='", "'");
-        String authType = XmlAttributeExtractor.extract(sXml, " authtype='", "'");
-        String groupSize = XmlAttributeExtractor.extract(sXml, " size='", "'");
-        String createUesrID = XmlAttributeExtractor.extract(sXml,
+		String announcement = XmlAttributeExtractor.extract(sXml,
+				" announcement='", "'");
+		String brief = XmlAttributeExtractor.extract(sXml, " summary='", "'");
+		String authType = XmlAttributeExtractor.extract(sXml, " authtype='",
+				"'");
+		String groupSize = XmlAttributeExtractor.extract(sXml, " size='", "'");
+		String createUesrID = XmlAttributeExtractor.extract(sXml,
 				" creatoruserid='", "'");
 		V2Group vg = new V2Group(Long.parseLong(gid), name, groupType);
 		if (gid != null && !gid.isEmpty() && createUesrID != null) {
 			vg.owner = new V2User(Long.valueOf(createUesrID));
 			vg.creator = vg.owner;
-            if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
-            	vg.announce = announcement;
-            	vg.brief = brief;
-	            vg.authType = Integer.valueOf(authType);
-	            vg.groupSize = Integer.valueOf(groupSize);
-            }
-		}else{
-			V2Log.e("OnAddGroupInfo:: parse xml failed , don't get group id or user id ...." + sXml);
+			if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+				vg.announce = announcement;
+				vg.brief = brief;
+				vg.authType = Integer.valueOf(authType);
+				vg.groupSize = Integer.valueOf(groupSize);
+			}
+		} else {
+			V2Log.e("OnAddGroupInfo:: parse xml failed , don't get group id or user id ...."
+					+ sXml);
 		}
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
@@ -596,8 +602,12 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnModifyGroupInfo(int groupType, long nGroupID, String sXml) {
-		V2Log.d("OnModifyGroupInfo::-->" + groupType + ":" + nGroupID + ":"
-				+ sXml);
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnModifyGroupInfo() groupType = "
+						+ groupType + " nGroupID = " + nGroupID + " sXml = "
+						+ sXml);
+
 		sXml = EscapedcharactersProcessing.reverse(sXml);
 		V2Group group = new V2Group(nGroupID, groupType);
 		if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
@@ -618,36 +628,14 @@ public class GroupRequest {
 			}
 
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
-			String sync = XmlAttributeExtractor.extract(sXml, " syncdesktop='",
-					"'");
-			if (sync == null || "".equals(sync)) {
-				group.isUpdateSync = false;
-			} else {
-				group.isUpdateSync = true;
-				if ("1".equalsIgnoreCase(sync)) {
-					group.isSync = true;
-				}
-			}
-			
-			
-			
-			String invite = XmlAttributeExtractor.extractAttribute(sXml, "inviteuser");
-			if (invite == null || "".equals(invite)) {
-				group.isUpdateInvitate = false;
-			} else {
-				group.isUpdateInvitate = true;
-				if ("1".equalsIgnoreCase(invite)) {
-					group.canInvitation = true;
-				}
-			}
-			
-			
-
+			// 会议室
+			group.xml=sXml;
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
 			group.name = name;
 		}
 
+		// 以次回调上层
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -726,17 +714,18 @@ public class GroupRequest {
 					" nickname='", "'");
 			name = EscapedcharactersProcessing.reverse(name);
 			user.name = name;
-		}else if (groupType == V2Group.TYPE_DISCUSSION_BOARD) {
+		} else if (groupType == V2Group.TYPE_DISCUSSION_BOARD) {
 			String id = XmlAttributeExtractor.extractAttribute(groupInfo, "id");
 			if (id == null || id.isEmpty()) {
 				V2Log.e(" Unknow disucssion information:" + groupInfo);
 				return;
 			}
-			String name = XmlAttributeExtractor.extractAttribute(groupInfo, "name");
+			String name = XmlAttributeExtractor.extractAttribute(groupInfo,
+					"name");
 			name = EscapedcharactersProcessing.reverse(name);
 			group = new V2Group(Long.parseLong(id), groupType);
 			group.name = name;
-		} 
+		}
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
@@ -752,14 +741,14 @@ public class GroupRequest {
 
 	}
 
-    /**
-     * this funcation was called when be invited user refused to join group
-     *
-     * @param groupType
-     * @param nGroupID
-     * @param nUserID
-     * @param reason
-     */
+	/**
+	 * this funcation was called when be invited user refused to join group
+	 * 
+	 * @param groupType
+	 * @param nGroupID
+	 * @param nUserID
+	 * @param reason
+	 */
 	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String reason) {
 		V2Log.d("OnRefuseInviteJoinGroup ==>" + "groupType:" + groupType + ","
@@ -771,12 +760,12 @@ public class GroupRequest {
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
 				/**
-				 * The callBack was only called when somebody refused the invite from you sended..
-				 * SomeBody invite you to join group and you refuse it ... this callback isn't called
+				 * The callBack was only called when somebody refused the invite
+				 * from you sended.. SomeBody invite you to join group and you
+				 * refuse it ... this callback isn't called
 				 */
 				callback.OnRefuseInviteJoinGroup(new GroupQualicationJNIObject(
-						groupType, nGroupID, nUserID, 1,
-						3 , reason));
+						groupType, nGroupID, nUserID, 1, 3, reason));
 			}
 		}
 
@@ -864,13 +853,13 @@ public class GroupRequest {
 		}
 	}
 
-    /**
-     * The CallBack that refuse apply for join group 拒绝申请加入群回调
-     *
-     * @param groupType
-     * @param sXml
-     * @param reason
-     */
+	/**
+	 * The CallBack that refuse apply for join group 拒绝申请加入群回调
+	 * 
+	 * @param groupType
+	 * @param sXml
+	 * @param reason
+	 */
 	private void OnRefuseApplyJoinGroup(int groupType, String sXml,
 			String reason) {
 		V2Log.d("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
@@ -1066,4 +1055,3 @@ public class GroupRequest {
 		}
 	}
 }
-

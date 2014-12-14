@@ -209,6 +209,12 @@ public class ConversationP2PAVActivity extends Activity implements
 
 			Log.i(TAG, "蓝牙是连接的");
 		}
+		
+		if (!uad.isIncoming() && uad.isAudioType()) {
+			audioManager.setMode(AudioManager.MODE_IN_CALL);
+			headsetAndBluetoothHeadsetHandle(true);
+		}
+		
 
 		currentVideoBean = new VideoBean();
 		if (uad.isIncoming()) {

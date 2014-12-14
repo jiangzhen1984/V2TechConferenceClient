@@ -72,6 +72,7 @@ import android.widget.Toast;
 import com.V2.jni.ImRequest;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
+import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.R;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.ChatService;
@@ -106,6 +107,7 @@ import com.v2tech.vo.V2ShapeMeta;
 import com.v2tech.vo.VMessage;
 
 public class ConferenceActivity extends Activity {
+	private static final String LOG_VOICEACTIVATION = "VOICEACTIVATION";
 	private static final String TAG = "ConferenceActivity";
 	private static final int TAG_SUB_WINDOW_STATE_FIXED = 0x1;
 	private static final int TAG_SUB_WINDOW_STATE_FLOAT = 0x0;
@@ -134,6 +136,7 @@ public class ConferenceActivity extends Activity {
 	private static final int DOC_CLOSED_NOTIFICATION = 55;
 	private static final int DOC_PAGE_CANVAS_NOTIFICATION = 56;
 	private static final int DESKTOP_SYNC_NOTIFICATION = 57;
+	private static final int VOICEACTIVATION_NOTIFICATION = 58;
 
 	private static final int VIDEO_MIX_NOTIFICATION = 70;
 	private static final int TAG_CLOSE_DEVICE = 0;
@@ -202,7 +205,7 @@ public class ConferenceActivity extends Activity {
 	private List<VMessage> mPendingMessageList;
 
 	private List<PermissionUpdateIndication> mPendingPermissionUpdateList;
-	
+
 	private Set<User> mHostRequestUsers;
 
 	private Toast mToast;
@@ -223,6 +226,8 @@ public class ConferenceActivity extends Activity {
 	private BluetoothAdapter blueadapter = BluetoothAdapter.getDefaultAdapter();
 
 	private int arrowWidth = 0;
+	private int isSyn = 0;
+	private int isVoiceActivation = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -254,7 +259,10 @@ public class ConferenceActivity extends Activity {
 
 		this.mVideoLayout = new FrameLayout(this);
 		mContentLayoutMain.addView(this.mVideoLayout);
+		//mVideoLayout.setBackgroundColor(Color.rgb(255, 0, 0));
+		mVideoLayout.setVisibility(View.VISIBLE);
 		this.mSubWindowLayout = new FrameLayout(this);
+
 		mSubWindowLayout.setVisibility(View.GONE);
 		mContentLayoutMain.addView(this.mSubWindowLayout);
 
@@ -338,6 +346,13 @@ public class ConferenceActivity extends Activity {
 		// Broadcast for user joined conference, to inform that quit P2P
 		// conversation
 		broadcastForJoined();
+		mVideoHandler.post(new Runnable() {
+
+			@Override
+			public void run() {
+				initVideoLayout();
+			}
+		});
 	}
 
 	@Override
@@ -402,6 +417,10 @@ public class ConferenceActivity extends Activity {
 		filter.addAction(Intent.ACTION_USER_PRESENT);
 		filter.addAction(Intent.ACTION_HEADSET_PLUG);
 		filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
+		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO);
+		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO);
+		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE);
+		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE);
 
 		mContext.registerReceiver(mConfUserChangeReceiver, filter);
 
@@ -439,7 +458,7 @@ public class ConferenceActivity extends Activity {
 		mPendingMessageList = new ArrayList<VMessage>();
 
 		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
-		
+
 		mHostRequestUsers = new HashSet<User>();
 		// Set default speaking state if current user is owner, then should
 		// apply speaking default;
@@ -737,6 +756,39 @@ public class ConferenceActivity extends Activity {
 
 		// make sure local is in front of any view
 		localSurfaceViewLy.bringToFront();
+	}
+
+	public void initVideoLayout() {
+
+		// Update width and height for video layout
+		FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mVideoLayout
+				.getLayoutParams();
+		if (mContentWidth == -1) {
+			mContentWidth = mContentLayoutMain.getWidth();
+		}
+		if (mContentHeight == -1) {
+			mContentHeight = mContentLayoutMain.getHeight();
+		}
+
+		int marginLeft = mMenuButtonContainer.getMeasuredWidth();
+
+		int width = mContentWidth - marginLeft;
+		int height = mContentHeight;
+		if (fl == null) {
+			fl = new FrameLayout.LayoutParams(width, height);
+		}
+
+		if (fl.leftMargin == marginLeft && fl.width == width
+				&& fl.height == height) {
+
+		} else {
+			fl.width = width;
+			fl.height = height;
+
+			fl.leftMargin = marginLeft;
+			mContentLayoutMain.updateViewLayout(mVideoLayout, fl);
+
+		}
 	}
 
 	/**
@@ -1125,7 +1177,8 @@ public class ConferenceActivity extends Activity {
 									mHostRequestWindow = new VideoShowHostRequest(
 											mContext, mHostRequestUsers, cb);
 								} else {
-									mHostRequestWindow.updateList(mHostRequestUsers);
+									mHostRequestWindow
+											.updateList(mHostRequestUsers);
 								}
 
 								mHostRequestWindow.showAtLocation(
@@ -1295,8 +1348,9 @@ public class ConferenceActivity extends Activity {
 
 	};
 
-	private BroadcastReceiver mConfUserChangeReceiver = new BroadcastReceiver() {
+	private BroadcastReceiver mConfUserChangeReceiver = new ConfUserChangeReceiver();
 
+	class ConfUserChangeReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE.equals(intent
@@ -1404,10 +1458,114 @@ public class ConferenceActivity extends Activity {
 					isBluetoothHeadsetConnected = false;
 					headsetAndBluetoothHeadsetHandle();
 				}
+			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO
+					.equals(intent.getAction())) {
+				V2Log.d(V2Log.UI_BROADCAST,
+						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO");
+
+				// 传来的是设备ID
+				String dstDeviceID = intent.getStringExtra("dstDeviceID");
+				UserDeviceConfig userDeviceConfig = null;
+
+				if (dstDeviceID == null) {
+					return;
+				}
+
+				for (SurfaceViewW sw : mCurrentShowedSV) {
+
+					if (dstDeviceID.equals(sw.udc.getDeviceID())) {
+						userDeviceConfig = sw.udc;
+						break;
+					}
+
+				}
+				if (userDeviceConfig == null) {
+					V2Log.i("20141210 1", "同步关闭视频:null" + "可能是自己跳过");
+				} else {
+					V2Log.i("20141210 1",
+							"同步关闭视频:" + userDeviceConfig.getDeviceID());
+				}
+
+				closeAttendeeVideo(userDeviceConfig);
+
+			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO
+					.equals(intent.getAction())) {
+				V2Log.d(V2Log.UI_BROADCAST,
+						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO");
+
+				if (isSyn == 1 && isVoiceActivation == 1) {
+					String xml = intent.getStringExtra("xml");
+					if (xml == null || xml.equals("")) {
+						return;
+					}
+					// 获得两个参数在列表中查的
+
+					String dstUserIDStr = XmlAttributeExtractor.extract(xml,
+							" DstUserID='", "'");
+					String dstDeviceID = XmlAttributeExtractor.extract(xml,
+							" DstDeviceID='", "'");
+					if (dstUserIDStr == null || dstDeviceID == null) {
+						return;
+					}
+
+					long dstUserID = -1;
+					try {
+						dstUserID = Long.valueOf(dstUserIDStr);
+					} catch (NumberFormatException e) {
+						V2Log.e(V2Log.XML_ERROR,
+								" CLASS =ConferenceActivity.BroadcastReceiver METHOD = onReceive()"
+										+ "dstUserIDStr = " + dstUserIDStr
+										+ "is not long");
+						return;
+					}
+
+					UserDeviceConfig userDeviceConfig = null;
+					for (Attendee attendee : mAttendeeList) {
+
+						if (attendee.getAttId() == dstUserID) {
+							if (attendee.isSelf()) {
+								V2Log.i("20141210 1", "语音激励打开视频:" + "是自己跳过");
+								return;
+							}
+							List<UserDeviceConfig> list = attendee
+									.getmDevices();
+							if (list == null) {
+								return;
+							}
+							for (UserDeviceConfig udc : list) {
+								if (udc.getDeviceID().equals(dstDeviceID)) {
+									userDeviceConfig = udc;
+								}
+							}
+
+						}
+					}
+					V2Log.i("20141210 1",
+							"语音激励打开视频:" + userDeviceConfig.getDeviceID());
+					openAttendeeVideo(userDeviceConfig);
+
+				}
+			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE
+					.equals(intent.getAction())) {
+				// 直接关闭视频
+
+				V2Log.d(V2Log.UI_BROADCAST,
+						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE");
+				V2Log.i("20141211 2",
+						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE");
+
+			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE
+					.equals(intent.getAction())) {
+				// 如果在同步，打开视频
+				V2Log.d(V2Log.UI_BROADCAST,
+						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE");
+
+				V2Log.i("20141211 2",
+						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE");
+
 			}
 
 		}
-
 	};
 
 	private OnClickListener mConverseCameraListener = new OnClickListener() {
@@ -1586,6 +1744,7 @@ public class ConferenceActivity extends Activity {
 							.getView());
 				}
 				mVideoLayout.addView(sw.getView(), p);
+				mVideoLayout.setVisibility(View.VISIBLE);
 			}
 
 			index++;
@@ -1661,6 +1820,8 @@ public class ConferenceActivity extends Activity {
 					DOC_PAGE_CANVAS_NOTIFICATION, null);
 			cb.removeSyncDesktopListener(mVideoHandler,
 					DESKTOP_SYNC_NOTIFICATION, null);
+			cb.removeVoiceActivationListener(mVideoHandler,
+					VOICEACTIVATION_NOTIFICATION, null);
 			cb.removeAttendeeDeviceListener(mVideoHandler,
 					ATTENDEE_DEVICE_LISTENER, null);
 
@@ -1889,9 +2050,9 @@ public class ConferenceActivity extends Activity {
 		if (mAttendeeContainer != null) {
 			mAttendeeContainer.updateEnteredAttendee(att);
 		}
-
-		showToastNotification(att.getAttName()
-				+ mContext.getText(R.string.conf_notification_joined_meeting));
+		//咱不提示进入或退出
+//		showToastNotification(att.getAttName()
+//				+ mContext.getText(R.string.conf_notification_joined_meeting));
 	}
 
 	private void showToastNotification(String text) {
@@ -1966,9 +2127,10 @@ public class ConferenceActivity extends Activity {
 			mAttendeeContainer.updateExitedAttendee(att);
 		}
 
-		// Clean user device
-		showToastNotification(att.getAttName()
-				+ mContext.getText(R.string.conf_notification_quited_meeting));
+		//咱不提示进入或退出
+		// // Clean user device
+		// showToastNotification(att.getAttName()
+		// + mContext.getText(R.string.conf_notification_quited_meeting));
 
 	}
 
@@ -1982,6 +2144,60 @@ public class ConferenceActivity extends Activity {
 	 * @param udc
 	 */
 	private boolean showOrCloseAttendeeVideo(UserDeviceConfig udc) {
+		if (isSyn == 1) {
+			Toast.makeText(ConferenceActivity.this, "主席正在同步视频",
+					Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		if (udc == null) {
+			V2Log.e(" can't not open or close device");
+			return false;
+		}
+		// if already opened attendee's video, switch action to close
+		if (udc.isShowing()) {
+			return closeAttendeeVideo(udc);
+		} else {
+			return openAttendeeVideo(udc);
+		}
+
+	}
+
+	public boolean openAttendeeVideo(UserDeviceConfig udc) {
+		if (udc == null) {
+			V2Log.e(" can't not open device");
+			return false;
+		}
+		if (udc.isShowing()) {
+			return true;
+		}
+		if (checkVideoExceedMaminum()) {
+			Toast.makeText(mContext, R.string.error_exceed_support_video_count,
+					Toast.LENGTH_SHORT).show();
+			return false;
+		}
+		VideoPlayer vp = new VideoPlayer();
+		udc.setSVHolder(new SurfaceView(this));
+		udc.setVp(vp);
+		if (udc.getBelongsAttendee() instanceof AttendeeMixedDevice) {
+			vp.setLayout(((AttendeeMixedDevice) udc.getBelongsAttendee())
+					.getMV().getType().toIntValue());
+		}
+		SurfaceHolderObserver observer = new SurfaceHolderObserver(cg, cs, udc);
+		SurfaceViewW sw = new SurfaceViewW(udc.getBelongsAttendee(), udc,
+				observer);
+		mCurrentShowedSV.add(sw);
+
+		// Do adjust layout first, then request open device.
+		// otherwise can't show video
+		adjustVideoLayout();
+		// Request open device
+		sw.observer.open();
+
+		udc.setShowing(true);
+		return true;
+	}
+
+	public boolean closeAttendeeVideo(UserDeviceConfig udc) {
 		if (udc == null) {
 			V2Log.e(" can't not open or close device");
 			return false;
@@ -2000,37 +2216,9 @@ public class ConferenceActivity extends Activity {
 			udc.setShowing(false);
 			udc.doClose();
 			adjustVideoLayout();
-			return false;
-		} else {
-			if (checkVideoExceedMaminum()) {
-				Toast.makeText(mContext,
-						R.string.error_exceed_support_video_count,
-						Toast.LENGTH_SHORT).show();
-				return false;
-			}
-			VideoPlayer vp = new VideoPlayer();
-			udc.setSVHolder(new SurfaceView(this));
-			udc.setVp(vp);
-			if (udc.getBelongsAttendee() instanceof AttendeeMixedDevice) {
-				vp.setLayout(((AttendeeMixedDevice) udc.getBelongsAttendee())
-						.getMV().getType().toIntValue());
-			}
-			SurfaceHolderObserver observer = new SurfaceHolderObserver(cg, cs,
-					udc);
-			SurfaceViewW sw = new SurfaceViewW(udc.getBelongsAttendee(), udc,
-					observer);
-			mCurrentShowedSV.add(sw);
-
-			// Do adjust layout first, then request open device.
-			// otherwise can't show video
-			adjustVideoLayout();
-			// Request open device
-			sw.observer.open();
-
-			udc.setShowing(true);
-			return true;
 		}
 
+		return true;
 	}
 
 	/**
@@ -2260,7 +2448,8 @@ public class ConferenceActivity extends Activity {
 					null);
 			cb.registerSyncDesktopListener(mVideoHandler,
 					DESKTOP_SYNC_NOTIFICATION, null);
-
+			cb.registerVoiceActivationListener(mVideoHandler,
+					VOICEACTIVATION_NOTIFICATION, null);
 			cb.registerVideoMixerListener(mVideoHandler,
 					VIDEO_MIX_NOTIFICATION, null);
 
@@ -2752,7 +2941,8 @@ public class ConferenceActivity extends Activity {
 										.getType());
 					} else if (ConferencePermission.CONTROL.intValue() == ind
 							.getType()) {
-						if (ind.getUid() == GlobalHolder.getInstance().getCurrentUserId()) {
+						if (ind.getUid() == GlobalHolder.getInstance()
+								.getCurrentUserId()) {
 							updateControlState(PermissionState.fromInt(ind
 									.getState()), true);
 						}
@@ -2760,10 +2950,12 @@ public class ConferenceActivity extends Activity {
 				}
 				break;
 			case NOTIFY_HOST_PERMISSION_REQUESTED: {
-				PermissionRequestIndication rri =(PermissionRequestIndication)(((AsyncResult) msg.obj)
+				PermissionRequestIndication rri = (PermissionRequestIndication) (((AsyncResult) msg.obj)
 						.getResult());
-				if (rri.getUid() != GlobalHolder.getInstance().getCurrentUserId()) {
-					mHostRequestUsers.add(GlobalHolder.getInstance().getUser(rri.getUid()));
+				if (rri.getUid() != GlobalHolder.getInstance()
+						.getCurrentUserId()) {
+					mHostRequestUsers.add(GlobalHolder.getInstance().getUser(
+							rri.getUid()));
 					mMsgNotification.setVisibility(View.VISIBLE);
 				}
 				if (mHostRequestWindow != null) {
@@ -2771,7 +2963,7 @@ public class ConferenceActivity extends Activity {
 				}
 				
 			}
-				
+
 				break;
 			case NEW_DOC_NOTIFICATION:
 			case DOC_PAGE_NOTIFICATION:
@@ -2784,8 +2976,46 @@ public class ConferenceActivity extends Activity {
 				break;
 			case DESKTOP_SYNC_NOTIFICATION:
 				doUpdateSyncEvent(msg.arg1 == 1? true : false, msg.arg2);
+
+				V2Log.d(V2Log.UI_MESSAGE,
+						"CLASS = ConferenceActivity  MESSAGE = DESKTOP_SYNC_NOTIFICATION");
+				isSyn = msg.arg1;
+				if (mDocContainer != null) {
+					if (isSyn == 1) {
+						mDocContainer.updateSyncStatus(true);
+					} else {
+						mDocContainer.updateSyncStatus(false);
+					}
+				}
+				V2Log.i("20141210 1", "同步状态:" + isSyn);
+				if (isSyn == 1) {
+					// 关闭所有打开的视频
+					V2Log.i("20141210 1", "同步要关闭所有视频");
+					Object[] surfaceViewWArray = mCurrentShowedSV.toArray();
+					for (int i = 0; i < surfaceViewWArray.length; i++) {
+						closeAttendeeVideo(((SurfaceViewW) surfaceViewWArray[i]).udc);
+					}
+				}
+
 				break;
 
+			case VOICEACTIVATION_NOTIFICATION:
+				// 语音激励开启与关闭
+				V2Log.d(V2Log.UI_MESSAGE,
+						"CLASS = ConferenceActivity  MESSAGE = VOICEACTIVATION_NOTIFICATION");
+				isVoiceActivation = msg.arg1;
+				V2Log.i("20141210 1", "语音激励状态:" + isVoiceActivation);
+
+				if (isVoiceActivation == 0) {
+					// 关闭所有打开的视频
+					V2Log.i("20141210 1", "语音激励关关闭所有视频");
+					Object[] surfaceViewWArray = mCurrentShowedSV.toArray();
+					for (int i = 0; i < surfaceViewWArray.length; i++) {
+						closeAttendeeVideo(((SurfaceViewW) surfaceViewWArray[i]).udc);
+					}
+				}
+
+				break;
 			case VIDEO_MIX_NOTIFICATION:
 				// create mixed video
 				V2Log.e(TAG,
@@ -2850,7 +3080,6 @@ public class ConferenceActivity extends Activity {
 				break;
 			}
 		}
-
 	}
 
 	private void headsetAndBluetoothHeadsetHandle() {

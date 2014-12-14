@@ -32,15 +32,29 @@ public abstract class ConfRequestCallbackAdapter implements ConfRequestCallback 
 	}
 
 	@Override
-	public void OnConfNotify(V2Conference v2conf,  V2User user) {
+	public void OnConfNotify(V2Conference v2conf, V2User user) {
 
 	}
 
 	@Override
 	public void OnConfHostRequest(V2User user, int permission) {
-		
+
 	}
 
-	
-	
+	@Override
+	public void OnConfSyncOpenVideo(String str) {
+	}
+
+	@Override
+	public void OnConfSyncCloseVideo(long gid, String str) {
+	}
+
+	@Override
+	public void OnConfSyncCloseVideoToMobile(long nDstUserID, String sDstMediaID) {
+	}
+
+	@Override
+	public void OnConfSyncOpenVideoToMobile(String sSyncVideoMsgXML) {
+	}
+
 }
