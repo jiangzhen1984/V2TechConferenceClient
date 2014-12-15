@@ -107,7 +107,6 @@ import com.v2tech.vo.V2ShapeMeta;
 import com.v2tech.vo.VMessage;
 
 public class ConferenceActivity extends Activity {
-	private static final String LOG_VOICEACTIVATION = "VOICEACTIVATION";
 	private static final String TAG = "ConferenceActivity";
 	private static final int TAG_SUB_WINDOW_STATE_FIXED = 0x1;
 	private static final int TAG_SUB_WINDOW_STATE_FLOAT = 0x0;
@@ -470,6 +469,9 @@ public class ConferenceActivity extends Activity {
 		
 		if (confGroup.getOwnerUser().getmUserId() != GlobalHolder.getInstance().getCurrentUserId()) {
 			mChairmanControl.setVisibility(View.INVISIBLE);
+		} else {
+			//If current user is conference creatoer, than update control permission to granted
+			 mControlState = PermissionState.GRANTED;
 		}
 	}
 
@@ -513,6 +515,8 @@ public class ConferenceActivity extends Activity {
 				Toast.makeText(mContext,
 						R.string.confs_toast_get_control_permission,
 						Toast.LENGTH_SHORT).show();
+				//Apply speaking
+				mSpeakerIV.performClick();
 			} else if (state == PermissionState.NORMAL) {
 				if (reject) {
 				Toast.makeText(mContext,
@@ -1479,12 +1483,7 @@ public class ConferenceActivity extends Activity {
 					}
 
 				}
-				if (userDeviceConfig == null) {
-					V2Log.i("20141210 1", "同步关闭视频:null" + "可能是自己跳过");
-				} else {
-					V2Log.i("20141210 1",
-							"同步关闭视频:" + userDeviceConfig.getDeviceID());
-				}
+
 
 				closeAttendeeVideo(userDeviceConfig);
 
@@ -1524,7 +1523,6 @@ public class ConferenceActivity extends Activity {
 
 						if (attendee.getAttId() == dstUserID) {
 							if (attendee.isSelf()) {
-								V2Log.i("20141210 1", "语音激励打开视频:" + "是自己跳过");
 								return;
 							}
 							List<UserDeviceConfig> list = attendee
@@ -1540,29 +1538,14 @@ public class ConferenceActivity extends Activity {
 
 						}
 					}
-					V2Log.i("20141210 1",
-							"语音激励打开视频:" + userDeviceConfig.getDeviceID());
 					openAttendeeVideo(userDeviceConfig);
 
 				}
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE
 					.equals(intent.getAction())) {
-				// 直接关闭视频
-
-				V2Log.d(V2Log.UI_BROADCAST,
-						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE");
-				V2Log.i("20141211 2",
-						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE");
-
+			
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE
 					.equals(intent.getAction())) {
-				// 如果在同步，打开视频
-				V2Log.d(V2Log.UI_BROADCAST,
-						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE");
-
-				V2Log.i("20141211 2",
-						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE");
-
 			}
 
 		}
@@ -2078,7 +2061,10 @@ public class ConferenceActivity extends Activity {
 			cg.setCanInvitation(flag);
 			if (!cg.isCanInvitation()) {
 				View view = initInvitionContainer();
-				if (mSubWindowLayout.getVisibility() == View.VISIBLE && mSubWindowLayout.getChildAt(0) == view) {
+				if (mSubWindowLayout.getVisibility() == View.VISIBLE
+						&& mSubWindowLayout.getChildAt(0) == view
+						&& conf.getCreator() != GlobalHolder.getInstance()
+						.getCurrentUserId()) {
 					//close invitation view, remote forbbien invitation
 					showOrHideSubWindow(view);
 					Toast.makeText(mContext,
@@ -2987,10 +2973,8 @@ public class ConferenceActivity extends Activity {
 						mDocContainer.updateSyncStatus(false);
 					}
 				}
-				V2Log.i("20141210 1", "同步状态:" + isSyn);
 				if (isSyn == 1) {
 					// 关闭所有打开的视频
-					V2Log.i("20141210 1", "同步要关闭所有视频");
 					Object[] surfaceViewWArray = mCurrentShowedSV.toArray();
 					for (int i = 0; i < surfaceViewWArray.length; i++) {
 						closeAttendeeVideo(((SurfaceViewW) surfaceViewWArray[i]).udc);
@@ -3004,11 +2988,9 @@ public class ConferenceActivity extends Activity {
 				V2Log.d(V2Log.UI_MESSAGE,
 						"CLASS = ConferenceActivity  MESSAGE = VOICEACTIVATION_NOTIFICATION");
 				isVoiceActivation = msg.arg1;
-				V2Log.i("20141210 1", "语音激励状态:" + isVoiceActivation);
 
 				if (isVoiceActivation == 0) {
 					// 关闭所有打开的视频
-					V2Log.i("20141210 1", "语音激励关关闭所有视频");
 					Object[] surfaceViewWArray = mCurrentShowedSV.toArray();
 					for (int i = 0; i < surfaceViewWArray.length; i++) {
 						closeAttendeeVideo(((SurfaceViewW) surfaceViewWArray[i]).udc);
