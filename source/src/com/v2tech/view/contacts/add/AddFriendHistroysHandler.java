@@ -10,6 +10,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.User;
+import com.v2tech.vo.VMessageQualification.ReadState;
 
 public class AddFriendHistroysHandler {
 	public static final String tableName = "AddFriendHistories";
@@ -106,7 +107,7 @@ public class AddFriendHistroysHandler {
 		// 查别人加我未处理的
 		sql = "update " + tableName + " set AddState=2" + ",RefuseReason='"
 				+ refuseReason + "'" + " where FromUserID=" + remoteUserId
-				+ " and " + "AddState=0";
+				+ " and " + "AddState = 0";
 		update(context, sql);
 	}
 

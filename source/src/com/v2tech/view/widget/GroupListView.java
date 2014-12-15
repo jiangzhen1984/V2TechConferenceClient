@@ -1087,66 +1087,39 @@ public class GroupListView extends ListView {
 	 */
 	class LocalFilter extends Filter {
 
-		int lastLength = 0;
-		List<ItemData> lastDatas = new ArrayList<GroupListView.ItemData>();
+		private boolean isFirst = true;
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults fr = new FilterResults();
-			List<User> filter = null;
 			List<ItemData> list = null;
 			List<User> searchUser = null;
 			if (TextUtils.isEmpty(constraint.toString())) {
 				list = mBaseList;
 				SearchUtils.clearAll();
+				isFirst = true;
 			} else {
 //				list = new ArrayList<ItemData>();
 //				for (Group g : mGroupList) {
 //					search(list, g, constraint);
 //				}
 //				Collections.sort(list);
-				list = new ArrayList<ItemData>();
-				boolean flag = false;
-				if(mFilterList != null && mFilterList.size() != mBaseList.size()){
-					filter = new ArrayList<User>();
-					if(mFilterList.size() <= 0){
-						if(lastDatas.size() <= 0){
-							searchUser = SearchUtils.startGroupUserSearch(mGroupList, constraint);
-							flag = true;
-						}
-						else{
-							for (ItemData itemData : lastDatas) {
-								if(itemData instanceof UserItemData){
-									UserItemData data = (UserItemData) itemData;
-									filter.add((User) data.getObject());
-								} else{
-									GroupItemData data = (GroupItemData) itemData;
-									filter.addAll(((Group)data.getObject()).getUsers());
-								}
-							}
-						}
+				list = new ArrayList<GroupListView.ItemData>();
+				if(isFirst){
+					List<Object> users = new ArrayList<Object>();
+					for (Group group : mGroupList) {
+						convertGroupToUser(users , group);
 					}
-					else{
-						lastDatas = mFilterList;
-						for (ItemData itemData : mFilterList) {
-							if(itemData instanceof UserItemData){
-								UserItemData data = (UserItemData) itemData;
-								filter.add((User) data.getObject());
-							} else{
-								GroupItemData data = (GroupItemData) itemData;
-								filter.addAll(((Group)data.getObject()).getUsers());
-							}
-						}
-					}
-					
-					if(!flag)
-						searchUser = SearchUtils.startGroupUserFilterSearch(filter, constraint);
-				}
-				else{
-					searchUser = SearchUtils.startGroupUserSearch(mGroupList, constraint);
+					SearchUtils.receiveList = users;
+					isFirst = false;
 				}
 				
-				for (User user : searchUser) {
-					list.add(getItem(user.getFirstBelongsGroup(), user));
+				searchUser = SearchUtils.startGroupUserFilterSearch(constraint);
+				
+				if(searchUser != null){
+					for (int i = 0; i < searchUser.size(); i++) {
+						User user = searchUser.get(i);
+						list.add(getItem(user.getFirstBelongsGroup(), user));
+					}
 				}
 			}
 
@@ -1154,8 +1127,16 @@ public class GroupListView extends ListView {
 			fr.count = list.size();
 			list = null;
 			searchUser = null;
-			filter = null;
+//			filter = null;
 			return fr;
+		}
+		
+		private void convertGroupToUser(List<Object> users , Group group) {
+			users.addAll(group.getUsers());
+			List<Group> gList = group.getChildGroup();
+			for (Group subG : gList) {
+				convertGroupToUser(users , subG);
+			}
 		}
 
 		@Override

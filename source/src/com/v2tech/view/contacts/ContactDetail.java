@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.database.CursorJoiner.Result;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -22,7 +21,6 @@ import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -151,7 +149,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-			mItemsContainer.setVisibility(View.GONE);
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 			tvTitle.setText("个人资料");
@@ -246,6 +243,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tvAuthenticationState.setVisibility(View.GONE);
 				tvTitle.setText("个人资料");
 				llAuthenticationMessageLayout.setVisibility(View.GONE);
+				mItemsContainer.setVisibility(View.VISIBLE);
 				break;
 			case 1:// 未处理
 				bAccess.setVisibility(View.VISIBLE);
@@ -253,6 +251,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tvAuthenticationState.setVisibility(View.GONE);
 				tvTitle.setText("好友申请");
 				llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
+				mItemsContainer.setVisibility(View.GONE);
 				break;
 			case 2:// 已同意
 				bAccess.setVisibility(View.GONE);
@@ -261,6 +260,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tvAuthenticationState.setText("已同意该申请");
 				tvTitle.setText("好友申请");
 				llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
+				mItemsContainer.setVisibility(View.VISIBLE);
 				break;
 			case 3:// 3已拒绝
 				bAccess.setVisibility(View.GONE);
@@ -269,10 +269,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tvAuthenticationState.setText("已拒绝该申请");
 				tvTitle.setText("好友申请");
 				llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
+				mItemsContainer.setVisibility(View.GONE);
 				break;
 			case 4:// 5被同意
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
+				mItemsContainer.setVisibility(View.VISIBLE);
 				mCompanyTitleTV.setVisibility(View.VISIBLE);
 				mMoreDetailButton.setVisibility(View.VISIBLE);
 				llAuthenticationMessageLayout.setVisibility(View.GONE);
@@ -286,12 +288,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				tvTitle.setText("验证通知");
 				((View) tvAuthenticationMessage.getParent())
 						.setVisibility(View.VISIBLE);
+				mItemsContainer.setVisibility(View.GONE);
 				break;
 			}
 
 		} else {
 			bAccess.setVisibility(View.GONE);
 			bRefuse.setVisibility(View.GONE);
+			mItemsContainer.setVisibility(View.GONE);
 			mCompanyTitleTV.setVisibility(View.VISIBLE);
 			mMoreDetailButton.setVisibility(View.VISIBLE);
 			llAuthenticationMessageLayout.setVisibility(View.GONE);

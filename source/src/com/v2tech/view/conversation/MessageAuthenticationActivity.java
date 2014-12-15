@@ -91,8 +91,8 @@ public class MessageAuthenticationActivity extends Activity {
 	private final static String TAG = "MessageAuthenticationActivity";
 	private final static int ACCEPT_INVITATION_DONE = 1;
 	private final static int ACCEPT_APPLY_DONE = 5;
-	private final static int PROMPT_TYPE_FRIEND = 2;
-	private final static int PROMPT_TYPE_GROUP = 3;
+	public final static int PROMPT_TYPE_FRIEND = 2;
+	public final static int PROMPT_TYPE_GROUP = 3;
 	private final static int AUTHENTICATION_RESULT = 4;
 	private final static int FRIEND_AUTHENTICATION_RESULT = 5;
 	private final static int LOAD_SIZE = 20;
@@ -232,7 +232,6 @@ public class MessageAuthenticationActivity extends Activity {
     public void requestUpdateConversation(){
         Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
         i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-        i.putExtra("isFresh", false);
         i.putExtra("obj" , new ConversationNotificationObject(0 , -2));
         mContext.sendBroadcast(i);
     }
@@ -412,7 +411,6 @@ public class MessageAuthenticationActivity extends Activity {
 
 							@Override
 							protected Void doInBackground(Void... arg0) {
-								offset = offset + 10;
 								tempMessageAuthenticationDataList = VerificationProvider.loadFriendsVerifyMessages(LOAD_SIZE , offset);
  								return null;
 							}
@@ -421,9 +419,10 @@ public class MessageAuthenticationActivity extends Activity {
 							protected void onPostExecute(Void result) {
 								lvMessageAuthentication.setAdapter(null);
 								lvMessageAuthentication.removeFooterView(listViewFootView);
-								friendMADataList.clear();
-								if(tempMessageAuthenticationDataList != null)
+								if(tempMessageAuthenticationDataList != null){
+									offset = offset + tempMessageAuthenticationDataList.size();
 									friendMADataList.addAll(tempMessageAuthenticationDataList);
+								}
 								lvMessageAuthentication.setAdapter(firendAdapter);
 								isLoading=false;
 							}
@@ -677,10 +676,8 @@ public class MessageAuthenticationActivity extends Activity {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		ConversationNotificationObject obj = new ConversationNotificationObject(
-				Conversation.TYPE_CONTACT, -2);
+				Conversation.TYPE_VERIFICATION_MESSAGE, Conversation.SPECIFIC_VERIFICATION_ID , true , -1);
 		i.putExtra("obj", obj);
-		i.putExtra("isFresh", false);
-		i.putExtra("isDelete", true);
 		mContext.sendBroadcast(i);
 	}
 
@@ -701,7 +698,7 @@ public class MessageAuthenticationActivity extends Activity {
 				if (firendAdapter != null) {
 					friendMADataList.clear();
 					if(tempMessageAuthenticationDataList != null){
-						offset += LOAD_SIZE;
+						offset = offset + tempMessageAuthenticationDataList.size();
 						friendMADataList.addAll(tempMessageAuthenticationDataList);
 					}
 					firendAdapter.notifyDataSetChanged();
@@ -770,7 +767,21 @@ public class MessageAuthenticationActivity extends Activity {
 		if (isFriendInDeleteMode || isGroupInDeleteMode) {
 			exitDeleteMode();
 		} else {
-			setResult(16);
+			Intent intent = new Intent();
+			intent.putExtra("tabType", currentRadioType);
+			if(currentRadioType == PROMPT_TYPE_FRIEND){
+				if(View.VISIBLE == ivGroupAuthenticationPrompt.getVisibility())
+					intent.putExtra("isOtherShowPrompt", true);
+				else
+					intent.putExtra("isOtherShowPrompt", false);
+			}
+			else{
+				if(View.VISIBLE == ivFriendAuthenticationPrompt.getVisibility())
+					intent.putExtra("isOtherShowPrompt", true);
+				else
+					intent.putExtra("isOtherShowPrompt", false);
+			}
+			setResult(16 , intent);
 			super.onBackPressed();
 		}
 

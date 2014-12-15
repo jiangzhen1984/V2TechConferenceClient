@@ -159,6 +159,7 @@ public class CrowdApplicationActivity extends Activity {
 		i.setAction(JNIService.JNI_BROADCAST_CROWD_INVATITION);
 		i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
 		i.putExtra("crowd", crowd);
+		i.putExtra("isFromApplication", true);
 		startActivity(i);
 		super.onBackPressed();
 //		mButtonLy.setVisibility(View.GONE);

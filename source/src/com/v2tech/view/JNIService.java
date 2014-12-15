@@ -346,6 +346,7 @@ public class JNIService extends Service implements
 	private static final int JNI_LOG_OUT = 26;
 	private static final int JNI_GROUP_NOTIFY = 35;
 	private static final int JNI_GROUP_USER_INFO_NOTIFICATION = 60;
+	private static final int JNI_GROUP_LOADED = 63;
 	private static final int JNI_CONFERENCE_INVITATION = 61;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
 	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
@@ -453,6 +454,16 @@ public class JNIService extends Service implements
 				} else {
 					V2Log.e("Invalid group user data");
 				}
+				break;
+			case JNI_GROUP_LOADED:
+				V2Log.e(TAG, "The All Group Infos Loaded !");
+				//Update group loaded state
+				GlobalHolder.getInstance().setGroupLoaded();
+				
+				Intent loaded = new Intent();
+				loaded.addCategory(JNI_BROADCAST_CATEGROY);
+				loaded.setAction(JNI_BROADCAST_GROUPS_LOADED);
+				sendBroadcast(loaded);
 				break;
 			case JNI_CONFERENCE_INVITATION:
 				Group g = (Group) msg.obj;
@@ -664,13 +675,8 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnGroupsLoaded() {
-			// Update group loaded state
-			GlobalHolder.getInstance().setGroupLoaded();
-
-			Intent i = new Intent();
-			i.addCategory(JNI_BROADCAST_CATEGROY);
-			i.setAction(JNI_BROADCAST_GROUPS_LOADED);
-			sendBroadcast(i);
+			Message.obtain(mCallbackHandler, JNI_GROUP_LOADED)
+				.sendToTarget();
 		}
 
 	}

@@ -41,7 +41,6 @@ import com.V2.jni.WBRequest;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.provider.DatabaseProvider;
-import com.v2tech.db.provider.VerificationProvider;
 import com.v2tech.util.AlgorithmUtil;
 import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.CrashHandler;

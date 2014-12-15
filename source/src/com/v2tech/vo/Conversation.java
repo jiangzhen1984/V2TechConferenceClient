@@ -25,8 +25,9 @@ public class Conversation implements Comparable<Conversation>{
 
 	public static final int READ_FLAG_READ = 1;
 	public static final int READ_FLAG_UNREAD = 0;
-
-	private int mId;
+	
+	public static final int SPECIFIC_VERIFICATION_ID = -2;
+	public static final int SPECIFIC_VOICE_ID = -1;
 
 	protected int mType;
 
@@ -49,20 +50,15 @@ public class Conversation implements Comparable<Conversation>{
 	public Conversation() {
 	}
 
-	public Conversation(int mId, int mType, long mExtId, int readFlag) {
+	public Conversation(int mType, long mExtId, int readFlag) {
 		super();
-		this.mId = mId;
 		this.mType = mType;
 		this.mExtId = mExtId;
 		this.readFlag = readFlag;
 	}
 
-	public Conversation(int mId, int mType, long mExtId) {
-		this(0, mType, mExtId, READ_FLAG_UNREAD);
-	}
-
 	public Conversation(int mType, long mExtId) {
-		this(0, mType, mExtId);
+		this(mType, mExtId, READ_FLAG_UNREAD);
 	}
 
 	public String getDateLong() {
@@ -135,14 +131,6 @@ public class Conversation implements Comparable<Conversation>{
 		// else if (!mType.equals(other.mType))
 		// return false;
 		return true;
-	}
-
-	public int getId() {
-		return mId;
-	}
-
-	public void setId(int id) {
-		this.mId = id;
 	}
 
 	public int getType() {

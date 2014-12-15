@@ -480,14 +480,32 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		super.onStop();
 	}
 
+	private boolean isFrist = true;
 	@Override
 	public void afterTextChanged(Editable s) {
 
-		List<ScrollItem> searchTempList = new ArrayList<ScrollItem>();
-		searchTempList.addAll(mItemList);
-		searchList = SearchUtils.startConversationSearch(searchTempList, s);
-		mIsStartedSearch = SearchUtils.mIsStartedSearch;
-		adapter.notifyDataSetChanged();
+		if(TextUtils.isEmpty(s)){
+			SearchUtils.clearAll();
+			mIsStartedSearch = SearchUtils.mIsStartedSearch;
+			isFrist = true;
+			searchList.clear();
+			adapter.notifyDataSetChanged();
+		}
+		else{
+			if(isFrist){
+				List<Object> conversations = new ArrayList<Object>();
+				for (int i = 0; i < mItemList.size(); i++) {
+					conversations.add(mItemList.get(i));
+				}
+				SearchUtils.receiveList = conversations;
+				isFrist = false;
+			}
+			
+			searchList.clear();
+			searchList = SearchUtils.startConversationSearch(s);
+			mIsStartedSearch = SearchUtils.mIsStartedSearch;
+			adapter.notifyDataSetChanged();
+		}
 
 		if (subTabLayout != null) {
 			if (mIsStartedSearch)
@@ -495,25 +513,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			else
 				subTabLayout.setVisibility(View.VISIBLE);
 		}
-		// String englishChar =
-		// V2techSearchContentProvider.queryChineseToEnglish(mContext, "HZ = ?",
-		// new String[]{String.valueOf(mChar)});
-		// List<Conversation> newItemList = new ArrayList<Conversation>();
-		// String searchKey = s == null ? "" : s.toString();
-		// for (int i = 0; mCacheItemList != null && i < mCacheItemList.size();
-		// i++) {
-		// Conversation cov = mCacheItemList.get(i);
-		// if (cov.getName() != null
-		// && cov.getName().contains(searchKey)) {
-		// newItemList.add(cov);
-		// } else if (cov.getMsg() != null
-		// && cov.getMsg().toString().contains(searchKey)) {
-		// newItemList.add(cov);
-		// }
-		// }
-		// mConvList = newItemList;
-		// fillAdapter(mConvList , true);
-		// adapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -526,31 +525,31 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	}
 
-	// @Override
-	// public void setUserVisibleHint(boolean isVisibleToUser) {
-	// super.setUserVisibleHint(isVisibleToUser);
-	// // recover search result
-	// if (!isVisibleToUser && mIsStartedSearch) {
-	// mConvList = mCacheItemList;
-	// adapter.notifyDataSetChanged();
-	// mIsStartedSearch = false;
-	// }
-	// }
-
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		// 保证从验证消息界面返回来时，验证条目是已读状态！
 		if (resultCode == REQUEST_UPDATE_VERIFICATION_CONVERSATION) {
-			// // boolean isCrowd = updateVerificationConversation();
-			// // if(isCrowd){
-			// MessageBuilder
-			// .updateCrowdAllQualicationMessageReadStateToRead(true);
-			// MessageBuilder
-			// .updateCrowdAllQualicationMessageReadStateToRead(false);
-			// verificationItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
-			// updateUnreadConversation(verificationItem);
-			// // }
+			int tabType = data.getIntExtra("tabType", -1);
+			if(tabType != -1){
+				if(tabType == MessageAuthenticationActivity.PROMPT_TYPE_FRIEND){
+					MessageBuilder
+						.updateCrowdAllQualicationMessageReadStateToRead(false);
+				}
+				else{
+					MessageBuilder
+						.updateCrowdAllQualicationMessageReadStateToRead(true);
+				}
+			}
+			
+			boolean isOtherShowPrompt = data.getBooleanExtra("isOtherShowPrompt", false);
+			if(isOtherShowPrompt){
+				verificationItem.cov.setReadFlag(Conversation.READ_FLAG_UNREAD);
+			}
+			else{
+				verificationItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
+			}
+			updateUnreadConversation(verificationItem);
 		} else {
 			cb.requestExitConference(currentEntered, null);
 			currentEntered = null;
@@ -567,8 +566,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		AddFriendHistorieNode friendNode = MessageLoader
 				.getNewestFriendVerificationMessage();
 
-		if (nestQualification == null && friendNode == null)
-			return false;
+        if (nestQualification == null && friendNode == null){
+        	V2Log.d(TAG, "没有获取到好友或群组最新的验证消息，删除验证消息会话！");
+        	removeConversation(verificationItem.cov.getExtId() , false);
+            return false;
+        }
 
 		if (nestQualification != null) {
 			crowdTime = nestQualification.getmTimestamp().getTime();
@@ -880,7 +882,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 * 初始化通话消息item对象
 	 */
 	private void initVoiceItem() {
-		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE, -1);
+		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE, Conversation.SPECIFIC_VOICE_ID);
 		voiceMessageItem.setName("通话消息");
 		voiceLayout = new GroupLayout(mContext, voiceMessageItem);
 		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
@@ -892,7 +894,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 */
 	private void initVerificationItem() {
 		verificationMessageItemData = new ConversationFirendAuthenticationData(
-				Conversation.TYPE_VERIFICATION_MESSAGE, -2);
+				Conversation.TYPE_VERIFICATION_MESSAGE, Conversation.SPECIFIC_VERIFICATION_ID);
 		verificationMessageItemData.setName("验证消息");
 		verificationMessageItemLayout = new GroupLayout(mContext,
 				verificationMessageItemData);
@@ -1367,8 +1369,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.setReadFlag(Conversation.READ_FLAG_READ);
 		verificationItem.cov = verificationMessageItemData;
 		updateUnreadConversation(verificationItem);
-		if (!mItemList.contains(verificationItem))
-			mItemList.add(verificationItem);
 		Collections.sort(mItemList);
 		adapter.notifyDataSetChanged();
 	}
@@ -2202,7 +2202,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 
 			currentPosition = pos;
-			ScrollItem item = mItemList.get(pos);
+			ScrollItem item = null;
+			if (mIsStartedSearch)
+				item = searchList.get(pos);
+			else
+				item = mItemList.get(pos);
 			Conversation cov = item.cov;
 			GroupLayout layout = (GroupLayout) item.gp;
 
@@ -2419,26 +2423,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 				ConversationNotificationObject uao = (ConversationNotificationObject) intent
 						.getExtras().get("obj");
-				boolean isFresh = intent.getBooleanExtra("isFresh", true);
-				boolean isNeedDelete = intent
-						.getBooleanExtra("isDelete", false);
+				 if(uao == null) {
+	                return ;
+	             }
+				 
 				// delete Empty message conversation
-				if (isNeedDelete) {
+				if (uao.isDeleteConversation()) {
 					removeConversation(uao.getExtId(), false);
 					return;
 				}
 
-				if (!isFresh && uao != null) {
-					for (ScrollItem scroll : mItemList) {
-						if (scroll.cov.getExtId() == uao.getExtId()) {
-							GroupLayout layout = (GroupLayout) scroll.gp;
-							layout.updateNotificator(false);
-							scroll.cov.setReadFlag(Conversation.READ_FLAG_READ);
-							updateUnreadConversation(scroll);
-						}
-					}
-					return;
-				}
 				Message.obtain(mHandler, UPDATE_CONVERSATION, uao)
 						.sendToTarget();
 				// Update name of creator of conversation
@@ -2946,7 +2940,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				checkGroupIsExist();
 			} else if (PublicIntent.BROADCAST_ADD_OTHER_FRIEND_WAITING_NOTIFICATION
 					.equals(intent.getAction())) {
-				updateVerificationConversation();
+				if(!mItemList.contains(verificationItem))
+					mItemList.add(verificationItem);
+				Collections.sort(mItemList);
+				adapter.notifyDataSetChanged();
+//				updateVerificationConversation();
 			} else if (JNIService.JNI_BROADCAST_GROUP_UPDATED.equals(intent
 					.getAction())) {
 				long gid = intent.getLongExtra("gid", 0);
@@ -3115,10 +3113,26 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (uno == null)
 					return;
 
-				if (uno.getType() == Conversation.TYPE_CONTACT)
+				switch (uno.getConversationType()) {
+				case Conversation.TYPE_CONTACT:
 					updateUserConversation(uno.getExtId(), uno.getMsgID());
-				else
-					updateGroupConversation(uno.getType(), uno.getExtId());
+					break;
+				case Conversation.TYPE_VERIFICATION_MESSAGE:
+					updateVerificationConversation();
+					break;
+				case Conversation.TYPE_VOICE_MESSAGE:
+					voiceLayout.updateNotificator(false);
+					voiceItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
+					updateUnreadConversation(voiceItem);
+					break;
+				case Conversation.TYPE_DEPARTMENT:
+				case Conversation.TYPE_GROUP:
+				case Conversation.TYPE_DISCUSSION:
+					updateGroupConversation(uno.getConversationType() , uno.getExtId());
+					break;
+				default:
+					throw new RuntimeException("ERROR CONVERSATION TYPE : " + uno.getConversationType());
+				}
 				break;
 			case UPDATE_SEARCHED_LIST:
 				break;
@@ -3143,15 +3157,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
 					Conference c = ((RequestEnterConfResponse) recr).getConf();
 					c.setStartTime(mItemList.get(currentPosition).cov.getDate());
-					// conf.setChairman(c.getChairman());
-					// // set enter flag to true
-					// // Request grant speaking permission
-					// // If chair man is current user, then automatically apply
-					// // speaking
-					// if (c.getChairman() == GlobalHolder.getInstance()
-					// .getCurrentUserId()) {
-					// doApplyOrReleaseSpeak();
-					// }
 					startConferenceActivity(c);
 				} else {
 					V2Log.d(TAG, "Request enter conf response , code is : "
@@ -3207,10 +3212,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private void startConversationView(Conversation cov) {
+		if(cov == null)
+			return ;
+		
 		Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		i.putExtra("obj", new ConversationNotificationObject(cov));
+		i.putExtra("obj", new ConversationNotificationObject(cov.getType() , cov.getExtId()));
 		startActivity(i);
 	}
 }

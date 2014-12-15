@@ -38,11 +38,13 @@ import com.v2tech.view.JNIService;
 import com.v2tech.view.MainActivity;
 import com.v2tech.view.MainApplication;
 import com.v2tech.view.PublicIntent;
+import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.widget.MarqueeTextView;
 import com.v2tech.vo.ContactGroup;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -618,11 +620,17 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 						isRelation = false;
 						updateContactGroup();
 					} else {
-
 						Intent i = new Intent(ContactDetail2.this,
 								MainActivity.class);
 						i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 						ContactDetail2.this.startActivity(i);
+						
+						Intent intent = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+						ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_VERIFICATION_MESSAGE,
+									Conversation.SPECIFIC_VERIFICATION_ID);
+						intent.putExtra("obj", obj);
+						mContext.sendBroadcast(intent);
 					}
 
 				} else if (response.getResult() == JNIResponse.Result.TIME_OUT) {

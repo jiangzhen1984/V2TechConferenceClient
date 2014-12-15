@@ -315,12 +315,9 @@ public class VoiceMessageDetailActivity extends Activity implements
 			//update conversation state
 			Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 	        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-	    	ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-	    			-1);
-	        obj.setMsgID(0);
+	    	ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_VOICE_MESSAGE,
+	    			Conversation.SPECIFIC_VOICE_ID);
 	        i.putExtra("obj", obj);
-	        i.putExtra("isFresh", false);
-	        i.putExtra("isDelete", false);
 	        mContext.sendBroadcast(i);	
 	        
 	        //update database state

@@ -7,23 +7,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.Editable;
+import android.util.SparseArray;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.db.provider.SearchContentProvider;
 import com.v2tech.view.ConversationsTabFragment.ScrollItem;
-import com.v2tech.view.widget.GroupListView.ItemData;
-import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
 
 public class SearchUtils {
 
+	private static final String TAG = "SearchUtils";
 	private static List<Object> searchList = new ArrayList<Object>();
 	private static List<Object> searchCacheList = new ArrayList<Object>();
 	private static List<Object> firstSearchCacheList = new ArrayList<Object>();
+	private static SparseArray<List<Object>> cacheList = new SparseArray<List<Object>>();
 	
-	private static List<Object> receiveList = new ArrayList<Object>();
-	private static final String TAG = "SearchUtils";
-	private static int lastSize;
+	public static List<Object> receiveList = new ArrayList<Object>();
 	private static boolean isShouldAdd;
 	private static boolean isShouldQP; // 是否需要启动全拼
 	private static int startIndex = 0;
@@ -34,74 +33,95 @@ public class SearchUtils {
 	private static final int TYPE_ITEM_DATA = 11;
 	private static int type = TYPE_CONVERSATION;
 	
-	public static List<ScrollItem> startConversationSearch(List<ScrollItem> list , Editable content){
+	/**
+	 * For ConversationTabFragment search
+	 * @param content
+	 * @return
+	 */
+	public static List<ScrollItem> startConversationSearch(Editable content){
 		type = TYPE_CONVERSATION;
-		receiveList.addAll(list);
-		List<Object> search = search(content.toString());
-		list.clear();
-		for (Object object : search) {
-			list.add((ScrollItem)object);
+		
+		List<Object> cache = cacheList.get(content.length());
+		if(cache != null){
+			V2Log.e(TAG, "find cache list : key --> " + content.length() + " and value --> " + cache.size());
+			List<ScrollItem> cacheItems = new ArrayList<ScrollItem>();
+			for (Object object : cache) {
+				cacheItems.add((ScrollItem)object);
+			}
+			cacheList.delete(content.length() + 1);
+			return cacheItems;
 		}
-		receiveList.clear();
-		return list;
+		else{
+			if(content.length() - 1 != 0){
+				startIndex = content.length() - 1;
+				searchList.clear();
+				searchList.addAll(cacheList.get(content.length() - 1));
+			}
+			
+			List<ScrollItem> searchItems = new ArrayList<ScrollItem>();
+			List<Object> search = search(content.toString());
+			for (Object object : search) {
+				searchItems.add((ScrollItem)object);
+			}
+			
+			List<Object> temp = new ArrayList<Object>();
+			temp.addAll(search);
+			cacheList.put(content.length(), temp);
+			V2Log.e(TAG, "put cache list : key --> " + content.length() + " and value --> " + search.size());
+			search = null;
+			temp = null;
+			return searchItems;
+		}
 	}
 	
-	public static List<User> startGroupUserSearch(List<Group> mGroupList , CharSequence content){
+	/**
+	 * For GroupListView Filter
+	 * @param content
+	 * @return
+	 */
+	public static List<User> startGroupUserFilterSearch(CharSequence content){
 		type = TYPE_ITEM_DATA;
-		List<User> users = new ArrayList<User>();
-		for (Group group : mGroupList) {
-			convertGroupToUser(users , group);
+		
+		List<Object> cache = cacheList.get(content.length());
+		if(cache != null){
+			V2Log.e(TAG, "find cache list : key --> " + content.length() + " and value --> " + cache.size());
+			List<User> cacheUsers = new ArrayList<User>();
+			for (Object object : cache) {
+				cacheUsers.add((User)object);
+			}
+			cacheList.delete(content.length() + 1);
+			return cacheUsers;
 		}
-		receiveList.addAll(users);
-		List<Object> search = search(content.toString());
-		users.clear();
-		for (Object object : search) {
-			users.add((User)object);
-		}
-		receiveList.clear();
-		return users;
-	}
-	
-	public static List<User> startGroupUserFilterSearch(List<User> mItemList , CharSequence content){
-		type = TYPE_ITEM_DATA;
-		List<User> users = mItemList;
-		receiveList.addAll(users);
-		List<Object> search = search(content.toString());
-		users.clear();
-		for (Object object : search) {
-			users.add((User)object);
-		}
-		receiveList.clear();
-		return users;
-	}
-	
-	
-	private static void convertGroupToUser(List<User> users , Group group) {
-		users.addAll(group.getUsers());
-		List<Group> gList = group.getChildGroup();
-		for (Group subG : gList) {
-			convertGroupToUser(users , subG);
+		else{
+			if(content.length() - 1 != 0){
+				startIndex = content.length() - 1;
+				searchList.clear();
+				searchList.addAll(cacheList.get(content.length() - 1));
+			}
+			
+			List<User> searchUsers = new ArrayList<User>();
+			List<Object> search = search(content.toString());
+			for (Object object : search) {
+				searchUsers.add((User)object);
+			}
+			
+			List<Object> temp = new ArrayList<Object>();
+			temp.addAll(search);
+			cacheList.put(content.length(), temp);
+			V2Log.e(TAG, "put cache list : key --> " + content.length() + " and value --> " + search.size());
+			search = null;
+			temp = null;
+			return searchUsers;
 		}
 	}
-
+	
 	private static List<Object> search(String content){
 		if (content != null && content.length() > 0) {
 			if (!mIsStartedSearch) {
-				searchList.clear();
-				lastSize = 0;
-				startIndex = 0;
 				mIsStartedSearch = true;
 				searchList.addAll(receiveList);
 			}
 	
-			int length = content.length();
-			if (length < lastSize) {
-				searchList.clear();
-				searchList.addAll(receiveList);
-				startIndex = content.length() - 1;
-			}
-			lastSize = length;
-		
 			StringBuilder sb = new StringBuilder();
 			V2Log.e(TAG, "Editable :" + content.toString());
 
@@ -179,7 +199,7 @@ public class SearchUtils {
 //						for (char c : targetChars) {
 //							if (!material.contains(String.valueOf(c))
 //									&& first.equals(c)) {
-								if (targetChars[j] != material.charAt(j)) {
+							if (j >= material.length() || targetChars[j] != material.charAt(j)) {
 								isShouldAdd = true;
 								V2Log.e(TAG, "material not contains " + targetChars[j]);
 								break;
@@ -216,6 +236,7 @@ public class SearchUtils {
 			receiveList.clear();
 			searchCacheList.clear();
 			searchList.clear();
+			cacheList.clear();
 			mIsStartedSearch = false;
 			startIndex = 0;
 		}

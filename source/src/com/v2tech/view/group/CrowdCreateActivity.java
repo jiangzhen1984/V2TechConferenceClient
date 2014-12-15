@@ -436,24 +436,26 @@ public class CrowdCreateActivity extends Activity {
 			}
 
 			if (crowd != null) {
-				List<User> users = crowd.getUsers();
-				Iterator<User> iterator = mUserList.iterator();
-				while (iterator.hasNext()) {
-					User checkUser = iterator.next();
-					for (User user : users) {
-						if(user.getmUserId() == checkUser.getmUserId()){
-							mUserList.remove(checkUser);
-							break;
+				synchronized (CrowdCreateActivity.class) {
+					List<User> users = crowd.getUsers();
+					Iterator<User> iterator = mUserList.iterator();
+					while (iterator.hasNext()) {
+						User checkUser = iterator.next();
+						for (User user : users) {
+							if(user.getmUserId() == checkUser.getmUserId()){
+								mUserList.remove(checkUser);
+								break;
+							}
 						}
 					}
+					
+					List<User> newMembers = new ArrayList<User>(mUserList);
+					for (User user : newMembers) {
+						saveQualication(user);
+					}
+					cg.inviteMember(crowd, newMembers, new MessageListener(
+							mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
 				}
-				
-				List<User> newMembers = new ArrayList<User>(mUserList);
-				for (User user : newMembers) {
-					saveQualication(user);
-				}
-				cg.inviteMember(crowd, newMembers, new MessageListener(
-						mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
 			} else {
 				CrowdGroup crowd = new CrowdGroup(0, mGroupTitleET.getText()
 						.toString(), GlobalHolder.getInstance()

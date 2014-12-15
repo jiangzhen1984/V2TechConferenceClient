@@ -32,9 +32,9 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
-import com.v2tech.vo.CrowdConversation;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.VMessageQualification;
@@ -204,46 +204,65 @@ public class CrowdInvitationActivity extends Activity {
 					.setText(R.string.crowd_invitation_reject_button_done);
 			mButtonLayout.setVisibility(View.GONE);
 			mTitleName.setText(R.string.crowd_invitation_reject_titile);
+			
 		} else {
-			mTitleName.setText(R.string.crowd_invitation_titile);
-			if (vq.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
-				mButtonLayout.setVisibility(View.GONE);
-
+			boolean isFromApplication = this.getIntent().getBooleanExtra("isFromApplication", false);
+			if(isFromApplication){
+				mTitleName.setText(R.string.crowd_application_title);
 				mAcceptedLy.setVisibility(View.VISIBLE);
-                mNotesLayout.setVisibility(View.VISIBLE);
-                mNotesTV.setText(R.string.crowd_invitation_accept_notes);
-                mSendMsgButton.setVisibility(View.VISIBLE);
-			} else if (vq.getQualState() == VMessageQualification.QualificationState.REJECT) {
 				mButtonLayout.setVisibility(View.GONE);
-                mSendMsgButton.setVisibility(View.GONE);
-                mAcceptedLy.setVisibility(View.GONE);
-
-                mNotesLayout.setVisibility(View.VISIBLE);
-                mNotesTV.setText(R.string.crowd_invitation_reject_notes);
-			} else if (vq.getQualState() == QualificationState.INVALID) {
-                mButtonLayout.setVisibility(View.GONE);
-                mSendMsgButton.setVisibility(View.GONE);
-                mAcceptedLy.setVisibility(View.GONE);
-
-                mNotesLayout.setVisibility(View.VISIBLE);
-                mNotesTV.setText(R.string.crowd_invitation_invalid_notes);
-            }  else if (vq.getQualState() == QualificationState.WAITING_FOR_APPLY) {
-                mButtonLayout.setVisibility(View.GONE);
-                mSendMsgButton.setVisibility(View.GONE);
-                mAcceptedLy.setVisibility(View.GONE);
-
-                mNotesLayout.setVisibility(View.VISIBLE);
-                mNotesTV.setText(R.string.crowd_application_applyed);
-                mTitleName.setText(R.string.crowd_applicant_invite_title);
-            } else {
-				mSendMsgButton.setVisibility(View.GONE);
-				mAcceptedLy.setVisibility(View.GONE);
-				mButtonLayout.setVisibility(View.VISIBLE);
-			}
-			mSendMsgButton
+				mSendMsgButton.setVisibility(View.VISIBLE);
+				mSendMsgButton
 					.setText(R.string.crowd_invitation_top_bar_right_button);
-			mBoxLy.setVisibility(View.VISIBLE);
-			mRejectResasonLayout.setVisibility(View.GONE);
+				
+				Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_VERIFICATION_MESSAGE,
+							Conversation.SPECIFIC_VERIFICATION_ID);
+				i.putExtra("obj", obj);
+				mContext.sendBroadcast(i);
+			}
+			else{
+				mTitleName.setText(R.string.crowd_invitation_titile);
+				if (vq.getQualState() == VMessageQualification.QualificationState.ACCEPTED) {
+					mButtonLayout.setVisibility(View.GONE);
+	
+					mAcceptedLy.setVisibility(View.VISIBLE);
+	                mNotesLayout.setVisibility(View.VISIBLE);
+	                mNotesTV.setText(R.string.crowd_invitation_accept_notes);
+	                mSendMsgButton.setVisibility(View.VISIBLE);
+				} else if (vq.getQualState() == VMessageQualification.QualificationState.REJECT) {
+					mButtonLayout.setVisibility(View.GONE);
+	                mSendMsgButton.setVisibility(View.GONE);
+	                mAcceptedLy.setVisibility(View.GONE);
+	
+	                mNotesLayout.setVisibility(View.VISIBLE);
+	                mNotesTV.setText(R.string.crowd_invitation_reject_notes);
+				} else if (vq.getQualState() == QualificationState.INVALID) {
+	                mButtonLayout.setVisibility(View.GONE);
+	                mSendMsgButton.setVisibility(View.GONE);
+	                mAcceptedLy.setVisibility(View.GONE);
+	
+	                mNotesLayout.setVisibility(View.VISIBLE);
+	                mNotesTV.setText(R.string.crowd_invitation_invalid_notes);
+	            }  else if (vq.getQualState() == QualificationState.WAITING_FOR_APPLY) {
+	                mButtonLayout.setVisibility(View.GONE);
+	                mSendMsgButton.setVisibility(View.GONE);
+	                mAcceptedLy.setVisibility(View.GONE);
+	
+	                mNotesLayout.setVisibility(View.VISIBLE);
+	                mNotesTV.setText(R.string.crowd_application_applyed);
+	                mTitleName.setText(R.string.crowd_applicant_invite_title);
+	            } else {
+					mSendMsgButton.setVisibility(View.GONE);
+					mAcceptedLy.setVisibility(View.GONE);
+					mButtonLayout.setVisibility(View.VISIBLE);
+				}
+				mSendMsgButton
+						.setText(R.string.crowd_invitation_top_bar_right_button);
+				mBoxLy.setVisibility(View.VISIBLE);
+				mRejectResasonLayout.setVisibility(View.GONE);
+			}
 		}
 
 		if (isInRejectReasonMode != isInReject) {
@@ -327,7 +346,6 @@ public class CrowdInvitationActivity extends Activity {
 						service.refuseInvitation(crowd, mReasonET.getEditableText().toString(), new MessageListener(
 								mLocalHandler, REFUSE_INVITATION_DONE, null));
 						handleDeclineDone();
-//						ProgressUtils.showNormalWithHintProgress(mContext, true).initTimeOut();
 					}
 				}
 				return;
@@ -337,10 +355,8 @@ public class CrowdInvitationActivity extends Activity {
 				Intent i = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-				i.putExtra("obj", new ConversationNotificationObject(
-						new CrowdConversation(group)));
+				i.putExtra("obj", new ConversationNotificationObject(group.getGroupType().intValue() , group.getmGId()));
 				startActivity(i);
-				onBackPressed();
 			}
 		}
 

@@ -7,31 +7,38 @@ import com.v2tech.vo.Conversation;
 
 public class ConversationNotificationObject implements Parcelable {
 
-	
-	private int cid;
-	private int type;
-	private long extId; 
-	private long msgID;
-	
+	private int conversationType;
+	private long extId;
+	private long msgID; // P2PText notificateConversationUpdate
+	private boolean isDeleteConversation;
+
 	public ConversationNotificationObject(Parcel in) {
-		cid = in.readInt();
-		type = in.readInt();
+		conversationType = in.readInt();
 		extId = in.readLong();
 		msgID = in.readLong();
+		int deleteInt = in.readInt();
+		if (deleteInt == 1)
+			isDeleteConversation = true;
+		else
+			isDeleteConversation = false;
+	}
+
+	public ConversationNotificationObject(int conversationType, long extId) {
+		this(conversationType , extId , false , -1);
 	}
 	
-	public ConversationNotificationObject(int type, long extId) {
-		this.type = type;
+	
+	public ConversationNotificationObject(int conversationType, long extId , long msgID) {
+		this(conversationType , extId , false , msgID);
+	}
+
+	public ConversationNotificationObject(int conversationType, long extId,
+			boolean isDeleteConversation, long msgID) {
+		super();
+		this.conversationType = conversationType;
 		this.extId = extId;
-	}
-	
-	
-	public ConversationNotificationObject(Conversation cov) {
-		if (cov != null) {
-			this.cid = cov.getId();
-			this.type= cov.getType();
-			this.extId = cov.getExtId();
-		}
+		this.isDeleteConversation = isDeleteConversation;
+		this.msgID = msgID;
 	}
 	
 	@Override
@@ -41,38 +48,28 @@ public class ConversationNotificationObject implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel par, int flag) {
-		par.writeInt(cid);
-		par.writeInt(type);
+		par.writeInt(conversationType);
 		par.writeLong(extId);
 		par.writeLong(msgID);
+		par.writeInt(isDeleteConversation ? 1 : 0);
 	}
 
-	
-	
 	public static final Parcelable.Creator<ConversationNotificationObject> CREATOR = new Parcelable.Creator<ConversationNotificationObject>() {
-	    public ConversationNotificationObject createFromParcel(Parcel in) {
-	        return new ConversationNotificationObject(in);
-	    }
+		public ConversationNotificationObject createFromParcel(Parcel in) {
+			return new ConversationNotificationObject(in);
+		}
 
-	    public ConversationNotificationObject[] newArray(int size) {
-	        return new ConversationNotificationObject[size];
-	    }
+		public ConversationNotificationObject[] newArray(int size) {
+			return new ConversationNotificationObject[size];
+		}
 	};
 
-	public int getCid() {
-		return cid;
+	public int getConversationType() {
+		return conversationType;
 	}
 
-	public void setCid(int cid) {
-		this.cid = cid;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
+	public void setConversationType(int conversationType) {
+		this.conversationType = conversationType;
 	}
 
 	public long getExtId() {
@@ -82,7 +79,7 @@ public class ConversationNotificationObject implements Parcelable {
 	public void setExtId(long extId) {
 		this.extId = extId;
 	}
-	
+
 	public long getMsgID() {
 		return msgID;
 	}
@@ -90,6 +87,12 @@ public class ConversationNotificationObject implements Parcelable {
 	public void setMsgID(long msgID) {
 		this.msgID = msgID;
 	}
-	
-	
+
+	public boolean isDeleteConversation() {
+		return isDeleteConversation;
+	}
+
+	public void setDeleteConversation(boolean isDeleteConversation) {
+		this.isDeleteConversation = isDeleteConversation;
+	}
 }
