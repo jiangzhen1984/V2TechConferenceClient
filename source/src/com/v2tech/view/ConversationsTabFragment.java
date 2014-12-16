@@ -546,7 +546,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.updateCrowdAllQualicationMessageReadStateToRead(true);
 				}
 			}
-			
+			//更新验证会话最新内容
+			updateVerificationConversation();
+			//更新红点
 			boolean isOtherShowPrompt = data.getBooleanExtra("isOtherShowPrompt", false);
 			if(isOtherShowPrompt){
 				verificationItem.cov.setReadFlag(Conversation.READ_FLAG_UNREAD);

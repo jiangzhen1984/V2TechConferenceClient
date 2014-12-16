@@ -37,7 +37,9 @@ public class GlobalConfig {
 	public static String SDCARD_GLOBLE_PATH = "";
 	
 	public static String LOGIN_USER_ID = "";
-
+	
+	public static String SERVER_DATABASE_ID = "";
+	
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 	
 	public static Map<Long, Integer> mTransingFiles = new HashMap<Long, Integer>();
@@ -126,15 +128,17 @@ public class GlobalConfig {
 		return null;
 	}
 
+	
+	
 	public static String getGlobalPath() {
 		boolean sdExist = android.os.Environment.MEDIA_MOUNTED
 				.equals(android.os.Environment.getExternalStorageState());
 		if (!sdExist) {// 如果不存在,
 			// --data/data/com.v2tech
-		    return DEFAULT_GLOBLE_PATH + "/v2tech";
+		    return DEFAULT_GLOBLE_PATH + "/v2tech" + "/" + SERVER_DATABASE_ID;
 		} else {
 			// --mnt/sdcard
-			return SDCARD_GLOBLE_PATH + "/v2tech";
+			return SDCARD_GLOBLE_PATH + "/v2tech" + "/" + SERVER_DATABASE_ID;
 		}
 		// return getGlobalPath()+"/.v2tech/";
 	}

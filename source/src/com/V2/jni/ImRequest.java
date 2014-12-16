@@ -95,20 +95,22 @@ public class ImRequest {
 	 * @param nUserID
 	 *            logged in user ID
 	 * @param nStatus
+	 * @param serverTime
+	 * @param sDBID
+	 * 			server id
 	 * @param nResult
 	 *            0: logged in successfully
 	 * 
 	 * @see #login(String, String, int, int, boolean)
 	 */
-	private void OnLogin(long nUserID, int nStatus, long serverTime, int nResult) {
-		V2Log.d("OnLogin --> " + nUserID + ": " + "-:" + nStatus + ":"
-				+ nResult);
-		// GlobalConfig.TIME_SERVER_TIME = serverTime;
+	private void OnLogin(long nUserID, int nStatus, long serverTime, String sDBID , int nResult) {
+		V2Log.d("ImRequest UI", "OnLogin ---> nUserID ---> nUserID" + " | nStatus: " + nStatus + " | serverTime: " + serverTime
+				 + " | sDBID: " + sDBID + " | nResult: " + nResult);
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnLoginCallback(nUserID, nStatus, nResult, serverTime);
+				callback.OnLoginCallback(nUserID, nStatus, nResult, serverTime , sDBID.trim());
 			}
 		}
 	}

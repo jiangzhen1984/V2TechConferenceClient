@@ -63,7 +63,7 @@ public class UserService extends AbstractHandler {
 		if (user == null) {
 			if (caller != null && caller.getHandler() != null) {
 				sendResult(caller,
-						new RequestLogInResponse(null,
+						new RequestLogInResponse(null ,
 								RequestLogInResponse.Result.INCORRECT_PAR,
 								caller.getObject()));
 			}
@@ -98,7 +98,7 @@ public class UserService extends AbstractHandler {
 
 		@Override
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult,
-				long serverTime) {
+				long serverTime , String sDBID) {
 			// 获取系统时间
 			GlobalConfig.recordLoginTime(serverTime);
             SimpleDateFormat fromat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -107,7 +107,7 @@ public class UserService extends AbstractHandler {
 			RequestLogInResponse.Result res = RequestLogInResponse.Result
 					.fromInt(nResult);
 			Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,
-					new RequestLogInResponse(new User(nUserID), res));
+					new RequestLogInResponse(new User(nUserID), sDBID , res));
 			handler.dispatchMessage(m);
 		}
 
@@ -117,7 +117,7 @@ public class UserService extends AbstractHandler {
 					.fromInt(nResult);
 			if (res != RequestLogInResponse.Result.SUCCESS) {
 				Message m = Message.obtain(handler, JNI_REQUEST_LOG_IN,
-						new RequestLogInResponse(null, res));
+						new RequestLogInResponse(null , res));
 				handler.dispatchMessage(m);
 			}
 		}

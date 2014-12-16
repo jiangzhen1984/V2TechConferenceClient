@@ -52,8 +52,35 @@ public class WBRequest {
 	public native void unInitialize();
 
 	public native void downLoadPageDoc(String bowardid, int pageid);
+	
+	/**
+	 * 取消文档打印
+	 * @param szWBoardID
+	 * 				ID白板ID
+	 */
+	public native void CanclePrint(String szWBoardID);
 
-	// 4514714000 1 196 3d4805676-0f02-4fd6-bf98-b8166832e51a
+	/**
+	 * 白板添加一页
+	 * @param szWBoardID
+	 * 				ID白板ID
+	 * @param nActive
+	 * 				是否激活所添中的页
+	 */
+	public native void AddPage(String szWBoardID, boolean nActive);
+	
+	
+	/**
+	 * 白板激活一页
+	 * @param szWBoardID
+	 * 			白板ID
+	 * @param nPageID
+	 * 			激页ID
+	 * @param nIndex
+	 * @param bNotify
+	 * 			激活页是否通知其它成员
+	 */
+	public native void ActivePage(String szWBoardID, long nPageID, int nIndex, boolean bNotify);
 
 	private long lastgoupid = 0L;
 

@@ -9,8 +9,6 @@
         android:layout_height="@dimen/common_delete_icon_height"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
         android:focusable="false"
         android:padding="@dimen/common_delete_icon_padding"
         android:src="@drawable/ic_delete"
@@ -23,7 +21,7 @@
         android:layout_centerVertical="true"
         android:layout_marginBottom="@dimen/conversation_view_margin"
         android:layout_marginRight="5dp"
-        android:layout_marginLeft="5dp"
+        android:paddingLeft="10dp"
         android:layout_marginTop="@dimen/conversation_view_margin"
         android:layout_toRightOf="@+id/ib_delete" >
         <ImageView
@@ -101,7 +99,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingRight="15dp"
-                android:text="TextView"
+                android:text=""
                 android:textSize="@dimen/common_item_text_size_16" />
         </FrameLayout>
         <Button

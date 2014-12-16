@@ -7,7 +7,7 @@ import com.V2.jni.ind.V2User;
 public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 
 	@Override
-	public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime) {
+	public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime , String sDBID) {
 
 	}
 

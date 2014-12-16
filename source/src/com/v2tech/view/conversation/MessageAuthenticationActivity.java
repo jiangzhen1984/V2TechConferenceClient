@@ -1329,8 +1329,7 @@ public class MessageAuthenticationActivity extends Activity {
 						VerificationProvider.updateQualicationMessage(msg);
 //						startCrowdInvitationDetail(msg);
 					} else {
-						// Add crowd group to cache, we can't handle this after
-						// done
+						// Add crowd group to cache, we can't handle this after done
 						// because group information come before done event.
 //						GlobalHolder.getInstance().addGroupToList(
 //								GroupType.CHATING.intValue(), cg);

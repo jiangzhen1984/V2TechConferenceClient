@@ -522,8 +522,12 @@ public class LoginActivity extends Activity {
 				} else if (rlr.getResult() == JNIResponse.Result.SUCCESS){
 					//获取到登陆用户对象
 					User user = ((RequestLogInResponse) rlr).getUser();
-					if(user == null)
+					String serverID = ((RequestLogInResponse) rlr).getServerID();
+					if(user == null || serverID == null)
 						throw new RuntimeException(getResources().getString(R.string.login_error_init_user_id));
+					//构建文件夹路径
+					GlobalConfig.SERVER_DATABASE_ID = serverID;
+					V2Log.d(TAG, "Build folder finish! Globle Path is : " + GlobalConfig.getGlobalPath());
 					//为登陆用户创建个人资料文件夹
 					createPersonFolder(user);
 					// Save user info

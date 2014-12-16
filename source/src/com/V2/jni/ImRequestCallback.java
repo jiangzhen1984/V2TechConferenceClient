@@ -20,9 +20,10 @@ public interface ImRequestCallback {
 	 * @param nStatus
 	 * @param nResult  0: succeed,  1: failed
 	 * @param serverTime 
+	 * @param sDBID : Server id
 	 * @see com.v2tech.service.jni.JNIResponse.Result
 	 */
-	public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime);
+	public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime , String sDBID);
 	
 	
 	/**

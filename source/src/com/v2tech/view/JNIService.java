@@ -573,7 +573,7 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnLoginCallback(long nUserID, int nStatus, int nResult,
-				long serverTime) {
+				long serverTime , String sDBID) {
 			if (JNIResponse.Result.fromInt(nResult) == JNIResponse.Result.SUCCESS) {
 				// Just request current logged in user information
 				ImRequest.getInstance().getUserBaseInfo(nUserID);
