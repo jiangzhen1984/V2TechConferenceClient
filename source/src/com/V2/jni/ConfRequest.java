@@ -422,7 +422,8 @@ public class ConfRequest {
 	}
 
 	private void OnConfMute() {
-		Log.e("ImRequest UI", "OnConfMute ");
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ConfRequest METHOD = OnConfMute()");
 	}
 
 	// 浼氳琚垹闄ょ殑鍥炶皟

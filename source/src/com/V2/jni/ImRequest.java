@@ -451,7 +451,7 @@ public class ImRequest {
 	private void OnSignalDisconnected() {
 		Log.e("ImRequest UI", "OnSignalDisconnected");
 	}
-
+	
 	private void OnDelGroupInfo(int type, long groupid, boolean isdel) {
 		Log.e("ImRequest UI", "OnDelGroupInfo" + type + ":" + groupid + ":"
 				+ isdel);

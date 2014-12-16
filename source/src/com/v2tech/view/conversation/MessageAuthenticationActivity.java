@@ -80,9 +80,9 @@ import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 
 /**
  * FIXME should combine two types of message, use one adapter for two.
- *
+ * 
  * @author jiangzhen
- *
+ * 
  */
 public class MessageAuthenticationActivity extends Activity {
 
@@ -113,7 +113,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private FriendMessageAdapter firendAdapter;
 	private GroupMessageAdapter groupAdapter;
 	private List<FriendMAData> friendMADataList = new ArrayList<FriendMAData>();
-//	private long loadFriendMADataNumber = 20;
+	// private long loadFriendMADataNumber = 20;
 	private List<ListItemWrapper> mMessageList;
 
 	private FriendAuthenticationBroadcastReceiver friendAuthenticationBroadcastReceiver;
@@ -129,7 +129,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private View listViewFootView;
 
 	private Context mContext;
-	
+
 	private int offset = 0;
 
 	@Override
@@ -149,36 +149,39 @@ public class MessageAuthenticationActivity extends Activity {
 		isFriendAuthentication = getIntent().getBooleanExtra(
 				"isFriendActivity", true);
 		if (isFriendAuthentication) {
-			MessageLoader.updateVerificationMessageReadState(VerificationMessageType.CONTACT_TYPE
-					 , ReadState.READ , null , null);
+			MessageLoader.updateVerificationMessageReadState(
+					VerificationMessageType.CONTACT_TYPE, ReadState.READ, null,
+					null);
 			changeMessageAuthenticationListView();
 		} else {
-			MessageLoader.updateVerificationMessageReadState(VerificationMessageType.CROWD_TYPE
-					 , ReadState.READ , null , null);
+			MessageLoader.updateVerificationMessageReadState(
+					VerificationMessageType.CROWD_TYPE, ReadState.READ, null,
+					null);
 			rbGroupAuthentication.setChecked(true);
 		}
-        
+
 		initPrompt();
 	}
 
 	private void initPrompt() {
 		boolean showFriendNotification = false;
 		// 查出未读的第一条按时间顺序
-        String order = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE
-                + " desc limit 1";
-        Cursor cursor = mContext.getContentResolver().query(
-                ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
-                null, "ReadState = ?",
-                new String[] { String.valueOf(ReadState.UNREAD.intValue()) }, order);
-        if ((cursor != null) && (cursor.getCount() == 0))
-        	showFriendNotification = false;
-        else
-        	showFriendNotification = true;
+		String order = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE
+				+ " desc limit 1";
+		Cursor cursor = mContext.getContentResolver().query(
+				ContentDescriptor.HistoriesAddFriends.CONTENT_URI, null,
+				"ReadState = ?",
+				new String[] { String.valueOf(ReadState.UNREAD.intValue()) },
+				order);
+		if ((cursor != null) && (cursor.getCount() == 0))
+			showFriendNotification = false;
+		else
+			showFriendNotification = true;
 
-        if (cursor != null)
-            cursor.close();
-        
-        boolean showCrwodNotification = getIntent().getBooleanExtra(
+		if (cursor != null)
+			cursor.close();
+
+		boolean showCrwodNotification = getIntent().getBooleanExtra(
 				"isCrowdShowNotification", false);
 		if (showCrwodNotification && isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_GROUP, true);
@@ -186,8 +189,8 @@ public class MessageAuthenticationActivity extends Activity {
 		if (showFriendNotification && !isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_FRIEND, true);
 		V2Log.d(TAG, "Is show friend notification : " + showFriendNotification);
-		
-		if(!showCrwodNotification && !showFriendNotification)
+
+		if (!showCrwodNotification && !showFriendNotification)
 			requestUpdateConversation();
 	}
 
@@ -204,21 +207,23 @@ public class MessageAuthenticationActivity extends Activity {
 		lvMessageAuthentication = (ListView) findViewById(R.id.message_authentication);
 		ivFriendAuthenticationPrompt = (ImageView) findViewById(R.id.rb_friend_authentication_prompt);
 		ivGroupAuthenticationPrompt = (ImageView) findViewById(R.id.rb_group_authentication_prompt);
-		listViewFootView=createListViewFootView();
+		listViewFootView = createListViewFootView();
 	}
 
 	private View createListViewFootView() {
-		ProgressBar progressbar = new ProgressBar(MessageAuthenticationActivity.this);// 定义一个ProgressBar
-		progressbar.setPadding(20, 0, 0, 0);// left, top, right, bottom
+		ProgressBar progressbar = new ProgressBar(
+				MessageAuthenticationActivity.this);// 定义一个ProgressBar
+		progressbar.setPadding(5, 5, 5, 5);// left, top, right, bottom
 
 		TextView tv_wait = new TextView(MessageAuthenticationActivity.this);// 定义一个TextView
 		tv_wait.setText("正在动态加载……");
 		tv_wait.setTextSize(20f);
 		tv_wait.setPadding(20, 0, 0, 0);
 
-		LinearLayout layout = new LinearLayout(MessageAuthenticationActivity.this);
+		LinearLayout layout = new LinearLayout(
+				MessageAuthenticationActivity.this);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
-		layout.setGravity(Gravity.CENTER_VERTICAL);
+		layout.setGravity(Gravity.CENTER);
 		LinearLayout.LayoutParams flayoutparams = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);// 定义FootView中控件的布局
@@ -238,15 +243,15 @@ public class MessageAuthenticationActivity extends Activity {
 
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
-			if(user == null)
-				return ;
+			if (user == null)
+				return;
 
 			for (FriendMAData data : friendMADataList) {
-				if(data.remoteUserID == user.getmUserId()){
+				if (data.remoteUserID == user.getmUserId()) {
 					data.dheadImage.recycle();
 					data.dheadImage = null;
 					data.dheadImage = bm;
-					if(firendAdapter != null)
+					if (firendAdapter != null)
 						firendAdapter.notifyDataSetChanged();
 				}
 			}
@@ -281,8 +286,9 @@ public class MessageAuthenticationActivity extends Activity {
 									.getColor(R.color.button_text_color));
 							isFriendAuthentication = true;
 							changeMessageAuthenticationListView();
-							MessageLoader.updateVerificationMessageReadState(VerificationMessageType.CONTACT_TYPE
-									 , ReadState.READ , null , null);
+							MessageLoader.updateVerificationMessageReadState(
+									VerificationMessageType.CONTACT_TYPE,
+									ReadState.READ, null, null);
 							updateTabPrompt(PROMPT_TYPE_FRIEND, false);
 						}
 
@@ -302,8 +308,9 @@ public class MessageAuthenticationActivity extends Activity {
 							isFriendAuthentication = false;
 							changeMessageAuthenticationListView();
 							updateTabPrompt(PROMPT_TYPE_GROUP, false);
-							MessageLoader.updateVerificationMessageReadState(VerificationMessageType.CROWD_TYPE
-									 , ReadState.READ , null , null);
+							MessageLoader.updateVerificationMessageReadState(
+									VerificationMessageType.CROWD_TYPE,
+									ReadState.READ, null, null);
 						}
 					}
 				});
@@ -342,15 +349,15 @@ public class MessageAuthenticationActivity extends Activity {
 								break;
 							}
 
-							if(data.state == 0 || data.state == 4){
-								intent.putExtra("contactButtonShow",true);
+							if (data.state == 0 || data.state == 4) {
+								intent.putExtra("contactButtonShow", true);
+							} else {
+								intent.putExtra("contactButtonShow", false);
 							}
-							else{
-								intent.putExtra("contactButtonShow",false);
-							}
-							
+
 							MessageAuthenticationActivity.this
-									.startActivityForResult(intent , FRIEND_AUTHENTICATION_RESULT);
+									.startActivityForResult(intent,
+											FRIEND_AUTHENTICATION_RESULT);
 						} else {
 							if (isGroupInDeleteMode) {
 								Toast.makeText(
@@ -393,51 +400,66 @@ public class MessageAuthenticationActivity extends Activity {
 					}
 
 				});
-		
-		lvMessageAuthentication.setOnScrollListener(new OnScrollListener() {
-			private boolean isNeedLoad=false;
-			private boolean isLoading=false;
-			@Override
-			public void onScrollStateChanged(final AbsListView view, int scrollState) {
-				if(scrollState==OnScrollListener.SCROLL_STATE_IDLE && rbFriendAuthentication.isChecked()){
-					if(isNeedLoad&&!isLoading){
-						ListView listView = ((ListView)view);
-						listView.addFooterView(listViewFootView);
-						isLoading=true;
-						new AsyncTask<Void, Void, Void>() {
-							List<FriendMAData> tempMessageAuthenticationDataList;
 
+		lvMessageAuthentication.setOnScrollListener(new OnScrollListener() {
+			private boolean isNeedLoad = false;
+			private boolean isLoading = false;
+
+			@Override
+			public void onScrollStateChanged(final AbsListView view,
+					int scrollState) {
+				if (!rbFriendAuthentication.isChecked()) {
+					return;
+				}
+				if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+					if (isNeedLoad && !isLoading) {
+						ListView listView = ((ListView) view);
+						listView.addFooterView(listViewFootView);
+						listView.setAdapter(firendAdapter);
+						isLoading = true;
+						new AsyncTask<Void, Void, List<FriendMAData>>() {
 							@Override
-							protected Void doInBackground(Void... arg0) {
-								tempMessageAuthenticationDataList = VerificationProvider.loadFriendsVerifyMessages(LOAD_SIZE , offset);
- 								return null;
+							protected List<FriendMAData> doInBackground(
+									Void... arg0) {
+								List<FriendMAData> tempMessageAuthenticationDataList = VerificationProvider
+										.loadFriendsVerifyMessages(LOAD_SIZE
+												+ offset);
+								offset = tempMessageAuthenticationDataList
+										.size();
+								return tempMessageAuthenticationDataList;
 							}
 
 							@Override
-							protected void onPostExecute(Void result) {
-								lvMessageAuthentication.setAdapter(null);
-								lvMessageAuthentication.removeFooterView(listViewFootView);
-								if(tempMessageAuthenticationDataList != null){
-									offset = offset + tempMessageAuthenticationDataList.size();
-									friendMADataList.addAll(tempMessageAuthenticationDataList);
+							protected void onPostExecute(
+									List<FriendMAData> result) {
+								lvMessageAuthentication
+										.removeFooterView(listViewFootView);
+								friendMADataList.clear();
+								if (result != null) {
+									friendMADataList.addAll(result);
+									firendAdapter.notifyDataSetChanged();
 								}
-								lvMessageAuthentication.setAdapter(firendAdapter);
-								isLoading=false;
+								isLoading = false;
+
 							}
 
 						}.execute();
 					}
-					
+
 				}
 			}
-			
+
 			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
-				if(firstVisibleItem+visibleItemCount==totalItemCount&&totalItemCount>0){
-					isNeedLoad=true;
-				}else{
-					isNeedLoad=false;
+				if (!rbFriendAuthentication.isChecked()) {
+					return;
+				}
+				if (firstVisibleItem + visibleItemCount == totalItemCount
+						&& totalItemCount > 0) {
+					isNeedLoad = true;
+				} else {
+					isNeedLoad = false;
 				}
 			}
 		});
@@ -486,9 +508,6 @@ public class MessageAuthenticationActivity extends Activity {
 
 	}
 
-	/**
-	 * FIXME optimze code
-	 */
 	private void changeMessageAuthenticationListView() {
 		if (isFriendAuthentication) {
 			if (firendAdapter == null) {
@@ -497,7 +516,6 @@ public class MessageAuthenticationActivity extends Activity {
 			lvMessageAuthentication.setAdapter(firendAdapter);
 			loadFriendMessage();
 		} else {
-
 			mMessageList = new ArrayList<ListItemWrapper>();
 
 			if (groupAdapter == null) {
@@ -557,7 +575,8 @@ public class MessageAuthenticationActivity extends Activity {
 	void initReceiver() {
 		friendAuthenticationBroadcastReceiver = new FriendAuthenticationBroadcastReceiver();
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION);
+		intentFilter
+				.addAction(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION);
 		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
@@ -572,8 +591,10 @@ public class MessageAuthenticationActivity extends Activity {
 				.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
 		intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
-		intentFilter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
-		intentFilter.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+		intentFilter
+				.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
+		intentFilter
+				.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(mCrowdAuthenticationBroadcastReceiver, intentFilter);
 
@@ -602,35 +623,36 @@ public class MessageAuthenticationActivity extends Activity {
 					for (ListItemWrapper wrapper : mMessageList) {
 						VMessageQualification message = (VMessageQualification) wrapper.obj;
 						if (message.getId() == id) {
-                            if(state == QualificationState.INVALID){
-                                mMessageList.remove(wrapper);
-                                MessageBuilder.deleteQualMessage(mContext , message.getId());
-                            }
-                            else
-							    message.setQualState(state);
+							if (state == QualificationState.INVALID) {
+								mMessageList.remove(wrapper);
+								MessageBuilder.deleteQualMessage(mContext,
+										message.getId());
+							} else
+								message.setQualState(state);
 							groupAdapter.notifyDataSetChanged();
 							isFresh = true;
 							break;
 						}
 					}
 
-					if(!isFresh)
-						V2Log.e(TAG , "Update QualificationState failed ... because no search it in mMessageList "
-								+ "id is : " + id);
-				}
-				else
-					V2Log.e(TAG , "Update QualificationState failed ... because id is -1");
+					if (!isFresh)
+						V2Log.e(TAG,
+								"Update QualificationState failed ... because no search it in mMessageList "
+										+ "id is : " + id);
+				} else
+					V2Log.e(TAG,
+							"Update QualificationState failed ... because id is -1");
 			}
 			break;
 		case FRIEND_AUTHENTICATION_RESULT:
-			if(data != null){
-				//FIXME Should not fresh all
-//				long id = data.getLongExtra("remoteUserID", -1l);
-//				for (FriendMAData friend : friendMADataList) {
-//					if(friend.remoteUserID == id){
-//						
-//					}
-//				}
+			if (data != null) {
+				// FIXME Should not fresh all
+				// long id = data.getLongExtra("remoteUserID", -1l);
+				// for (FriendMAData friend : friendMADataList) {
+				// if(friend.remoteUserID == id){
+				//
+				// }
+				// }
 				friendMADataList.clear();
 				loadFriendMessage();
 			}
@@ -679,25 +701,21 @@ public class MessageAuthenticationActivity extends Activity {
 		mContext.sendBroadcast(i);
 	}
 
-
 	private void loadFriendMessage() {
-		new AsyncTask<Void, Void, Void>() {
-			List<FriendMAData> tempMessageAuthenticationDataList;
-
+		new AsyncTask<Void, Void, List<FriendMAData>>() {
 			@Override
-			protected Void doInBackground(Void... arg0) {
-				offset = 0;
-				tempMessageAuthenticationDataList = VerificationProvider.loadFriendsVerifyMessages(LOAD_SIZE , offset);
-				return null;
+			protected List<FriendMAData> doInBackground(Void... arg0) {
+				List<FriendMAData> tempMessageAuthenticationDataList = VerificationProvider
+						.loadFriendsVerifyMessages(LOAD_SIZE);
+				return tempMessageAuthenticationDataList;
 			}
 
 			@Override
-			protected void onPostExecute(Void result) {
+			protected void onPostExecute(List<FriendMAData> result) {
+				friendMADataList.clear();
 				if (firendAdapter != null) {
-					friendMADataList.clear();
-					if(tempMessageAuthenticationDataList != null){
-						offset = offset + tempMessageAuthenticationDataList.size();
-						friendMADataList.addAll(tempMessageAuthenticationDataList);
+					if (result != null) {
+						friendMADataList.addAll(result);
 					}
 					firendAdapter.notifyDataSetChanged();
 				}
@@ -706,7 +724,7 @@ public class MessageAuthenticationActivity extends Activity {
 		}.execute();
 
 	}
-	
+
 	private void startCrowdInvitationDetail(VMessageQualification msg) {
 		VMessageQualificationInvitationCrowd imsg = (VMessageQualificationInvitationCrowd) msg;
 		Intent i = new Intent();
@@ -725,23 +743,23 @@ public class MessageAuthenticationActivity extends Activity {
 				V2Log.e("startCrowdInvitationDetail --> start ConversationActivity failed ... crowd group isn't exist!");
 			}
 		} else {
-            CrowdGroup group = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-                    V2GlobalEnum.GROUP_TYPE_CROWD,
-                    imsg.getCrowdGroup().getmGId());
-            Crowd crowd;
-            if(group != null){
-                crowd = new Crowd(group.getmGId(), group.getOwnerUser(), group.getName(),
-                        group.getBrief());
-                crowd.setAnnounce(group.getAnnouncement());
-                crowd.setAuth(group.getAuthType().intValue());
-            }
-            else {
-                CrowdGroup crowdGroup = imsg.getCrowdGroup();
-                crowd = new Crowd(crowdGroup.getmGId(), crowdGroup.getOwnerUser(), crowdGroup
-                        .getName(), crowdGroup.getBrief());
-                crowd.setAnnounce(crowdGroup.getAnnouncement());
-                crowd.setAuth(crowdGroup.getAuthType().intValue());
-            }
+			CrowdGroup group = (CrowdGroup) GlobalHolder.getInstance()
+					.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD,
+							imsg.getCrowdGroup().getmGId());
+			Crowd crowd;
+			if (group != null) {
+				crowd = new Crowd(group.getmGId(), group.getOwnerUser(),
+						group.getName(), group.getBrief());
+				crowd.setAnnounce(group.getAnnouncement());
+				crowd.setAuth(group.getAuthType().intValue());
+			} else {
+				CrowdGroup crowdGroup = imsg.getCrowdGroup();
+				crowd = new Crowd(crowdGroup.getmGId(),
+						crowdGroup.getOwnerUser(), crowdGroup.getName(),
+						crowdGroup.getBrief());
+				crowd.setAnnounce(crowdGroup.getAnnouncement());
+				crowd.setAuth(crowdGroup.getAuthType().intValue());
+			}
 
 			if (imsg.getQualState() == QualificationState.BE_REJECT) {
 				i.setAction(PublicIntent.SHOW_CROWD_APPLICATION_ACTIVITY);
@@ -750,7 +768,7 @@ public class MessageAuthenticationActivity extends Activity {
 				// set disable authentication
 				i.putExtra("authdisable", false);
 				i.putExtra("stored", true);
-                startActivityForResult(i , AUTHENTICATION_RESULT);
+				startActivityForResult(i, AUTHENTICATION_RESULT);
 			} else {
 				i.setAction(JNIService.JNI_BROADCAST_CROWD_INVATITION);
 				i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
@@ -857,27 +875,30 @@ public class MessageAuthenticationActivity extends Activity {
 			if (arg0 >= list.size())
 				return arg1;
 			final FriendMAData data = list.get(arg0);
-            if(data == null){
-                V2Log.e(TAG , "Get FriendMAData Object is null ... please check!");
-                return arg1;
-            }
+			if (data == null) {
+				V2Log.e(TAG,
+						"Get FriendMAData Object is null ... please check!");
+				return arg1;
+			}
 
-            boolean isGetAvatar = false;
-            if (data.dheadImage != null) {
-                if (!data.dheadImage.isRecycled())
-                    viewTag.ivHeadImage.setImageBitmap(data.dheadImage);
-                else
-                    isGetAvatar = true;
-            } else
-                isGetAvatar = true;
+			boolean isGetAvatar = false;
+			if (data.dheadImage != null) {
+				if (!data.dheadImage.isRecycled())
+					viewTag.ivHeadImage.setImageBitmap(data.dheadImage);
+				else
+					isGetAvatar = true;
+			} else
+				isGetAvatar = true;
 
-            if(isGetAvatar == true) {
-                User remoteUser = GlobalHolder.getInstance().getUser(data.remoteUserID);
-                if (remoteUser != null)
-                    viewTag.ivHeadImage.setImageBitmap(remoteUser.getAvatarBitmap());
-                else
-                    viewTag.ivHeadImage.setImageResource(R.drawable.avatar);
-            }
+			if (isGetAvatar == true) {
+				User remoteUser = GlobalHolder.getInstance().getUser(
+						data.remoteUserID);
+				if (remoteUser != null)
+					viewTag.ivHeadImage.setImageBitmap(remoteUser
+							.getAvatarBitmap());
+				else
+					viewTag.ivHeadImage.setImageResource(R.drawable.avatar);
+			}
 			viewTag.tvName.setText(data.name);
 
 			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
@@ -1021,7 +1042,7 @@ public class MessageAuthenticationActivity extends Activity {
 			TextView mRes;
 			View mAcceptButton;
 			View mDeleteButton;
-//			TextView mRejectContentTV;
+			// TextView mRejectContentTV;
 		}
 
 		class AcceptedButtonTag {
@@ -1060,9 +1081,9 @@ public class MessageAuthenticationActivity extends Activity {
 				item = new ViewItem();
 				item.mDeleteHintButton = convertView
 						.findViewById(R.id.qualification_msg_delete_left_button);
-				//拒绝理由显示，暂不用
-//				item.mRejectContentTV = (TextView) convertView
-//						.findViewById(R.id.qualification_msg_content_reject);
+				// 拒绝理由显示，暂不用
+				// item.mRejectContentTV = (TextView) convertView
+				// .findViewById(R.id.qualification_msg_content_reject);
 				item.mDeleteHintButton
 						.setOnClickListener(mDeleteLeftButtonListener);
 
@@ -1114,11 +1135,12 @@ public class MessageAuthenticationActivity extends Activity {
 				CrowdGroup cg = vqic.getCrowdGroup();
 				item.mMsgBanneriv.setImageResource(R.drawable.chat_group_icon);
 				item.mNameTV.setText(cg.getName());
-				if (vqic.getInvitationUser() != null){
+				if (vqic.getInvitationUser() != null) {
 					String name;
 					User user = vqic.getInvitationUser();
-					boolean isFriend = GlobalHolder.getInstance().isFriend(user);
-					if(isFriend && user.getNickName() != null)
+					boolean isFriend = GlobalHolder.getInstance()
+							.isFriend(user);
+					if (isFriend && user.getNickName() != null)
 						name = user.getNickName();
 					else
 						name = user.getName();
@@ -1137,9 +1159,12 @@ public class MessageAuthenticationActivity extends Activity {
 				} else {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
-				
-				boolean isFriend = GlobalHolder.getInstance().isFriend(vqac.getApplicant());
-				if(isFriend && !TextUtils.isEmpty(vqac.getApplicant().getNickName()))
+
+				boolean isFriend = GlobalHolder.getInstance().isFriend(
+						vqac.getApplicant());
+				if (isFriend
+						&& !TextUtils
+								.isEmpty(vqac.getApplicant().getNickName()))
 					item.mNameTV.setText(vqac.getApplicant().getNickName());
 				else
 					item.mNameTV.setText(vqac.getApplicant().getName());
@@ -1175,7 +1200,7 @@ public class MessageAuthenticationActivity extends Activity {
 			if (vqac.getQualState() == QualificationState.ACCEPTED) {
 				item.mRes.setVisibility(View.VISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
-//                item.mRejectContentTV.setVisibility(View.GONE);
+				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_accepted);
 				item.mContentTV.setText(res
 						.getString(R.string.crowd_invitation_apply_join)
@@ -1184,7 +1209,7 @@ public class MessageAuthenticationActivity extends Activity {
 			} else if (vqac.getQualState() == QualificationState.REJECT) {
 				item.mRes.setVisibility(View.VISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
-//                item.mRejectContentTV.setVisibility(View.GONE);
+				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_rejected);
 				item.mContentTV.setText(res
 						.getString(R.string.crowd_invitation_apply_join)
@@ -1193,8 +1218,8 @@ public class MessageAuthenticationActivity extends Activity {
 			} else if (vqac.getQualState() == QualificationState.BE_REJECT) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
-//				item.mRejectContentTV.setVisibility(View.GONE);
-//				item.mRejectContentTV.setText(vqac.getApplyReason());
+				// item.mRejectContentTV.setVisibility(View.GONE);
+				// item.mRejectContentTV.setText(vqac.getApplyReason());
 				item.mContentTV.setText(res
 						.getString(R.string.crowd_invitation_reject_join)
 						+ vqac.getCrowdGroup().getName()
@@ -1202,14 +1227,14 @@ public class MessageAuthenticationActivity extends Activity {
 			} else if (vqac.getQualState() == QualificationState.BE_ACCEPTED) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
-//                item.mRejectContentTV.setVisibility(View.GONE);
+				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mContentTV.setText(res
 						.getString(R.string.crowd_invitation_accept_join)
 						+ vqac.getCrowdGroup().getName()
 						+ res.getString(R.string.crowd_Authentication_crowd));
 			} else if (vqac.getQualState() == QualificationState.WAITING) {
 				item.mRes.setVisibility(View.INVISIBLE);
-//                item.mRejectContentTV.setVisibility(View.GONE);
+				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.VISIBLE);
 				item.mContentTV.setText(res
 						.getString(R.string.crowd_invitation_apply_join)
@@ -1223,33 +1248,35 @@ public class MessageAuthenticationActivity extends Activity {
 			if (vqic.getQualState() == QualificationState.ACCEPTED) {
 				item.mRes.setVisibility(View.VISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
-//				 item.mRejectContentTV.setVisibility(View.GONE);
+				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_accepted);
 			} else if (vqic.getQualState() == QualificationState.REJECT) {
 				item.mRes.setVisibility(View.VISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
-//				item.mRejectContentTV.setVisibility(View.GONE);
+				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_rejected);
 			} else if (vqic.getQualState() == QualificationState.BE_ACCEPTED) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
-//				 item.mRejectContentTV.setVisibility(View.GONE);
-				item.mContentTV.setText(R.string.crowd_invitation_accepted_notes);
+				// item.mRejectContentTV.setVisibility(View.GONE);
+				item.mContentTV
+						.setText(R.string.crowd_invitation_accepted_notes);
 			} else if ((vqic.getQualState() == QualificationState.BE_REJECT)
 					|| (vqic.getQualState() == QualificationState.WAITING_FOR_APPLY)) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
-//				item.mRejectContentTV.setVisibility(View.VISIBLE);
-//				item.mRejectContentTV.setText(vqic.getRejectReason());
-				item.mContentTV.setText(R.string.crowd_invitation_rejected_notes);
-			} else if (vqic.getQualState() == QualificationState.INVALID){
-                item.mRes.setVisibility(View.VISIBLE);
-                item.mAcceptButton.setVisibility(View.INVISIBLE);
-//                item.mRejectContentTV.setVisibility(View.GONE);
-                item.mRes.setText(R.string.crowd_invitation_invalid_notes);
-            }else {
+				// item.mRejectContentTV.setVisibility(View.VISIBLE);
+				// item.mRejectContentTV.setText(vqic.getRejectReason());
+				item.mContentTV
+						.setText(R.string.crowd_invitation_rejected_notes);
+			} else if (vqic.getQualState() == QualificationState.INVALID) {
+				item.mRes.setVisibility(View.VISIBLE);
+				item.mAcceptButton.setVisibility(View.INVISIBLE);
+				// item.mRejectContentTV.setVisibility(View.GONE);
+				item.mRes.setText(R.string.crowd_invitation_invalid_notes);
+			} else {
 				item.mRes.setVisibility(View.INVISIBLE);
-//				item.mRejectContentTV.setVisibility(View.GONE);
+				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.VISIBLE);
 			}
 		}
@@ -1321,18 +1348,22 @@ public class MessageAuthenticationActivity extends Activity {
 						Intent intent = new Intent();
 						intent.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 						intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-						intent.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, cg.getmGId(), -1));
+						intent.putExtra(
+								"group",
+								new GroupUserObject(
+										V2GlobalEnum.GROUP_TYPE_CROWD, cg
+												.getmGId(), -1));
 						sendBroadcast(intent);
-						
+
 						updateViewItem(tag.wrapper, tag.item);
 						msg.setReadState(ReadState.READ);
 						VerificationProvider.updateQualicationMessage(msg);
-//						startCrowdInvitationDetail(msg);
+						// startCrowdInvitationDetail(msg);
 					} else {
 						// Add crowd group to cache, we can't handle this after done
 						// because group information come before done event.
-//						GlobalHolder.getInstance().addGroupToList(
-//								GroupType.CHATING.intValue(), cg);
+						// GlobalHolder.getInstance().addGroupToList(
+						// GroupType.CHATING.intValue(), cg);
 
 						Crowd crowd = new Crowd(cg.getmGId(),
 								cg.getOwnerUser(), cg.getName(), cg.getBrief());
@@ -1380,7 +1411,8 @@ public class MessageAuthenticationActivity extends Activity {
 		}
 
 		VMessageQualification currentMessage = null;
-		VMessageQualification vq = MessageBuilder.queryQualMessageByCrowdId(userID, groupID);
+		VMessageQualification vq = MessageBuilder.queryQualMessageByCrowdId(
+				userID, groupID);
 		for (ListItemWrapper wrapper : mMessageList) {
 			VMessageQualification message = (VMessageQualification) wrapper.obj;
 			if (vq.getId() == message.getId()) {
@@ -1392,29 +1424,32 @@ public class MessageAuthenticationActivity extends Activity {
 			}
 		}
 
-//		if (type == Type.CROWD_INVITATION) {
-//			Intent i = new Intent();
-//			i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-//			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-//			i.putExtra("crowd", groupID);
-//			sendBroadcast(i);
-//			startCrowdInvitationDetail(currentMessage);
-//		}
+		// if (type == Type.CROWD_INVITATION) {
+		// Intent i = new Intent();
+		// i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
+		// i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		// i.putExtra("crowd", groupID);
+		// sendBroadcast(i);
+		// startCrowdInvitationDetail(currentMessage);
+		// }
 
 	}
 
 	private void handleFailedDone() {
 		if (waitingQualification != null) {
 			VMessageQualificationInvitationCrowd vm = (VMessageQualificationInvitationCrowd) waitingQualification.obj;
-			Toast.makeText(mContext, vm.getCrowdGroup().getName() + res.getString(R.string.crowd_Authentication_hit) ,
+			Toast.makeText(
+					mContext,
+					vm.getCrowdGroup().getName()
+							+ res.getString(R.string.crowd_Authentication_hit),
 					Toast.LENGTH_SHORT).show();
-//            vm.setQualState(QualificationState.INVALID);
-//            MessageBuilder.updateQualicationMessage(mContext , vm);
-            mMessageList.remove(waitingQualification);
-            waitingQualification = null;
-            MessageBuilder.deleteQualMessage(mContext, vm.getId());
-            groupAdapter.notifyDataSetChanged();
-        }
+			// vm.setQualState(QualificationState.INVALID);
+			// MessageBuilder.updateQualicationMessage(mContext , vm);
+			mMessageList.remove(waitingQualification);
+			waitingQualification = null;
+			MessageBuilder.deleteQualMessage(mContext, vm.getId());
+			groupAdapter.notifyDataSetChanged();
+		}
 	}
 
 	class CrowdAuthenticationBroadcastReceiver extends BroadcastReceiver {
@@ -1452,72 +1487,78 @@ public class MessageAuthenticationActivity extends Activity {
 					VerificationProvider.updateQualicationMessage(msg);
 				}
 				// Cancel next broadcast
-//				this.abortBroadcast();
-			}
-			else if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
+				// this.abortBroadcast();
+			} else if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
 					.getAction())) {
 				ProgressUtils.showNormalWithHintProgress(mContext, false);
 				handleFailedDone();
 			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
-                    .equals(intent.getAction())
-                    || intent.getAction().equals(
-                    JNIService.JNI_BROADCAST_KICED_CROWD)) {
+					.equals(intent.getAction())
+					|| intent.getAction().equals(
+							JNIService.JNI_BROADCAST_KICED_CROWD)) {
 				GroupUserObject obj = intent.getParcelableExtra("group");
 				if (obj == null) {
 					V2Log.e(TAG,
 							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
 					return;
 				}
-				
+
 				long cid = obj.getmGroupId();
-                int location = -1;
-				for (int i = 0 ; i < mMessageList.size() ; i++) {
-					VMessageQualification message = (VMessageQualification) mMessageList.get(i).obj;
-					if(message.getType() == Type.CROWD_APPLICATION){
+				int location = -1;
+				for (int i = 0; i < mMessageList.size(); i++) {
+					VMessageQualification message = (VMessageQualification) mMessageList
+							.get(i).obj;
+					if (message.getType() == Type.CROWD_APPLICATION) {
 						VMessageQualificationApplicationCrowd apply = (VMessageQualificationApplicationCrowd) message;
-						if(apply.getCrowdGroup() != null){
-							if(apply.getCrowdGroup().getmGId() == cid){
+						if (apply.getCrowdGroup() != null) {
+							if (apply.getCrowdGroup().getmGId() == cid) {
 								location = i;
 								break;
 							}
-						}
-						else
-							V2Log.e(TAG, "Remove the crowd qualification message failed! get crowd group is null"
-									+ "crowd id is " + cid + " and message id is : " + apply.getId());
-					}
-					else{
+						} else
+							V2Log.e(TAG,
+									"Remove the crowd qualification message failed! get crowd group is null"
+											+ "crowd id is " + cid
+											+ " and message id is : "
+											+ apply.getId());
+					} else {
 						VMessageQualificationInvitationCrowd invite = (VMessageQualificationInvitationCrowd) message;
-						if(invite.getCrowdGroup() != null){
-							if(invite.getCrowdGroup().getmGId() == cid){
+						if (invite.getCrowdGroup() != null) {
+							if (invite.getCrowdGroup().getmGId() == cid) {
 								location = i;
 								break;
 							}
-						}
-						else
-							V2Log.e(TAG, "Remove the crowd qualification message failed! get crowd group is null"
-									+ "crowd id is " + cid + " and message id is : " + invite.getId());
+						} else
+							V2Log.e(TAG,
+									"Remove the crowd qualification message failed! get crowd group is null"
+											+ "crowd id is " + cid
+											+ " and message id is : "
+											+ invite.getId());
 					}
 				}
-				
-				if(location != -1){
+
+				if (location != -1) {
 					mMessageList.remove(location);
 					groupAdapter.notifyDataSetChanged();
-					V2Log.e(TAG, "Remove the crowd qualification message successful! crowd id is : " + cid);
+					V2Log.e(TAG,
+							"Remove the crowd qualification message successful! crowd id is : "
+									+ cid);
 				}
-//				if(!isFriendAuthentication)
-//					changeMessageAuthenticationListView();
-//				rbGroupAuthentication.setChecked(true);
-            } else if(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION.equals(intent
-					.getAction())){
-            	Long uid = intent.getLongExtra("modifiedUser", -1);
+				// if(!isFriendAuthentication)
+				// changeMessageAuthenticationListView();
+				// rbGroupAuthentication.setChecked(true);
+			} else if (PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
+					.equals(intent.getAction())) {
+				Long uid = intent.getLongExtra("modifiedUser", -1);
 				if (uid == -1l) {
-					V2Log.e(TAG , "BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
+					V2Log.e(TAG,
+							"BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
 					return;
 				}
-				
-				if(groupAdapter != null)
+
+				if (groupAdapter != null)
 					groupAdapter.notifyDataSetChanged();
-            }
+			}
 		}
 	}
 
@@ -1532,8 +1573,8 @@ public class MessageAuthenticationActivity extends Activity {
 					updateTabPrompt(PROMPT_TYPE_FRIEND, true);
 				// Cancel next broadcast
 				this.abortBroadcast();
-			} else if(arg1.getAction().equals(
-					JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)){
+			} else if (arg1.getAction().equals(
+					JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 				GroupUserObject guo = (GroupUserObject) arg1.getExtras().get(
 						"obj");
 				if (guo == null) {
@@ -1541,11 +1582,11 @@ public class MessageAuthenticationActivity extends Activity {
 							"USER_REMOVE --> Received the broadcast to quit the crowd group , but crowd id is wroing... ");
 					return;
 				}
-				
+
 				for (FriendMAData friend : friendMADataList) {
-					if(friend.remoteUserID == guo.getmUserId()){
+					if (friend.remoteUserID == guo.getmUserId()) {
 						friendMADataList.remove(friend);
-						if(firendAdapter != null)
+						if (firendAdapter != null)
 							firendAdapter.notifyDataSetChanged();
 						break;
 					}
@@ -1567,8 +1608,7 @@ public class MessageAuthenticationActivity extends Activity {
 					CrowdGroup crowd = (CrowdGroup) jni.callerObject;
 					handleAcceptDone(Type.CROWD_INVITATION, crowd.getmGId(),
 							crowd.getOwnerUser().getmUserId());
-				}
-				else{
+				} else {
 					Toast.makeText(mContext, "连接服务器超时！", 0).show();
 				}
 				break;
@@ -1579,8 +1619,7 @@ public class MessageAuthenticationActivity extends Activity {
 					GroupAddUserJNIObject obj = (GroupAddUserJNIObject) applyJni.resObj;
 					handleAcceptDone(Type.CROWD_APPLICATION, obj.getGroupID(),
 							obj.getUserID());
-				}
-				else{
+				} else {
 					Toast.makeText(mContext, "连接服务器超时！", 0).show();
 				}
 				break;
@@ -1590,4 +1629,3 @@ public class MessageAuthenticationActivity extends Activity {
 
 	};
 }
-

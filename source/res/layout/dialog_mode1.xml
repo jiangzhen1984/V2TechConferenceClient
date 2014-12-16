@@ -41,13 +41,13 @@
             android:layout_centerHorizontal="true" >
 
             <TextView
-                android:id="@+id/in_meeting_quit_window_content"
+                android:id="@+id/content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:layout_marginBottom="20dp"
                 android:layout_marginTop="20dp"
-                android:text="@string/in_meeting_quit_text"
+                android:text="hjjghjhhjhjjhjj"
                 android:textColor="#000000"
                 android:textSize="20sp" />
         </RelativeLayout>
@@ -61,7 +61,7 @@
             android:layout_marginTop="25dp" >
 
             <Button
-                android:id="@+id/IMWQuitButton"
+                android:id="@+id/IMWOKButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight=".5"
@@ -70,7 +70,7 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:paddingTop="10dp"
-                android:text="@string/in_meeting_quit_quit_button"
+                android:text="确定"
                 android:textColor="@color/button_text_color"
                 android:textSize="18sp" />
 

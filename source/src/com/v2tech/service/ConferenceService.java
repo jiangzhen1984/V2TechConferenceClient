@@ -252,6 +252,21 @@ public class ConferenceService extends DeviceService {
 		this.sendMessageDelayed(res, 300);
 	}
 
+	public void muteConf() {
+		ConfRequest.getInstance().muteConf();
+	}
+
+	public void enableVideoDev(String szDeviceID, boolean bInuse) {
+		int _bInuse = 0;
+		if (bInuse) {
+			_bInuse = 1;
+		} else {
+			_bInuse = 0;
+		}
+		
+		VideoRequest.getInstance().enableVideoDev(szDeviceID, _bInuse);
+	}
+
 	/**
 	 * User request speak permission on the conference.
 	 * 

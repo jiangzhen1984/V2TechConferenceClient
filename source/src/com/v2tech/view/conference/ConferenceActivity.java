@@ -144,7 +144,7 @@ public class ConferenceActivity extends Activity {
 	private PermissionState mControlState = PermissionState.NORMAL;
 
 	private boolean isSpeaking;
-	private boolean isMuteCamera;
+	private boolean isMuteCamera = false;
 
 	private Handler mVideoHandler = new VideoHandler();
 
@@ -168,6 +168,7 @@ public class ConferenceActivity extends Activity {
 	private VideoShowHostRequest mHostRequestWindow;
 
 	private Dialog mQuitDialog;
+	private Dialog mMuteCameraDialog;
 	private VideoInvitionAttendeeLayout mInvitionContainer;
 	private VideoMsgChattingLayout mMessageContainer;
 	private VideoAttendeeListLayout mAttendeeContainer;
@@ -258,7 +259,7 @@ public class ConferenceActivity extends Activity {
 
 		this.mVideoLayout = new FrameLayout(this);
 		mContentLayoutMain.addView(this.mVideoLayout);
-		//mVideoLayout.setBackgroundColor(Color.rgb(255, 0, 0));
+		// mVideoLayout.setBackgroundColor(Color.rgb(255, 0, 0));
 		mVideoLayout.setVisibility(View.VISIBLE);
 		this.mSubWindowLayout = new FrameLayout(this);
 
@@ -267,7 +268,7 @@ public class ConferenceActivity extends Activity {
 
 		this.mChairmanControl = (ImageView) findViewById(R.id.iv_chairman_control);
 		this.mChairmanControl.setOnClickListener(onClickMChairmanControl);
-		
+
 		mMsgNotification = findViewById(R.id.host_request_msg_notificator);
 		mMsgNotification.setVisibility(View.GONE);
 
@@ -341,7 +342,7 @@ public class ConferenceActivity extends Activity {
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
 		isBluetoothHeadsetConnected = audioManager.isBluetoothA2dpOn();
-//		audioManager.setMode(AudioManager.MODE_IN_CALL);
+		// audioManager.setMode(AudioManager.MODE_IN_CALL);
 		// Broadcast for user joined conference, to inform that quit P2P
 		// conversation
 		broadcastForJoined();
@@ -352,6 +353,8 @@ public class ConferenceActivity extends Activity {
 				initVideoLayout();
 			}
 		});
+		
+		showMuteCameraDialog();
 	}
 
 	@Override
@@ -464,10 +467,8 @@ public class ConferenceActivity extends Activity {
 		isSpeaking = (conf.getCreator() == GlobalHolder.getInstance()
 				.getCurrentUserId() || conf.getChairman() == GlobalHolder
 				.getInstance().getCurrentUserId()) ? true : false;
-
-		isMuteCamera = true;
-		
-		if (confGroup.getOwnerUser().getmUserId() != GlobalHolder.getInstance().getCurrentUserId()) {
+		if (confGroup.getOwnerUser().getmUserId() != GlobalHolder.getInstance()
+				.getCurrentUserId()) {
 			mChairmanControl.setVisibility(View.INVISIBLE);
 		} else {
 			//If current user is conference creatoer, than update control permission to granted
@@ -509,8 +510,8 @@ public class ConferenceActivity extends Activity {
 	 * @param flag
 	 */
 	private void updateControlState(PermissionState state, boolean reject) {
-		
-		if (mControlState == PermissionState.APPLYING ) {
+
+		if (mControlState == PermissionState.APPLYING) {
 			if (state == PermissionState.GRANTED) {
 				Toast.makeText(mContext,
 						R.string.confs_toast_get_control_permission,
@@ -519,17 +520,16 @@ public class ConferenceActivity extends Activity {
 				mSpeakerIV.performClick();
 			} else if (state == PermissionState.NORMAL) {
 				if (reject) {
-				Toast.makeText(mContext,
-						R.string.confs_toast_reject_control_permission,
-						Toast.LENGTH_SHORT).show();
+					Toast.makeText(mContext,
+							R.string.confs_toast_reject_control_permission,
+							Toast.LENGTH_SHORT).show();
 				} else {
 					Toast.makeText(mContext,
 							R.string.confs_toast_cancel_control_permission,
 							Toast.LENGTH_SHORT).show();
 				}
 			}
-		} else 
-		if (mControlState == PermissionState.GRANTED) {
+		} else if (mControlState == PermissionState.GRANTED) {
 			if (state == PermissionState.NORMAL) {
 				Toast.makeText(mContext,
 						R.string.confs_toast_release_control_permission,
@@ -542,17 +542,16 @@ public class ConferenceActivity extends Activity {
 						Toast.LENGTH_SHORT).show();
 			}
 		}
-		
+
 		mControlState = state;
 	}
 
 	private void updateMCameraIVState(boolean flag) {
-		isMuteCamera = flag;
 		// set flag to speaking icon
-		if (isMuteCamera) {
-			mCameraIV.setImageResource(R.drawable.confernce_camera_mute);
-		} else {
+		if (flag) {
 			mCameraIV.setImageResource(R.drawable.confernce_camera);
+		} else {
+			mCameraIV.setImageResource(R.drawable.confernce_camera_mute);
 		}
 	}
 
@@ -981,7 +980,17 @@ public class ConferenceActivity extends Activity {
 	private OnClickListener onClickMCameraIV = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			updateMCameraIVState(!isMuteCamera);
+			if (isMuteCamera) {
+				isMuteCamera = false;
+				cb.enableVideoDev("", true);
+				updateMCameraIVState(true);
+			} else {
+				isMuteCamera = true;
+				cb.enableVideoDev("", false);
+				updateMCameraIVState(false);
+
+			}
+
 		}
 	};
 
@@ -1004,12 +1013,11 @@ public class ConferenceActivity extends Activity {
 					.findViewById(R.id.conference_activity_request_host_tv))
 					.setText(R.string.confs_title_button_request_host_name);
 
-	
 			if ((mControlState == PermissionState.GRANTED || mControlState == PermissionState.APPLYING)) {
-				updateControlState( PermissionState.NORMAL, false);
+				updateControlState(PermissionState.NORMAL, false);
 				cb.applyForReleasePermission(ConferencePermission.CONTROL, null);
 			} else {
-				updateControlState( PermissionState.APPLYING, false);
+				updateControlState(PermissionState.APPLYING, false);
 				cb.applyForControlPermission(ConferencePermission.CONTROL, null);
 			}
 		}
@@ -1063,12 +1071,12 @@ public class ConferenceActivity extends Activity {
 				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
-				
-				 mRequestButtonName = (TextView)layout.findViewById(
-						 R.id.conference_activity_request_host_tv);
-				mRequestButtonImage = (ImageView)layout.findViewById(
-						 R.id.conference_activity_request_host_iv);
-				
+
+				mRequestButtonName = (TextView) layout
+						.findViewById(R.id.conference_activity_request_host_tv);
+				mRequestButtonImage = (ImageView) layout
+						.findViewById(R.id.conference_activity_request_host_iv);
+
 				arrow.measure(View.MeasureSpec.UNSPECIFIED,
 						View.MeasureSpec.UNSPECIFIED);
 
@@ -1093,17 +1101,25 @@ public class ConferenceActivity extends Activity {
 			}
 
 			if (mControlState == PermissionState.APPLYING) {
-				mRequestButtonName.setTextColor(mContext.getResources().getColor(R.color.conference_host_requesting_text_color));
-				mRequestButtonImage.setImageResource(R.drawable.host_requesting);
-				mRequestButtonName.setText(R.string.confs_title_button_request_host_name);
+				mRequestButtonName
+						.setTextColor(mContext.getResources().getColor(
+								R.color.conference_host_requesting_text_color));
+				mRequestButtonImage
+						.setImageResource(R.drawable.host_requesting);
+				mRequestButtonName
+						.setText(R.string.confs_title_button_request_host_name);
 			} else if (mControlState == PermissionState.GRANTED) {
-				mRequestButtonName.setTextColor(mContext.getResources().getColor(R.color.conference_acquired_host_text_color));
+				mRequestButtonName.setTextColor(mContext.getResources()
+						.getColor(R.color.conference_acquired_host_text_color));
 				mRequestButtonImage.setImageResource(R.drawable.host_required);
-				mRequestButtonName.setText(R.string.confs_title_button_release_host_name);
+				mRequestButtonName
+						.setText(R.string.confs_title_button_release_host_name);
 			} else if (mControlState == PermissionState.NORMAL) {
-				mRequestButtonName.setTextColor(mContext.getResources().getColor(R.color.common_item_text_color_black));
+				mRequestButtonName.setTextColor(mContext.getResources()
+						.getColor(R.color.common_item_text_color_black));
 				mRequestButtonImage.setImageResource(R.drawable.host_request);
-				mRequestButtonName.setText(R.string.confs_title_button_request_host_name);
+				mRequestButtonName
+						.setText(R.string.confs_title_button_request_host_name);
 			}
 
 			int[] pos = new int[2];
@@ -1155,6 +1171,7 @@ public class ConferenceActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
+						cb.muteConf();
 						mChairControlWindow.dismiss();
 
 					}
@@ -1166,7 +1183,8 @@ public class ConferenceActivity extends Activity {
 							@Override
 							public void onCheckedChanged(
 									CompoundButton buttonView, boolean isChecked) {
-								cb.updateConferenceAttribute(conf, cg.isSyn(), isChecked, null);
+								cb.updateConferenceAttribute(conf, cg.isSyn(),
+										isChecked, null);
 								mChairControlWindow.dismiss();
 							}
 						});
@@ -1203,7 +1221,6 @@ public class ConferenceActivity extends Activity {
 
 			}
 
-			
 			int[] pos = new int[2];
 			v.getLocationInWindow(pos);
 			pos[0] += v.getMeasuredWidth() / 2 - 15 * dm.density - arrowWidth
@@ -1538,14 +1555,112 @@ public class ConferenceActivity extends Activity {
 
 						}
 					}
+					if (userDeviceConfig == null) {
+						return;
+					}
+					V2Log.i("20141210 1",
+							"语音激励打开视频:" + userDeviceConfig.getDeviceID());
 					openAttendeeVideo(userDeviceConfig);
 
 				}
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE
 					.equals(intent.getAction())) {
 			
+				// 传来的是设备ID
+				String dstDeviceID = intent.getStringExtra("sDstMediaID");
+				UserDeviceConfig userDeviceConfig = null;
+
+				if (dstDeviceID == null) {
+					return;
+				}
+
+				for (SurfaceViewW sw : mCurrentShowedSV) {
+
+					if (dstDeviceID.equals(sw.udc.getDeviceID())) {
+						userDeviceConfig = sw.udc;
+						break;
+					}
+
+				}
+				if (userDeviceConfig == null) {
+					return;
+				}
+				V2Log.i("20141210 1",
+						"同步关闭视频:" + userDeviceConfig.getDeviceID());
+				closeAttendeeVideo(userDeviceConfig);
+
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE
 					.equals(intent.getAction())) {
+				if (isSyn == 1) {
+					String xml = intent.getStringExtra("sSyncVideoMsgXML");
+					if (xml == null || xml.equals("")) {
+						return;
+					}
+					// 获得两个参数在列表中查的
+
+					while (true) {
+						String dstUserIDStr = XmlAttributeExtractor.extract(
+								xml, " DstUserID='", "'");
+
+						String dstDeviceID = XmlAttributeExtractor.extract(xml,
+								" DstDeviceID='", "'");
+
+						if (dstUserIDStr == null || dstDeviceID == null) {
+							return;
+						}
+						int indexDstUserID = xml.indexOf(" DstUserID='")
+								+ " DstUserID='".length();
+						int indexDstDeviceID = xml.indexOf(" DstDeviceID='")
+								+ " DstDeviceID='".length();
+						if (indexDstUserID > indexDstDeviceID) {
+							xml = xml.substring(indexDstUserID);
+						} else {
+							xml = xml.substring(indexDstDeviceID);
+						}
+
+						long dstUserID = -1;
+						try {
+							dstUserID = Long.valueOf(dstUserIDStr);
+						} catch (NumberFormatException e) {
+							V2Log.e(V2Log.XML_ERROR,
+									" CLASS =ConferenceActivity.BroadcastReceiver METHOD = onReceive()"
+											+ "dstUserIDStr = " + dstUserIDStr
+											+ "is not long");
+							return;
+						}
+
+						UserDeviceConfig userDeviceConfig = null;
+						for (Attendee attendee : mAttendeeList) {
+
+							if (attendee.getAttId() == dstUserID) {
+								if (attendee.isSelf()) {
+									V2Log.i("20141210 1", "指给移动端打开视频:"
+											+ "是自己跳过");
+									return;
+								}
+								List<UserDeviceConfig> list = attendee
+										.getmDevices();
+								if (list == null) {
+									return;
+								}
+								for (UserDeviceConfig udc : list) {
+									if (udc.getDeviceID().equals(dstDeviceID)) {
+										userDeviceConfig = udc;
+									}
+								}
+
+							}
+						}
+						if (userDeviceConfig == null) {
+							return;
+						}
+						V2Log.i("20141210 1",
+								"指给移动端打开视频:" + userDeviceConfig.getDeviceID());
+						openAttendeeVideo(userDeviceConfig);
+					}
+
+				}
+
 			}
 
 		}
@@ -1595,6 +1710,10 @@ public class ConferenceActivity extends Activity {
 		udc = atd.getDefaultDevice();
 		// Add default device
 		if (udc == null) {
+			// udc = new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE,
+			// conf.getId(), atd.getAttId(),
+			// String.valueOf(atd.getAttId())+":Camera", null);
+			// //为什么默认设备要传""呢？
 			udc = new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE,
 					conf.getId(), atd.getAttId(), "", null);
 			// Make sure current user device is enable
@@ -1908,6 +2027,41 @@ public class ConferenceActivity extends Activity {
 		mQuitDialog.show();
 	}
 
+	private void showMuteCameraDialog() {
+		if (mMuteCameraDialog == null) {
+
+			final Dialog d = new Dialog(mContext, R.style.DialogStyle1);
+
+			d.setContentView(R.layout.dialog_mode1);
+			final Button cancelB = (Button) d
+					.findViewById(R.id.IMWCancelButton);
+			cancelB.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					d.dismiss();
+				}
+
+			});
+			final Button quitB = (Button) d.findViewById(R.id.IMWOKButton);
+			quitB.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					d.dismiss();
+					isMuteCamera = true;
+					cb.enableVideoDev("", false);
+					updateMCameraIVState(false);
+				}
+
+			});
+			mMuteCameraDialog = d;
+		}
+
+		TextView v = (TextView) mMuteCameraDialog.findViewById(R.id.content);
+		v.setText("是否禁用本地视频？");
+
+		mMuteCameraDialog.show();
+	}
+
 	/**
 	 * reverse local camera from back to front or from front to back
 	 */
@@ -2006,8 +2160,6 @@ public class ConferenceActivity extends Activity {
 		}
 	}
 
-	
-
 	/**
 	 * Handle event which new user entered conference
 	 * 
@@ -2033,9 +2185,9 @@ public class ConferenceActivity extends Activity {
 		if (mAttendeeContainer != null) {
 			mAttendeeContainer.updateEnteredAttendee(att);
 		}
-		//咱不提示进入或退出
-//		showToastNotification(att.getAttName()
-//				+ mContext.getText(R.string.conf_notification_joined_meeting));
+		// 咱不提示进入或退出
+		// showToastNotification(att.getAttName()
+		// + mContext.getText(R.string.conf_notification_joined_meeting));
 	}
 
 	private void showToastNotification(String text) {
@@ -2045,8 +2197,7 @@ public class ConferenceActivity extends Activity {
 		mToast = Toast.makeText(mContext, text, Toast.LENGTH_SHORT);
 		mToast.show();
 	}
-	
-	
+
 	private void doUpdateSyncEvent(boolean flag, int type) {
 		if (type == 0) {
 			if (mDocContainer != null) {
@@ -2113,7 +2264,7 @@ public class ConferenceActivity extends Activity {
 			mAttendeeContainer.updateExitedAttendee(att);
 		}
 
-		//咱不提示进入或退出
+		// 咱不提示进入或退出
 		// // Clean user device
 		// showToastNotification(att.getAttName()
 		// + mContext.getText(R.string.conf_notification_quited_meeting));
@@ -2929,8 +3080,9 @@ public class ConferenceActivity extends Activity {
 							.getType()) {
 						if (ind.getUid() == GlobalHolder.getInstance()
 								.getCurrentUserId()) {
-							updateControlState(PermissionState.fromInt(ind
-									.getState()), true);
+							updateControlState(
+									PermissionState.fromInt(ind.getState()),
+									true);
 						}
 					}
 				}
@@ -2947,7 +3099,7 @@ public class ConferenceActivity extends Activity {
 				if (mHostRequestWindow != null) {
 					mHostRequestWindow.updateList(mHostRequestUsers);
 				}
-				
+
 			}
 
 				break;
@@ -2961,7 +3113,7 @@ public class ConferenceActivity extends Activity {
 				updateDocNotification((AsyncResult) (msg.obj), msg.what);
 				break;
 			case DESKTOP_SYNC_NOTIFICATION:
-				doUpdateSyncEvent(msg.arg1 == 1? true : false, msg.arg2);
+				doUpdateSyncEvent(msg.arg1 == 1 ? true : false, msg.arg2);
 
 				V2Log.d(V2Log.UI_MESSAGE,
 						"CLASS = ConferenceActivity  MESSAGE = DESKTOP_SYNC_NOTIFICATION");

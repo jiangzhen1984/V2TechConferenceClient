@@ -29,7 +29,7 @@ public class VerificationProvider extends DatabaseProvider {
 	 * 
 	 * @return
 	 */
-	public static List<FriendMAData> loadFriendsVerifyMessages(int limit , int offset) {
+	public static List<FriendMAData> loadFriendsVerifyMessages(int limit) {
 		List<FriendMAData> tempList = new ArrayList<FriendMAData>();
 		// // 把所有的改为已读
 		// String sql = "update " + tableName
@@ -38,10 +38,7 @@ public class VerificationProvider extends DatabaseProvider {
 
 		Cursor cursor = null;
 		try {
-			String order = ContentDescriptor.HistoriesAddFriends.Cols.ID
-					+ " desc , "
-					+ ContentDescriptor.HistoriesAddFriends.Cols.ID
-					+ " desc limit " + limit + " offset  " + offset;
+			String order = ContentDescriptor.HistoriesAddFriends.Cols.ID+ " desc limit " + limit;
 			cursor = mContext.getContentResolver().query(
 					ContentDescriptor.HistoriesAddFriends.CONTENT_URI, null,
 					null, null, order);
