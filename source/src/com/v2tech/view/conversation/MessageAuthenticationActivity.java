@@ -149,12 +149,12 @@ public class MessageAuthenticationActivity extends Activity {
 		isFriendAuthentication = getIntent().getBooleanExtra(
 				"isFriendActivity", true);
 		if (isFriendAuthentication) {
-			MessageLoader.updateVerificationMessageReadState(
+			VerificationProvider.updateCrowdQualicationReadState(
 					VerificationMessageType.CONTACT_TYPE, ReadState.READ, null,
 					null);
 			changeMessageAuthenticationListView();
 		} else {
-			MessageLoader.updateVerificationMessageReadState(
+			VerificationProvider.updateCrowdQualicationReadState(
 					VerificationMessageType.CROWD_TYPE, ReadState.READ, null,
 					null);
 			rbGroupAuthentication.setChecked(true);
@@ -286,7 +286,7 @@ public class MessageAuthenticationActivity extends Activity {
 									.getColor(R.color.button_text_color));
 							isFriendAuthentication = true;
 							changeMessageAuthenticationListView();
-							MessageLoader.updateVerificationMessageReadState(
+							VerificationProvider.updateCrowdQualicationReadState(
 									VerificationMessageType.CONTACT_TYPE,
 									ReadState.READ, null, null);
 							updateTabPrompt(PROMPT_TYPE_FRIEND, false);
@@ -308,7 +308,7 @@ public class MessageAuthenticationActivity extends Activity {
 							isFriendAuthentication = false;
 							changeMessageAuthenticationListView();
 							updateTabPrompt(PROMPT_TYPE_GROUP, false);
-							MessageLoader.updateVerificationMessageReadState(
+							VerificationProvider.updateCrowdQualicationReadState(
 									VerificationMessageType.CROWD_TYPE,
 									ReadState.READ, null, null);
 						}
@@ -532,8 +532,8 @@ public class MessageAuthenticationActivity extends Activity {
 
 			@Override
 			protected Void doInBackground(Void... params) {
-				List<VMessageQualification> list = MessageBuilder
-						.queryQualMessageList(mContext, GlobalHolder
+				List<VMessageQualification> list = VerificationProvider
+						.queryCrowdQualMessageList(GlobalHolder
 								.getInstance().getCurrentUser());
 				if (list == null) {
 					return null;
@@ -625,8 +625,7 @@ public class MessageAuthenticationActivity extends Activity {
 						if (message.getId() == id) {
 							if (state == QualificationState.INVALID) {
 								mMessageList.remove(wrapper);
-								MessageBuilder.deleteQualMessage(mContext,
-										message.getId());
+								VerificationProvider.deleteCrowdQualMessage(message.getId());
 							} else
 								message.setQualState(state);
 							groupAdapter.notifyDataSetChanged();
@@ -672,7 +671,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private void checkVerificationMessage() {
 		Cursor cursor = null;
 		try {
-			VMessageQualification nestQualification = MessageLoader
+			VMessageQualification nestQualification = VerificationProvider
 					.getNewestCrowdVerificationMessage();
 			String sql = "select * from " + AddFriendHistroysHandler.tableName
 					+ " order by SaveDate desc limit 1";
@@ -1316,7 +1315,7 @@ public class MessageAuthenticationActivity extends Activity {
 					}
 				}
 				// delete message from database
-				MessageBuilder.deleteQualMessage(mContext, msg.getId());
+				VerificationProvider.deleteCrowdQualMessage(msg.getId());
 
 				groupAdapter.notifyDataSetChanged();
 			}
@@ -1337,8 +1336,8 @@ public class MessageAuthenticationActivity extends Activity {
 				VMessageQualification msg = (VMessageQualification) tag.wrapper.obj;
 				waitingQualification = tag.wrapper;
 				// msg.setQualState(VMessageQualification.QualificationState.ACCEPTED);
-				VMessageQualification message = MessageBuilder
-						.queryQualMessageById(mContext, msg.getId());
+				VMessageQualification message = VerificationProvider
+						.queryCrowdQualMessageById(msg.getId());
 
 				if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
 					CrowdGroup cg = ((VMessageQualificationInvitationCrowd) msg)
@@ -1357,7 +1356,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 						updateViewItem(tag.wrapper, tag.item);
 						msg.setReadState(ReadState.READ);
-						VerificationProvider.updateQualicationMessage(msg);
+						VerificationProvider.updateCrowdQualicationMessage(msg);
 						// startCrowdInvitationDetail(msg);
 					} else {
 						// Add crowd group to cache, we can't handle this after done
@@ -1385,7 +1384,7 @@ public class MessageAuthenticationActivity extends Activity {
 							msg.setQualState(QualificationState.ACCEPTED);
 							msg.setReadState(ReadState.READ);
 							updateViewItem(tag.wrapper, tag.item);
-							VerificationProvider.updateQualicationMessage(msg);
+							VerificationProvider.updateCrowdQualicationMessage(msg);
 						} else {
 							crowdService.acceptApplication(
 									vqac.getCrowdGroup(), vqac.getApplicant(),
@@ -1411,7 +1410,7 @@ public class MessageAuthenticationActivity extends Activity {
 		}
 
 		VMessageQualification currentMessage = null;
-		VMessageQualification vq = MessageBuilder.queryQualMessageByCrowdId(
+		VMessageQualification vq = VerificationProvider.queryCrowdQualMessageByCrowdId(
 				userID, groupID);
 		for (ListItemWrapper wrapper : mMessageList) {
 			VMessageQualification message = (VMessageQualification) wrapper.obj;
@@ -1447,7 +1446,7 @@ public class MessageAuthenticationActivity extends Activity {
 			// MessageBuilder.updateQualicationMessage(mContext , vm);
 			mMessageList.remove(waitingQualification);
 			waitingQualification = null;
-			MessageBuilder.deleteQualMessage(mContext, vm.getId());
+			VerificationProvider.deleteCrowdQualMessage(vm.getId());
 			groupAdapter.notifyDataSetChanged();
 		}
 	}
@@ -1459,8 +1458,8 @@ public class MessageAuthenticationActivity extends Activity {
 			if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
 					.equals(intent.getAction())) {
 				long msgId = intent.getLongExtra("msgId", 0);
-				VMessageQualification msg = MessageBuilder
-						.queryQualMessageById(mContext, msgId);
+				VMessageQualification msg = VerificationProvider
+						.queryCrowdQualMessageById(msgId);
 				boolean isAdd = true;
 				ListItemWrapper removedWrapper = null;
 				if (msg != null && mMessageList != null) {
@@ -1484,7 +1483,7 @@ public class MessageAuthenticationActivity extends Activity {
 						updateTabPrompt(PROMPT_TYPE_GROUP, true);
 
 					msg.setReadState(ReadState.READ);
-					VerificationProvider.updateQualicationMessage(msg);
+					VerificationProvider.updateCrowdQualicationMessage(msg);
 				}
 				// Cancel next broadcast
 				// this.abortBroadcast();

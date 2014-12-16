@@ -31,7 +31,6 @@ import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.ProgressUtils;
 import com.v2tech.util.V2Toast;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
@@ -106,7 +105,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 		
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(crowdId);
 		applicant = GlobalHolder.getInstance().getUser(applicationId);
-		msg = (VMessageQualificationApplicationCrowd)MessageBuilder.queryQualMessageById(this, mid);
+		msg = (VMessageQualificationApplicationCrowd)VerificationProvider.queryCrowdQualMessageById(mid);
 		if (applicant != null) {
 			updateView();
 		} else {
@@ -114,7 +113,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 		}
 		
 		msg.setReadState(VMessageQualification.ReadState.READ);
-		VerificationProvider.updateQualicationMessage(msg);
+		VerificationProvider.updateCrowdQualicationMessage(msg);
 	}
 	
 	@Override
@@ -212,15 +211,15 @@ public class CrowdApplicantDetailActivity extends Activity {
 		
 		msg.setQualState(QualificationState.REJECT);
 		msg.setReadState(ReadState.READ);
-		MessageBuilder.updateQualicationMessageState(msg.getId() , new GroupQualicationState(Type.CROWD_APPLICATION,
-				QualificationState.REJECT, null , ReadState.UNREAD  , true));
+		VerificationProvider.updateCrowdQualicationMessageState(msg.getId() , new GroupQualicationState(Type.CROWD_APPLICATION,
+				QualificationState.REJECT, null , ReadState.READ  , true));
 	}
 	
 	private OnClickListener mAcceptButtonListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
-			VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, msg.getId());
+			VMessageQualification message = VerificationProvider.queryCrowdQualMessageById(msg.getId());
 			if(message.getQualState().intValue() != msg.getQualState().intValue())
 				handleAcceptDone();
 			else{
@@ -280,7 +279,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 		if(crowd == null)
 			crowd = new CrowdGroup(0, "", null);
 		
-		long waitMessageExist = MessageBuilder.queryInviteWaitingQualMessageById(user.getmUserId());
+		long waitMessageExist = VerificationProvider.queryCrowdInviteWaitingQualMessageById(user.getmUserId());
 		if (waitMessageExist != -1) {
 			V2Log.d("CrowdApplicationDetailActivity  --> Save VMessageQualification Cache Object failed , "
 					+ "Because already exist in database...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
@@ -292,7 +291,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(
 				crowd, user);
 		crowdQuion.setmTimestamp(new Date());
-		Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion , true);
+		Uri uri = VerificationProvider.saveQualicationMessage(crowdQuion , true);
 		if (uri != null){
 			V2Log.d("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "
 					+ "groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId() + ""

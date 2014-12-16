@@ -186,11 +186,11 @@ public class GlobalHolder {
 			if (tmp == null) {
 				tmp = new User(id);
 				mUserHolder.put(key, tmp);
-                ImRequest.getInstance().getUserBaseInfo(id);
+				//if receive this callback , the dirty change false;
+				ImRequest.getInstance().getUserBaseInfo(id);
 			}
 			return tmp;
 		}
-
 	}
 
 	/**
@@ -605,6 +605,18 @@ public class GlobalHolder {
 			this.mState.setState(st);
 		}
 	}
+	
+	public void setOfflineLoaded(boolean isLoad) {
+		synchronized (mState) {
+			int st = this.mState.getState();
+			if (isLoad) {
+				st |= GlobalState.STATE_SERVER_OFFLINE_MESSAGE_LOADED;
+			} else {
+				st &= (~GlobalState.STATE_SERVER_OFFLINE_MESSAGE_LOADED);
+			}
+			this.mState.setState(st);
+		}
+	}
 
 	public boolean isVoiceConnected() {
 		synchronized (mState) {
@@ -638,24 +650,32 @@ public class GlobalHolder {
 	
 	public boolean isFriend(User user){
 		
-		if(user == null){
-			V2Log.e("GlobalHolder isFriend ---> get user is null , please check conversation user is exist");
-			return false;
-		}
-		
-		long currentUserID = user.getmUserId();
-		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_CONTACT);
-		if(friendGroup.size() >= 0){
-			for (Group friend : friendGroup) {
-				List<User> users = friend.getUsers();
-				for (User friendUser : users) {
-					if(currentUserID == friendUser.getmUserId()){
-						return true;
+		synchronized (mState) {
+			if(user == null){
+				V2Log.e("GlobalHolder isFriend ---> get user is null , please check conversation user is exist");
+				return false;
+			}
+			
+			long currentUserID = user.getmUserId();
+			List<Group> friendGroup = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_CONTACT);
+			if(friendGroup.size() >= 0){
+				for (Group friend : friendGroup) {
+					List<User> users = friend.getUsers();
+					for (User friendUser : users) {
+						if(currentUserID == friendUser.getmUserId()){
+							return true;
+						}
 					}
 				}
 			}
+			return false;
 		}
-		return false;
+	}
+	
+	public boolean isOfflineLoaded() {
+		synchronized (mState) {
+			return mState.isOfflineLoaded();
+		}
 	}
 
 	/**

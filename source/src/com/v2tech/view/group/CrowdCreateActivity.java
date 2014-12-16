@@ -41,6 +41,7 @@ import android.widget.TextView;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.db.provider.VerificationProvider;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
@@ -51,7 +52,6 @@ import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
 import com.v2tech.view.bo.GroupUserObject;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.ItemData;
 import com.v2tech.vo.CrowdGroup;
@@ -500,7 +500,7 @@ public class CrowdCreateActivity extends Activity {
 		if(crowd == null)
 			crowd = new CrowdGroup(0, "", null);
 		
-		long waitMessageExist = MessageBuilder.queryInviteWaitingQualMessageById(user.getmUserId());
+		long waitMessageExist = VerificationProvider.queryCrowdInviteWaitingQualMessageById(user.getmUserId());
 		if (waitMessageExist != -1) {
 			V2Log.d("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
 					+ "Because already exist in database...groupID is : " + crowd == null ? "creater" : crowd.getmGId() + "--" + 
@@ -511,7 +511,7 @@ public class CrowdCreateActivity extends Activity {
 		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(
 				crowd, user);
 		crowdQuion.setmTimestamp(new Date());
-		Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion , true);
+		Uri uri = VerificationProvider.saveQualicationMessage(crowdQuion , true);
 		if (uri != null){
 			V2Log.d("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "
 					+ "groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId() + ""

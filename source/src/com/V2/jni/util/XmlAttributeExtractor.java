@@ -431,11 +431,12 @@ public class XmlAttributeExtractor {
 		list.add(0 , file);
 	}
 	
-	
 	public static String buildAttendeeUsersXml(User at){
 		String target;
-		if(at.getNickName() != null)
-			target = " <user id='" + at.getmUserId() + "' nickname='" + at.getName() + "' />";
+		if(at.getName() != null){
+			String nickname = EscapedcharactersProcessing.convert(at.getName());
+			target = " <user id='" + at.getmUserId() + "' nickname='" + nickname + "' />";
+		}
 		else{
 			V2Log.e("XmlAttributeExtractor buildAttendeeUsersXml--> when build attendee user list , "
 					+ " the user's name is null , id is : " + at.getmUserId());

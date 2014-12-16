@@ -86,7 +86,6 @@ import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.conversation.CommonCallBack;
 import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
@@ -538,11 +537,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			int tabType = data.getIntExtra("tabType", -1);
 			if(tabType != -1){
 				if(tabType == MessageAuthenticationActivity.PROMPT_TYPE_FRIEND){
-					MessageBuilder
+					VerificationProvider
 						.updateCrowdAllQualicationMessageReadStateToRead(false);
 				}
 				else{
-					MessageBuilder
+					VerificationProvider
 						.updateCrowdAllQualicationMessageReadStateToRead(true);
 				}
 			}
@@ -568,9 +567,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	public boolean updateVerificationConversation() {
 		long crowdTime = 0;
 		long friendTime = 0;
-		VMessageQualification nestQualification = MessageLoader
+		VMessageQualification nestQualification = VerificationProvider
 				.getNewestCrowdVerificationMessage();
-		AddFriendHistorieNode friendNode = MessageLoader
+		AddFriendHistorieNode friendNode = VerificationProvider
 				.getNewestFriendVerificationMessage();
 
         if (nestQualification == null && friendNode == null){
@@ -774,9 +773,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		long crowdTime = 0;
 		long friendTime = 0;
-		VMessageQualification nestQualification = MessageLoader
+		VMessageQualification nestQualification = VerificationProvider
 				.getNewestCrowdVerificationMessage();
-		AddFriendHistorieNode friendNode = MessageLoader
+		AddFriendHistorieNode friendNode = VerificationProvider
 				.getNewestFriendVerificationMessage();
 
 		if (nestQualification == null && friendNode == null)
@@ -1357,7 +1356,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			ConversationFirendAuthenticationData friend = (ConversationFirendAuthenticationData) verificationMessageItemData;
 			friend.setUser(GlobalHolder.getInstance().getUser(
 					tempNode.remoteUserID));
-			friend.setFriendNode(tempNode);
 			friend.setMessageType(ConversationFirendAuthenticationData.VerificationMessageType.CONTACT_TYPE);
 			verificationMessageItemLayout.update();
 		}
@@ -1384,11 +1382,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 */
 	private void updateCrowdVerificationConversation(boolean isFresh) {
 
-		VMessageQualification msg = MessageLoader
+		VMessageQualification msg = VerificationProvider
 				.getNewestCrowdVerificationMessage();
 		if (msg == null) {
 			V2Log.e(TAG,
-					"update Friend verification conversation failed ... given VMessageQualification is null");
+					"update Crowd verification conversation failed ... given VMessageQualification is null");
 			return;
 		}
 
@@ -1409,7 +1407,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					if (user != null) {
 						boolean isFriend = GlobalHolder.getInstance().isFriend(
 								user);
-						if (isFriend && user.getNickName() != null)
+						if (isFriend && !TextUtils.isEmpty(user.getNickName()))
 							invitationName = user.getNickName();
 						else
 							invitationName = user.getName();
@@ -1761,15 +1759,22 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	/**
 	 * Remove conversation from mConvList by id.
 	 * 
-	 * @param id
+	 * @param conversationID
+	 * <ul>
+	 *     <li> ContactConversation	   : conversationID mean User's id
+	 *     <li> ConferenceConversation : conversationID mean ConferenceGroup's id
+	 *     <li> CrowdConversation      : conversationID mean CrowdGroup's id
+	 *     <li> DepartmentConversation : conversationID mean OrgGroup's's id
+	 *     <li> DiscussionConversation : conversationID mean DiscussionGroup's's id
+	 * </ul>
 	 * @param isDeleteVerification
 	 *            在删除会话的时候，是否连带删除验证消息
 	 */
-	private void removeConversation(long id, boolean isDeleteVerification) {
+	private void removeConversation(long conversationID, boolean isDeleteVerification) {
 		boolean flag = false;
 		for (int i = 0; i < mItemList.size(); i++) {
 			Conversation temp = mItemList.get(i).cov;
-			if (temp.getExtId() == id) {
+			if (temp.getExtId() == conversationID) {
 				ScrollItem removeItem = mItemList.get(i);
 				removeItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
 				updateUnreadConversation(removeItem);
@@ -1792,7 +1797,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						}
 						V2Log.d(TAG,
 								" Successfully remove contact conversation , id is : "
-										+ id);
+										+ conversationID);
 					}
 				}
 				// Now , Department conversation is not show in crowd interface.
@@ -1810,19 +1815,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 
 		if (!flag)
-			V2Log.e(TAG, "Delete Conversation Failed...id is : " + id);
+			V2Log.e(TAG, "Delete Conversation Failed...id is : " + conversationID);
 
 		if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER
 				&& isDeleteVerification) {
-			removeVerificationMessage(id);
+			removeVerificationMessage(conversationID);
 		}
 		sortAndUpdate();
 	}
 
 	private void removeVerificationMessage(long id) {
 		// clear the crowd group all verification database messges
-		int friend = MessageLoader.deleteFriendVerificationMessage(id);
-		int group = MessageLoader.deleteCrowdVerificationMessage(id);
+		int friend = VerificationProvider.deleteFriendVerificationMessage(id);
+		int group = VerificationProvider.deleteCrowdVerificationMessage(id);
 		if (friend + group > 0) {
 			V2Log.e(TAG,
 					"Successfully delete verification , update conversaton!");
@@ -2483,14 +2488,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					switch (item.cov.getType()) {
 					case Conversation.TYPE_VERIFICATION_MESSAGE:
 						ConversationFirendAuthenticationData verification = ((ConversationFirendAuthenticationData) item.cov);
-						User friendUser = verification.getUser();
-						if (friendUser == null) {
-							V2Log.e(TAG,
-									"update crowd verification message failed .. user is null");
-							friendUser = new User(
-									verification.getFriendNode().remoteUserID);
-							verification.setUser(friendUser);
-						}
+//						User friendUser = verification.getUser();
+//						if (friendUser == null) {
+//							V2Log.e(TAG,
+//									"update crowd verification message failed .. user is null");
+//							friendUser = new User(
+//									verification.getFriendNode().remoteUserID);
+//							verification.setUser(friendUser);
+//						}
 
 						User verificationUser = GlobalHolder.getInstance()
 								.getUser(verification.getUser().getmUserId());
@@ -2527,15 +2532,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							msg.sendToTarget();
 						} else {
 
-							if (verification.getFriendNode() == null) {
-								V2Log.e(TAG,
-										"update friend verification message failed .. user or group is null");
-								break;
-							}
+//							if (verification.getFriendNode() == null) {
+//								V2Log.e(TAG,
+//										"update friend verification message failed .. user or group is null");
+//								break;
+//							}
 
+//							Message msg = Message.obtain(mHandler,
+//									UPDATE_VERIFICATION_MESSAGE,
+//									verification.getFriendNode());
 							Message msg = Message.obtain(mHandler,
-									UPDATE_VERIFICATION_MESSAGE,
-									verification.getFriendNode());
+									UPDATE_VERIFICATION_MESSAGE);
 							msg.arg1 = verification.getMessageType().intValue();
 							msg.sendToTarget();
 						}
@@ -2853,7 +2860,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (uid == -1)
 					return;
 
-				AddFriendHistorieNode node = MessageLoader
+				AddFriendHistorieNode node = VerificationProvider
 						.getNewestFriendVerificationMessage();
 				if (node == null) {
 					V2Log.d(TAG,
@@ -2871,9 +2878,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					updateFriendVerificationConversation(node);
 			} else if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
 					.equals(intent.getAction())) {
-				// If this can receive this broadcast, means
-				// MessageAuthenticationActivity doesn't show, we need to show
-				// red icon
 				V2Log.d(TAG,
 						"having new crowd verification message coming ... update..");
 
@@ -2883,7 +2887,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							"update crowd verification message content failed... get 0 message id");
 					return;
 				}
-				updateCrowdVerificationConversation(true);
+				
+				if(!GlobalHolder.getInstance().isOfflineLoaded()){
+					VMessageQualification message = VerificationProvider.queryCrowdQualMessageById(msgId);
+					if(message != null && message.getReadState() == ReadState.READ){
+						V2Log.w(TAG, "Received duplicate Qualication Message ! message id : " + msgId);
+						return ;
+					}
+				}
+				
+				Message msg = Message.obtain(mHandler,
+						UPDATE_VERIFICATION_MESSAGE);
+				msg.arg1 = VerificationMessageType.CROWD_TYPE.intValue();
+				msg.sendToTarget();
 			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
 					.equals(intent.getAction())
 					|| intent.getAction().equals(
@@ -2949,13 +2965,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
 						"obj");
 
+				if(guo == null){
+					V2Log.e(TAG, "Update Conversation failed that the user removed ... given GroupUserObject is null");
+					return ;
+				}
 				for (ScrollItem item : mItemList) {
 					Conversation con = item.cov;
 					if (con.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
 						removeVerificationMessage(guo.getmGroupId());
 						removeVerificationMessage(guo.getmUserId());
-						// removeConversation(guo.getmGroupId() , true);
-						// removeConversation(guo.getmUserId() , true);
+						removeConversation(guo.getmUserId() , false);
 						updateVerificationConversation();
 						adapter.notifyDataSetChanged();
 						break;
@@ -3049,9 +3068,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private String showUnreadFriendAuthentication() {
 
 		// 查出未读的第一条按时间顺序
-		boolean hasUnread = MessageLoader.getUNReandFriendMessage();
+		boolean hasUnread = VerificationProvider.getUNReandFriendMessage();
 
-		AddFriendHistorieNode tempNode = MessageLoader
+		AddFriendHistorieNode tempNode = VerificationProvider
 				.getNewestFriendVerificationMessage();
 		String msg = "";
 		String date = "";
@@ -3099,7 +3118,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			verificationMessageItemData.setDateLong(dateLong);
 			ConversationFirendAuthenticationData friend = (ConversationFirendAuthenticationData) verificationMessageItemData;
 			friend.setUser(user);
-			friend.setFriendNode(tempNode);
 			friend.setMessageType(ConversationFirendAuthenticationData.VerificationMessageType.CONTACT_TYPE);
 			verificationMessageItemLayout.update();
 		}
@@ -3133,12 +3151,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 
 				if (isFinish) {
+					V2Log.e(TAG, "发现有等待的好友验证的消息已变为成为好友，用户id : " + user.getmUserId());
 					AddFriendHistroysHandler.becomeFriendHanler(mContext, user);
-					AddFriendHistorieNode node = MessageLoader
-							.getNewestFriendVerificationMessage();
-					if (node != null) {
-						updateFriendVerificationConversation(user.getName(),
-								node);
+					int update = VerificationProvider.updateFriendQualicationReadState(user.getmUserId(), 
+							ReadState.UNREAD);
+					if (update <= 0) {
+						V2Log.e(TAG, "更新等待的好友验证失败！");
 					}
 				}
 			}
@@ -3264,8 +3282,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (msg.arg1 == VerificationMessageType.CROWD_TYPE.intValue()) {
 					updateCrowdVerificationConversation(true);
 				} else {
-					AddFriendHistorieNode node = (AddFriendHistorieNode) msg.obj;
-					updateFriendVerificationConversation(node);
+//					AddFriendHistorieNode node = (AddFriendHistorieNode) msg.obj;
+					AddFriendHistorieNode node = VerificationProvider.getNewestFriendVerificationMessage();
+					if(node != null)
+						updateFriendVerificationConversation(node);
+					else
+						V2Log.e(TAG, "UPDATE_VERIFICATION_MESSAGE --> Update Friend Conversation Failed...Get"
+								+ "Newest is null");
 				}
 				break;
 			// case QUIT_DISCUSSION_BOARD_DONE:

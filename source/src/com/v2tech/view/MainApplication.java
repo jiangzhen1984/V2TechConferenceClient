@@ -46,7 +46,6 @@ import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogService;
-import com.v2tech.util.LogcatThread;
 import com.v2tech.util.Notificator;
 import com.v2tech.util.StorageUtil;
 import com.v2tech.view.conference.ConferenceActivity;
@@ -69,16 +68,6 @@ public class MainApplication extends Application {
 		V2Log.isDebuggable = (0 != (getApplicationInfo().flags &
 				ApplicationInfo.FLAG_DEBUGGABLE));
 		V2Log.d(TAG, "isDebuggable : " + V2Log.isDebuggable);
-//		 if (!V2Log.isDebuggable) {
-//		 CrashHandler crashHandler = CrashHandler.getInstance();
-//		 crashHandler.init(getApplicationContext());
-//		 new LogcatThread().start();
-//		 }
-		SharedPreferences sf = getSharedPreferences("config",
-				Context.MODE_PRIVATE);
-		Editor ed = sf.edit();
-		ed.putInt("LoggedIn", 0);
-		ed.commit();
 
 		try {
 			String app_ver = this.getPackageManager().getPackageInfo(
@@ -100,6 +89,7 @@ public class MainApplication extends Application {
 
 		initGloblePath();
 		String path = GlobalConfig.getGlobalPath();
+        initConfigSP();
 		initConfFile();
 
 		DatabaseProvider.init(getApplicationContext());
@@ -141,12 +131,49 @@ public class MainApplication extends Application {
 			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());
 		}
 
+
 		initSQLiteFile();
 		initDPI();
 		initResource();
 	}
 
-	private void initResource() {
+    private void initConfigSP() {
+        SharedPreferences sf = getSharedPreferences("config",
+                Context.MODE_PRIVATE);
+        Editor ed = sf.edit();
+        ed.putInt("LoggedIn", 0);
+        ed.commit();
+
+        boolean isAppFirstLoad = sf.getBoolean("isAppFirstLoad" , true);
+        if(isAppFirstLoad){
+            new Thread(new Runnable(){
+                @Override
+                public void run() {
+                    File file = new File(GlobalConfig.getGlobalPath());
+                    recursionDeleteOlderFiles(file);
+                }
+
+                private void recursionDeleteOlderFiles(File file) {
+                    File[] files = file.listFiles();
+                    for(int i = 0 ; i < files.length ; i++){
+                        File temp = files[i];
+                        if(temp.isDirectory()){
+                            recursionDeleteOlderFiles(temp);
+                        } else {
+                            V2Log.d(TAG , "成功删除文件：" + temp.getAbsolutePath());
+                            temp.delete();
+                        }
+                    }
+                }
+            }).start();
+
+            Editor editor = sf.edit();
+            editor.putBoolean("isAppFirstLoad", false);
+            editor.commit();
+        }
+    }
+
+    private void initResource() {
 		GlobalConfig.Resource.CONTACT_DEFAULT_GROUP_NAME = this
 				.getApplicationContext().getResources()
 				.getText(R.string.contacts_default_group_name).toString();

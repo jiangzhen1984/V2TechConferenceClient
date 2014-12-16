@@ -44,6 +44,11 @@ public final class GlobalState {
 	public static final int STATE_SERVER_GROUPS_LOADED = 0x02000;
 	
 
+	/**
+	 * Use to mark all offline message loaded from server
+	 */
+	public static final int STATE_SERVER_OFFLINE_MESSAGE_LOADED = 0x04000;
+	
 	private int state;
 	private long gid;
 	private long uid;
@@ -157,9 +162,11 @@ public final class GlobalState {
 		return (state & STATE_SERVER_CONNECTED) == STATE_SERVER_CONNECTED;
 	}
 	
-	
-	
 	public boolean isGroupLoaded() {
 		return (state & STATE_SERVER_GROUPS_LOADED) == STATE_SERVER_GROUPS_LOADED;
+	}
+	
+	public boolean isOfflineLoaded() {
+		return (state & STATE_SERVER_OFFLINE_MESSAGE_LOADED) == STATE_SERVER_OFFLINE_MESSAGE_LOADED;
 	}
 }

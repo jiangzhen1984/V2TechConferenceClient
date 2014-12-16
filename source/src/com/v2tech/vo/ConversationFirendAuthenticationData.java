@@ -7,7 +7,7 @@ public class ConversationFirendAuthenticationData extends Conversation {
 	private Group group;
 	private VerificationMessageType messageType;
 	private VMessageQualification qualification;
-	private AddFriendHistorieNode friendNode;
+//	private AddFriendHistorieNode friendNode;
 
 	public ConversationFirendAuthenticationData(int mType, long mExtId) {
 		super(mType, mExtId);
@@ -46,13 +46,13 @@ public class ConversationFirendAuthenticationData extends Conversation {
 		this.qualification = qualification;
 	}
 	
-	public AddFriendHistorieNode getFriendNode() {
-		return friendNode;
-	}
-
-	public void setFriendNode(AddFriendHistorieNode friendNode) {
-		this.friendNode = friendNode;
-	}
+//	public AddFriendHistorieNode getFriendNode() {
+//		return friendNode;
+//	}
+//
+//	public void setFriendNode(AddFriendHistorieNode friendNode) {
+//		this.friendNode = friendNode;
+//	}
 	
 	public enum VerificationMessageType {
 		CROWD_TYPE(0), CONTACT_TYPE(1), UNKNOWN(2);

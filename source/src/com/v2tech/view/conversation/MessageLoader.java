@@ -25,11 +25,8 @@ import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.CrashHandler;
 import com.v2tech.util.XmlParser;
-import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
-import com.v2tech.vo.ConversationFirendAuthenticationData.VerificationMessageType;
 import com.v2tech.vo.CrowdGroup;
-import com.v2tech.vo.CrowdGroup.ReceiveQualificationType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VMessage;
@@ -37,15 +34,13 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
-import com.v2tech.vo.VMessageQualification;
-import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VideoBean;
 
 public class MessageLoader {
 
 	public static final int CONTACT_TYPE = -5;
 	public static final int CROWD_TYPE = -6;
-	private static final String TAG = "MessageLoader";
+	public static final String TAG = "MessageLoader";
 	public static Context context;
 
 	/**
@@ -1246,44 +1241,6 @@ public class MessageLoader {
 	}
 
 	/**
-	 * according crowd group id , delete all verification message..
-	 * 
-	 * @param groupID
-	 */
-	public static int deleteCrowdVerificationMessage(long groupID) {
-
-		DataBaseContext mContext = new DataBaseContext(context);
-		int ret = mContext.getContentResolver().delete(
-				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + "=?",
-				new String[] { String.valueOf(groupID) });
-		if (ret <= 0)
-			V2Log.d(TAG,
-					"May delete CrowdVerificationMessage failed...groupID : "
-							+ groupID);
-		return ret;
-	}
-
-    /**
-     * according user id , delete all verification message..
-     *
-     * @param groupID
-     */
-    public static int deleteFriendVerificationMessage(long userID) {
-
-        DataBaseContext mContext = new DataBaseContext(context);
-        int ret = mContext.getContentResolver().delete(
-                ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
-                ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID + "=?",
-                new String[] { String.valueOf(userID) });
-        if (ret <= 0)
-            V2Log.d(TAG,
-                    "May delete FriendVerificationMessage failed...groupID : "
-                            + userID);
-        return ret;
-    }
-    
-    /**
      * according user id , delete all voice message..
      *
      * @param groupID
@@ -1487,48 +1444,7 @@ public class MessageLoader {
 	}
 
 	
-	/**
-	 * According to the specified ReadState , update group verification message or friend verification message
-	 * @param type
-	 * <br>&nbsp;&nbsp;&nbsp;&nbsp;  Crowd Type OR Friend Type
-	 * @param readState
-	 * 	<br>&nbsp;&nbsp;&nbsp;&nbsp; Read OR UNRead
-	 * @param where
-	 * 	<br>&nbsp;&nbsp;&nbsp;&nbsp; if null , it would update all Messages;
-	 * @param args
-	 * @return
-	 * 
-	 * @see VerificationMessageType
-	 * @see ReadState
-	 */
-	public static int updateVerificationMessageReadState(VerificationMessageType type , ReadState readState , 
-			String where , String[] args) {
-
-		if (type == null | readState == null){
-			V2Log.e(TAG, "updateGroupVerificationReadState --> Update Verification Message ReadState Failed !  Given " +
-					"VerificationMessageType or ReadState is null !");
-			return -1;
-		}
-
-		DataBaseContext mContext = new DataBaseContext(context);
-		ContentValues values = new ContentValues();
-		if(type == VerificationMessageType.CROWD_TYPE){
-			values.put(
-					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
-					readState.intValue());
-			return mContext.getContentResolver().update(
-					ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
-					args);
-		}
-		else{
-			values.put(
-					ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE,
-					readState.intValue());
-			return mContext.getContentResolver().update(
-					ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values,
-					where, args);
-		}
-	}
+	
 
 	// private static void loadVMessageItem(Context context, VMessage vm,
 	// int msgType) {
@@ -1616,127 +1532,6 @@ public class MessageLoader {
 	//
 	// cur.close();
 	// }
-
-	/**
-	 * 获取最新的好友验证消息
-	 * @return
-	 */
-	public static AddFriendHistorieNode getNewestFriendVerificationMessage() {
-		DataBaseContext mContext = new DataBaseContext(context);
-		Cursor cursor = null;
-		try {
-			
-			String sortOrder = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE
-					+ " desc limit 1 offset 0 ";
-			cursor = mContext.getContentResolver().query(
-					ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
-					ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS, null,
-					null, sortOrder);
-			
-			if (cursor == null) {
-				return null;
-			}
-
-			if (cursor.getCount() < 0) {
-				return null;
-			}
-
-			if(cursor.moveToFirst()){
-				AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
-				tempNode.ownerUserID = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.OWNER_USER_ID));
-				tempNode.saveDate = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE));
-				tempNode.fromUserID = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID));
-				tempNode.ownerAuthType = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_AUTHTYPE));
-				tempNode.toUserID = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_TO_USER_ID));
-				tempNode.remoteUserID = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID));
-				tempNode.applyReason = cursor.getString(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_APPLY_REASON));
-				tempNode.refuseReason = cursor.getString(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REFUSE_REASON));
-				tempNode.addState = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_STATE));
-				tempNode.readState = cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE));
-				return tempNode;
-			}
-			return null;
-		} catch (Exception e) {
-			e.printStackTrace();
-			CrashHandler.getInstance().saveCrashInfo2File(e);
-			return null;
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
-	
-	/**
-	 * 判断数据库是否有未读的好友验证消息
-	 * @return
-	 */
-	public static boolean getUNReandFriendMessage(){
-		DataBaseContext mContext = new DataBaseContext(context);
-		Cursor cursor = null;
-		try {
-			String selection = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE
-					+ "= ?";
-			String[] selectionArgs = new String[] {
-					String.valueOf(ReadState.UNREAD.intValue())};
-			cursor = mContext.getContentResolver().query(
-					ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
-					ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS, selection,
-					selectionArgs, null);
-			if (cursor == null) {
-				return false;
-			}
-
-			if (cursor.getCount() < 0) {
-				return false;
-			}
-			return true;
-		} catch (Exception e) {
-			e.printStackTrace();
-			CrashHandler.getInstance().saveCrashInfo2File(e);
-			return false;
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
-	}
-
-	/**
-	 * 获取最新的群验证消息
-	 * @return
-	 */
-	public static VMessageQualification getNewestCrowdVerificationMessage() {
-
-		DataBaseContext mContext = new DataBaseContext(context);
-		Cursor cursor = null;
-		try{
-			VMessageQualification message = null;
-			String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE + "= ?";
-			String[] selectionArgs = new String[] {
-					String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE.intValue())};
-			String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE
-					+ " desc limit 1 offset 0 ";
-			cursor = mContext.getContentResolver().query(
-					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-					ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
-					selectionArgs, sortOrder);
-	
-			if (cursor == null || cursor.getCount() <= 0)
-				return null;
-	
-			if(cursor.moveToFirst()){
-				message = MessageBuilder.extraMsgFromCursor(cursor);
-			}
-			return message;
-		} catch(Exception e){
-			e.printStackTrace();
-			return null;
-		} finally{
-			if(cursor != null)
-				cursor.close();
-		}
-	}
 
 	/**
 	 * 获取最新的音视频记录消息

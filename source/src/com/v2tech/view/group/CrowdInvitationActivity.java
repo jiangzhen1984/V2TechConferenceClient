@@ -30,7 +30,6 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
@@ -128,7 +127,7 @@ public class CrowdInvitationActivity extends Activity {
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);
 		g.setAuthType(AuthType.fromInt(crowd.getAuth()));
-		vq = MessageBuilder.queryQualMessageByCrowdId(crowd.getCreator().getmUserId(), g.getmGId());
+		vq = VerificationProvider.queryCrowdQualMessageByCrowdId(crowd.getCreator().getmUserId(), g.getmGId());
 		updateView(false);
 		mRejectResasonLayout.setVisibility(View.GONE);
 	}
@@ -178,11 +177,11 @@ public class CrowdInvitationActivity extends Activity {
             mBriefTV.setText(group.getBrief());
         }
 
-		VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
+		VMessageQualification message = VerificationProvider.queryCrowdQualMessageById(vq.getId());
 		vq.setQualState(message.getQualState());
 		vq.setReadState(message.getReadState());
 		updateView(false);
-		MessageBuilder.updateQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
+		VerificationProvider.updateCrowdQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
 				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.ACCEPTED , null , ReadState.READ , false));
 	}
 
@@ -190,7 +189,7 @@ public class CrowdInvitationActivity extends Activity {
 		vq.setReadState(VMessageQualification.ReadState.READ);
 		vq.setQualState(VMessageQualification.QualificationState.REJECT);
 		updateView(false);
-		MessageBuilder.updateQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
+		VerificationProvider.updateCrowdQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
 				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.REJECT , null , ReadState.READ , false));
 	}
 
@@ -296,7 +295,7 @@ public class CrowdInvitationActivity extends Activity {
 					return;
 				}
 				mState = State.UPDATING;
-                VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
+                VMessageQualification message = VerificationProvider.queryCrowdQualMessageById(vq.getId());
                 if (message.getQualState().intValue() != vq.getQualState().intValue())
                     handleAcceptDone();
                 else {
@@ -339,7 +338,7 @@ public class CrowdInvitationActivity extends Activity {
 						return;
 					}
 					mState = State.UPDATING;
-					VMessageQualification message = MessageBuilder.queryQualMessageById(mContext, vq.getId());
+					VMessageQualification message = VerificationProvider.queryCrowdQualMessageById(vq.getId());
 					if(message.getQualState().intValue() != vq.getQualState().intValue())
 						handleDeclineDone();
 					else{
@@ -379,7 +378,7 @@ public class CrowdInvitationActivity extends Activity {
                         Toast.LENGTH_SHORT).show();
 
                 vq.setQualState(VMessageQualification.QualificationState.INVALID);
-                VerificationProvider.updateQualicationMessage(vq);
+                VerificationProvider.updateCrowdQualicationMessage(vq);
                 isReturnData = true;
                 mReturnButton.performClick();
             } else if(JNIService.JNI_BROADCAST_KICED_CROWD.equals(intent

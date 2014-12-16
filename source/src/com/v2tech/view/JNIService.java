@@ -679,6 +679,17 @@ public class JNIService extends Service implements
 				.sendToTarget();
 		}
 
+		@Override
+		public void OnOfflineStart() {
+			super.OnOfflineStart();
+			GlobalHolder.getInstance().setOfflineLoaded(false);
+		}
+		
+		@Override
+		public void OnOfflineEnd() {
+			super.OnOfflineEnd();
+			GlobalHolder.getInstance().setOfflineLoaded(true);
+		}
 	}
 
 	class GroupRequestCB extends GroupRequestCallbackAdapter {
@@ -743,14 +754,21 @@ public class JNIService extends Service implements
 			if (group == null || user == null) {
 				return;
 			}
-			CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
+			
+			CrowdGroup crowd = (CrowdGroup) GlobalHolder.getInstance()
 					.getGroupById(group.id);
-			User u = GlobalHolder.getInstance().getUser(user.uid);
-			if (cg == null || u == null) {
+			if (crowd == null) {
 				return;
 			}
+			
+			User remoteUser = GlobalHolder.getInstance().getUser(user.uid);
+			if(remoteUser.isDirty()){
+				remoteUser = convertUser(user);
+				GlobalHolder.getInstance().putUser(user.uid, remoteUser);
+			}
+			
 			checkMessageAndSendBroadcast(
-					VMessageQualification.Type.CROWD_APPLICATION, cg, u, reason);
+					VMessageQualification.Type.CROWD_APPLICATION, crowd, remoteUser, reason);
 
 		}
 
@@ -844,16 +862,16 @@ public class JNIService extends Service implements
 			// boolean sendBroadcast = true;
 			VMessageQualification crowdMsg = null;
 			if (type == Type.CROWD_APPLICATION) {
-				crowdMsg = MessageBuilder.queryApplyQualMessageByUserId(user
+				crowdMsg = VerificationProvider.queryCrowdApplyQualMessageByUserId(user
 						.getmUserId());
 				if (crowdMsg != null
 						&& !(crowdMsg instanceof VMessageQualificationApplicationCrowd)) {
-					MessageBuilder
-							.deleteQualMessage(mContext, crowdMsg.getId());
+					VerificationProvider
+							.deleteCrowdQualMessage(crowdMsg.getId());
 					crowdMsg = null;
 				}
 			} else {
-				crowdMsg = MessageBuilder.queryQualMessageByCrowdId(user, g);
+				crowdMsg = VerificationProvider.queryCrowdQualMessageByCrowdId(user, g);
 			}
 
 			if (crowdMsg != null) {
@@ -873,9 +891,9 @@ public class JNIService extends Service implements
 				}
 				
 				if(olderGroup.getmGId() == g.getmGId())
-					VerificationProvider.updateQualicationMessage(crowdMsg);
+					VerificationProvider.updateCrowdQualicationMessage(crowdMsg);
 				else
-					VerificationProvider.updateQualicationMessage(olderGroup, crowdMsg);
+					VerificationProvider.updateCrowdQualicationMessage(olderGroup, crowdMsg);
 			} else {
 				// Save message to database
 				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
@@ -893,7 +911,7 @@ public class JNIService extends Service implements
 				crowdMsg.setmTimestamp(new Date(GlobalConfig
 						.getGlobalServerTime()));
 				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
-				Uri uri = MessageBuilder.saveQualicationMessage(crowdMsg);
+				Uri uri = VerificationProvider.saveQualicationMessage(crowdMsg);
 				if (uri != null) {
 					crowdMsg.setId(Long.parseLong(uri.getLastPathSegment()));
 				}
@@ -906,7 +924,6 @@ public class JNIService extends Service implements
 				i.putExtra("msgId", crowdMsg.getId());
 				mContext.sendOrderedBroadcast(i, null);
 			}
-
 			return crowdMsg;
 		}
 
@@ -1092,18 +1109,18 @@ public class JNIService extends Service implements
 						nGroupID, newUser);
 			} else if (gType == GroupType.CHATING) {
 
-				long id = -1;
+				long msgID = -1;
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
-					long waitMessageExist = MessageBuilder
-							.queryInviteWaitingQualMessageById(user.uid);
+					long waitMessageExist = VerificationProvider
+							.queryCrowdInviteWaitingQualMessageById(user.uid);
 					if (waitMessageExist != -1) {
 						V2Log.e("CrowdCreateActivity  -->Delete  VMessageQualification Cache Object Successfully!");
 						// if (CrowdGroupService.isLocalInvite) {
-						boolean isTrue = MessageBuilder.deleteInviteWattingQualMessage(mContext, waitMessageExist);
+						boolean isTrue = VerificationProvider.deleteCrowdInviteWattingQualMessage(waitMessageExist);
 						if(!isTrue){
 							V2Log.e(TAG, "delete local invite waitting qualication message failed... cols id is :" + waitMessageExist);
 						}
-						id = MessageBuilder.updateQualicationMessageState(
+						msgID = VerificationProvider.updateCrowdQualicationMessageState(
 								nGroupID, user.uid, new GroupQualicationState(
 										Type.CROWD_APPLICATION,
 										QualificationState.BE_ACCEPTED, null,
@@ -1121,7 +1138,7 @@ public class JNIService extends Service implements
 
 						if (group.getOwnerUser().getmUserId() == GlobalHolder
 								.getInstance().getCurrentUserId()) {
-							id = MessageBuilder.updateQualicationMessageState(
+							msgID = VerificationProvider.updateCrowdQualicationMessageState(
 									nGroupID, user.uid,
 									new GroupQualicationState(
 											Type.CROWD_APPLICATION,
@@ -1131,7 +1148,7 @@ public class JNIService extends Service implements
 					}
 				}
 
-				if (id == -1) {
+				if (msgID == -1) {
 					V2Log.e(TAG,
 							"OnAddGroupUserInfoCallback --> update crowd qualication message failed..");
 					return;
@@ -1140,7 +1157,7 @@ public class JNIService extends Service implements
 				Intent intent = new Intent();
 				intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				intent.putExtra("msgId", id);
+				intent.putExtra("msgId", msgID);
 				sendOrderedBroadcast(intent, null);
 			}
 
@@ -1173,11 +1190,11 @@ public class JNIService extends Service implements
 						GroupType.CHATING.intValue(), g);
 			}
 
-			long id = MessageBuilder.updateQualicationMessageState(group,
+			long msgID = VerificationProvider.updateCrowdQualicationMessageState(group,
 					new GroupQualicationState(Type.CROWD_INVITATION,
 							QualificationState.BE_ACCEPTED, null,
 							ReadState.UNREAD, false));
-			if (id == -1) {
+			if (msgID == -1) {
 				V2Log.e(TAG,
 						"OnAcceptApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
 								+ group.id
@@ -1191,7 +1208,7 @@ public class JNIService extends Service implements
 			Intent intent = new Intent();
 			intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 			intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			intent.putExtra("msgId", id);
+			intent.putExtra("msgId", msgID);
 			sendOrderedBroadcast(intent, null);
 		}
 
@@ -1204,12 +1221,12 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			long id = MessageBuilder.updateQualicationMessageState(
+			long msgID = VerificationProvider.updateCrowdQualicationMessageState(
 					parseSingleCrowd, new GroupQualicationState(
 							Type.CROWD_INVITATION,
 							QualificationState.BE_REJECT, reason,
 							ReadState.UNREAD, false));
-			if (id == -1) {
+			if (msgID == -1) {
 				V2Log.e(TAG,
 						"OnRefuseApplyJoinGroup : Update Qualication Message to Database failed.. return -1 , group id is : "
 								+ parseSingleCrowd.id
@@ -1222,7 +1239,7 @@ public class JNIService extends Service implements
 			Intent intent = new Intent();
 			intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 			intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			intent.putExtra("msgId", id);
+			intent.putExtra("msgId", msgID);
 			sendOrderedBroadcast(intent, null);
 		}
 
@@ -1245,16 +1262,16 @@ public class JNIService extends Service implements
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
 			} else if (gType == GroupType.CHATING) {
-				long waitMessageExist = MessageBuilder
-						.queryInviteWaitingQualMessageById(obj.userID);
+				long waitMessageExist = VerificationProvider
+						.queryCrowdInviteWaitingQualMessageById(obj.userID);
 				if (waitMessageExist != -1) {
-					boolean isTrue = MessageBuilder.deleteInviteWattingQualMessage(mContext, waitMessageExist);
+					boolean isTrue = VerificationProvider.deleteCrowdInviteWattingQualMessage(waitMessageExist);
 					if(!isTrue){
 						V2Log.e(TAG, "delete local invite waitting qualication message failed... cols id is :" + waitMessageExist);
 					}
 				}
-				long id = MessageBuilder
-						.updateQualicationMessageState(
+				long msgID = VerificationProvider
+						.updateCrowdQualicationMessageState(
 								obj.groupID,
 								obj.userID,
 								new GroupQualicationState(
@@ -1263,7 +1280,7 @@ public class JNIService extends Service implements
 										com.v2tech.vo.VMessageQualification.QualificationState
 												.fromInt(obj.state),
 										obj.reason, ReadState.UNREAD, false));
-				if (id == -1) {
+				if (msgID == -1) {
 					V2Log.e(TAG,
 							"OnRefuseInviteJoinGroup --> update refuse Invite join group failed... !");
 					return;
@@ -1271,7 +1288,7 @@ public class JNIService extends Service implements
 				Intent intent = new Intent();
 				intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				intent.putExtra("msgId", id);
+				intent.putExtra("msgId", msgID);
 				sendOrderedBroadcast(intent, null);
 			}
 		}
@@ -1314,7 +1331,7 @@ public class JNIService extends Service implements
 				GlobalHolder.getInstance().addGroupToList(
 						GroupType.CHATING.intValue(), g);
 
-				MessageBuilder.updateQualicationMessageState(crowd,
+				VerificationProvider.updateCrowdQualicationMessageState(crowd,
 						new GroupQualicationState(Type.CROWD_INVITATION,
 								QualificationState.ACCEPTED, null,
 								ReadState.UNREAD, false));

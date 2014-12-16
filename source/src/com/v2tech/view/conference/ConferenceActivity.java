@@ -74,6 +74,7 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.v2tech.R;
+import com.v2tech.db.provider.VerificationProvider;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.ConferencMessageSyncService;
@@ -2012,7 +2013,7 @@ public class ConferenceActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
-					MessageLoader.deleteCrowdVerificationMessage(conf.getId());
+					VerificationProvider.deleteCrowdVerificationMessage(conf.getId());
 					finish();
 				}
 

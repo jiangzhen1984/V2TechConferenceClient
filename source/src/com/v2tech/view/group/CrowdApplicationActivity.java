@@ -30,7 +30,6 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
 import com.v2tech.view.conversation.MessageBuilder;
-import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
@@ -122,7 +121,7 @@ public class CrowdApplicationActivity extends Activity {
 				crowd.getCreator(), null);
         if(g.getOwnerUser() != null) {
             User user = g.getOwnerUser();
-            vq = MessageBuilder.queryQualMessageByCrowdId(user, g);
+            vq = VerificationProvider.queryCrowdQualMessageByCrowdId(user, g);
         }
 		updateView();
 	}
@@ -236,10 +235,10 @@ public class CrowdApplicationActivity extends Activity {
          if (vq != null) {
              vq.setReadState(VMessageQualification.ReadState.READ);
              vq.setQualState(VMessageQualification.QualificationState.BE_REJECT);
-             VerificationProvider.updateQualicationMessage(vq);
+             VerificationProvider.updateCrowdQualicationMessage(vq);
          }
          else{
-             VMessageQualification quaion = MessageBuilder.queryQualMessageByCrowdId(
+             VMessageQualification quaion = VerificationProvider.queryCrowdQualMessageByCrowdId(
                     crowd.getCreator().getmUserId() , crowd.getId());
              if(quaion == null) {
                  CrowdGroup g = new CrowdGroup(crowd.getId(),
@@ -248,7 +247,7 @@ public class CrowdApplicationActivity extends Activity {
                  vq = new VMessageQualificationInvitationCrowd(g, GlobalHolder.getInstance().getCurrentUser());
                  vq.setReadState(VMessageQualification.ReadState.READ);
                  vq.setQualState(VMessageQualification.QualificationState.BE_REJECT);
-                 MessageBuilder.saveQualicationMessage(vq);
+                 VerificationProvider.saveQualicationMessage(vq);
              }
          }
 	}
@@ -332,11 +331,11 @@ public class CrowdApplicationActivity extends Activity {
                 Toast.makeText(getApplicationContext() , getResources().getString(R.string.crowd_Authentication_hit) ,
                         Toast.LENGTH_SHORT).show();
                 vq.setQualState(VMessageQualification.QualificationState.INVALID);
-                VerificationProvider.updateQualicationMessage(vq);
+                VerificationProvider.updateCrowdQualicationMessage(vq);
                 isReturnData = true;
             } else if(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE.equals(intent
                     .getAction())){
-            	VMessageQualification msg = MessageLoader
+            	VMessageQualification msg = VerificationProvider
                         .getNewestCrowdVerificationMessage();
         		if (msg == null) {
         			V2Log.e("CrowdApplicationActivity",
