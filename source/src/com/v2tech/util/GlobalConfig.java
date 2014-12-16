@@ -38,6 +38,9 @@ public class GlobalConfig {
 	
 	public static String LOGIN_USER_ID = "";
 	
+	/**
+	 * Get from Server , For distinguish different server
+	 */
 	public static String SERVER_DATABASE_ID = "";
 	
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
