@@ -60,7 +60,7 @@ public class ConversationSelectFile extends Activity {
 	private static final int ITEM_CHECKED = 7;
 	private static final int ITEM_UNCHECKED = 8;
 	private static final int UPDATE_REMOVE = 9;
-	private static final int MAX_TRANS_FILE_SIZE = 9;
+	private static final int MAX_TRANS_FILE_SIZE = 4;
 	private String mCurrentPath = StorageUtil.getSdcardPath();
 	private TextView backButton;
 	private TextView finishButton;
@@ -924,12 +924,12 @@ public class ConversationSelectFile extends Activity {
 			}
 			V2Log.e(TAG, "当前正在传输的文件个数是：" + transing);
 			if(transing + mCheckedList.size() > MAX_TRANS_FILE_SIZE){
-				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达10个", Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
 				return ;
 			}
 			
 			if(mCheckedList.size() > MAX_TRANS_FILE_SIZE){
-				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，一次性只能发送10个文件", Toast.LENGTH_LONG).show();
+				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，一次性只能发送5个文件", Toast.LENGTH_LONG).show();
 				return ;
 			}
 			

@@ -35,8 +35,9 @@ public class DiscussionConversation extends Conversation {
 				return name;
 			}
 		}
-		else
+		else{
 			return super.getName();
+		}
 	}
 
 	private String getDiscussionNames() {

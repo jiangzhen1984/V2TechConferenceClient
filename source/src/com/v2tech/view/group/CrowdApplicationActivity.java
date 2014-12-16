@@ -344,10 +344,13 @@ public class CrowdApplicationActivity extends Activity {
         			return;
         		}
         		
-        		if(msg.getQualState() == QualificationState.BE_ACCEPTED)
-        			handleApplyDone();
-        		else if(msg.getQualState() == QualificationState.BE_REJECT){
-        			mRefuseTV.setText(msg.getRejectReason());
+        		if(crowd.getAuth() == CrowdGroup.AuthType.QULIFICATION
+                        .intValue()){
+        			if(msg.getQualState() == QualificationState.BE_ACCEPTED)
+            			handleApplyDone();
+            		else if(msg.getQualState() == QualificationState.BE_REJECT){
+            			mRefuseTV.setText(msg.getRejectReason());
+            		}
         		}
             }
         }

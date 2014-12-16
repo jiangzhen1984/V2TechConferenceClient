@@ -366,6 +366,30 @@ public class ImRequest {
 			}
 		}
 	}
+	
+	private void OnOfflineStart() {
+		V2Log.d("ImRequest UI", "OnOfflineStart ---> START!");
+		for (int i = 0; i <this.mCallbacks.size(); i++) {
+			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnOfflineStart();
+			}
+		}
+	}
+	
+	private void OnOfflineEnd() {
+		V2Log.d("ImRequest UI", "OnOfflineStart ---> END!");
+		for (int i = 0; i <this.mCallbacks.size(); i++) {
+			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
+			Object obj = wf.get();
+			if (obj != null) {
+				ImRequestCallback callback = (ImRequestCallback) obj;
+				callback.OnOfflineEnd();
+			}
+		}
+	}
 
 	private void OnUserPrivacyUpdated(long nUserID, int nPrivacy) {
 		Log.e("ImRequest UI", "OnUserPrivacyUpdated");

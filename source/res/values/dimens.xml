@@ -16,6 +16,10 @@
     <dimen name="contact_detail_2_item_margin_left">5dp</dimen>
     <dimen name="contact_detail_2_item_margin_right">5dp</dimen>
     
+    <dimen name="common_delete_icon_width">50dp</dimen>
+    <dimen name="common_delete_icon_height">50dp</dimen>
+    <dimen name="common_delete_icon_padding">8dp</dimen>
+    
     <!-- conversation view fragment  -->
  	<dimen name="text_margin_left">15dp</dimen>
  	<dimen name="date_time_max_width">130dp</dimen>

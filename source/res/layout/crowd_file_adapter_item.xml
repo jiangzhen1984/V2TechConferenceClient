@@ -11,8 +11,9 @@
         android:layout_marginTop="@dimen/conversation_view_margin" >
         <ImageView
             android:id="@+id/ic_delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/common_delete_icon_width"
+            android:layout_height="@dimen/common_delete_icon_height"
+            android:padding="@dimen/common_delete_icon_padding"
             android:layout_alignParentLeft="true"
             android:layout_centerInParent="true"
             android:layout_marginLeft="@dimen/common_margin_horizontal"

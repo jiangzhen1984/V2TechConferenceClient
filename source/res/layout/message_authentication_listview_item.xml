@@ -3,38 +3,34 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/confs_group_list_bg" >
-
-    <ImageButton
+    <ImageView
         android:id="@+id/ib_delete"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/common_delete_icon_width"
+        android:layout_height="@dimen/common_delete_icon_height"
         android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginBottom="15dp"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="15dp"
-        android:background="@drawable/ic_delete"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
         android:focusable="false"
+        android:padding="@dimen/common_delete_icon_padding"
+        android:src="@drawable/ic_delete"
         android:textColor="@color/button_text_color"
-        android:visibility="gone" />
-
+        android:visibility="visible" />
     <RelativeLayout
         android:id="@+id/group_list_conference_image_view_rl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginBottom="@dimen/conversation_view_margin"
-        android:layout_marginLeft="15dp"
         android:layout_marginRight="5dp"
+        android:layout_marginLeft="5dp"
         android:layout_marginTop="@dimen/conversation_view_margin"
         android:layout_toRightOf="@+id/ib_delete" >
-
         <ImageView
             android:id="@+id/head_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/avatar" />
-
         <ImageView
             android:id="@+id/group_list_conference_notificator"
             android:layout_width="wrap_content"
@@ -46,7 +42,6 @@
             android:src="@drawable/red_nofificator"
             android:visibility="invisible" />
     </RelativeLayout>
-
     <LinearLayout
         android:id="@+id/name_layout"
         android:layout_width="wrap_content"
@@ -57,7 +52,6 @@
         android:layout_toLeftOf="@+id/ll_rightLayout"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
         android:orientation="vertical" >
-
         <TextView
             android:id="@+id/name"
             android:layout_width="wrap_content"
@@ -68,7 +62,6 @@
             android:text="TextView11111111111111133333333333333333333333333333333333333333333333333333333333333333333333333333333333311"
             android:textColor="@color/conversation_view_name_color"
             android:textSize="@dimen/conversation_view_name_text_size" />
-
         <TextView
             android:id="@+id/authentication_message"
             android:layout_width="wrap_content"
@@ -81,7 +74,6 @@
             android:textColor="@color/conversation_view_text_color"
             android:textSize="@dimen/common_item_text_size_16" />
     </LinearLayout>
-
     <LinearLayout
         android:id="@+id/ll_rightLayout"
         android:layout_width="wrap_content"
@@ -89,14 +81,12 @@
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
         android:orientation="horizontal" >
-
         <FrameLayout
             android:id="@+id/fl_rightLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginRight="15dp" >
-
             <Button
                 android:id="@+id/access"
                 android:layout_width="wrap_content"
@@ -106,7 +96,6 @@
                 android:text="同意"
                 android:textColor="@color/button_text_color"
                 android:visibility="gone" />
-
             <TextView
                 android:id="@+id/access_or_no"
                 android:layout_width="wrap_content"
@@ -114,9 +103,7 @@
                 android:paddingRight="15dp"
                 android:text="TextView"
                 android:textSize="@dimen/common_item_text_size_16" />
-
         </FrameLayout>
-
         <Button
             android:id="@+id/b_suer_delete"
             android:layout_width="wrap_content"
@@ -127,9 +114,7 @@
             android:text="删除"
             android:textColor="@color/common_white_color"
             android:visibility="visible" />
-
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="1dp"
@@ -139,5 +124,4 @@
         android:background="@color/confs_group_widget_separation_line"
         android:orientation="vertical" >
     </LinearLayout>
-
 </RelativeLayout>

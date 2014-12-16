@@ -435,7 +435,7 @@ public class XmlAttributeExtractor {
 	public static String buildAttendeeUsersXml(User at){
 		String target;
 		if(at.getNickName() != null)
-			target = " <user id='" + at.getmUserId() + "Nickname='" + at.getName() + "' />";
+			target = " <user id='" + at.getmUserId() + "' nickname='" + at.getName() + "' />";
 		else{
 			V2Log.e("XmlAttributeExtractor buildAttendeeUsersXml--> when build attendee user list , "
 					+ " the user's name is null , id is : " + at.getmUserId());

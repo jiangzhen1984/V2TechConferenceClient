@@ -316,7 +316,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 			Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 	        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 	    	ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_VOICE_MESSAGE,
-	    			Conversation.SPECIFIC_VOICE_ID);
+	    			Conversation.SPECIFIC_VOICE_ID  , false , true , -1);
 	        i.putExtra("obj", obj);
 	        mContext.sendBroadcast(i);	
 	        

@@ -32,7 +32,6 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -66,7 +65,6 @@ import com.v2tech.view.contacts.ContactDetail2;
 import com.v2tech.view.contacts.add.AddFriendHistroysHandler;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.group.CrowdApplicantDetailActivity;
-import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.ConversationFirendAuthenticationData.VerificationMessageType;
 import com.v2tech.vo.Crowd;
@@ -232,7 +230,7 @@ public class MessageAuthenticationActivity extends Activity {
     public void requestUpdateConversation(){
         Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
         i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-        i.putExtra("obj" , new ConversationNotificationObject(0 , -2));
+        i.putExtra("obj" , new ConversationNotificationObject(0 , Conversation.SPECIFIC_VERIFICATION_ID , false , true , -1));
         mContext.sendBroadcast(i);
     }
 
@@ -676,7 +674,7 @@ public class MessageAuthenticationActivity extends Activity {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		ConversationNotificationObject obj = new ConversationNotificationObject(
-				Conversation.TYPE_VERIFICATION_MESSAGE, Conversation.SPECIFIC_VERIFICATION_ID , true , -1);
+				Conversation.TYPE_VERIFICATION_MESSAGE, Conversation.SPECIFIC_VERIFICATION_ID , true , true , -1);
 		i.putExtra("obj", obj);
 		mContext.sendBroadcast(i);
 	}
@@ -719,7 +717,7 @@ public class MessageAuthenticationActivity extends Activity {
 				i.putExtra("obj",
 						new ConversationNotificationObject(
 								Conversation.TYPE_GROUP, imsg.getCrowdGroup()
-										.getmGId()));
+										.getmGId() , false , true , -1));
 				i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivity(i);
@@ -803,7 +801,7 @@ public class MessageAuthenticationActivity extends Activity {
 			// R.id.b_suer_delete
 			Button bSuerDelete;
 			// R.id.ib_delete
-			ImageButton ibDelete;
+			ImageView ibDelete;
 		}
 
 		private final int layoutId = R.layout.message_authentication_listview_item;
@@ -847,7 +845,7 @@ public class MessageAuthenticationActivity extends Activity {
 				viewTag.bAccess = (Button) arg1.findViewById(R.id.access);
 				viewTag.tvAccessOrNo = (TextView) arg1
 						.findViewById(R.id.access_or_no);
-				viewTag.ibDelete = (ImageButton) arg1
+				viewTag.ibDelete = (ImageView) arg1
 						.findViewById(R.id.ib_delete);
 				viewTag.bSuerDelete = (Button) arg1
 						.findViewById(R.id.b_suer_delete);

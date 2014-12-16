@@ -577,9 +577,14 @@ public class ConferenceCreateActivity extends Activity {
 					if(rccr.getResult() == JNIResponse.Result.ERR_CONF_LOCKDOG_NORESOURCE)
 						mErrorMessageTV
 							.setText(R.string.error_no_resource);
-					else
+					else if(rccr.getResult() == JNIResponse.Result.TIME_OUT){
+						mErrorMessageTV
+							.setText(R.string.error_time_out_create_conference_failed);
+					}
+					else{
 						mErrorMessageTV
 							.setText(R.string.error_create_conference_failed_from_server_side);
+					}
 					break;
 				}
 

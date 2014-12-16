@@ -337,7 +337,7 @@ public class VoiceMessageActivity extends Activity {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_VOICE_MESSAGE,
-					Conversation.SPECIFIC_VOICE_ID , true , -1);
+					Conversation.SPECIFIC_VOICE_ID , true , true , -1);
 		i.putExtra("obj", obj);
 		mContext.sendBroadcast(i);
 	}
@@ -623,7 +623,7 @@ public class VoiceMessageActivity extends Activity {
 			Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 	        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 	    	ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_VOICE_MESSAGE,
-	    			Conversation.SPECIFIC_VOICE_ID);
+	    			Conversation.SPECIFIC_VOICE_ID , false , true , -1);
 	        obj.setMsgID(0);
 	        i.putExtra("obj", obj);
 	        i.putExtra("isFresh", false);

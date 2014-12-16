@@ -37,7 +37,6 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
@@ -61,7 +60,6 @@ import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
-import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 
 /**
@@ -493,28 +491,35 @@ public class CrowdCreateActivity extends Activity {
 	
 	private void saveQualication(User user){
 
-		long waitMessageExist = MessageBuilder.queryInviteWaitingQualMessageById(user.getmUserId());
-		if (waitMessageExist != -1) {
-			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
-					+ "Because already exist in database...groupID is : " + crowd == null ? "creater" : crowd.getmGId() + " userID is : " + user.getmUserId());
+		if(user == null){
+			V2Log.e("CrowdCreateActivity --> Save VMessageQualification Cache Object failed , "
+					+ "Because given user object is null");
 			return ;
 		}
 		
 		if(crowd == null)
 			crowd = new CrowdGroup(0, "", null);
+		
+		long waitMessageExist = MessageBuilder.queryInviteWaitingQualMessageById(user.getmUserId());
+		if (waitMessageExist != -1) {
+			V2Log.d("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
+					+ "Because already exist in database...groupID is : " + crowd == null ? "creater" : crowd.getmGId() + "--" + 
+							user == null ? "user" : user.getmUserId() + "");
+			return ;
+		}
+		
 		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(
 				crowd, user);
 		crowdQuion.setmTimestamp(new Date());
 		Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion , true);
 		if (uri != null){
-			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "
+			V2Log.d("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "
 					+ "groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId() + ""
 							+ " database id is : " + Long.parseLong(uri.getLastPathSegment()) 
 							+ " URI is : " + uri.toString());
 		}
 		else{
-			Toast.makeText(mContext, "邀请群成员失败", 0).show();
-			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
+			V2Log.d("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
 					+ "the Uri is null...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
 		}
 	}
@@ -588,7 +593,7 @@ public class CrowdCreateActivity extends Activity {
                    cg.setmPendingCrowdId(0);
                    V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create crowd group failed.. time out!!");
                    mErrorNotificationLayout.setVisibility(View.VISIBLE);
-                   mErrorNotification.setText(R.string.crowd_create_activity_error_info);
+                   mErrorNotification.setText(R.string.crowd_create_activity_time_out_error_info);
                 } else {
                     V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create crowd group failed.. ERROR CODE IS : " +
                             recr.getResult().name());

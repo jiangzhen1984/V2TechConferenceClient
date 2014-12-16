@@ -5,7 +5,10 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.BitmapFactory.Options;
 import android.os.Bundle;
 import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
@@ -104,6 +107,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 	public void onBackPressed() {
 		if (isInDeleteMode) {
 			isInDeleteMode = false;
+			mInvitationButton.setText(R.string.discussion_board_members_invitation_button_text);
 			adapter.notifyDataSetChanged();
 			return;
 		}
@@ -267,7 +271,16 @@ public class DiscussionBoardMembersActivity extends Activity {
 
 			// Add delete icon
 			mDeleteIV = new ImageView(mContext);
-			mDeleteIV.setImageResource(R.drawable.ic_delete);
+			
+			Options opts = new Options();
+			opts.outWidth = (int) getResources().getDimension(R.dimen.common_delete_icon_width);
+			opts.outHeight = (int) getResources().getDimension(R.dimen.common_delete_icon_height);
+			Bitmap bit = BitmapFactory.decodeResource(getResources(), R.drawable.ic_delete, opts);
+			mDeleteIV.setImageBitmap(bit);
+			
+			int padding = (int) getResources().getDimension(R.dimen.common_delete_icon_padding);
+			mDeleteIV.setPadding(padding, padding, padding, padding);
+			
 			if (isInDeleteMode) {
 				if (this.mUser.getmUserId() != crowd.getOwnerUser()
 						.getmUserId()) {

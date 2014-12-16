@@ -3,14 +3,13 @@ package com.v2tech.view.bo;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.v2tech.vo.Conversation;
-
 public class ConversationNotificationObject implements Parcelable {
 
 	private int conversationType;
 	private long extId;
 	private long msgID; // P2PText notificateConversationUpdate
 	private boolean isDeleteConversation;
+	private boolean isNormalFresh; 
 
 	public ConversationNotificationObject(Parcel in) {
 		conversationType = in.readInt();
@@ -21,23 +20,30 @@ public class ConversationNotificationObject implements Parcelable {
 			isDeleteConversation = true;
 		else
 			isDeleteConversation = false;
+		
+		int freshInt = in.readInt();
+		if (freshInt == 1)
+			isNormalFresh = true;
+		else
+			isNormalFresh = false;
 	}
 
 	public ConversationNotificationObject(int conversationType, long extId) {
-		this(conversationType , extId , false , -1);
+		this(conversationType , extId , false , false , -1);
 	}
 	
 	
 	public ConversationNotificationObject(int conversationType, long extId , long msgID) {
-		this(conversationType , extId , false , msgID);
+		this(conversationType , extId , false , false , msgID);
 	}
 
 	public ConversationNotificationObject(int conversationType, long extId,
-			boolean isDeleteConversation, long msgID) {
+			boolean isDeleteConversation, boolean isNormalFresh , long msgID) {
 		super();
 		this.conversationType = conversationType;
 		this.extId = extId;
 		this.isDeleteConversation = isDeleteConversation;
+		this.isNormalFresh = isNormalFresh;
 		this.msgID = msgID;
 	}
 	
@@ -52,6 +58,7 @@ public class ConversationNotificationObject implements Parcelable {
 		par.writeLong(extId);
 		par.writeLong(msgID);
 		par.writeInt(isDeleteConversation ? 1 : 0);
+		par.writeInt(isNormalFresh ? 1 : 0);
 	}
 
 	public static final Parcelable.Creator<ConversationNotificationObject> CREATOR = new Parcelable.Creator<ConversationNotificationObject>() {
@@ -90,6 +97,14 @@ public class ConversationNotificationObject implements Parcelable {
 
 	public boolean isDeleteConversation() {
 		return isDeleteConversation;
+	}
+
+	public boolean isNormalFresh() {
+		return isNormalFresh;
+	}
+
+	public void setNormalFresh(boolean isNormalFresh) {
+		this.isNormalFresh = isNormalFresh;
 	}
 
 	public void setDeleteConversation(boolean isDeleteConversation) {

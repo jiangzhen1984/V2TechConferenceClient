@@ -628,7 +628,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 						Intent intent = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 						ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_VERIFICATION_MESSAGE,
-									Conversation.SPECIFIC_VERIFICATION_ID);
+									Conversation.SPECIFIC_VERIFICATION_ID , false , true , -1);
 						intent.putExtra("obj", obj);
 						mContext.sendBroadcast(intent);
 					}

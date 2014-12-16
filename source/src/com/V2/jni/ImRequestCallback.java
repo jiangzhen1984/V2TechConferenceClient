@@ -91,7 +91,18 @@ public interface ImRequestCallback {
 	 */
 	public void OnSearchUserCallback(List<V2User> list);
 	
-	
+	/**
+	 * <ul>Indicate the all group info or group's users info  has already received! over! </ul>
+	 */
 	public void OnGroupsLoaded();
-
+	
+	/**
+	 * <ul>Indicate the all messsages that offline type start received!</ul>
+	 */
+	public void OnOfflineStart();
+	
+	/**
+	 * <ul>Indicate the all messsages that offline type has already received! over! </ul>
+	 */
+	public void OnOfflineEnd();
 }

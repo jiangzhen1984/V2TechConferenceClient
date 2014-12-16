@@ -271,9 +271,18 @@ public class CrowdApplicantDetailActivity extends Activity {
 	
 	private void saveQualication(User user){
 
+		if(user == null){
+			V2Log.d("CrowdApplicationDetailActivity  --> Save VMessageQualification Cache Object failed , "
+					+ "Because given user object is null");
+			return ;
+		}
+		
+		if(crowd == null)
+			crowd = new CrowdGroup(0, "", null);
+		
 		long waitMessageExist = MessageBuilder.queryInviteWaitingQualMessageById(user.getmUserId());
 		if (waitMessageExist != -1) {
-			V2Log.e("CrowdApplicationDetailActivity  --> Save VMessageQualification Cache Object failed , "
+			V2Log.d("CrowdApplicationDetailActivity  --> Save VMessageQualification Cache Object failed , "
 					+ "Because already exist in database...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
 			return ;
 		}
@@ -285,14 +294,14 @@ public class CrowdApplicantDetailActivity extends Activity {
 		crowdQuion.setmTimestamp(new Date());
 		Uri uri = MessageBuilder.saveQualicationMessage(crowdQuion , true);
 		if (uri != null){
-			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "
+			V2Log.d("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "
 					+ "groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId() + ""
 							+ " database id is : " + Long.parseLong(uri.getLastPathSegment()) 
 							+ " URI is : " + uri.toString());
 		}
 		else{
 			Toast.makeText(mContext, "邀请群成员失败", 0).show();
-			V2Log.e("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
+			V2Log.d("CrowdCreateActivity  --> Save VMessageQualification Cache Object failed , "
 					+ "the Uri is null...groupID is : " + crowd.getmGId() + " userID is : " + user.getmUserId());
 		}
 	}

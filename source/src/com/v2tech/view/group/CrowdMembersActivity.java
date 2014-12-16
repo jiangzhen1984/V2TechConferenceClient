@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -108,6 +110,7 @@ public class CrowdMembersActivity extends Activity {
 	public void onBackPressed() {
 		if (isInDeleteMode) {
 			isInDeleteMode = false;
+			mInvitationButton.setText(R.string.crowd_members_invitation);
 			adapter.notifyDataSetChanged();
 			return;
 		}
@@ -264,13 +267,40 @@ public class CrowdMembersActivity extends Activity {
 
 			// Add delete icon
 			mDeleteIV = new ImageView(mContext);
-			mDeleteIV.setImageResource(R.drawable.ic_delete);
+			
+			Options opts = new Options();
+			opts.outWidth = (int) getResources().getDimension(R.dimen.common_delete_icon_width);
+			opts.outHeight = (int) getResources().getDimension(R.dimen.common_delete_icon_height);
+			Bitmap bit = BitmapFactory.decodeResource(getResources(), R.drawable.ic_delete, opts);
+			mDeleteIV.setImageBitmap(bit);
+			
+			int padding = (int) getResources().getDimension(R.dimen.common_delete_icon_padding);
+			mDeleteIV.setPadding(padding, padding, padding, padding);
+			
 			mDeleteIV.setVisibility(View.GONE);
+			if (isInDeleteMode) {
+				if (this.mUser.getmUserId() != crowd.getOwnerUser()
+						.getmUserId()) {
+					mDeleteIV.setVisibility(View.VISIBLE);
+				} else {
+					mDeleteIV.setVisibility(View.GONE);
+				}
+			}
+			else
+				mDeleteIV.setVisibility(View.GONE);
+			
 			mDeleteIV.setOnClickListener(new OnClickListener() {
 
 				@Override
 				public void onClick(View v) {
-					mDeleteButtonTV.setVisibility(View.VISIBLE);
+					if(mUser.isShowDelete){
+						mUser.isShowDelete = false;
+						mDeleteButtonTV.setVisibility(View.GONE);
+					}
+					else{
+						mUser.isShowDelete = true;
+						mDeleteButtonTV.setVisibility(View.VISIBLE);
+					}
 				}
 
 			});

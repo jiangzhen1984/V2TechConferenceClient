@@ -540,19 +540,19 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			boolean isDelete = MessageLoader.getNewestMessage(mContext, currentLoginUserID,
 					remoteChatUserID) == null ? true : false;
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					remoteChatUserID , isDelete , -1);
+					remoteChatUserID , isDelete , false , -1);
 		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 			boolean isDelete = MessageLoader.getNewestGroupMessage(mContext,
 					V2GlobalEnum.GROUP_TYPE_CROWD, remoteGroupID) == null ? true
 					: false;
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					remoteGroupID , isDelete , -1);
+					remoteGroupID , isDelete , false , -1);
 		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 			boolean isDelete = MessageLoader.getNewestGroupMessage(mContext,
 					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, remoteGroupID) == null ? true
 					: false;
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					remoteGroupID , isDelete , -1);
+					remoteGroupID , isDelete , false , -1);
 		}
 
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
@@ -1957,7 +1957,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	 * 通知ConversationTabFragment 更新会话列表
 	 * 
 	 * @param isFresh
-	 *            false msgID为null，但需要刷新会话列表；ture 正常刷新
+	 *            false 为非正常刷新，即消除红点   ， ture 正常刷新
 	 * @param msgID
 	 *            最新消息ID
 	 */
@@ -1970,24 +1970,25 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		switch (currentConversationViewType) {
 		case Conversation.TYPE_CONTACT:
 			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					remoteChatUserID , isDeleteConversation , msgID);
+					remoteChatUserID , isDeleteConversation , isFresh , msgID);
 			break;
 		case Conversation.TYPE_GROUP:
 			obj = new ConversationNotificationObject(Conversation.TYPE_GROUP,
-					remoteGroupID , isDeleteConversation , msgID);
+					remoteGroupID , isDeleteConversation , isFresh , msgID);
 			break;
 		case Conversation.TYPE_DEPARTMENT:
 			obj = new ConversationNotificationObject(
-					Conversation.TYPE_DEPARTMENT, remoteGroupID , isDeleteConversation , msgID);
+					Conversation.TYPE_DEPARTMENT, remoteGroupID , isDeleteConversation , isFresh , msgID);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
 			obj = new ConversationNotificationObject(
-					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID , isDeleteConversation , msgID);
+					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID , isDeleteConversation , isFresh , msgID);
 			break;
 		default:
 			return ;
 		}
 		
+		obj.setNormalFresh(!isFresh);
 		i.putExtra("obj", obj);
 		mContext.sendBroadcast(i);
 	}

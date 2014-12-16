@@ -1,25 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-
     <!-- Application theme. -->
-    <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+    <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
-
     <style name="IpSettingDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowIsFloating">true</item>
     </style>
-
     <style name="InMeetingQuitDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowIsFloating">true</item>
     </style>
-
     <style name="customDialog" parent="@android:style/Theme.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>
@@ -30,45 +25,37 @@
         <item name="android:background">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
     </style>
-
     <style name="ContactUserActionDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowIsFloating">true</item>
     </style>
-
     <style name="GraySquareCheckbox" parent="@android:style/Widget.CompoundButton.CheckBox">
         <item name="android:button">@drawable/selector_check_box</item>
     </style>
-
     <style name="InMeetingCameraSettingAnim">
         <item name="@android:windowEnterAnimation">@animator/nonam_scale_0_100</item>
         <item name="@android:windowExitAnimation">@animator/nonam_scale_100_0</item>
     </style>
-
     <style name="TitleBarPopupWindowAnim">
         <item name="@android:windowEnterAnimation">@animator/translation_down_to_up_related_self</item>
         <item name="@android:windowExitAnimation">@animator/translation_up_to_down_related_self</item>
     </style>
-
     <style name="MessageVoiceDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowIsFloating">true</item>
     </style>
-
     <style name="ContactUserDetailVoiceCallDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowIsFloating">true</item>
     </style>
-
     <style name="RightRadioStyle">
         <item name="android:drawableRight">@android:drawable/btn_radio</item>
         <item name="android:button">@null</item>
     </style>
-    
     <style name="Common_title_height_imageView">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -76,5 +63,16 @@
         <item name="android:paddingBottom">10dp</item>
         <item name="android:paddingTop">10dp</item>
         <item name="android:src">@drawable/translucent</item>
+    </style>
+    <style name="Common_delete_button_red_imageView">
+        <item name="android:background">@drawable/rounded_corners_contacts_group_delete_button</item>
+        <item name="android:layout_margin">@dimen/contacts_group_view_margin_or_padding_normal</item>
+        <item name="android:paddingLeft">@dimen/contacts_group_view_margin_or_padding_normal</item>
+        <item name="android:paddingRight">@dimen/contacts_group_view_margin_or_padding_normal</item>
+        <item name="android:paddingTop">@dimen/contacts_group_view_margin_or_padding_small</item>
+        <item name="android:paddingBottom">@dimen/contacts_group_view_margin_or_padding_small</item>
+        <item name="android:text">@string/activiy_contact_group_item_button_delete</item>
+        <item name="android:textColor">@color/common_white_color</item>
+        <item name="android:textSize">@dimen/common_item_text_size</item>
     </style>
 </resources>

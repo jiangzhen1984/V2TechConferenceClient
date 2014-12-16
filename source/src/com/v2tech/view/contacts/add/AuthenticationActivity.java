@@ -1,12 +1,5 @@
 package com.v2tech.view.contacts.add;
 
-import com.v2tech.R;
-import com.v2tech.service.ContactsService;
-import com.v2tech.service.GlobalHolder;
-import com.v2tech.view.MainActivity;
-import com.v2tech.view.conversation.MessageAuthenticationActivity;
-import com.v2tech.vo.User;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +12,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.v2tech.R;
+import com.v2tech.service.ContactsService;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.conversation.MessageAuthenticationActivity;
+import com.v2tech.vo.User;
 
 public class AuthenticationActivity extends Activity {
 	// 两个标题

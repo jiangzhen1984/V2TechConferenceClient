@@ -54,4 +54,13 @@ public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 		
 	}
 	
+	@Override
+	public void OnOfflineStart() {
+		
+	}
+	
+	@Override
+	public void OnOfflineEnd() {
+		
+	}
 }
