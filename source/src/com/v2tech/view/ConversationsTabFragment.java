@@ -406,7 +406,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION);
 			} else {
-				// intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 				intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
@@ -415,6 +414,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						.addAction(JNIService.JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION);
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION);
+				intentFilter
+						.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 			}
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONTACT) {
@@ -2753,6 +2754,42 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 				adapter.notifyDataSetChanged();
 			}
+			else if(JNIService.JNI_BROADCAST_GROUP_USER_ADDED
+					.equals(intent.getAction())){
+				GroupUserObject obj = (GroupUserObject) intent.getExtras().get("obj");
+				if (obj == null) {
+					V2Log.e(TAG,
+							"JNI_BROADCAST_GROUP_USER_ADDED --> Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				
+				if(mCurrentSubTab == SUB_TAB_DISCUSSION){
+					for (int i = 0; i < mItemList.size(); i++) {
+						Conversation cov = mItemList.get(i).cov;
+						if(cov.getExtId() == obj.getmGroupId()){
+							GroupLayout layout = (GroupLayout) mItemList.get(i).gp;
+							layout.update();
+							adapter.notifyDataSetChanged();
+						}
+					}
+				}
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION.equals(intent
+				.getAction())) {
+				if(GlobalHolder.getInstance().getGlobalState().isGroupLoaded()){
+					int groupType = intent.getIntExtra("gtype", -1);
+					if(groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION && mCurrentSubTab == SUB_TAB_DISCUSSION){
+						long gid = intent.getLongExtra("gid", -1);
+						for (int i = 0; i < mItemList.size(); i++) {
+							Conversation cov = mItemList.get(i).cov;
+							if(cov.getExtId() == gid){
+								GroupLayout layout = (GroupLayout) mItemList.get(i).gp;
+								layout.update();
+								adapter.notifyDataSetChanged();
+							}
+						}
+					}
+				}
+			}
 			// else if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent
 			// .getAction())) {
 			// boolean groupMessage = intent.getBooleanExtra("gm", false);
@@ -2948,8 +2985,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				adapter.notifyDataSetChanged();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
 					.getAction())) {
-				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
-						"obj");
+				GroupUserObject guo = (GroupUserObject) intent.getExtras().get("obj");
+				if (guo == null) {
+					V2Log.e(TAG,
+							"JNI_BROADCAST_GROUP_USER_ADDED --> Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
 
 				for (ScrollItem item : mItemList) {
 					Conversation con = item.cov;

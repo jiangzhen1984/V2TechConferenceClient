@@ -94,18 +94,13 @@ public class CrowdGroupService extends AbstractHandler {
 	 */
 	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList,
 			MessageListener caller) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("<userlist>");
-		for (User u : invationUserList) {
-			sb.append(" <user id=\"" + u.getmUserId() + "\" />");
-		}
-		sb.append("</userlist>");
+		String sXml = XmlAttributeExtractor.buildAttendeeUsersXml(invationUserList);
 
 		this.initTimeoutMessage(CREATE_DISCUSSION_BOARD, DEFAULT_TIME_OUT_SECS,
 				caller);
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.CHATING.intValue(), crowd.toXml(),
-				sb.toString());
+				sXml);
 
 	}
 	
@@ -118,18 +113,13 @@ public class CrowdGroupService extends AbstractHandler {
 	 */
 	public void createDiscussionBoard(DiscussionGroup discussion, List<User> invationUserList,
 			MessageListener caller) {
-		StringBuffer sb = new StringBuffer();
-		sb.append("<userlist>");
-		for (User u : invationUserList) {
-			sb.append(" <user id=\"" + u.getmUserId() + "\" />");
-		}
-		sb.append("</userlist>");
+		String sXml = XmlAttributeExtractor.buildAttendeeUsersXml(invationUserList);
 
 		this.initTimeoutMessage(CREATE_DISCUSSION_BOARD, DEFAULT_TIME_OUT_SECS,
 				caller);
 		GroupRequest.getInstance().createGroup(
 				Group.GroupType.DISCUSSION.intValue(), discussion.toXml(),
-				sb.toString());
+				sXml);
 
 	}
 	

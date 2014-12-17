@@ -3,6 +3,7 @@ package com.v2tech.view.widget;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -287,7 +288,7 @@ public class GroupListView extends ListView {
 
 		ItemData item = mItemMap.get(group.getmGId());
 		if (item != null) {
-			if (count == list.size())
+			if (count == list.size() && list.size() != 0)
 				item.setChecked(true);
 			else
 				item.setChecked(false);
@@ -773,8 +774,6 @@ public class GroupListView extends ListView {
 	/**
 	 */
 	private ItemData getItem(Group g, User u) {
-		ItemData groupItem = getItem(g);
-
 		LongSparseArray<ItemData> map = mUserItemDataMapOfMap.get(g.getmGId());
 		if (map == null) {
 			map = new LongSparseArray<ItemData>();
@@ -803,6 +802,14 @@ public class GroupListView extends ListView {
 		if (itemList == null) {
 			itemList = new HashSet<ItemData>();
 			mUserItemListMap.put(u.getmUserId(), itemList);
+		} else {
+			Iterator<ItemData> iterator = itemList.iterator();
+			ItemData next = iterator.next();
+			if(next.isChecked()){
+				item.setChecked(true);
+			} else {
+				item.setChecked(false);
+			}
 		}
 		itemList.add(item);
 

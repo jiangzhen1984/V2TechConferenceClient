@@ -130,6 +130,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private final int SEND_MESSAGE_ERROR = 6;
 	private final int PLAY_NEXT_UNREAD_MESSAGE = 7;
 	private final int REQUEST_DEL_MESSAGE = 8;
+	private final int ADAPTER_NOTIFY = 9;
 	private final int FILE_STATUS_LISTENER = 20;
 
 	private final int BATCH_COUNT = 10;
@@ -562,6 +563,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	}
 
 	private void finishWork() {
+		messageArray = null;
+		messageAllID = null;
+		mCheckedList = null;
 		unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
@@ -572,7 +576,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				FILE_STATUS_LISTENER, null);
 		stopPlaying();
 		releasePlayer();
-		cleanCache();
 	}
 
 	@Override
@@ -686,7 +689,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			public void run() {
 				mMessagesContainer.setSelection(messageArray.size() - 1);
 			}
-
 		});
 	}
 
@@ -712,15 +714,14 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			mMessagesContainer.setSelection(pos);
 		}
 		else{
-             adapter.notifyDataSetChanged();
-             if((LastFistItem > messageArray.size() || LastFistItem < messageArray.size())){
+			 adapter.notifyDataSetChanged();
+             if((LastFistItem >= messageArray.size() || LastFistItem < 0)){
 	//			// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
 				mMessagesContainer.post(new Runnable() {
 	
 					@Override
 					public void run() {
 						mMessagesContainer.setSelection(pos);
-	
 					}
 	
 				});
@@ -1000,10 +1001,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			ItemWrapper.setView(null);
 			vm.recycleAllImageMessage();
 		}
-	}
-
-	private void cleanCache() {
-		messageArray.clear();
 	}
 
 	private void startVoiceCall() {
@@ -1993,15 +1990,18 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		mContext.sendBroadcast(i);
 	}
 
-	private void addMessageToContainer(VMessage msg) {
+	private void addMessageToContainer(final VMessage msg) {
 		// make offset
-		offset++;
-
-		messageArray.add(new VMessageAdater(msg));
-		scrollToBottom();
-
-		judgeShouldShowTime(msg);
-		adapter.notifyDataSetChanged();
+		runOnUiThread(new Runnable() {
+			
+			@Override
+			public void run() {
+				offset++;
+				judgeShouldShowTime(msg);
+				messageArray.add(new VMessageAdater(msg));
+				scrollToBottom();
+			}
+		});
 	}
 	
 	private void startSendMoreFile() {
@@ -2484,7 +2484,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				}
 			}
 		}
-		adapter.notifyDataSetChanged();
+		
+		Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 	}
 
 	private OnTouchListener mHiddenOnTouchListener = new OnTouchListener() {
@@ -2698,8 +2699,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 							CommonAdapterItemWrapper wrapper = messageArray.get(i);
 							messageArray.remove(wrapper);
 							messageArray.add(wrapper);
-							adapter.notifyDataSetChanged();
 							scrollToBottom();
+							Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 						}
 						break;
 					}
@@ -3005,6 +3006,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 								"send chating failed....get the return code is :"
 										+ res);
 				}
+				break;
+			case ADAPTER_NOTIFY:
+				adapter.notifyDataSetChanged();
 				break;
 			}
 		}
