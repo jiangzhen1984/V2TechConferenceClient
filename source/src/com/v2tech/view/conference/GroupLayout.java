@@ -94,7 +94,6 @@ public class GroupLayout extends LinearLayout {
 					.getCurrentUserId())
 				mGroupIV.setImageResource(R.drawable.conference_icon);
 			mGroupNameTV.setText(mConv.getName());
-			mGroupDateTV.setVisibility(View.INVISIBLE);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 			mGroupIV.setImageResource(R.drawable.chat_group_icon);

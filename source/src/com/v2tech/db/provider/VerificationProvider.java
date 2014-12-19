@@ -1073,6 +1073,70 @@ public class VerificationProvider extends DatabaseProvider {
 				cursor.close();
 		}
 	}
+	
+	public static AddFriendHistorieNode queryFriendQualMessageByUserId(long remoteUserID){
+		Cursor cursor = null;
+		try {
+			cursor = mContext.getContentResolver().query(
+					ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
+					ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS, 
+					ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID + " = ?",
+					new String[]{String.valueOf(remoteUserID)}, 
+					null);
+
+			if (cursor == null) {
+				return null;
+			}
+
+			if (cursor.getCount() < 0) {
+				return null;
+			}
+
+			if (cursor.moveToNext()) {
+				AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
+				tempNode.ownerUserID = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.OWNER_USER_ID));
+				tempNode.saveDate = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE));
+				tempNode.fromUserID = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID));
+				tempNode.ownerAuthType = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_AUTHTYPE));
+				tempNode.toUserID = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_TO_USER_ID));
+				tempNode.remoteUserID = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID));
+				tempNode.applyReason = cursor
+						.getString(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_APPLY_REASON));
+				tempNode.refuseReason = cursor
+						.getString(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REFUSE_REASON));
+				tempNode.addState = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_STATE));
+				tempNode.readState = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE));
+				return tempNode;
+			}
+			return null;
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
+			return null;
+		} finally {
+			if (cursor != null) {
+				cursor.close();
+			}
+		}
+	}
 
 	public static List<Long> getFriendWaittingVerifyMessage() {
 		List<Long> waitingUsers = new ArrayList<Long>();

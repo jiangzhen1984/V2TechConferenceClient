@@ -144,7 +144,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if (configuration.smallestScreenWidthDp > 600) {
 			isPad = true;
 		}
-		
+
 		fromActivity = this.getIntent().getStringExtra("fromActivity");
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
@@ -214,7 +214,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				intent.putExtra("remoteUserID", ContactDetail.this.getIntent()
 						.getLongExtra("remoteUserID", 0));
 				intent.putExtra("cause", "refuse_friend_authentication");
-				ContactDetail.this.startActivityForResult(intent, START_AUTHENTICATION_ACTIVITY);
+				ContactDetail.this.startActivityForResult(intent,
+						START_AUTHENTICATION_ACTIVITY);
 			}
 		});
 	}
@@ -395,8 +396,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			}
 			break;
 		case START_AUTHENTICATION_ACTIVITY:
-			Intent i = new Intent(mContext,
-					MessageAuthenticationActivity.class);
+			Intent i = new Intent(mContext, MessageAuthenticationActivity.class);
 			i.putExtra("remoteUserID", mUid);
 			setResult(5, i);
 			finish();
@@ -535,13 +535,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				}
 				tv.setVisibility(View.VISIBLE);
 			}
-			
-			boolean showContact = this.getIntent().getBooleanExtra("contactButtonShow" , true);
-			if(showContact)
+
+			boolean showContact = this.getIntent().getBooleanExtra(
+					"contactButtonShow", true);
+			if (showContact)
 				mContactButtonContainer.setVisibility(View.VISIBLE);
 			else
 				mContactButtonContainer.setVisibility(View.GONE);
-			
+
 			mSelfItemsContainer.setVisibility(View.GONE);
 			mGenderRG.setVisibility(View.GONE);
 
@@ -829,6 +830,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				Conversation.TYPE_CONTACT, u.getmUserId()));
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putParcelableArrayListExtra("checkedFiles", mCheckedList);
+		i.putExtra("fromContactDetail", true);
 		mContext.startActivity(i);
 	}
 
@@ -923,7 +925,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			i.putExtra("uid", mUid);
 			if ((fromActivity != null)
 					&& (fromActivity.equals("MessageAuthenticationActivity"))) {
-				i.putExtra("fromActivity", "MessageAuthenticationActivity-ContactDetail");
+				i.putExtra("fromActivity",
+						"MessageAuthenticationActivity-ContactDetail");
 			}
 			mContext.startActivity(i);
 		}
@@ -1025,16 +1028,18 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				break;
 			case UPDATE_USER_INFO_DONE:
 				JNIResponse ponse = (JNIResponse) msg.obj;
-				if(ponse.getResult() == JNIResponse.Result.SUCCESS){
+				if (ponse.getResult() == JNIResponse.Result.SUCCESS) {
 					Intent intent = new Intent();
 					intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					intent.putExtra("modifiedUser", u.getmUserId());
 					sendBroadcast(intent);
-				}
-				else{
-					V2Log.e("ContactDetail", "Update User Name or Comment Name Failed... error code : " + 
-							ponse.getResult().value() + " error name is : " + ponse.getResult().name());
+				} else {
+					V2Log.e("ContactDetail",
+							"Update User Name or Comment Name Failed... error code : "
+									+ ponse.getResult().value()
+									+ " error name is : "
+									+ ponse.getResult().name());
 				}
 				break;
 			}
@@ -1081,4 +1086,5 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		}
 
 	}
+
 }

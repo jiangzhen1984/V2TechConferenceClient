@@ -1139,7 +1139,7 @@ public class MessageAuthenticationActivity extends Activity {
 					User user = vqic.getInvitationUser();
 					boolean isFriend = GlobalHolder.getInstance()
 							.isFriend(user);
-					if (isFriend && user.getNickName() != null)
+					if (isFriend && !TextUtils.isEmpty(user.getNickName()))
 						name = user.getNickName();
 					else
 						name = user.getName();

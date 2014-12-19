@@ -435,16 +435,21 @@ public class CrowdCreateActivity extends Activity {
 
 			if (crowd != null) {
 				synchronized (CrowdCreateActivity.class) {
+					List<User> removeUsers = new ArrayList<User>();
 					List<User> users = crowd.getUsers();
 					Iterator<User> iterator = mUserList.iterator();
 					while (iterator.hasNext()) {
 						User checkUser = iterator.next();
 						for (User user : users) {
 							if(user.getmUserId() == checkUser.getmUserId()){
-								mUserList.remove(checkUser);
+								removeUsers.add(checkUser);
 								break;
 							}
 						}
+					}
+					
+					for (int i = 0; i < removeUsers.size(); i++) {
+						mUserList.remove(removeUsers.get(i));
 					}
 					
 					List<User> newMembers = new ArrayList<User>(mUserList);

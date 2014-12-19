@@ -35,7 +35,6 @@ import com.v2tech.db.provider.SearchContentProvider;
 import com.v2tech.service.ChatService;
 import com.v2tech.service.FileOperationEnum;
 import com.v2tech.util.Notificator;
-import com.v2tech.view.conversation.CommonCallBack.CommonUpdateFileStateInterface;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.receiver.HeadSetPlugReceiver;
@@ -49,7 +48,7 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFileItem;
 
 public class MainActivity extends FragmentActivity implements
-		NotificationListener , CommonUpdateFileStateInterface{
+		NotificationListener {
 
 	private Context mContext;
 	private boolean exitedFlag = false;
@@ -59,12 +58,12 @@ public class MainActivity extends FragmentActivity implements
 	private TabHost mTabHost;
 	private ViewPager mViewPager;
 	private PagerAdapter mPagerAdapter;
-	
+
 	private ConferenceListener mConfListener;
-	
+
 	private List<CommonAdapterItemWrapper> messageArray;
 	private List<Fragment> fragments;
-	
+
 	private HeadSetPlugReceiver localReceiver = new HeadSetPlugReceiver();
 
 	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
@@ -159,7 +158,6 @@ public class MainActivity extends FragmentActivity implements
 		initReceiver();
 		// Start animation
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
-//		CommonCallBack.getInstance().setFileStateInterface(this);
 		messageArray = new ArrayList<CommonAdapterItemWrapper>();
 		updateFileState();
 	}
@@ -185,8 +183,9 @@ public class MainActivity extends FragmentActivity implements
 			Bundle bundle = new Bundle();
 			bundle.putString("tag", tc.mTabName);
 			Fragment frg = Fragment.instantiate(this, tc.clsName, bundle);
-			if (frg instanceof ConferenceListener && tc.mTabName.equals(PublicIntent.TAG_CONF)) {
-				mConfListener =(ConferenceListener) frg;
+			if (frg instanceof ConferenceListener
+					&& tc.mTabName.equals(PublicIntent.TAG_CONF)) {
+				mConfListener = (ConferenceListener) frg;
 			}
 			fragments.add(frg);
 
@@ -247,8 +246,8 @@ public class MainActivity extends FragmentActivity implements
 		filter.addAction(PublicIntent.FINISH_APPLICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		mContext.registerReceiver(receiver, filter);
-		
-		//Register listener for headset
+
+		// Register listener for headset
 		IntentFilter filterHeadSet = new IntentFilter();
 		filterHeadSet.addAction(Intent.ACTION_HEADSET_PLUG);
 		Intent result = mContext.registerReceiver(localReceiver, filterHeadSet);
@@ -261,8 +260,6 @@ public class MainActivity extends FragmentActivity implements
 	protected void onStart() {
 		super.onStart();
 	}
-	
-	
 
 	@Override
 	protected void onNewIntent(Intent intent) {
@@ -270,7 +267,7 @@ public class MainActivity extends FragmentActivity implements
 		int index = intent.getIntExtra("initFragment", 0);
 		mViewPager.setCurrentItem(index);
 		if (intent.getExtras() != null) {
-			Conference conf= (Conference)intent.getExtras().get("conf");
+			Conference conf = (Conference) intent.getExtras().get("conf");
 			mConfListener.requestJoinConf(conf);
 		}
 	}
@@ -290,7 +287,7 @@ public class MainActivity extends FragmentActivity implements
 			this.getApplicationContext().stopService(
 					new Intent(this.getApplicationContext(), JNIService.class));
 			finish();
-			((MainApplication)this.getApplicationContext()).requestQuit();
+			((MainApplication) this.getApplicationContext()).requestQuit();
 
 		} else {
 			exitedFlag = true;
@@ -307,18 +304,17 @@ public class MainActivity extends FragmentActivity implements
 			}, 2500);
 		}
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		mContext.unregisterReceiver(receiver);
-		//unregister for headset
+		// unregister for headset
 		mContext.unregisterReceiver(localReceiver);
 		mContext.stopService(new Intent(this.getApplicationContext(),
 				JNIService.class));
-		//Just for user remove application from recent task list
-		Notificator
-		.cancelAllSystemNotification(getApplicationContext());
+		// Just for user remove application from recent task list
+		Notificator.cancelAllSystemNotification(getApplicationContext());
 
 		V2Log.d("system destroyed v2tech");
 	}
@@ -326,17 +322,18 @@ public class MainActivity extends FragmentActivity implements
 	public void updateNotificator(int type, boolean flag) {
 
 		View noticator = null;
-		if (type == Conversation.TYPE_GROUP || type == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+		if (type == Conversation.TYPE_GROUP
+				|| type == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 			noticator = mTabClasses[2].notificator;
-		} else if (type ==Conversation.TYPE_CONFERNECE) {
+		} else if (type == Conversation.TYPE_CONFERNECE) {
 			noticator = mTabClasses[3].notificator;
-		} else if (type ==Conversation.TYPE_CONTACT) {
+		} else if (type == Conversation.TYPE_CONTACT) {
 			noticator = mTabClasses[4].notificator;
 		} else {
 			V2Log.e(TAG, "Error TabFragment Type Value : " + type);
-			return ;
+			return;
 		}
-		
+
 		if (flag) {
 			noticator.setVisibility(View.VISIBLE);
 		} else {
@@ -357,14 +354,16 @@ public class MainActivity extends FragmentActivity implements
 		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
 			((TextWatcher) ((FragmentPagerAdapter) mViewPager.getAdapter())
-					.getItem(mTabHost.getCurrentTab())).beforeTextChanged(arg0, arg1, arg2, arg3);
+					.getItem(mTabHost.getCurrentTab())).beforeTextChanged(arg0,
+					arg1, arg2, arg3);
 		}
 
 		@Override
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
 			((TextWatcher) ((FragmentPagerAdapter) mViewPager.getAdapter())
-					.getItem(mTabHost.getCurrentTab())).onTextChanged(arg0, arg1, arg2, arg3);
+					.getItem(mTabHost.getCurrentTab())).onTextChanged(arg0,
+					arg1, arg2, arg3);
 		}
 
 	};
@@ -383,16 +382,18 @@ public class MainActivity extends FragmentActivity implements
 				V2Log.e(" MainActivity state is illegal");
 				return;
 			}
-			//恢复搜索状态
+			// 恢复搜索状态
 			TabClass tab = mTabClasses[pos];
 			Fragment fragment = fragments.get(pos);
-			if(tab.mTabName.equals(PublicIntent.TAG_COV) || tab.mTabName.equals(PublicIntent.TAG_GROUP) || 
-					tab.mTabName.equals(PublicIntent.TAG_CONF)){
-				((ConversationsTabFragment)fragment).updateSearchState();
-			} else if(tab.mTabName.equals(PublicIntent.TAG_CONTACT) || tab.mTabName.equals(PublicIntent.TAG_ORG)){
-				
+			if (tab.mTabName.equals(PublicIntent.TAG_COV)
+					|| tab.mTabName.equals(PublicIntent.TAG_GROUP)
+					|| tab.mTabName.equals(PublicIntent.TAG_CONF)) {
+				((ConversationsTabFragment) fragment).updateSearchState();
+			} else if (tab.mTabName.equals(PublicIntent.TAG_CONTACT)
+					|| tab.mTabName.equals(PublicIntent.TAG_ORG)) {
+
 			}
-			
+
 			mViewPager.setCurrentItem(pos);
 			titleBar.updateTitle(mTabClasses[pos].mTabTitleId);
 
@@ -462,8 +463,8 @@ public class MainActivity extends FragmentActivity implements
 			String action = intent.getAction();
 			if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				exitedFlag = true;
-				//把会话中所有发送或下载的文件，状态更新到数据库
-//				executeUpdateFileState();
+				// 把会话中所有发送或下载的文件，状态更新到数据库
+				// executeUpdateFileState();
 				requestQuit();
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(action)) {
@@ -502,66 +503,65 @@ public class MainActivity extends FragmentActivity implements
 		}
 
 	}
-	
+
 	@Override
 	public boolean dispatchTouchEvent(MotionEvent ev) {
-		  View v = getCurrentFocus(); 
-		    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
-		    if (imm != null && v != null) {  
-		        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
-		    }  
-		  SearchContentProvider.closedDataBase();  
+		View v = getCurrentFocus();
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null && v != null) {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		}
+		SearchContentProvider.closedDataBase();
 		return super.dispatchTouchEvent(ev);
 	}
-	
+
 	/**
-	 * Detecting all VMessageFileItem Object that state is sending or downloading in the database , 
-	 * and change their status to failed..  
+	 * Detecting all VMessageFileItem Object that state is sending or
+	 * downloading in the database , and change their status to failed..
 	 */
 	public void updateFileState() {
 		new Thread(new Runnable() {
-			
+
 			@Override
 			public void run() {
-				List<VMessageFileItem> loadFileMessages = MessageLoader.loadFileMessages(-1, -1);
-				if(loadFileMessages != null){
+				List<VMessageFileItem> loadFileMessages = MessageLoader
+						.loadFileMessages(-1, -1);
+				if (loadFileMessages != null) {
 					for (VMessageFileItem fileItem : loadFileMessages) {
 						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING)
 							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
 						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
 							fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-						int update = MessageLoader.updateFileItemState(mContext , fileItem);
-						if(update == -1){
-							V2Log.e(TAG, "update file state failed... file id is : " + fileItem.getUuid());
+						int update = MessageLoader.updateFileItemState(
+								mContext, fileItem);
+						if (update == -1) {
+							V2Log.e(TAG,
+									"update file state failed... file id is : "
+											+ fileItem.getUuid());
 						}
 					}
-				}
-				else
+				} else
 					V2Log.e(TAG, "load all files failed... get null");
 			}
 		}).start();
 	}
 
-	@Override
-	public void updateFileState(List<CommonAdapterItemWrapper> messageArray) {
-		this.messageArray.addAll(messageArray);
-	}
-	
 	/**
 	 * now it's not used..
+	 * 
 	 * @deprecated
 	 */
-	public void executeUpdateFileState(){
-		
-		if(messageArray == null){
-			V2Log.e(TAG, "executeUpdateFileState is failed ... because messageArray is null");
-			return ;
+	public void executeUpdateFileState() {
+
+		if (messageArray == null) {
+			V2Log.e(TAG,
+					"executeUpdateFileState is failed ... because messageArray is null");
+			return;
 		}
-			
+
 		ChatService mChat = new ChatService();
 		for (int i = 0; i < messageArray.size(); i++) {
-			VMessage vm = (VMessage) messageArray.get(i)
-					.getItemObject();
+			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
 			if (vm.getFileItems().size() > 0) {
 				List<VMessageFileItem> fileItems = vm.getFileItems();
 				for (int j = 0; j < fileItems.size(); j++) {
@@ -570,8 +570,8 @@ public class MainActivity extends FragmentActivity implements
 					case VMessageAbstractItem.STATE_FILE_DOWNLOADING:
 					case VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING:
 						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
-						MessageBuilder.updateVMessageItemToSentFalied(
-								mContext, vm);
+						MessageBuilder.updateVMessageItemToSentFalied(mContext,
+								vm);
 						mChat.updateFileOperation(item,
 								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
 								null);
@@ -579,8 +579,8 @@ public class MainActivity extends FragmentActivity implements
 					case VMessageAbstractItem.STATE_FILE_SENDING:
 					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
 						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
-						MessageBuilder.updateVMessageItemToSentFalied(
-								mContext, vm);
+						MessageBuilder.updateVMessageItemToSentFalied(mContext,
+								vm);
 						mChat.updateFileOperation(item,
 								FileOperationEnum.OPERATION_CANCEL_SENDING,
 								null);

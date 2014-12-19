@@ -195,6 +195,7 @@ public class CrowdMembersActivity extends Activity {
 				i.putExtra("cid", crowd.getmGId());
 				i.putExtra("mode", true);
 				startActivity(i);
+				onBackPressed();
 			}
 		}
 

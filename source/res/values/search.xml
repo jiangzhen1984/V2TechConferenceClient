@@ -4,9 +4,9 @@
    <string name="search_title_crowd">查找群组</string>
    <string name="search_title_return_button">返回</string>
    
-   <string name="search_content_text_crowd">请输入群组号码/关键词</string>
+   <string name="search_content_text_crowd">您可以输入群名称或群号码进行查找</string>
    <string name="search_content_text_member">请输入关键词</string>
-   <string name="search_rules_tips">您可以输入首字母，汉字或者全拼进行查找</string>
+   <string name="search_rules_tips">您可以输入帐号或姓名进行查找</string>
    <string name="search_text_required">请输入要查找的内容!</string>
    
    <string name="search_search_button">查 找</string>

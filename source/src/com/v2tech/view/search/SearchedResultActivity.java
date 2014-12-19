@@ -196,7 +196,7 @@ public class SearchedResultActivity extends Activity {
 			SearchedResult.SearchedResultItem srItem = mList.get(position);
 			item.tv.setText(srItem.name);
 			if (srItem.mType == SearchedResult.Type.CROWD) {
-				item.iv.setImageResource(R.drawable.conference_icon_self);
+				item.iv.setImageResource(R.drawable.chat_group_icon);
 			} else if (srItem.mType == SearchedResult.Type.USER) {
 				item.iv.setImageResource(R.drawable.avatar);
 			}

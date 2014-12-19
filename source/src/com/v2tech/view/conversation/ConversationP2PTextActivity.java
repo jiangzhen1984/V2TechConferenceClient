@@ -91,6 +91,7 @@ import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.SPUtil;
+import com.v2tech.view.ConversationsTabFragment;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.adapter.VMessageAdater;
@@ -237,6 +238,12 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private MessageBodyView showingPopupWindow;
 	private boolean stopOhterAudio;
 	private boolean isCreate;
+	
+	/**
+	 * for ContactDetail create conversation
+	 */
+	private boolean isFromContactDetail;
+	private boolean isFirstCall = true;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -270,7 +277,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				null);
 		mGroupChat.registerFileTransStatusListener(this.lh,
 				FILE_STATUS_LISTENER, null);
-		notificateConversationUpdate(false, cov.getExtId());
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
@@ -499,8 +505,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 	@Override
 	public void onBackPressed() {
-		super.onBackPressed();
+		checkMessageEmpty();
 		V2Log.d(TAG, "entry onBackPressed");
+		super.onBackPressed();
 	}
 
 	@Override
@@ -530,36 +537,34 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	protected void onDestroy() {
 		super.onDestroy();
 		V2Log.e(TAG, "entry onDestroy....");
-		checkMessageEmpty();
 		finishWork();
 	}
 
 	private void checkMessageEmpty() {
-
-		ConversationNotificationObject obj = null;
+		boolean isDelete = false;
 		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
-			boolean isDelete = MessageLoader.getNewestMessage(mContext, currentLoginUserID,
+			isDelete = MessageLoader.getNewestMessage(mContext, currentLoginUserID,
 					remoteChatUserID) == null ? true : false;
-			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					remoteChatUserID , isDelete , false , -1);
 		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
-			boolean isDelete = MessageLoader.getNewestGroupMessage(mContext,
+			isDelete = MessageLoader.getNewestGroupMessage(mContext,
 					V2GlobalEnum.GROUP_TYPE_CROWD, remoteGroupID) == null ? true
 					: false;
-			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					remoteGroupID , isDelete , false , -1);
 		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
-			boolean isDelete = MessageLoader.getNewestGroupMessage(mContext,
+			isDelete = MessageLoader.getNewestGroupMessage(mContext,
 					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, remoteGroupID) == null ? true
 					: false;
-			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					remoteGroupID , isDelete , false , -1);
+		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+			isDelete = MessageLoader.getNewestGroupMessage(mContext,
+					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID) == null ? true
+					: false;
 		}
 
-		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
-		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.putExtra("obj", obj);
-		mContext.sendBroadcast(i);
+		Intent i = new Intent();
+		i.putExtra("groupType", currentConversationViewType);
+		i.putExtra("groupID", remoteGroupID);
+		i.putExtra("remoteUserID", remoteChatUserID);
+		i.putExtra("isDelete", isDelete);
+		setResult(ConversationsTabFragment.REQUEST_UPDATE_CHAT_CONVERSATION, i);
 	}
 
 	private void finishWork() {
@@ -599,7 +604,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			mLoadedAllMessages = false;
 			currentItemPos = 0;
 			offset = 0;
-			notificateConversationUpdate(false, cov.getExtId(), false);
 		}
 	}
 
@@ -619,6 +623,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					1);
 		}
 
+		isFromContactDetail = this.getIntent().getBooleanExtra("fromContactDetail", false);
 		initConversationInfos();
 	}
 
@@ -1724,7 +1729,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 						addMessageToContainer(vm);
 						// send notification
-						notificateConversationUpdate(true, vm.getId());
 					}
 
 					Intent intent = new Intent(this, FileService.class);
@@ -1920,8 +1924,13 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
-		// send notification
-		notificateConversationUpdate(isFresh, vm.getId());
+		
+		//如果从个人资料界面发送消息，需要回调界面创建该会话
+		if(isFromContactDetail && isFirstCall){
+			isFirstCall = false;
+			CommonCallBack.getInstance().executeConversationCreate(currentConversationViewType
+					, remoteGroupID , remoteChatUserID);
+		}
 	}
 
 	/**
@@ -1944,50 +1953,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			j++;
 		}
 		return new String(copy, 0, j);
-	}
-
-	private void notificateConversationUpdate(boolean isFresh, long msgID) {
-		notificateConversationUpdate(isFresh, msgID, false);
-	}
-
-	/**
-	 * 通知ConversationTabFragment 更新会话列表
-	 * 
-	 * @param isFresh
-	 *            false 为非正常刷新，即消除红点   ， ture 正常刷新
-	 * @param msgID
-	 *            最新消息ID
-	 */
-	private void notificateConversationUpdate(boolean isFresh, long msgID,
-			boolean isDeleteConversation) {
-
-		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
-		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		ConversationNotificationObject obj = null;
-		switch (currentConversationViewType) {
-		case Conversation.TYPE_CONTACT:
-			obj = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					remoteChatUserID , isDeleteConversation , isFresh , msgID);
-			break;
-		case Conversation.TYPE_GROUP:
-			obj = new ConversationNotificationObject(Conversation.TYPE_GROUP,
-					remoteGroupID , isDeleteConversation , isFresh , msgID);
-			break;
-		case Conversation.TYPE_DEPARTMENT:
-			obj = new ConversationNotificationObject(
-					Conversation.TYPE_DEPARTMENT, remoteGroupID , isDeleteConversation , isFresh , msgID);
-			break;
-		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
-			obj = new ConversationNotificationObject(
-					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID , isDeleteConversation , isFresh , msgID);
-			break;
-		default:
-			return ;
-		}
-		
-		obj.setNormalFresh(!isFresh);
-		i.putExtra("obj", obj);
-		mContext.sendBroadcast(i);
 	}
 
 	private void addMessageToContainer(final VMessage msg) {
@@ -2133,7 +2098,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			if(update <= 0)
 				V2Log.e(TAG, "Update chatMessage state failed...message uuid is : " + v.getUUID());
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
-			notificateConversationUpdate(true, v.getId());
 		}
 
 		@Override
@@ -2466,6 +2430,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
 						MessageBuilder.updateVMessageItemToSentFalied(mContext,
 								vm);
+						mChat.updateFileOperation(item,
+								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING, null);
 						break;
 					case VMessageAbstractItem.STATE_FILE_SENDING:
 					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
@@ -2772,8 +2738,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						item.setFileSize(fileJNIObject.fileSize);
 						item.setUuid(fileJNIObject.fileId);
 						addMessageToContainer(vm);
-						// send notification
-						notificateConversationUpdate(true, vm.getId());
 					}
 				}
 			} else if (intent.getAction().equals(
@@ -2890,8 +2854,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				}
 				
 				adapter.notifyDataSetChanged();
-				// Update conversation
-				notificateConversationUpdate(false, message.getId());
 				break;
 			case FILE_STATUS_LISTENER:
 				FileTransStatusIndication ind = (FileTransStatusIndication) (((AsyncResult) msg.obj)

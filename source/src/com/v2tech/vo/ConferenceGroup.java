@@ -9,9 +9,8 @@ public class ConferenceGroup extends Group {
 	private boolean isVoiceActivation;
 	private boolean isCanInvitation = true;
 
-
-	public ConferenceGroup(long mGId, String mName,
-			User mOwner, Date createDate, User chairMan) {
+	public ConferenceGroup(long mGId, String mName, User mOwner,
+			Date createDate, User chairMan) {
 		super(mGId, GroupType.CONFERENCE, mName, mOwner, createDate);
 		this.mChairMan = chairMan;
 	}
@@ -19,11 +18,11 @@ public class ConferenceGroup extends Group {
 	public void setVoiceActivation(boolean isVoiceActivation) {
 		this.isVoiceActivation = isVoiceActivation;
 	}
-	
+
 	public boolean isVoiceActivation() {
 		return isVoiceActivation;
 	}
-	
+
 	public boolean isSyn() {
 		return isSyn;
 	}
@@ -40,6 +39,13 @@ public class ConferenceGroup extends Group {
 		this.isCanInvitation = isCanInvitation;
 	}
 
+	public User getmChairMan() {
+		return mChairMan;
+	}
+
+	public void setmChairMan(User mChairMan) {
+		this.mChairMan = mChairMan;
+	}
 
 	@Override
 	public int compareTo(Group g) {
@@ -55,12 +61,11 @@ public class ConferenceGroup extends Group {
 
 		return 1;
 	}
-	
-	
-	
-	public static final  int EXTRA_FLAG_INVITATION = 0X0001;
-	
-	public static final  int EXTRA_FLAG_SYNC = 0X0002;
+
+	public static final int EXTRA_FLAG_INVITATION = 0X0001;
+
+	public static final int EXTRA_FLAG_SYNC = 0X0002;
+
 	/**
 	 * 
 	 * @param g
@@ -106,7 +111,5 @@ public class ConferenceGroup extends Group {
 	public String toXml() {
 		return null;
 	}
-	
-	
 
 }

@@ -166,10 +166,11 @@ public class GroupListView extends ListView {
 		mGroupList.addAll(list);
 		mBaseList.clear();
 		for (int i = 0; i < list.size(); i++) {
-			ItemData item = getItem(list.get(i));
+			GroupItemData item = (GroupItemData) getItem(list.get(i));
 			mBaseList.add(item);
-			if (((GroupItemData) item).isExpanded) {
-				expand((GroupItemData) item, i);
+			if (item.isExpanded) {
+				int startPos = getGroupItemPos(item);
+				expand(item, startPos);
 			}
 		}
 		mFilterList = mBaseList;
@@ -441,11 +442,28 @@ public class GroupListView extends ListView {
 			adapter.notifyDataSetChanged();
 		}
 	}
+	
+	/**
+	 * According ItemData , get pos in mFilterList;
+	 * @param item
+	 * @return
+	 */
+	public int getGroupItemPos(GroupItemData item){
+		for (int i = 0; i < mFilterList.size(); i++) {
+			ItemData itemData = mFilterList.get(i);
+			if(itemData instanceof GroupItemData){
+				GroupItemData temp = (GroupItemData) itemData;
+				if(temp.mGroup.getmGId() == item.mGroup.getmGId()){
+					return i;
+				}
+			}
+		}
+		return -1;
+	}
 
 	/**
-	 * Mark user as selected, and call {@link ItemData#isChecked()} will return
-	 * true
-	 * 
+	 * Mark user as selected, and call {@link ItemData#isChecked()} will return true
+	 * The function only called by {ConferenceCreateActivity#doPreSelect}
 	 * @param user
 	 */
 	public void selectUser(User user) {
@@ -456,14 +474,20 @@ public class GroupListView extends ListView {
 		for (Group g : groupList) {
 			ItemData item = getItem(g, user);
 			item.setChecked(true);
+			
+			GroupItemData groupItem = (GroupItemData) getItem(g);
+			if(!groupItem.isExpanded){
+				int pos = getGroupItemPos(groupItem);
+				if(pos != -1)
+					expand(groupItem, pos);
+			}
 		}
 		adapter.notifyDataSetChanged();
 	}
 
 	/**
-	 * Mark user list as selected, and call {@link ItemData#isChecked()} will
-	 * return true
-	 * 
+	 * Mark user list as selected, and call {@link ItemData#isChecked()} will return true
+	 * The function only called by {ConferenceCreateActivity#doPreSelect}
 	 * @param userList
 	 */
 	public void selectUser(List<User> userList) {
@@ -475,6 +499,13 @@ public class GroupListView extends ListView {
 			for (Group g : groupList) {
 				ItemData item = getItem(g, user);
 				item.setChecked(true);
+				
+				GroupItemData groupItem = (GroupItemData) getItem(g);
+				if(!groupItem.isExpanded){
+					int pos = getGroupItemPos(groupItem);
+					if(pos != -1)
+						expand(groupItem, pos);
+				}
 			}
 		}
 		adapter.notifyDataSetChanged();
@@ -1120,7 +1151,7 @@ public class GroupListView extends ListView {
 					isFirst = false;
 				}
 				
-				searchUser = SearchUtils.startGroupUserFilterSearch(constraint);
+				searchUser = SearchUtils.receiveGroupUserFilterSearch(constraint.toString());
 				
 				if(searchUser != null){
 					for (int i = 0; i < searchUser.size(); i++) {

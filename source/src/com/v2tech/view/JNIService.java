@@ -72,6 +72,7 @@ import com.v2tech.view.conversation.CommonCallBack.CommonUpdateConversationState
 import com.v2tech.view.conversation.ConversationP2PAVActivity;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
+import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.CrowdGroup;
@@ -752,12 +753,29 @@ public class JNIService extends Service implements
 		@Override
 		public void OnApplyJoinGroup(V2Group group, V2User user, String reason) {
 			if (group == null || user == null) {
+				V2Log.d(TAG, "OnApplyJoinGroup --> Receive failed! Because V2Group or V2User is null");
 				return;
+			}
+			
+			VMessageQualification qualication = 
+					VerificationProvider.queryCrowdQualMessageByCrowdId(user.uid , group.id);
+			if(qualication != null){
+				V2Log.d(TAG, "OnApplyJoinGroup --> qualication : " + qualication.getReadState().name() + 
+						" offline state : " + GlobalHolder.getInstance().isOfflineLoaded());
+				if(qualication.getReadState() == ReadState.READ && !GlobalHolder.getInstance().isOfflineLoaded()){
+					return ;
+				}
+			}
+			else{
+				V2Log.d(TAG, "OnApplyJoinGroup --> group id : " + group.id + " group name : " + group.name +
+						" group user id : " + group.creator.uid);
 			}
 			
 			CrowdGroup crowd = (CrowdGroup) GlobalHolder.getInstance()
 					.getGroupById(group.id);
 			if (crowd == null) {
+				V2Log.d(TAG, "OnApplyJoinGroup --> Parse failed! Because get CrowdGroup is null from GlobleHolder!"
+						+ "ID is : " + group.id);
 				return;
 			}
 			
@@ -788,9 +806,8 @@ public class JNIService extends Service implements
 				V2Log.e(" invitation group is null");
 				return;
 			}
-
+			
 			GroupType gType = GroupType.fromInt(group.type);
-
 			if (gType == GroupType.CONFERENCE) {
 				User owner = GlobalHolder.getInstance()
 						.getUser(group.owner.uid);
@@ -808,6 +825,22 @@ public class JNIService extends Service implements
 				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
 						.sendToTarget();
 			} else if (gType == GroupType.CHATING) {
+				
+				VMessageQualification qualication = 
+						VerificationProvider.queryCrowdQualMessageByCrowdId(group.creator.uid , group.id);
+				if(qualication != null){
+					V2Log.d(TAG, "OnInviteJoinGroupCallback --> qualication : " + qualication.getReadState().name() + 
+							" offline state : " + GlobalHolder.getInstance().isOfflineLoaded());
+					if(qualication.getReadState() == ReadState.READ &&
+						!GlobalHolder.getInstance().isOfflineLoaded() && 
+						qualication.getQualState() == QualificationState.WAITING){
+						return ;
+					}
+				}
+				else{
+					V2Log.d(TAG, "OnInviteJoinGroupCallback --> group id : " + group.id + " group name : " + group.name +
+							" group user id : " + group.creator.uid);
+				}
 				User owner = GlobalHolder.getInstance().getUser(
 						group.creator.uid);
 				if (owner.isDirty()) {
@@ -930,9 +963,23 @@ public class JNIService extends Service implements
 		@Override
 		public void OnRequestCreateRelationCallback(V2User user,
 				String additInfo) {
-			if (user == null)
+			if (user == null){
 				V2Log.e(TAG,
 						"OnRequestCreateRelationCallback ---> Create relation failed...get user is null");
+				return ;
+			}
+			
+			AddFriendHistorieNode node = VerificationProvider.queryFriendQualMessageByUserId(user.uid);
+			if(node != null){
+				V2Log.d(TAG, "OnRequestCreateRelationCallback --> Node readState : " + node.readState + " offlineLoad"
+						+ ": " + GlobalHolder.getInstance().isOfflineLoaded());
+				if(node.readState == ReadState.READ.intValue() && !GlobalHolder.getInstance().isOfflineLoaded()){
+					return ;
+				}
+			}
+			else{
+				V2Log.d(TAG, "OnRequestCreateRelationCallback --> user id is : " + user.uid);
+			}
 
 			boolean isOutORG = false;
 			User vUser = GlobalHolder.getInstance().getUser(user.uid);
@@ -954,7 +1001,6 @@ public class JNIService extends Service implements
 			intent.setAction(JNI_BROADCAST_CONTACTS_AUTHENTICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
 			sendBroadcast(intent);
-
 		}
 
 		@Override

@@ -596,9 +596,10 @@ public class MessageBodyView extends LinearLayout {
 				if (failedIcon.getVisibility() == View.VISIBLE) {
 					if (mMsg.isLocal()) {
 						pwResendTV.setVisibility(View.VISIBLE);
-					} else {
-						pwReDownloadTV.setVisibility(View.VISIBLE);
-					}
+					} 
+//					else {
+//						pwReDownloadTV.setVisibility(View.VISIBLE);
+//					}
 				} else {
 					pwResendTV.setVisibility(View.GONE);
 				}
