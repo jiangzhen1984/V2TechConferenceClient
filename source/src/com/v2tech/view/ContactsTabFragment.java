@@ -252,11 +252,17 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
 					.getAction())) {
+				V2Log.d(TAG	, "JNI_BROADCAST_GROUP_USER_ADDED --> The New User Coming !");
 				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
 						"obj");
+				if(guo == null){
+					V2Log.e(TAG, "JNI_BROADCAST_GROUP_USER_ADDED --> Add New User Failed ! Because"
+							+ "Given GroupUserObject is null!");
+					return ;
+				}
+				
 				if (flag == TAG_CONTACT
 						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
-
 					mContactsContainer.addUser(
 							GlobalHolder.getInstance().getGroupById(
 									GroupType.CONTACT.intValue(),

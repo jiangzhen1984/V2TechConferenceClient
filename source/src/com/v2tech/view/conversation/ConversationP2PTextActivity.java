@@ -412,6 +412,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			}
 		}
 		
+		if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+			V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity initTransingObserver --> 用户" + remoteChatUserID
+					+ "初始化文件传输个数：" + transing);
 		transing = transing + count;
 		GlobalConfig.mTransingFiles.put(key, transing);
 	}
@@ -2070,6 +2073,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					CommonAdapterItemWrapper wrapper = messageArray.get(i);
 					VMessage tempVm = (VMessage) wrapper.getItemObject();
 					if (tempVm.getUUID().equals(playingAudioMessage.getUUID())) {
+						
+						tempVm.getAudioItems().get(0).setReadState(VMessageAbstractItem.STATE_READED);
 						playingAudioBodyView = (MessageBodyView) wrapper
 								.getView();
 					}
@@ -2438,6 +2443,11 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 						MessageBuilder.updateVMessageItemToSentFalied(mContext,
 								vm);
+						Integer trans = GlobalConfig.mTransingFiles.get(remoteChatUserID);
+						trans = trans - 1;
+						V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity executeUpdateFileState --> 用户" + remoteChatUserID
+								+ "的一个文件传输失败，当前正在传输个数是：" + trans);
+						GlobalConfig.mTransingFiles.put(remoteChatUserID, trans);
 						break;
 					default:
 						break;
@@ -2849,6 +2859,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				removeMessage(message);
 				Integer transing = GlobalConfig.mTransingFiles.get(remoteChatUserID);
 				if(transing != null){
+					V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity request_delete_message --> 用户" + remoteChatUserID
+							+ "的一个传输文件被删除：" + transing);
 					transing = transing - 1;
 					GlobalConfig.mTransingFiles.put(remoteChatUserID, transing);
 				}

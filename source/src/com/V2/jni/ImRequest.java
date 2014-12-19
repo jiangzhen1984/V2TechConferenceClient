@@ -161,8 +161,8 @@ public class ImRequest {
 	 * 
 	 */
 	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
-		V2Log.d("ImRequest.OnUpdateBaseInfo==>" + "nUserID:" + nUserID + ","
-				+ "updatexml:" + updatexml);
+		V2Log.d("ImRequest UI", "OnUpdateBaseInfo ---> nUserID: " + nUserID + " | updatexml: " + updatexml);
+		
 		V2User user = XmlAttributeExtractor.fromXml(nUserID , updatexml);
 		if (user == null) {
 			V2Log.e("ImRequest OnUpdateBaseInfo --> Parsed the xml convert to a V2User Object failed... userID is : " +
@@ -209,6 +209,9 @@ public class ImRequest {
 	 */
 	private void OnUserStatusUpdated(long nUserID, int nType, int nStatus,
 			String szStatusDesc) {
+		V2Log.d("ImRequest UI", "OnUserStatusUpdated ---> nUserID: " + nUserID + " | nType: " + nType
+				 + " | nStatus: " + nStatus + " | szStatusDesc: " + szStatusDesc);
+		
 		if (nUserID == 113 || nUserID == 112) {
 			V2Log.d(" OnUserStatusUpdated--> nUserID:" + nUserID + "  nStatus:"
 					+ nStatus + " nType:" + nType + " szStatusDesc:"

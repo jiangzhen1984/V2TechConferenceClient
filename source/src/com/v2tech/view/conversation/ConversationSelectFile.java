@@ -922,7 +922,9 @@ public class ConversationSelectFile extends Activity {
 				transing = 0;
 				GlobalConfig.mTransingFiles.put(uid, transing);
 			}
-			V2Log.e(TAG, "当前正在传输的文件个数是：" + transing);
+			
+			V2Log.d("TRANSING_File_SIZE" , "ConversationSelectFile notifyListChange --> 用户" + uid
+					+ "当前传输的文件个数：" + transing);
 			if(transing + mCheckedList.size() > MAX_TRANS_FILE_SIZE){
 				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
 				return ;

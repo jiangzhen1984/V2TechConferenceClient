@@ -412,6 +412,12 @@ public class ConfRequest {
 	 */
 	public native void TestConfSipCloseVideo(long nGroupID, long nSipUserID,
 			long nDstUserID, String sDstDevID);
+	
+	/**
+	 * 获得会场内所有通知消息
+	 * @param nGroupID
+	 */
+	public native void notifyAllMessage(long nGroupID);
 
 	// public List<Conf> confs = new ArrayList<Conf>();
 

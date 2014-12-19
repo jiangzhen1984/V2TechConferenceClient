@@ -2100,11 +2100,11 @@ public class JNIService extends Service implements
 		Integer trans = GlobalConfig.mTransingFiles.get(uid);
 		if (isAdd) {
 			trans = trans + 1;
-			V2Log.e("ConversationSelectFile", "用户" + uid
+			V2Log.d("TRANSING_File_SIZE" , "JNIService updateTransFileState --> 用户" + uid
 					+ "增加了一个文件传输，当前正在传输个数是：" + trans);
 		} else {
 			trans = trans - 1;
-			V2Log.e("ConversationSelectFile", "用户" + uid
+			V2Log.e("TRANSING_File_SIZE" , "JNIService updateTransFileState --> 用户" + uid
 					+ "的一个文件传输完毕，当前正在传输个数是：" + trans);
 		}
 		GlobalConfig.mTransingFiles.put(uid, trans);

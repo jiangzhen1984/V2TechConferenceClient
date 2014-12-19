@@ -21,9 +21,9 @@
         android:layout_centerVertical="true"
         android:layout_marginBottom="@dimen/conversation_view_margin"
         android:layout_marginRight="5dp"
-        android:paddingLeft="10dp"
         android:layout_marginTop="@dimen/conversation_view_margin"
-        android:layout_toRightOf="@+id/ib_delete" >
+        android:layout_toRightOf="@+id/ib_delete"
+        android:paddingLeft="10dp" >
         <ImageView
             android:id="@+id/head_image"
             android:layout_width="wrap_content"
@@ -46,7 +46,7 @@
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/group_list_conference_image_view_rl"
         android:layout_marginLeft="30dp"
-        android:layout_marginRight="30dp"
+        android:layout_marginRight="15dp"
         android:layout_toLeftOf="@+id/ll_rightLayout"
         android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
         android:orientation="vertical" >
@@ -72,47 +72,53 @@
             android:textColor="@color/conversation_view_text_color"
             android:textSize="@dimen/common_item_text_size_16" />
     </LinearLayout>
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/ll_rightLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:orientation="horizontal" >
-        <FrameLayout
-            android:id="@+id/fl_rightLayout"
+        android:layout_marginRight="15dp" >
+        <TextView
+            android:id="@+id/access_or_no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginRight="15dp" >
-            <Button
-                android:id="@+id/access"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/button_bg"
-                android:focusable="false"
-                android:text="同意"
-                android:textColor="@color/button_text_color"
-                android:visibility="gone" />
-            <TextView
-                android:id="@+id/access_or_no"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="15dp"
-                android:text=""
-                android:textSize="@dimen/common_item_text_size_16" />
-        </FrameLayout>
-        <Button
+            android:layout_gravity="center"
+            android:paddingLeft="@dimen/button_padding_horizontal"
+            android:paddingRight="@dimen/button_padding_horizontal"
+            android:text="已同意"
+            android:textColor="@color/common_item_text_color"
+            android:textSize="@dimen/common_item_text_size_16"
+            android:visibility="invisible" />
+        <TextView
+            android:id="@+id/authentication_access"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/button_bg"
+            android:gravity="center"
+            android:paddingBottom="@dimen/button_padding_vertical"
+            android:paddingLeft="@dimen/button_padding_horizontal"
+            android:paddingRight="@dimen/button_padding_horizontal"
+            android:paddingTop="@dimen/button_padding_vertical"
+            android:text="@string/crowd_invitation_accept_button_name"
+            android:textColor="@color/button_text_color"
+            android:textSize="@dimen/common_item_text_size_16" />
+        <TextView
             android:id="@+id/b_suer_delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="15dp"
-            android:background="@drawable/button_bg_red"
-            android:focusable="false"
-            android:text="删除"
+            android:layout_gravity="center"
+            android:background="@drawable/rounded_corners_contacts_group_delete_button"
+            android:paddingBottom="@dimen/button_padding_vertical"
+            android:paddingLeft="@dimen/button_padding_horizontal"
+            android:paddingRight="@dimen/button_padding_horizontal"
+            android:paddingTop="@dimen/button_padding_vertical"
+            android:text="@string/activiy_contact_group_item_button_delete"
             android:textColor="@color/common_white_color"
-            android:visibility="visible" />
-    </LinearLayout>
+            android:textSize="@dimen/common_item_text_size_16"
+            android:visibility="invisible" />
+    </FrameLayout>
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="1dp"

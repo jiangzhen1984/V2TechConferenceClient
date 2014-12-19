@@ -812,11 +812,11 @@ public class MessageAuthenticationActivity extends Activity {
 			// R.id.authentication_message
 			TextView tvAuthenticationMessage;
 			// R.id.access
-			Button bAccess;
+			TextView bAccess;
 			// R.id.access_or_no
 			TextView tvAccessOrNo;
 			// R.id.b_suer_delete
-			Button bSuerDelete;
+			TextView bSuerDelete;
 			// R.id.ib_delete
 			ImageView ibDelete;
 		}
@@ -859,12 +859,12 @@ public class MessageAuthenticationActivity extends Activity {
 				viewTag.tvName = (TextView) arg1.findViewById(R.id.name);
 				viewTag.tvAuthenticationMessage = (TextView) arg1
 						.findViewById(R.id.authentication_message);
-				viewTag.bAccess = (Button) arg1.findViewById(R.id.access);
+				viewTag.bAccess = (TextView) arg1.findViewById(R.id.authentication_access);
 				viewTag.tvAccessOrNo = (TextView) arg1
 						.findViewById(R.id.access_or_no);
 				viewTag.ibDelete = (ImageView) arg1
 						.findViewById(R.id.ib_delete);
-				viewTag.bSuerDelete = (Button) arg1
+				viewTag.bSuerDelete = (TextView) arg1
 						.findViewById(R.id.b_suer_delete);
 				arg1.setTag(viewTag);
 			} else {
