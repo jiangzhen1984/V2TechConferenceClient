@@ -104,7 +104,7 @@ public class ImRequest {
 	 * @see #login(String, String, int, int, boolean)
 	 */
 	private void OnLogin(long nUserID, int nStatus, long serverTime, String sDBID , int nResult) {
-		V2Log.d("ImRequest UI", "OnLogin ---> nUserID ---> nUserID" + " | nStatus: " + nStatus + " | serverTime: " + serverTime
+		V2Log.d("ImRequest UI", "OnLogin ---> nUserID: " + nUserID + " | nStatus: " + nStatus + " | serverTime: " + serverTime
 				 + " | sDBID: " + sDBID + " | nResult: " + nResult);
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();

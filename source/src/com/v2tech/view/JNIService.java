@@ -769,7 +769,7 @@ public class JNIService extends Service implements
 			}
 			else{
 				V2Log.d(TAG, "OnApplyJoinGroup --> group id : " + group.id + " group name : " + group.name +
-						" group user id : " + group.creator.uid);
+						" group user id : " + user.uid);
 			}
 			
 			CrowdGroup crowd = (CrowdGroup) GlobalHolder.getInstance()
@@ -1251,6 +1251,13 @@ public class JNIService extends Service implements
 				return;
 			}
 			isAcceptApply = true;
+			
+			Intent i = new Intent();
+			i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("group", new GroupUserObject(
+					V2GlobalEnum.GROUP_TYPE_CROWD, group.id, -1));
+			sendBroadcast(i);
 
 			Intent intent = new Intent();
 			intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
@@ -2047,6 +2054,15 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnFileTransCancel(String szFileID) {
+			VMessage vm = new VMessage(0, 0, null, null);
+			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
+			item.setUuid(szFileID);
+			item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+			int updates = MessageBuilder.updateVMessageItem(mContext, item);
+			V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+			vm = null;
+			item = null;
+			updateTransFileState(szFileID, false);
 		}
 	}
 

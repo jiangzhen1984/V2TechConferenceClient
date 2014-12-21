@@ -29,7 +29,6 @@ import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.conversation.MessageAuthenticationActivity;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
@@ -115,8 +114,8 @@ public class CrowdApplicationActivity extends Activity {
 		mCreatorTV.setText(crowd.getCreator().getName());
 
 		String cid = String.valueOf(crowd.getId());
-		mNoTV.setText(cid.length() > 4 ? cid.substring(5) : cid.substring(1));
-
+//		mNoTV.setText(cid.length() > 4 ? cid.substring(5) : cid.substring(1));
+		mNoTV.setText(cid);
 		CrowdGroup g = new CrowdGroup(crowd.getId(), crowd.getName(),
 				crowd.getCreator(), null);
         if(g.getOwnerUser() != null) {
@@ -172,6 +171,7 @@ public class CrowdApplicationActivity extends Activity {
 		if (isInApplicationMode) {
 			mSendButton.setVisibility(View.VISIBLE);
 			mMessageLy.setVisibility(View.VISIBLE);
+			mApplicationMessage.setText("");
 			mItemLy.setVisibility(View.GONE);
 			mApplicationButton.setVisibility(View.GONE);
 			mTitleTV.setText(R.string.crowd_application_qualification);
@@ -333,6 +333,7 @@ public class CrowdApplicationActivity extends Activity {
                 vq.setQualState(VMessageQualification.QualificationState.INVALID);
                 VerificationProvider.updateCrowdQualicationMessage(vq);
                 isReturnData = true;
+                mReturnButton.performClick();
             } else if(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE.equals(intent
                     .getAction())){
             	VMessageQualification msg = VerificationProvider

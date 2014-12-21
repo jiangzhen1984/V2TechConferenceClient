@@ -224,8 +224,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private boolean isReLoading; // 用于onNewIntent判断是否需要重新加载界面聊天数据
 	private boolean sendFile; // 用于从个人信息中传递过来的文件，只发送一次
 	
-	private MessageBodyType bodyType;
-
 	/**
 	 * Record Audio item flags
 	 */
@@ -236,9 +234,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private boolean isCreate;
 	
 	/**
-	 * for ContactDetail create conversation
+	 * executeConversationCreate only called once
 	 */
-	private boolean isFromContactDetail;
 	private boolean isFirstCall = true;
 
 	@Override
@@ -299,6 +296,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		filter.addAction(PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION);
 		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		registerReceiver(receiver, filter);
 	}
@@ -622,7 +620,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					1);
 		}
 
-		isFromContactDetail = this.getIntent().getBooleanExtra("fromContactDetail", false);
+//		this.getIntent().getBooleanExtra("fromContactDetail", false);
 		initConversationInfos();
 	}
 
@@ -630,7 +628,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		currentLoginUserID = GlobalHolder.getInstance().getCurrentUserId();
 		currentLoginUser = GlobalHolder.getInstance().getUser(currentLoginUserID);
 		if (cov.getConversationType() == Conversation.TYPE_CONTACT) {
-			bodyType = MessageBodyType.SINGLE_USER_TYPE;
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
 			remoteChatUserID = cov.getExtId();
 			remoteChatUser = GlobalHolder.getInstance().getUser(remoteChatUserID);
@@ -650,7 +647,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			mShowCrowdDetailButton.setVisibility(View.GONE);
 			mButtonCreateMetting.setVisibility(View.GONE);
 		} else if (cov.getConversationType() == Conversation.TYPE_GROUP) {
-			bodyType = MessageBodyType.CROWD_TYPE;
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
 			remoteGroupID = cov.getExtId();
 			Group group =  GlobalHolder.getInstance()
@@ -663,7 +659,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			mUserTitleTV.setText(group.getName());
 		} else if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT ||
 				cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
-			bodyType = MessageBodyType.CROWD_TYPE;
 			if(cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT ){
 				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
 				OrgGroup departmentGroup = (OrgGroup) GlobalHolder.getInstance()
@@ -765,7 +760,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 								"palying next aduio item failed , view is null , id is : "
 										+ vm.getId());
 						MessageBodyView bodyView = new MessageBodyView(this,
-								vm, vm.isShowTime() , bodyType);
+								vm, vm.isShowTime());
 						foundView = bodyView;
 						((VMessageAdater) wrapper).setView(bodyView);
 					}
@@ -1926,7 +1921,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		addMessageToContainer(vm);
 		
 		//如果从个人资料界面发送消息，需要回调界面创建该会话
-		if(isFromContactDetail && isFirstCall){
+		if(isFirstCall){
 			isFirstCall = false;
 			CommonCallBack.getInstance().executeConversationCreate(currentConversationViewType
 					, remoteGroupID , remoteChatUserID);
@@ -2291,7 +2286,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		if(showingPopupWindow != null)
 			showingPopupWindow.dissmisPopupWindow();
 		judgeShouldShowTime(m);
-		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime() , bodyType);
+		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
 		mv.setCallback(listener);
 		VMessageAdater adater = new VMessageAdater(m);
 		adater.setView(mv);
@@ -2432,6 +2427,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
 						MessageBuilder.updateVMessageItemToSentFalied(mContext,
 								vm);
+						V2Log.d(TAG, "executeUpdateFileState --> cancel downloading was called!");
 						mChat.updateFileOperation(item,
 								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING, null);
 						break;
@@ -2522,7 +2518,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			VMessage vm = (VMessage) wr.getItemObject();
 			if (convertView == null) {
 				MessageBodyView mv = new MessageBodyView(mContext, vm,
-						vm.isShowTime() , bodyType);
+						vm.isShowTime());
 				mv.setCallback(listener);
 				convertView = mv;
 			} else {
@@ -2604,7 +2600,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					adapterFileIcon(fileItems);
 				}
 				MessageBodyView mv = new MessageBodyView(mContext, vm,
-						vm.isShowTime() , bodyType);
+						vm.isShowTime());
 				mv.setCallback(listener);
 				((VMessageAdater) wrapper).setView(mv);
 			}
@@ -2748,6 +2744,21 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
 					executeUpdateFileState();
+				}
+			} else if (intent.getAction().equals(
+					JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
+				GroupUserObject obj = (GroupUserObject) intent.getExtras().get(
+						"obj");
+				if (obj == null) {
+					V2Log.e(TAG,
+							"JNI_BROADCAST_GROUP_USER_REMOVED --> Update Conversation failed that the user removed ... given GroupUserObject is null");
+					return;
+				}
+				
+				if(currentConversationViewType ==  V2GlobalEnum.GROUP_TYPE_USER &&
+					obj.getmType() == V2GlobalEnum.GROUP_TYPE_CONTACT && 
+					obj.getmUserId() == remoteChatUserID){
+					ConversationP2PTextActivity.super.onBackPressed();
 				}
 			}
 		}

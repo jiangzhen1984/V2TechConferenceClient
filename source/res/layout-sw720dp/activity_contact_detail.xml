@@ -99,8 +99,14 @@
                     android:layout_marginRight="10dp"
                     android:layout_toLeftOf="@+id/refuse"
                     android:background="@drawable/button_bg"
+                    android:gravity="center"
+                    android:paddingBottom="@dimen/crowd_invitation_button_padding_vertical"
+                    android:paddingLeft="@dimen/crowd_invitation_button_padding_horizontal"
+                    android:paddingRight="@dimen/crowd_invitation_button_padding_horizontal"
+                    android:paddingTop="@dimen/crowd_invitation_button_padding_vertical"
                     android:text="同意"
-                    android:textColor="@color/button_text_color" >
+                    android:textColor="@color/button_text_color"
+                    android:textSize="@dimen/common_item_text_size" >
                 </Button>
                 <Button
                     android:id="@+id/refuse"
@@ -110,8 +116,14 @@
                     android:layout_centerVertical="true"
                     android:layout_marginRight="40dp"
                     android:background="@drawable/button_bg"
+                    android:gravity="center"
+                    android:paddingBottom="@dimen/crowd_invitation_button_padding_vertical"
+                    android:paddingLeft="@dimen/crowd_invitation_button_padding_horizontal"
+                    android:paddingRight="@dimen/crowd_invitation_button_padding_horizontal"
+                    android:paddingTop="@dimen/crowd_invitation_button_padding_vertical"
                     android:text="拒绝"
-                    android:textColor="@color/button_text_color" >
+                    android:textColor="@color/button_text_color"
+                    android:textSize="@dimen/common_item_text_size" >
                 </Button>
             </RelativeLayout>
         </RelativeLayout>

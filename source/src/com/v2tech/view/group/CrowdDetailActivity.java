@@ -101,7 +101,8 @@ public class CrowdDetailActivity extends Activity {
 				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
 
 		String cid  = String.valueOf(crowd.getmGId());
-		mNoTV.setText(cid.length() > 4 ? cid.substring(5) : cid.substring(1));
+//		mNoTV.setText(cid.length() > 4 ? cid.substring(5) : cid.substring(1));
+		mNoTV.setText(cid);
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getOwnerUser().getName());
@@ -116,8 +117,7 @@ public class CrowdDetailActivity extends Activity {
 			mButtonText.setText(R.string.crowd_detail_qulification_quit_button);
 		}
 		
-		mMembersCountsTV.setText(crowd.getUsers().size()+"");
-		
+		mMembersCountsTV.setText(String.valueOf(crowd.getUsers().size()));
 		
 		initRules();
 		mRulesRD.setOnCheckedChangeListener(mRulesChangedListener);

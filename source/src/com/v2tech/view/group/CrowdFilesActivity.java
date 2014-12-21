@@ -440,6 +440,7 @@ public class CrowdFilesActivity extends Activity {
 			for (int i = 0; i < mFiles.size(); i++) {
 				if (mFiles.get(i).getId().equals(removedFile.getId())) {
 					VCrowdFile file = mFiles.get(i);
+					V2Log.d(TAG, "handleFileRemovedEvent --> cancel downloading was called!");
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
 							null);
@@ -518,6 +519,7 @@ public class CrowdFilesActivity extends Activity {
 			if (list.get(i).getId().equals(file.getId())) {
 				list.remove(i);
 				if (file.getState() == VCrowdFile.State.DOWNLOADING) {
+					V2Log.d(TAG, "handleFileRemovedEvent --> cancel downloading was called!");
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
 							null);
@@ -785,11 +787,13 @@ public class CrowdFilesActivity extends Activity {
 				if (obj.getmGroupId() == crowd.getmGId()) {
 					for (VCrowdFile f : mFiles) {
 						if (f.getState() == VFile.State.DOWNLOADING) {
+							V2Log.d(TAG, "JNI_BROADCAST_KICED_CROWD --> cancel downloading was called!");
 							service.handleCrowdFile(
 									f,
 									FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
 									null);
 						} else if (f.getState() == VFile.State.UPLOADING) {
+							V2Log.d(TAG, "JNI_BROADCAST_KICED_CROWD --> cancel sending was called!");
 							service.handleCrowdFile(f,
 									FileOperationEnum.OPERATION_CANCEL_SENDING,
 									null);

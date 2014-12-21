@@ -142,7 +142,7 @@ public abstract class Group implements Comparable<Group> {
 
 	public String getStrCreateDate() {
 		if (this.mCreateDate != null) {
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm",
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
 					Locale.getDefault());
 			return df.format(this.mCreateDate);
 		} else {

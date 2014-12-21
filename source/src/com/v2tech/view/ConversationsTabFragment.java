@@ -1077,6 +1077,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			V2Log.e(TAG,
 					"makeNewGroupItem ---> get newest VMessage is null , update failed");
 		GroupLayout viewLayout = new GroupLayout(mContext, cov);
+		viewLayout.update();
 
 		if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION)
 			viewLayout.updateDiscussionLayout();
@@ -1392,7 +1393,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			return;
 		}
 
-		V2Log.e(TAG, "msg cols id is : " + msg.getId());
+		V2Log.d(TAG, "updateCrowdVerificationConversation --> get newest msg cols id is : " + msg.getId());
 		String content = "";
 		ConversationFirendAuthenticationData verification = (ConversationFirendAuthenticationData) verificationMessageItemData;
 		switch (msg.getType()) {

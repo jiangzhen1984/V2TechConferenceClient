@@ -92,7 +92,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	public VideoAttendeeListLayout(Conference conf, Context context) {
 		super(context);
-		this.conf = conf;
+		this.conf = conf; 
 		mList = new ArrayList<Wrapper>();
 		mFilterList = mList;
 		initLayout();
@@ -120,6 +120,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					long id) {
 				if (listener != null) {
 					Wrapper wr = (Wrapper) view.getTag();
+					if(!wr.a.isJoined()){
+						return ;
+					}
+					
 					if (wr.udc == null || !wr.udc.isEnable()) {
 						V2Log.i("User device config is disabled ");
 						Toast.makeText(getContext(),
@@ -292,7 +296,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						R.color.video_attendee_name_color_offline));
 			}
 		} else if (at.isSelf()) {
-			name.setTypeface(null, Typeface.BOLD);
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
 			// set camera icon
@@ -303,7 +306,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		} else {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color_offline));
-
+		}
+		
+		//如果是自己，则名字改成粗体
+		if(at.isSelf()){
+			name.setTypeface(null, Typeface.BOLD);
+		} else {
+			name.setTypeface(null, Typeface.NORMAL);
 		}
 
 		// set image view

@@ -228,7 +228,7 @@ public class VideoDocLayout extends LinearLayout {
 		}
 		TextView content = new TextView(this.getContext());
 		content.setSingleLine(true);
-		content.setEllipsize(TruncateAt.END);
+		content.setEllipsize(TruncateAt.MARQUEE);
 		content.setText(d.getDocName());
 		content.setPadding(10, 10, 10, 10);
 		if (d == mCurrentDoc) {
@@ -449,9 +449,9 @@ public class VideoDocLayout extends LinearLayout {
 				// Merge bitmap
 				mergeBitmapToImage(mBackgroundBitMap, mShapeBitmap);
 				iv.setImageBitmap(mImageViewBitmap);
-				FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(
-						FrameLayout.LayoutParams.MATCH_PARENT,
-						FrameLayout.LayoutParams.MATCH_PARENT);
+//				FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(
+//						FrameLayout.LayoutParams.MATCH_PARENT,
+//						FrameLayout.LayoutParams.MATCH_PARENT);
 //				fl.leftMargin = (container.getWidth() - mImageViewBitmap.getWidth()) / 2;
 //				fl.topMargin = (container.getHeight() - mImageViewBitmap.getHeight()) / 2;
 //				if (fl.leftMargin < 0) {
@@ -460,8 +460,8 @@ public class VideoDocLayout extends LinearLayout {
 //				if (fl.topMargin < 0) {
 //					fl.topMargin = 0;
 //				}
-				container.addView(iv, fl);
-				container.postInvalidate();
+//				container.addView(iv, fl);
+//				container.postInvalidate();
 			} else {
 				// Set interval timer for waiting page download
 				mTimeHanlder.postDelayed(new Runnable() {

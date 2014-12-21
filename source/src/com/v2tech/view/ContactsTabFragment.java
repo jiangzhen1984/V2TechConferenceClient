@@ -232,22 +232,29 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 				Message.obtain(mHandler, UPDATE_GROUP_STATUS).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
 					.equals(intent.getAction())) {
-				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
+				GroupUserObject obj = (GroupUserObject) intent.getExtras().get(
 						"obj");
+				if (obj == null) {
+					V2Log.e(TAG,
+							"JNI_BROADCAST_GROUP_USER_REMOVED --> Update Conversation failed that the user removed ... given GroupUserObject is null");
+					return;
+				}
+				V2Log.e(TAG, "JNI GROUP USER REMOVED COMMING! GroupType : " + obj.getmType() + " GroupID : " + 
+						obj.getmGroupId() + " UserID : " + obj.getmUserId());
 				// FIXME now just support contacts remove do not support
 				if (flag == TAG_CONTACT
-						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
+						&& obj.getmType() == Group.GroupType.CONTACT.intValue()) {
 					User user = GlobalHolder.getInstance().getUser(
-							guo.getmUserId());
-
+							obj.getmUserId());
 					if (user != null) {
 						mContactsContainer.removeItem(user);
 					}
 
-				} else {
+				} else if(flag == TAG_ORG 
+						&& obj.getmType() == Group.GroupType.ORG.intValue()){
 					// update user name
 					mContactsContainer.updateUser(GlobalHolder.getInstance()
-							.getUser(guo.getmUserId()));
+							.getUser(obj.getmUserId()));
 				}
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
