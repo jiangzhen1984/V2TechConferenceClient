@@ -20,6 +20,7 @@ import com.v2tech.R;
 import com.v2tech.db.provider.SearchContentProvider;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.adapter.VMessageAdater;
+import com.v2tech.view.conference.ConferenceMessageBodyView.ActionListener;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
@@ -38,6 +39,8 @@ public class VideoMsgChattingLayout extends LinearLayout {
 	private List<CommonAdapterItemWrapper> messageArray;
 	private CommonAdapter adapter;
 	private Context mContext;
+	private ActionListener actionLisener;
+	
 	public interface ChattingListener {
 		public void requestSendMsg(VMessage vm);
 
@@ -245,7 +248,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			
 			VMessage vm = (VMessage) wr.getItemObject();
 			if (convertView == null) {
-				ConferenceMessageBodyView mv = new ConferenceMessageBodyView(getContext(), vm);
+				ConferenceMessageBodyView mv = new ConferenceMessageBodyView(getContext(), vm, actionLisener);
 				mv.setConf(conf);
 				convertView = mv;
 			} else {

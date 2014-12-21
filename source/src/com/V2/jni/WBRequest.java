@@ -80,7 +80,7 @@ public class WBRequest {
 	 * @param bNotify
 	 * 			激活页是否通知其它成员
 	 */
-	public native void ActivePage(String szWBoardID, long nPageID, int nIndex, boolean bNotify);
+	public native void ActivePage(String szWBoardID, long nUserId, int nPageId, boolean bNotify);
 
 	private long lastgoupid = 0L;
 

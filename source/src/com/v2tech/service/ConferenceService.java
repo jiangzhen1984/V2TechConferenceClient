@@ -76,6 +76,7 @@ public class ConferenceService extends DeviceService {
 	private static final int JNI_REQUEST_QUIT_CONFERENCE = 8;
 	private static final int JNI_REQUEST_INVITE_ATTENDEES = 9;
 	private static final int JNI_REQUEST_GRANT_PERMISSION = 10;
+	private static final int JNI_REQUEST_SHARE_DOC = 11;
 
 	private static final int JNI_UPDATE_CAMERA_PAR = 75;
 
@@ -396,6 +397,33 @@ public class ConferenceService extends DeviceService {
 			AudioRequest.getInstance().PausePlayout();
 		}
 
+	}
+	
+	
+	/**
+	 * Shared image document for conference
+	 * @param conf
+	 * @param file
+	 * @param listener
+	 */
+	public void shareDoc(Conference conf, String file, MessageListener listener) {
+		if (conf == null || file == null) {
+			if (listener != null) {
+				JNIResponse jniRes = new JNIResponse(
+						JNIResponse.Result.INCORRECT_PAR);
+				sendResult(listener, jniRes);
+			}
+			return;
+		}
+		GroupRequest.getInstance().groupCreateDocShare(GroupType.CONFERENCE.intValue(), conf.getId(),
+				file, 0, false);
+		
+
+		if (listener != null) {
+		JNIResponse jniRes = new JNIResponse(
+				RequestPermissionResponse.Result.SUCCESS);
+		sendResult(listener, jniRes);
+		}
 	}
 
 	/**

@@ -78,6 +78,7 @@ public class VideoDocLayout extends LinearLayout {
 	private View mShowDocListButton;
 	private View mRequestFixedPosButton;
 	private ImageView mRequestUpdateSizeButton;
+	private View mSharedDocButton;
 
 	private ScrollView mDocListWindowScroller;
 
@@ -99,6 +100,9 @@ public class VideoDocLayout extends LinearLayout {
 		public void requestDocViewFillParent(View v);
 
 		public void requestDocViewRestore(View v);
+		
+		public void requestShareImageDoc(View v);	
+		
 	};
 
 	public VideoDocLayout(Context context, Map<String, V2Doc> docs,
@@ -132,6 +136,9 @@ public class VideoDocLayout extends LinearLayout {
 		mRequestUpdateSizeButton = (ImageView) view
 				.findViewById(R.id.video_doc_screen_button);
 		mRequestUpdateSizeButton.setOnClickListener(mUpdateSizeListener);
+		
+		mSharedDocButton = view.findViewById(R.id.video_doc_share_button);
+		mSharedDocButton.setOnClickListener(mShareDocButtonListener);
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
@@ -477,6 +484,11 @@ public class VideoDocLayout extends LinearLayout {
 	public void setListener(DocListener listener) {
 		this.listener = listener;
 	}
+	
+	
+	public void requestShowSharedButton(boolean flag) {
+		mSharedDocButton.setVisibility(flag ? View.VISIBLE:View.GONE);
+	}
 
 	/**
 	 * Merge bitmaps to image view bitmap
@@ -774,12 +786,18 @@ public class VideoDocLayout extends LinearLayout {
 					mCurrentDoc.setActivatePageNo(mCurrentDoc
 							.getActivatePageNo() + 1);
 					updateCurrentDoc();
+					if (listener != null) {
+						listener.updateDoc(mCurrentDoc, mCurrentDoc.getActivatePage());
+					}
 				}
 			} else if (view == mPrePageButton) {
 				if (mCurrentDoc.getActivatePageNo() > 1) {
 					mCurrentDoc.setActivatePageNo(mCurrentDoc
 							.getActivatePageNo() - 1);
 					updateCurrentDoc();
+					if (listener != null) {
+						listener.updateDoc(mCurrentDoc, mCurrentDoc.getActivatePage());
+					}
 				}
 			} else {
 				V2Log.e(" Invalid click listener");
@@ -830,6 +848,9 @@ public class VideoDocLayout extends LinearLayout {
 				mCurrentDoc = d;
 				updateCurrentDoc();
 				mDocListWindow.dismiss();
+				if (listener != null) {
+					listener.updateDoc(d, d.getActivatePage());
+				}
 			}
 		}
 
@@ -857,6 +878,16 @@ public class VideoDocLayout extends LinearLayout {
 			}
 		}
 
+	};
+	
+	private OnClickListener mShareDocButtonListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View view) {
+			if (listener != null) {
+				listener.requestShareImageDoc(view);
+			}
+		}
 	};
 
 	private OnClickListener mUpdateSizeListener = new OnClickListener() {

@@ -32,7 +32,7 @@ import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
-public class ConferenceMessageBodyView extends LinearLayout {
+public class ConferenceMessageBodyView extends LinearLayout{
 
 	private VMessage mMsg;
 	private ConferenceGroup conf;
@@ -45,19 +45,26 @@ public class ConferenceMessageBodyView extends LinearLayout {
 	private Context mContext;
 	private ClickListener callback;
 	private boolean isImageItem;
+	private ActionListener actionLisener;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
 	}
+	
+	public interface ActionListener {
+		public void NotChangeTaskToBack();
+	}
 
-	public ConferenceMessageBodyView(Context context, VMessage m) {
+	public ConferenceMessageBodyView(Context context, VMessage m, ActionListener actionLisener) {
 		super(context);
 		this.mMsg = m;
 		this.mContext = context;
+		this.actionLisener = actionLisener;
 		rootView = LayoutInflater.from(context).inflate(
 				R.layout.conference_message_body, null, false);
 		initView();
 		initData();
+		
 	}
 
 	public void setConf(ConferenceGroup conf) {
@@ -99,8 +106,9 @@ public class ConferenceMessageBodyView extends LinearLayout {
 					if (imageItems != null && imageItems.size() > 0) {
 						imageItem = mMsg.getImageItems().get(0);
 					}
-					
-					((ConferenceActivity)mContext).NotChangeTaskToBack();
+					if (actionLisener != null) {
+						actionLisener.NotChangeTaskToBack();
+					}
 					Intent i = new Intent();
 					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);

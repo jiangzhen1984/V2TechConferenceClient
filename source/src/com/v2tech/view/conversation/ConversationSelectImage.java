@@ -234,7 +234,7 @@ public class ConversationSelectImage extends Activity {
 				}
 				else{
 					finish();
-					setResult(CANCEL_SELECT_PICTURE);
+					setResult(Activity.RESULT_CANCELED);
 				}
 			}
 		});

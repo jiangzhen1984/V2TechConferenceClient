@@ -90,6 +90,8 @@ import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
+import com.v2tech.view.conversation.ConversationP2PTextActivity;
+import com.v2tech.view.conversation.ConversationSelectImage;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.AttendeeMixedDevice;
@@ -142,6 +144,11 @@ public class ConferenceActivity extends Activity {
 	private static final int VIDEO_MIX_NOTIFICATION = 70;
 	private static final int TAG_CLOSE_DEVICE = 0;
 	private static final int TAG_OPEN_DEVICE = 1;
+	
+	private static final int FLAG_IS_SYNCING = 1;
+	private static final int FLAG_NO_SYNC = 0;
+	
+	private static final int SUB_ACTIVITY_CODE_SHARE_DOC = 100;
 
 	private PermissionState mControlState = PermissionState.NORMAL;
 
@@ -520,6 +527,9 @@ public class ConferenceActivity extends Activity {
 						Toast.LENGTH_SHORT).show();
 				//Apply speaking
 				mSpeakerIV.performClick();
+				
+				((VideoDocLayout)initDocLayout()).requestShowSharedButton(true);
+				
 			} else if (state == PermissionState.NORMAL) {
 				if (reject) {
 					Toast.makeText(mContext,
@@ -536,6 +546,7 @@ public class ConferenceActivity extends Activity {
 				Toast.makeText(mContext,
 						R.string.confs_toast_release_control_permission,
 						Toast.LENGTH_SHORT).show();
+				((VideoDocLayout)initDocLayout()).requestShowSharedButton(false);
 			}
 		} else if (mControlState == PermissionState.NORMAL) {
 			if (state == PermissionState.APPLYING) {
@@ -862,6 +873,21 @@ public class ConferenceActivity extends Activity {
 		}
 	}
 
+	
+	
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (requestCode == SUB_ACTIVITY_CODE_SHARE_DOC && resultCode != Activity.RESULT_CANCELED) {
+			String filePath = data.getStringExtra("checkedImage");
+			cb.shareDoc(conf, filePath, null);
+		}
+	}
+	
+
+
+
+
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
 
 		@Override
@@ -930,6 +956,14 @@ public class ConferenceActivity extends Activity {
 					requestSubViewFillScreen();
 				} else {
 					requestSubViewFixed();
+				}
+				//If current user is chairman or has get host rights then show shared doc button
+				if (conf.getChairman() == GlobalHolder.getInstance()
+						.getCurrentUserId()
+						|| mControlState == PermissionState.GRANTED) {
+					((VideoDocLayout) content).requestShowSharedButton(true);
+				} else {
+					((VideoDocLayout) content).requestShowSharedButton(false);
 				}
 
 			} else if (v.getTag().equals("invition")) {
@@ -2848,7 +2882,21 @@ public class ConferenceActivity extends Activity {
 
 		@Override
 		public void updateDoc(V2Doc doc, Page p) {
+			//If current user is host
+			if (mControlState == PermissionState.GRANTED) {
+				ds.switchDoc(doc, isSyn == FLAG_IS_SYNCING, null);
+			}
+		}
+		
+		
 
+		@Override
+		public void requestShareImageDoc(View v) {
+			Intent intent = new Intent(mContext,
+					ConversationSelectImage.class);
+			//Make sure current doesn't hide to back;
+			isMoveTaskBack = true;
+			startActivityForResult(intent, SUB_ACTIVITY_CODE_SHARE_DOC);			
 		}
 
 		@Override

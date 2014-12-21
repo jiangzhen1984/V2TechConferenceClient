@@ -8,6 +8,7 @@ import com.V2.jni.WBRequest;
 import com.V2.jni.WBRequestCallback;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.util.V2Log;
+import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
@@ -176,6 +177,18 @@ public class DocumentService extends AbstractHandler {
 		unRegisterListener(KEY_PAGE_CANVAS_NOTIFY_LISTENER, h, what, obj);
 	}
 	
+	
+	public void switchDoc(V2Doc doc, boolean syncFlag, MessageListener listener) {
+		if (doc == null) {
+			if (listener != null) {
+				super.sendResult(listener, new JNIResponse(JNIResponse.Result.INCORRECT_PAR));
+			}
+			return;
+		}
+		
+		V2Log.e(doc.getId()+"   ====>"+ doc.getActivatePage().getNo());
+		WBRequest.getInstance().ActivePage(doc.getId(), doc.getActivatePage().getNo(), doc.getActivatePage().getNo(),  syncFlag);
+	}
 	
 	
 
