@@ -78,15 +78,11 @@ import com.v2tech.service.ChatService;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.FileOperationEnum;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.FileDownLoadErrorIndication;
 import com.v2tech.service.jni.FileTransCannelIndication;
 import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
-import com.v2tech.service.jni.JNIResponse.Result;
-import com.v2tech.service.jni.RequestChatServiceResponse;
-import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
@@ -117,6 +113,7 @@ import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageFileItem;
+import com.v2tech.vo.VMessageFileItem.FileType;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
@@ -127,7 +124,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private final int LOAD_MESSAGE = 2;
 	private final int END_LOAD_MESSAGE = 3;
 	private final int SEND_MESSAGE = 4;
-	private final int SEND_MESSAGE_DONE = 5;
 	private final int SEND_MESSAGE_ERROR = 6;
 	private final int PLAY_NEXT_UNREAD_MESSAGE = 7;
 	private final int REQUEST_DEL_MESSAGE = 8;
@@ -939,7 +935,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 		// mAacEncoder = new AACEncoder(filePath);
 		// mAacEncoder.start();
-		// return true;
+		// return true;+
+		
 
 		mRecorder = new MediaRecorder();
 		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -2673,6 +2670,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						
 						if(result == SEND_MESSAGE_SUCCESS){
 							CommonAdapterItemWrapper wrapper = messageArray.get(i);
+							MessageBodyView bodyView = (MessageBodyView) wrapper.getView();
+							if (bodyView != null)
+								bodyView.updateDate();
 							messageArray.remove(wrapper);
 							messageArray.add(wrapper);
 							scrollToBottom();
@@ -2685,14 +2685,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					for (int j = 0; j < items.size(); j++) {
 						VMessageAbstractItem item = items.get(j);
 						if (uuid.equals(item.getUuid())) {
-//							MessageBodyView mdv = ((MessageBodyView) messageArray
-//									.get(i).getView());
-//							if (mdv != null){
-//								mdv.updateSendingFlag(false);
-//								if(result != SEND_MESSAGE_SUCCESS)
-//									mdv.updateFailedFlag(true);
-//							}
-							
 							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE)
 								item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 							else
@@ -2842,8 +2834,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				break;
 			case SEND_MESSAGE:
 				VMessage sendMessage = (VMessage) msg.obj;
-				mChat.sendVMessage(sendMessage, new MessageListener(
-						this, SEND_MESSAGE_DONE, null));
+				mChat.sendVMessage(sendMessage, null);
 				break;
 			case SEND_MESSAGE_ERROR:
 				break;
@@ -2961,26 +2952,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					}
 				}
 				break;
-			case SEND_MESSAGE_DONE:
-				if (msg.obj instanceof RequestChatServiceResponse) {
-					RequestChatServiceResponse code = (RequestChatServiceResponse) msg.obj;
-					if (code.getCode() != RequestChatServiceResponse.ACCEPTED) {
-						V2Log.e(TAG,
-								"send file failed....get the return code is :"
-										+ code.getCode());
-						String uuid = code.getUuid();
-						if (uuid != null)
-							updateFileTransErrorView(uuid);
-					}
-				} else if (msg.obj instanceof RequestSendMessageResponse) {
-					RequestSendMessageResponse code = (RequestSendMessageResponse) msg.obj;
-					int res = code.getResult().value();
-					if (res != Result.SUCCESS.value())
-						V2Log.e(TAG,
-								"send chating failed....get the return code is :"
-										+ res);
-				}
-				break;
 			case ADAPTER_NOTIFY:
 				adapter.notifyDataSetChanged();
 				break;
@@ -3006,7 +2977,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 		for (VMessageFileItem vMessageFileItem : fileItems) {
 			String fileName = vMessageFileItem.getFileName();
-			int fileType = FileUitls.adapterFileIcon(fileName);
+			FileType fileType = FileUitls.adapterFileIcon(fileName);
 			vMessageFileItem.setFileType(fileType);
 		}
 	}

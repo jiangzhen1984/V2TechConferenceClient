@@ -167,10 +167,12 @@ public class CrowdDetailActivity extends Activity {
 		localReceiver = new LocalReceiver(); 
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		this.registerReceiver(localReceiver, filter);
 	}
 
@@ -391,7 +393,10 @@ public class CrowdDetailActivity extends Activity {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (intent.getAction().equals(JNIService.JNI_BROADCAST_KICED_CROWD)) {
+			if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
+					.equals(intent.getAction())
+					|| intent.getAction().equals(
+							JNIService.JNI_BROADCAST_KICED_CROWD)) {
 				GroupUserObject obj = intent.getParcelableExtra("group");
 				if (obj == null) {
 					V2Log.e("CrowdDetailActivity",

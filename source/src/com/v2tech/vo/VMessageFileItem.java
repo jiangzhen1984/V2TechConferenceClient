@@ -25,35 +25,31 @@ public class VMessageFileItem extends VMessageAbstractItem {
 
 	private float speed;
 
-	private int fileType;
-
-	public int getFileType() {
-		return fileType;
-	}
-
-	public void setFileType(int fileType) {
-		this.fileType = fileType;
-	}
+	private FileType fileType;
 
 	// Always send offline file
 	private int transType = 2;
 
-	public VMessageFileItem(VMessage vm, String filePath , int fileState) {
-		this(vm, null, filePath, null, 0 , fileState, 0, 0, 0, -1 , 2);
+	public VMessageFileItem(VMessage vm, String filePath, int fileState) {
+		this(vm, null, filePath, null, 0, fileState, 0, 0, 0, FileType.UNKNOW,
+				2);
 	}
 
-	public VMessageFileItem(VMessage vm, String fileName , int fileState ,String uuid) {
-		this(vm, uuid, null, fileName, 0 ,fileState, 0, 0, 0, -1, 2);
+	public VMessageFileItem(VMessage vm, String fileName, int fileState,
+			String uuid) {
+		this(vm, uuid, null, fileName, 0, fileState, 0, 0, 0, FileType.UNKNOW,
+				2);
 	}
 
-	public VMessageFileItem(VMessage vm, String fileID, long fileSize, int fileState ,
-			String fileName, int fileType) {
-		this(vm, fileID, null, fileName , fileSize, fileState , 0, 0, 0, fileType, 2);
+	public VMessageFileItem(VMessage vm, String fileID, long fileSize,
+			int fileState, String fileName, FileType fileType) {
+		this(vm, fileID, null, fileName, fileSize, fileState, 0, 0, 0,
+				fileType, 2);
 	}
 
 	public VMessageFileItem(VMessage vm, String uuid, String filePath,
-			String fileName, long fileSize, int fileState , float progress,
-			long downloadedSize, float speed, int fileType, int transType) {
+			String fileName, long fileSize, int fileState, float progress,
+			long downloadedSize, float speed, FileType fileType, int transType) {
 		super(vm);
 		this.uuid = uuid;
 		this.filePath = filePath;
@@ -80,7 +76,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 				this.fileName = filePath.substring(start + 1);
 		}
 
-		if (fileType == -1 && !TextUtils.isEmpty(this.fileName))
+		if (fileType == FileType.UNKNOW && !TextUtils.isEmpty(this.fileName))
 			this.fileType = FileUitls.adapterFileIcon(this.fileName);
 
 		if (fileSize == 0 && !TextUtils.isEmpty(filePath)) {
@@ -126,6 +122,14 @@ public class VMessageFileItem extends VMessageAbstractItem {
 
 	public void setFileName(String fileName) {
 		this.fileName = fileName;
+	}
+
+	public FileType getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(FileType fileType) {
+		this.fileType = fileType;
 	}
 
 	@Override
@@ -226,4 +230,48 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		this.transType = transType;
 	}
 
+	public enum FileType {
+		IMAGE(1), WORD(2), EXCEL(3), PDF(4), PPT(5), ZIP(6), VIS(7), VIDEO(8), PACKAGE(
+				9), HTML(10), AUDIO(11), TEXT(12), UNKNOW(13);
+		private int fileType;
+
+		private FileType(int fileType) {
+			this.fileType = fileType;
+		}
+
+		public static FileType fromInt(int fileType) {
+			switch (fileType) {
+			case 1:
+				return IMAGE;
+			case 2:
+				return WORD;
+			case 3:
+				return EXCEL;
+			case 4:
+				return PDF;
+			case 5:
+				return PPT;
+			case 6:
+				return ZIP;
+			case 7:
+				return VIS;
+			case 8:
+				return VIDEO;
+			case 9:
+				return PACKAGE;
+			case 10:
+				return HTML;
+			case 11:
+				return AUDIO;
+			case 12:
+				return TEXT;
+			default:
+				return UNKNOW;
+			}
+		}
+
+		public int intValue() {
+			return fileType;
+		}
+	}
 }

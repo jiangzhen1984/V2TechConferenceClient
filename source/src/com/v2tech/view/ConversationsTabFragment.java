@@ -574,7 +574,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 
 			boolean isDelete = data.getBooleanExtra("isDelete", false);
-			if (isDelete) {
+			if (isDelete && mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
 				removeConversation(conversationID, false);
 				return;
 			}
@@ -594,7 +594,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					}
 
 					if (vm != null) {
-						cov.setDate(vm.getDateTimeStr());
+						cov.setDate(vm.getStringDate());
 						cov.setDateLong(String.valueOf(vm.getmDateLong()));
 						CharSequence msg = MessageUtil
 								.getMixedConversationContent(mContext, vm);
@@ -1064,7 +1064,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		VMessage vm = MessageLoader.getNewestGroupMessage(mContext, groupType,
 				groupID);
 		if (vm != null) {
-			cov.setDate(vm.getDateTimeStr());
+			cov.setDate(vm.getStringDate());
 			cov.setDateLong(String.valueOf(vm.getmDateLong()));
 			CharSequence newMessage = MessageUtil.getMixedConversationContent(
 					mContext, vm);
@@ -1143,7 +1143,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			case V2GlobalEnum.GROUP_TYPE_USER:
 				if (group != null)
 					existedCov.setName(group.getName());
-				existedCov.setDate(vm.getDateTimeStr());
+				existedCov.setDate(vm.getStringDate());
 				existedCov.setDateLong(String.valueOf(vm.getmDateLong()));
 				CharSequence newMessage = MessageUtil
 						.getMixedConversationContent(mContext, vm);
@@ -1153,6 +1153,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		} else {
 			if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
 				ScrollItem newItem = makeNewGroupItem(groupType, groupID);
+				currentItem = newItem;
 				existedCov = newItem.cov;
 				viewLayout = (GroupLayout) newItem.gp;
 				mItemList.add(0, newItem);
@@ -1251,7 +1252,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				V2Log.e(TAG, "get mixed content is null , VMessage id is :"
 						+ vm.getId());
 			existedCov.setMsg(mixedContent);
-			existedCov.setDate(vm.getFullDateStr());
+			existedCov.setDate(vm.getStandFormatDate());
 			existedCov.setDateLong(String.valueOf(vm.getmDateLong()));
 
 		} else {
@@ -1707,7 +1708,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			@Override
 			public void run() {
 				if (vm != null) {
-					con.setDate(vm.getDateTimeStr());
+					con.setDate(vm.getStringDate());
 					con.setDateLong(String.valueOf(vm.getmDateLong()));
 					CharSequence newMessage = MessageUtil
 							.getMixedConversationContent(mContext, vm);
@@ -1765,7 +1766,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							public void run() {
 								if (vm != null) {
 									department.setName(department.getName());
-									department.setDate(vm.getDateTimeStr());
+									department.setDate(vm.getStringDate());
 									department.setDateLong(String.valueOf(vm
 											.getmDateLong()));
 									CharSequence newMessage = MessageUtil

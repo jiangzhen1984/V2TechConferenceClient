@@ -1,5 +1,6 @@
 package com.v2tech.view.conversation;
 
+import java.util.Date;
 import java.util.List;
 
 import android.content.ClipData;
@@ -53,20 +54,11 @@ import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
+import com.v2tech.vo.VMessageFileItem.FileType;
 
 public class MessageBodyView extends LinearLayout {
 
 	private static final String TAG = "MessageBodyView";
-	private static final int PICTURE = 1;
-	private static final int WORD = 2;
-	private static final int EXCEL = 3;
-	private static final int PDF = 4;
-	private static final int PPT = 5;
-	private static final int ZIP = 6;
-	private static final int VIS = 7;
-	private static final int VIDEO = 8;
-	private static final int SOUND = 9;
-	private static final int OTHER = 10;
 	private static final int MESSAGE_TYPE_TEXT = 11;
 	private static final int MESSAGE_TYPE_NON_TEXT = 12;
 
@@ -163,7 +155,7 @@ public class MessageBodyView extends LinearLayout {
 	private void initData() {
 		
 		if (isShowTime && mMsg.getDate() != null) {
-			timeTV.setText(mMsg.getDateTimeStr());
+			timeTV.setText(mMsg.getStringDate());
 		} else {
 			timeTV.setVisibility(View.GONE);
 		}
@@ -528,10 +520,10 @@ public class MessageBodyView extends LinearLayout {
 
 	}
 
-	private void adapterFileIcon(int fileType, ImageView fileIcon) {
+	private void adapterFileIcon(FileType fileType, ImageView fileIcon) {
 
 		switch (fileType) {
-		case PICTURE:
+		case IMAGE:
 			fileIcon.setBackgroundResource(R.drawable.selectfile_type_picture);
 			break;
 		case WORD:
@@ -555,10 +547,13 @@ public class MessageBodyView extends LinearLayout {
 		case VIDEO:
 			fileIcon.setBackgroundResource(R.drawable.selectfile_type_video);
 			break;
-		case SOUND:
+		case AUDIO:
 			fileIcon.setBackgroundResource(R.drawable.selectfile_type_sound);
 			break;
-		case OTHER:
+		case UNKNOW:
+			fileIcon.setBackgroundResource(R.drawable.selectfile_type_ohter);
+			break;
+		default:
 			fileIcon.setBackgroundResource(R.drawable.selectfile_type_ohter);
 			break;
 		}
@@ -727,6 +722,16 @@ public class MessageBodyView extends LinearLayout {
 		}
 		this.mMsg = vm;
 		initData();
+	}
+	
+	public void updateDate(){
+		mMsg.setDate(new Date(GlobalConfig.getGlobalServerTime()));
+		if (isShowTime && mMsg.getDate() != null) {
+			timeTV.setVisibility(View.VISIBLE);
+			timeTV.setText(mMsg.getStringDate());
+		} else {
+			timeTV.setVisibility(View.GONE);
+		}
 	}
 
 	public void updateView(VMessageFileItem vfi) {
@@ -954,7 +959,7 @@ public class MessageBodyView extends LinearLayout {
 				}
 				else{
                     if(item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADED) {
-                        FileUitls.openFile(getContext(), item.getFilePath());
+                        FileUitls.openFile(item.getFilePath());
                     } else {
                         if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
                             callback.requestDownloadFile(view, item.getVm(), item);

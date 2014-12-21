@@ -960,7 +960,6 @@ public class CrowdFilesActivity extends Activity {
 			}
 
 			updateViewItem(tag);
-
 			return convertView;
 		}
 
@@ -1019,6 +1018,7 @@ public class CrowdFilesActivity extends Activity {
 				item.mProgressLayout.setVisibility(View.VISIBLE);
 				break;
 			case DOWNLOADED:
+			case UPLOADED:
 				item.mFileButton.setText(R.string.crowd_files_name_open_file);
 				item.mFileButton.setVisibility(View.VISIBLE);
 				item.mFileText.setVisibility(View.GONE);
@@ -1026,14 +1026,13 @@ public class CrowdFilesActivity extends Activity {
 				item.mFailedIcon.setVisibility(View.GONE);
 				item.mProgressLayout.setVisibility(View.GONE);
 				break;
-			case UPLOADED:
-				item.mFileText.setText(R.string.crowd_files_name_uploaded);
-				item.mFileText.setVisibility(View.VISIBLE);
-				item.mFileButton.setVisibility(View.GONE);
-				item.mFileProgress.setVisibility(View.GONE);
-				item.mFailedIcon.setVisibility(View.GONE);
-				item.mProgressLayout.setVisibility(View.GONE);
-				break;
+//				item.mFileText.setText(R.string.crowd_files_name_uploaded);
+//				item.mFileText.setVisibility(View.VISIBLE);
+//				item.mFileButton.setVisibility(View.GONE);
+//				item.mFileProgress.setVisibility(View.GONE);
+//				item.mFailedIcon.setVisibility(View.GONE);
+//				item.mProgressLayout.setVisibility(View.GONE);
+//				break;
 			case DOWNLOAD_FAILED:
 			case UPLOAD_FAILED:
 			case REMOVED:
@@ -1091,13 +1090,13 @@ public class CrowdFilesActivity extends Activity {
 				} else {
 					if (file.getState() == VFile.State.DOWNLOAD_FAILED) {
 						file.setState(VFile.State.DOWNLOADING);
-						file.setStartTime(new Date());
+						file.setStartTime(new Date(GlobalConfig.getGlobalServerTime()));
 						service.handleCrowdFile(file,
 								FileOperationEnum.OPERATION_START_DOWNLOAD,
 								null);
 					} else if (file.getState() == VFile.State.UPLOAD_FAILED) {
 						file.setState(VFile.State.UPLOADING);
-						file.setStartTime(new Date());
+						file.setStartTime(new Date(GlobalConfig.getGlobalServerTime()));
 						service.handleCrowdFile(file,
 								FileOperationEnum.OPERATION_START_SEND, null);
 					}
@@ -1191,7 +1190,7 @@ public class CrowdFilesActivity extends Activity {
 				if (file.getState() == VFile.State.UNKNOWN
 						|| file.getState() == VFile.State.DOWNLOAD_FAILED) {
 					file.setState(VFile.State.DOWNLOADING);
-					file.setStartTime(new Date());
+					file.setStartTime(new Date(GlobalConfig.getGlobalServerTime()));
 					((TextView) v)
 							.setText(R.string.crowd_files_button_name_pause);
 					service.handleCrowdFile(file,
@@ -1236,8 +1235,9 @@ public class CrowdFilesActivity extends Activity {
 					v.invalidate();
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_RESUME_SEND, null);
-				} else if (file.getState() == VFile.State.DOWNLOADED) {
-					FileUitls.openFile(mContext, file.getPath());
+				} else if (file.getState() == VFile.State.DOWNLOADED ||
+						file.getState() == VFile.State.UPLOADED) {
+					FileUitls.openFile(file.getPath());
 				}
 				adapter.notifyDataSetChanged();
 			}

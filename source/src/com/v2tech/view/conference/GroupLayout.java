@@ -194,7 +194,7 @@ public class GroupLayout extends LinearLayout {
 			}
 			CharSequence builder = MessageUtil.getMixedConversationContent(
 					getContext(), vm);
-			mConv.setDate(vm.getFullDateStr());
+			mConv.setDate(vm.getStandFormatDate());
 			if (builder != null) {
 				mConv.setMsg(builder);
 			}

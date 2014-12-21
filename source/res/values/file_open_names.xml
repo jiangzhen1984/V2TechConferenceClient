@@ -10,7 +10,9 @@
 
 <array name="fileEndingAudio">
     <item>.mp3</item>
+    <item>.ape</item>
     <item>.wav</item>
+    <item>.wmv</item>
     <item>.ogg</item>
     <item>.midi</item>
 </array>
@@ -20,6 +22,7 @@
     <item>.rmvb</item>
     <item>.avi</item>
     <item>.flv</item>
+    <item>.3gp</item>
 </array>
 
 <array name="fileEndingPackage">
@@ -27,8 +30,11 @@
     <item>.zip</item>
     <item>.rar</item>
     <item>.gz</item>
-    <item>.apk</item>
     <item>.img</item>
+</array>
+
+<array name="fileEndingAPK">
+    <item>.apk</item>
 </array>
 
 <array name="fileEndingWebText">
@@ -66,5 +72,12 @@
 
 <array name="fileEndingPdf">
     <item>.pdf</item>
+</array>
+
+<array name="fileEndingVis">
+    <item>.vss</item>
+    <item>.vsd</item>
+    <item>.vst</item>
+    <item>.vdx</item>
 </array>
 </resources>

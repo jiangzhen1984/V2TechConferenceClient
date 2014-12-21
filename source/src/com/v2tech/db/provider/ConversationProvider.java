@@ -533,7 +533,7 @@ public class ConversationProvider extends DatabaseProvider{
 		}
 		int readState = cur.getInt(cur.getColumnIndex("ReadState"));
 		if (vm != null) {
-			cov.setDate(vm.getDateTimeStr());
+			cov.setDate(vm.getStringDate());
 			cov.setDateLong(String.valueOf(vm.getmDateLong()));
 			CharSequence newMessage = MessageUtil.getMixedConversationContent(
 					mContext, vm);

@@ -89,6 +89,7 @@ import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
+import com.v2tech.vo.VMessageFileItem.FileType;
 import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
@@ -1440,7 +1441,7 @@ public class JNIService extends Service implements
 						fileJNIObject.fileName,
 						VMessageFileItem.STATE_FILE_SENT, fileJNIObject.fileId);
 				item.setFileSize(fileJNIObject.fileSize);
-				item.setFileType(fileJNIObject.fileType);
+				item.setFileType(FileType.fromInt(fileJNIObject.fileType));
 				// save to database
 				vm.setmXmlDatas(vm.toXml());
 				MessageBuilder.saveMessage(mContext, vm);
@@ -2003,7 +2004,7 @@ public class JNIService extends Service implements
 					GlobalConfig.getGlobalServerTime()));
 			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
 					file.fileSize, VMessageFileItem.STATE_FILE_UNDOWNLOAD,
-					file.fileName, file.fileType);
+					file.fileName, FileType.fromInt(file.fileType));
 			vm.setmXmlDatas(vm.toXml());
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();

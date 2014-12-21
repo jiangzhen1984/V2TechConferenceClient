@@ -82,7 +82,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 
 	private void initData() {
 		senderTV.setText(this.mMsg.getFromUser().getName() + "  "
-				+ mMsg.getDateTimeStr());
+				+ mMsg.getStringDate());
 
 		TextView et = new TextView(this.getContext());
 		et.setBackgroundColor(Color.TRANSPARENT);

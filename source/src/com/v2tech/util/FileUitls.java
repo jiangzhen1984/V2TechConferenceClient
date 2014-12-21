@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.v2tech.R;
+import com.v2tech.vo.VMessageFileItem.FileType;
 
 /**
  * 用于打开文件的Utils
@@ -18,46 +19,63 @@ import com.v2tech.R;
  */
 public class FileUitls {
 
-	public static int adapterFileIcon(String fileNames) {
-		String fileName = fileNames.toLowerCase();
-		if (fileName.endsWith(".jpg") || fileName.endsWith(".png")
-				|| fileName.endsWith(".jpeg") || fileName.endsWith(".bmp")
-				|| fileName.endsWith("gif")) {
-			return 1; // PICTURE = 1
-		} else if (fileName.endsWith(".doc")) {
-			return 2; // WORD = 2
-		} else if (fileName.endsWith(".xls")) {
-			return 3; // EXCEL = 3
-		} else if (fileName.endsWith(".pdf")) {
-			return 4; // PDF = 4
-		} else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
-			return 5; // PPT = 5
-		} else if (fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
-			return 6; // ZIP = 6
-		} else if (fileName.endsWith(".vsd") || fileName.endsWith(".vss")
-				|| fileName.endsWith(".vst") || fileName.endsWith(".vdx")) {
-			return 7; // VIS = 7
-		} else if (fileName.endsWith(".mp4") || fileName.endsWith(".rmvb")
-				|| fileName.endsWith(".avi") || fileName.endsWith(".3gp")) {
-			return 8; // VIDEO = 8
-		} else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav")
-				|| fileName.endsWith(".ape") || fileName.endsWith(".wmv")) {
-			return 9; // SOUND = 9
-		} else {
-			return 10; // OTHER = 10
+	public static Context context;
+
+	public static FileType adapterFileIcon(String postfixName) {
+		postfixName = postfixName.toLowerCase();
+		if (checkEndsWithInStringArray(postfixName, context.getResources()
+				.getStringArray(R.array.fileEndingImage))) {
+			return FileType.IMAGE;
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingWebText))) {
+			return FileType.HTML;
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingAPK))) {
+			return FileType.PACKAGE;
+
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingPackage))) {
+			return FileType.ZIP;
+
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingAudio))) {
+			return FileType.AUDIO;
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingVideo))) {
+			return FileType.VIDEO;
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingText))) {
+			return FileType.TEXT;
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingPdf))) {
+			return FileType.PDF;
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingWord))) {
+			return FileType.WORD;
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingExcel))) {
+			return FileType.EXCEL;
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingPPT))) {
+			return FileType.PPT;
+		} else if (checkEndsWithInStringArray(postfixName, context
+				.getResources().getStringArray(R.array.fileEndingVis))) {
+			return FileType.VIS;
+		} {
+			return FileType.UNKNOW;
 		}
 	}
 
-	public static void openFile(Context mContext, String filePath) {
-
+	public static void openFile(String filePath) {
+		filePath = filePath.toLowerCase();
 		if (!TextUtils.isEmpty(filePath))
-			openFile(mContext, new File(filePath));
+			openFile(new File(filePath));
 		else
-			Toast.makeText(mContext, "对不起，这不是文件！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, "没有应用程序可执行此操作", Toast.LENGTH_SHORT).show();
 
 	}
 
-	public static void openFile(Context mContext, File file) {
+	public static void openFile(File file) {
 
 		// 4、通过调用OpenFileUitls类返回的Intent，打开相应的文件
 		if (file != null && file.isFile()) {
@@ -65,55 +83,64 @@ public class FileUitls {
 			int dot = filePath.lastIndexOf(".");
 			String postfixName = filePath.substring(dot);
 			Intent intent;
-			if (checkEndsWithInStringArray(postfixName, mContext.getResources()
+			if (checkEndsWithInStringArray(postfixName, context.getResources()
 					.getStringArray(R.array.fileEndingImage))) {
 				intent = FileUitls.getImageFileIntent(file);
-				mContext.startActivity(intent);
-			} else if (checkEndsWithInStringArray(postfixName, mContext
+				context.startActivity(intent);
+			} else if (checkEndsWithInStringArray(postfixName, context
 					.getResources().getStringArray(R.array.fileEndingWebText))) {
 				intent = FileUitls.getHtmlFileIntent(file);
-				mContext.startActivity(intent);
-			} else if (checkEndsWithInStringArray(postfixName, mContext
-					.getResources().getStringArray(R.array.fileEndingPackage))) {
+				context.startActivity(intent);
+			} else if (checkEndsWithInStringArray(postfixName, context
+					.getResources().getStringArray(R.array.fileEndingAPK))) {
 				intent = FileUitls.getApkFileIntent(file);
-				mContext.startActivity(intent);
+				context.startActivity(intent);
 
-			} else if (checkEndsWithInStringArray(postfixName, mContext
+			} else if (checkEndsWithInStringArray(postfixName, context
+					.getResources().getStringArray(R.array.fileEndingPackage))) {
+				intent = FileUitls.getApplicationFileIntent(file);
+				context.startActivity(intent);
+
+			} else if (checkEndsWithInStringArray(postfixName, context
 					.getResources().getStringArray(R.array.fileEndingAudio))) {
 				intent = FileUitls.getAudioFileIntent(file);
-				mContext.startActivity(intent);
-			} else if (checkEndsWithInStringArray(postfixName, mContext
+				context.startActivity(intent);
+			} else if (checkEndsWithInStringArray(postfixName, context
 					.getResources().getStringArray(R.array.fileEndingVideo))) {
 				intent = FileUitls.getVideoFileIntent(file);
-				mContext.startActivity(intent);
-			} else if (checkEndsWithInStringArray(postfixName, mContext
+				context.startActivity(intent);
+			} else if (checkEndsWithInStringArray(postfixName, context
 					.getResources().getStringArray(R.array.fileEndingText))) {
 				intent = FileUitls.getTextFileIntent(file);
-				mContext.startActivity(intent);
-			} else if (checkEndsWithInStringArray(postfixName, mContext
+				context.startActivity(intent);
+			} else if (checkEndsWithInStringArray(postfixName, context
 					.getResources().getStringArray(R.array.fileEndingPdf))) {
 				intent = FileUitls.getPdfFileIntent(file);
-				mContext.startActivity(intent);
-			} else if (checkEndsWithInStringArray(postfixName, mContext
+				context.startActivity(intent);
+			} else if (checkEndsWithInStringArray(postfixName, context
 					.getResources().getStringArray(R.array.fileEndingWord))) {
 				intent = FileUitls.getWordFileIntent(file);
-				mContext.startActivity(intent);
-			} else if (checkEndsWithInStringArray(postfixName, mContext
+				context.startActivity(intent);
+			} else if (checkEndsWithInStringArray(postfixName, context
 					.getResources().getStringArray(R.array.fileEndingExcel))) {
 				intent = FileUitls.getExcelFileIntent(file);
-				mContext.startActivity(intent);
-			} else if (checkEndsWithInStringArray(postfixName, mContext
+				context.startActivity(intent);
+			} else if (checkEndsWithInStringArray(postfixName, context
 					.getResources().getStringArray(R.array.fileEndingPPT))) {
 				intent = FileUitls.getPPTFileIntent(file);
-				mContext.startActivity(intent);
+				context.startActivity(intent);
+			} else if (checkEndsWithInStringArray(postfixName, context
+					.getResources().getStringArray(R.array.fileEndingVis))) {
+				intent = FileUitls.getApplicationFileIntent(file);
+				context.startActivity(intent);
 			} else
-				Toast.makeText(mContext, "无法打开，请安装相应的软件！", Toast.LENGTH_SHORT)
+				Toast.makeText(context, "没有应用程序可执行此操作", Toast.LENGTH_SHORT)
 						.show();
 		} else
-			Toast.makeText(mContext, "对不起，这不是文件！", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, "没有应用程序可执行此操作", Toast.LENGTH_SHORT).show();
 
 	}
-
+	
 	// 3、定义用于检查要打开的文件的后缀是否在遍历后缀数组中
 	private static boolean checkEndsWithInStringArray(String checkItsEnd,
 			String[] fileEndings) {
@@ -123,7 +150,7 @@ public class FileUitls {
 		}
 		return false;
 	}
-
+	
 	// android获取一个用于打开HTML文件的intent
 	public static Intent getHtmlFileIntent(File file) {
 		Uri uri = Uri.parse(file.toString()).buildUpon()
@@ -225,7 +252,7 @@ public class FileUitls {
 		intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
 		return intent;
 	}
-
+	
 	// android获取一个用于打开apk文件的intent
 	public static Intent getApkFileIntent(File file) {
 		Intent intent = new Intent();
@@ -233,6 +260,16 @@ public class FileUitls {
 		intent.setAction(android.content.Intent.ACTION_VIEW);
 		intent.setDataAndType(Uri.fromFile(file),
 				"application/vnd.android.package-archive");
+		return intent;
+	}
+
+	// android获取一个用于打开apk文件的intent
+	public static Intent getApplicationFileIntent(File file) {
+		Intent intent = new Intent();
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+		intent.setAction(android.content.Intent.ACTION_VIEW);
+		intent.setDataAndType(Uri.fromFile(file),
+				"application/*");
 		return intent;
 	}
 }

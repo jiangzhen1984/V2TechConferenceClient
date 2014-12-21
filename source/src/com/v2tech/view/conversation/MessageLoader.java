@@ -33,6 +33,7 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
+import com.v2tech.vo.VMessageFileItem.FileType;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VideoBean;
 
@@ -690,7 +691,7 @@ public class MessageLoader {
 				}
 				current = new VMessage(type, 0, fromUser, new Date(date));
 				fileItems.add(new VMessageFileItem(current, uuid, filePath, null, fileSize, fileState,
-						0f, 0l, 0f, -1, 2));
+						0f, 0l, 0f, FileType.UNKNOW, 2));
 			}
 			return fileItems;
 		} catch (Exception e) {
@@ -1043,7 +1044,15 @@ public class MessageLoader {
 
 				loadImageMessageById(vm, mContext);
 				loadAudioMessageById(vm, mContext);
-				loadFileMessageById(vm, mContext);
+				boolean flag = loadFileMessageById(vm, mContext);
+				if(flag && vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD){
+					VMessageFileItem fileItem = vm.getFileItems().get(0);
+					if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENT){
+						if(vm.getFromUser() != null && vm.getFromUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId()){
+							continue;
+						}
+					}
+				}
 				vimList.add(vm);
 			}
 			return vimList;
@@ -1902,16 +1911,17 @@ public class MessageLoader {
 					item.setFileSize(fileSize);
 				}
 			}
+			return true;
 		}
 		catch(Exception e){
 			e.printStackTrace();
 			CrashHandler.getInstance().saveCrashInfo2File(e);
+			return false;
 		}
 		finally{
 			if (mCur != null)
 				mCur.close();
 		}
-		return true;
 	}
 
 	/**

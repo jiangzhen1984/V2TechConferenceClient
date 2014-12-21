@@ -27,7 +27,6 @@ import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
-import com.v2tech.service.jni.RequestSendMessageResponse;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.UserChattingObject;
@@ -73,7 +72,9 @@ import com.v2tech.vo.VMessageImageItem;
  * 
  */
 public class ChatService extends DeviceService {
-
+	
+	private static final String TAG = "ChatService";
+	
 	private AudioRequestCallback callback;
 
 	private VideoRequestCallback videoCallback;
@@ -189,7 +190,7 @@ public class ChatService extends DeviceService {
 	 */
 	public void sendVMessage(final VMessage msg, final MessageListener caller) {
 		if (msg == null) {
-			V2Log.w(" ToUser is null can not send message");
+			V2Log.e(TAG , "Send Message fail ! Because VMessage Object is null ! please check!");
 			return;
 		}
 		thread.post(new Runnable() {
@@ -209,12 +210,17 @@ public class ChatService extends DeviceService {
 						msg.getToUser() == null ? 0 : msg.getToUser()
 								.getmUserId(), msg.getUUID(), msg.toXml(),
 						msg.getTextContent().length());
-                V2Log.d("ChatService UI", "OnSendChatStarted ---> eGroupType :"
-                        + msg.getMsgCode() + " | nGroupID: " + msg.getGroupId());
+                V2Log.d(TAG , "sendVMessage --> eGroupType :"+ msg.getMsgCode() 
+                        + " | nGroupID: " + msg.getGroupId()
+                        + " | nFromUserID: " + msg.getFromUser() == null ? "null" : msg.getFromUser().getmUserId()
+                        + " | nToUserID: " + msg.getToUser() == null ? "null" : msg.getToUser().getmUserId()
+                        + " | sSeqID: " + msg.getUUID()
+                        + " | sXml: " + msg.toXml());
 
 				// send image message
 				List<VMessageImageItem> imageItems = msg.getImageItems();
-				for (VMessageImageItem item : imageItems) {
+				for (int i = 0 ; imageItems != null && i < imageItems.size() ; i++) {
+					VMessageImageItem item = imageItems.get(i);
 					// byte[] data = item.loadImageData();
 					ChatRequest.getInstance().sendBinaryMessage(
 							msg.getMsgCode(),
@@ -222,8 +228,9 @@ public class ChatService extends DeviceService {
 							msg.getToUser() == null ? 0 : msg.getToUser()
 									.getmUserId(), 2, item.getUuid(),
 							item.getFilePath(), 0);
-                    V2Log.d("ChatService UI", "OnSendBinaryStarted ---> eGroupType :"
-                            + msg.getMsgCode() + " | nGroupID: " + msg.getGroupId());
+                    V2Log.d(TAG, "sendVMessageImageBinary ---> eGroupType :"+ msg.getMsgCode() 
+                    		+ " | nGroupID: " + msg.getGroupId()
+                    		+ " | sSeqID: " + item.getUuid());
 				}
 
 				// send aduio message
@@ -236,19 +243,11 @@ public class ChatService extends DeviceService {
 									.getmUserId(), 3,
 							audioList.get(i).getUuid(),
 							audioList.get(i).getAudioFilePath(), 0);
-                    V2Log.d("ChatService UI", "OnSendBinaryStarted ---> eGroupType :"
-                            + msg.getMsgCode() + " | nGroupID: " + msg.getGroupId());
-				}
-
-				if (caller != null && caller.getHandler() != null) {
-					JNIResponse jniRes = new RequestSendMessageResponse(
-							JNIResponse.Result.SUCCESS);
-					sendResult(caller, jniRes);
-				} else {
-					V2Log.w(" requester don't expect response");
+                    V2Log.d(TAG, "sendVMessageAudioBinary ---> eGroupType :"+ msg.getMsgCode() 
+                    		+ " | nGroupID: " + msg.getGroupId()
+                    		+ " | sSeqID: " + audioList.get(i).getUuid());
 				}
 			}
-
 		});
 	}
 
@@ -260,7 +259,7 @@ public class ChatService extends DeviceService {
 						RequestChatServiceResponse.Result.INCORRECT_PAR);
 				sendResult(caller, resp);
 			} else {
-				V2Log.e("Incorrect parameters");
+				V2Log.e(TAG , "Incorrect parameters");
 			}
 			return;
 		}
@@ -277,10 +276,6 @@ public class ChatService extends DeviceService {
 			}
 
 		}
-		RequestChatServiceResponse resp = new RequestChatServiceResponse(
-				RequestChatServiceResponse.Result.SUCCESS);
-		resp.setUuid(vm.getUUID());
-		sendResult(caller, resp);
 	}
 
 	/**

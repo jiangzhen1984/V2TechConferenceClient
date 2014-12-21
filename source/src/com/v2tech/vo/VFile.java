@@ -4,6 +4,9 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.Date;
 
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.GlobalConfig;
+
 public class VFile {
 
 	protected String id;
@@ -88,11 +91,11 @@ public class VFile {
 	
 	public String getSpeedStr() {
 		if (startTime == null) {
-			startTime = new Date();
+			startTime = new Date(GlobalConfig.getGlobalServerTime());
 			return "";
 		}
 		
-		int divder = (int)(System.currentTimeMillis() - startTime.getTime()) /1000;
+		int divder = (int)(GlobalConfig.getGlobalServerTime() - startTime.getTime()) /1000;
 		long speed = (proceedSize / (divder == 0? 1 :divder) );
 		
 		Format df = new DecimalFormat("#.0");

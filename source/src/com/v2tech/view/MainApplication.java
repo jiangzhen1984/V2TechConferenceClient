@@ -44,6 +44,7 @@ import com.v2tech.db.provider.DatabaseProvider;
 import com.v2tech.util.AlgorithmUtil;
 import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.CrashHandler;
+import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.LogService;
 import com.v2tech.util.Notificator;
@@ -96,6 +97,7 @@ public class MainApplication extends Application {
 		MessageBuilder.init(getApplicationContext());
 		MessageLoader.context = getApplicationContext();
         BitmapUtil.context = getApplicationContext();
+        FileUitls.context = getApplicationContext();
 
 		// Load native library
 		System.loadLibrary("event");
