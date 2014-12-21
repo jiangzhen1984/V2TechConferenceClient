@@ -22,6 +22,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.text.TextUtils;
+import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -219,6 +220,8 @@ public class VideoDocLayout extends LinearLayout {
 			return null;
 		}
 		TextView content = new TextView(this.getContext());
+		content.setSingleLine(true);
+		content.setEllipsize(TruncateAt.END);
 		content.setText(d.getDocName());
 		content.setPadding(10, 10, 10, 10);
 		if (d == mCurrentDoc) {

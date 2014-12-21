@@ -85,6 +85,7 @@ import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.PermissionRequestIndication;
 import com.v2tech.service.jni.PermissionUpdateIndication;
 import com.v2tech.util.DensityUtils;
+import com.v2tech.view.ConversationsTabFragment;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
@@ -2014,7 +2015,8 @@ public class ConferenceActivity extends Activity {
 				public void onClick(View v) {
 					d.dismiss();
 					VerificationProvider.deleteCrowdVerificationMessage(conf.getId());
-					finish();
+					setResult(ConversationsTabFragment.CONFERENCE_ENTER_CODE);
+					ConferenceActivity.super.onBackPressed();
 				}
 
 			});

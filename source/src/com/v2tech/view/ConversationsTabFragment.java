@@ -132,7 +132,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private static final int UPDATE_VERIFICATION_MESSAGE = 17;
 	private static final int QUIT_DISCUSSION_BOARD_DONE = 18;
 
-	private static final int CONFERENCE_ENTER_CODE = 100;
+	public static final int CONFERENCE_ENTER_CODE = 100;
 
 	private View rootView;
 
@@ -178,7 +178,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 * This tag is used to save current click the location of item.
 	 */
 	private int currentPosition;
-
+	
 	/**
 	 * The two special Items that were showed in Message Interface , them don't
 	 * saved in database. VerificationItem item used to display verification
@@ -216,6 +216,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	private View subTabLayout;
 
+	private Conference currentEntered;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -2229,8 +2231,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 
 	}
-
-	private Conference currentEntered;
 
 	private void startConferenceActivity(Conference conf) {
 		// Set current state to in meeting state
