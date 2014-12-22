@@ -8,21 +8,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" >
 
-        <ImageView
-            android:id="@+id/arrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginBottom="-2dp"
-            android:layout_marginLeft="15dp"
-            android:src="@drawable/camera_setting_window_arrow_bg" />
-
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/arrow"
             android:background="@drawable/common_pop_up_window_bg"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingLeft="20dp"
+            android:paddingRight="10dp" >
 
             <TextView
                 android:id="@+id/textView1"
@@ -39,8 +32,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
                 android:layout_below="@+id/textView1"
-                android:layout_marginBottom="15dp"
-                android:layout_marginTop="15dp"
                 android:max="100"
                 android:paddingBottom="20dp"
                 android:paddingLeft="10dp"
@@ -57,8 +48,8 @@
                 android:layout_alignTop="@+id/camera_setting_quality"
                 android:layout_toRightOf="@+id/camera_setting_quality"
                 android:paddingBottom="10dp"
-                android:paddingTop="10dp"
-                android:paddingRight="10dp" >
+                android:paddingRight="10dp"
+                android:paddingTop="10dp" >
 
                 <TextView
                     android:layout_width="wrap_content"

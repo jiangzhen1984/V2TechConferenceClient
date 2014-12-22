@@ -12,8 +12,10 @@ public class ConferenceGroup extends Group {
 	public ConferenceGroup(long mGId, String mName, User mOwner,
 			Date createDate, User chairMan) {
 		super(mGId, GroupType.CONFERENCE, mName, mOwner, createDate);
-		this.mChairMan = chairMan;
+		this.setmChairMan(chairMan);
 	}
+	
+	
 
 	public void setVoiceActivation(boolean isVoiceActivation) {
 		this.isVoiceActivation = isVoiceActivation;
@@ -111,5 +113,19 @@ public class ConferenceGroup extends Group {
 	public String toXml() {
 		return null;
 	}
+
+
+
+	public User getmChairMan() {
+		return mChairMan;
+	}
+
+
+
+	public void setmChairMan(User mChairMan) {
+		this.mChairMan = mChairMan;
+	}
+	
+	
 
 }

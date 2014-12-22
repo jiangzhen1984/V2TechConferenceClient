@@ -16,8 +16,9 @@ import com.V2.jni.util.V2Log;
  */
 public class Attendee implements Comparable<Attendee>{
 	
-	public static final int CONFERENCE_PERMISSION_CONTROL = 0x0001;
-	public static final int CONFERENCE_PERMISSION_SPEAKING = 0x0002;
+	public static final int LECTURE_STATE_NOT = 0;
+	public static final int LECTURE_STATE_APPLYING = 1;
+	public static final int LECTURE_STATE_GRANTED = 2;
 	
 	public final static int  TYPE_ATTENDEE = 1;
 	public final static int  TYPE_MIXED_VIDEO = 2;
@@ -27,7 +28,8 @@ public class Attendee implements Comparable<Attendee>{
 	private boolean isSelf;
 	protected boolean isChairMan;
 	protected boolean isJoined;
-	private int mPermission;
+	private boolean isSpeaking;
+	private int lectureState=LECTURE_STATE_NOT;
 	
 	protected Attendee() {
 		
@@ -206,31 +208,20 @@ public class Attendee implements Comparable<Attendee>{
 	}
 
 	public boolean isSpeaking() {
-		return (mPermission & CONFERENCE_PERMISSION_SPEAKING) == CONFERENCE_PERMISSION_SPEAKING;
+		return isSpeaking;
 	}
 	
-	public void setSpeakingState(boolean state) {
-		if (!state) {
-			mPermission &= (~CONFERENCE_PERMISSION_SPEAKING);
-		} else {
-			mPermission |= CONFERENCE_PERMISSION_SPEAKING;
-		}
+	public void setSpeakingState(boolean isSpeaking) {
+		this.isSpeaking=isSpeaking;
 	}
 	
-	public boolean isControl() {
-		return (mPermission & CONFERENCE_PERMISSION_CONTROL) == CONFERENCE_PERMISSION_CONTROL;
+	public int getLectureState() {
+		return lectureState;
 	}
 	
-	public void setControlState(boolean state) {
-		if (!state) {
-			mPermission &= (~CONFERENCE_PERMISSION_CONTROL);
-		} else {
-			mPermission |= CONFERENCE_PERMISSION_CONTROL;
-		}
+	public void setLectureState(int lectureState) {
+		this.lectureState=lectureState;
 	}
-
-	
-
 
 	@Override
 	public int compareTo(Attendee attendee) {

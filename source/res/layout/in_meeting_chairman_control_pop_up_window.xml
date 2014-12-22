@@ -22,16 +22,16 @@
                 android:layout_height="wrap_content"
                 android:button="@null"
                 android:drawableLeft="@drawable/check_mark_space"
-                android:drawablePadding="10dp"
+                android:drawablePadding="5dp"
                 android:editable="false"
                 android:enabled="true"
                 android:paddingBottom="5dp"
-                android:paddingLeft="10dp"
+                android:paddingLeft="5dp"
                 android:paddingRight="10dp"
                 android:paddingTop="5dp"
                 android:text="会场静音"
-                android:textSize="@dimen/common_item_text_size_16"
-                android:textColor="@color/common_item_text_color_black" />
+                android:textColor="@color/common_item_text_color_black"
+                android:textSize="@dimen/common_item_text_size_16" />
 
             <TextView
                 android:id="@+id/textView1"
@@ -46,34 +46,53 @@
                 android:button="@null"
                 android:checked="true"
                 android:drawableLeft="@drawable/check_state"
-                android:drawablePadding="10dp"
+                android:drawablePadding="5dp"
                 android:paddingBottom="5dp"
-                android:paddingLeft="10dp"
+                android:paddingLeft="5dp"
                 android:paddingRight="10dp"
                 android:paddingTop="5dp"
                 android:text="邀请其他人"
-                android:textSize="@dimen/common_item_text_size_16"
-                android:textColor="@color/common_item_text_color_black" />
-            
-             <TextView
+                android:textColor="@color/common_item_text_color_black"
+                android:textSize="@dimen/common_item_text_size_16" />
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@color/common_gray_color_cd" />
-            <TextView
-                android:id="@+id/conference_message"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:drawablePadding="10dp"
-                android:paddingBottom="5dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="5dp"
-                android:textSize="@dimen/common_item_text_size_16"
-                android:text="@string/conference_chair_man_control_window_item_message"
-                android:textColor="@color/common_item_text_color_black" />
 
+            <RelativeLayout
+                android:id="@+id/conference_message_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <CheckBox
+                    android:id="@+id/conference_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:button="@null"
+                    android:drawableLeft="@drawable/check_mark_space"
+                    android:drawablePadding="5dp"
+                    android:editable="false"
+                    android:enabled="true"
+                    android:paddingBottom="5dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="10dp"
+                    android:paddingTop="5dp"
+                    android:text="@string/conference_chair_man_control_window_item_message"
+                    android:textColor="@color/common_item_text_color_black"
+                    android:textSize="@dimen/common_item_text_size_16" />
+
+                <ImageView
+                    android:id="@+id/host_request_msg_notificator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="false"
+                    android:layout_alignParentRight="false"
+                    android:layout_alignParentTop="true"
+                    android:layout_toRightOf="@+id/conference_message"
+                    android:src="@drawable/red_nofificator" />
+
+            </RelativeLayout>
         </LinearLayout>
 
         <ImageView
@@ -83,7 +102,6 @@
             android:layout_marginBottom="-2dp"
             android:layout_marginLeft="15dp"
             android:src="@drawable/camera_setting_window_arrow_bg" />
-
     </RelativeLayout>
 
 </RelativeLayout>

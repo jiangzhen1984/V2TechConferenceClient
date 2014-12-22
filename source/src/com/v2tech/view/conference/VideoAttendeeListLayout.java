@@ -17,6 +17,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -232,10 +233,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		TextView nameTV = (TextView) view
 				.findViewById(R.id.video_attendee_device_name);
-		ImageView cameraIV = (ImageView) view
-				.findViewById(R.id.video_attendee_device_camera_icon);
+		ImageView lectureStateIV = (ImageView) view
+				.findViewById(R.id.video_attendee_device_lectrue_state_icon);
 		ImageView spIV = (ImageView) view
 				.findViewById(R.id.video_attendee_device_speaker_icon);
+		ImageView cameraIV = (ImageView) view
+				.findViewById(R.id.video_attendee_device_camera_icon);
 
 		if (wr.sortFlag != DEFAULT_DEVICE_FLAG) {
 			nameTV.setText("     "
@@ -247,6 +250,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 		if (wr.udc != null) {
+
+			Log.i("20141220 2",
+					"updateView() wr.udc.id =" + wr.udc.getDeviceID()
+							+ " wr.udc.isShowing =" + wr.udc.isShowing());
+
 			if (!wr.udc.isShowing()) {
 				view.setBackgroundColor(Color.WHITE);
 			} else {
@@ -258,7 +266,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 
 		// Set text color and camera icon
-		setStyle(wr, nameTV, cameraIV, spIV);
+		setStyle(wr, nameTV, lectureStateIV, spIV, cameraIV);
 	}
 
 	/**
@@ -270,18 +278,19 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param speaker
 	 *            speaker image view
 	 */
-	private void setStyle(Wrapper wr, TextView name, ImageView iv,
-			ImageView speaker) {
+	private void setStyle(Wrapper wr, TextView name, ImageView lectureStateIV,
+			ImageView speaker, ImageView iv) {
 		Attendee at = wr.a;
 		UserDeviceConfig udc = wr.udc;
 
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
-			if (at.isSelf() || at.isJoined())
+			if (at.isSelf() || at.isJoined()) {
 				name.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_chair_man_name_color));
-			else
+			} else {
 				name.setTextColor(getContext().getResources().getColor(
 						R.color.video_attendee_name_color_offline));
+			}
 		} else if (at.isSelf()) {
 			name.setTypeface(null, Typeface.BOLD);
 			name.setTextColor(getContext().getResources().getColor(
@@ -302,10 +311,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			iv.setImageResource(R.drawable.camera);
 		} else if (at.isJoined()) {
 			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
-				if (udc != null)
+				if (udc != null) {
 					iv.setImageResource(R.drawable.camera);
-				else
+				} else {
 					iv.setImageResource(R.drawable.camera_pressed);
+				}
 			} else {
 				iv.setImageResource(R.drawable.mixed_video_camera);
 			}
@@ -319,20 +329,47 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			speaker.setVisibility(View.INVISIBLE);
 		}
 
+		// if (udc != null && !udc.isEnable()
+		// && at.getType() == Attendee.TYPE_ATTENDEE && at.isSelf()) {
+		// iv.setImageResource(R.drawable.camera_pressed);
+		// }
+
 		if (udc != null && !udc.isEnable()
-				&& at.getType() == Attendee.TYPE_ATTENDEE && at.isSelf()) {
+				&& at.getType() == Attendee.TYPE_ATTENDEE) {
 			iv.setImageResource(R.drawable.camera_pressed);
 		}
 
-		// Update speaking animation
-		if (speaker.getVisibility() == View.VISIBLE) {
+		if (wr.sortFlag == DEFAULT_DEVICE_FLAG) {
+			// Update lecture state display
+			switch (at.getLectureState()) {
+			case Attendee.LECTURE_STATE_NOT:
+				lectureStateIV.setVisibility(View.INVISIBLE);
+				break;
+			case Attendee.LECTURE_STATE_APPLYING:
+				lectureStateIV.setVisibility(View.VISIBLE);
+				lectureStateIV
+						.setImageResource(R.drawable.lecture_state_applaying);
+				break;
+			case Attendee.LECTURE_STATE_GRANTED:
+				lectureStateIV.setVisibility(View.VISIBLE);
+				lectureStateIV
+						.setImageResource(R.drawable.lecture_state_granted);
+				break;
+			}
+
+			// Update speaking display
 			if (!at.isSpeaking()) {
-				speaker.setImageResource(R.drawable.conf_speaker);
+				speaker.setVisibility(View.INVISIBLE);
 			} else {
+				speaker.setVisibility(View.VISIBLE);
 				speaker.setImageResource(R.drawable.conf_speaking);
 				((AnimationDrawable) speaker.getDrawable()).start();
 			}
+		} else {
+			lectureStateIV.setVisibility(View.INVISIBLE);
+			speaker.setVisibility(View.INVISIBLE);
 		}
+
 	}
 
 	public void setAttendsList(Set<Attendee> l) {
@@ -369,7 +406,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
 			mList.add(new Wrapper(at, dList.get(0), DEFAULT_DEVICE_FLAG));
 		} else {
-//			boolean isNew = false;
+			// boolean isNew = false;
 			int index = 0;
 			if (mList.size() > 0 && dList != null && dList.size() > 0) {
 				for (int i = 0; i < mList.size(); i++) {
@@ -383,20 +420,20 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			}
 
-            if(dList != null) {
-                for (int i = 1; i < dList.size(); i++) {
-                    if (index + 1 == mList.size() - 1) {
-                        mList.add(new Wrapper(at, dList.get(i), i));
-                    } else {
-                        mList.add(index + 1, new Wrapper(at, dList.get(i), i));
-                    }
-                    index++;
-//                    isNew = true;
-                }
-            }
+			if (dList != null) {
+				for (int i = 1; i < dList.size(); i++) {
+					if (index + 1 == mList.size() - 1) {
+						mList.add(new Wrapper(at, dList.get(i), i));
+					} else {
+						mList.add(index + 1, new Wrapper(at, dList.get(i), i));
+					}
+					index++;
+					// isNew = true;
+				}
+			}
 
-//			if (isNew)
-//				mAttendeeCount++;
+			// if (isNew)
+			// mAttendeeCount++;
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
 			}
@@ -494,6 +531,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			return;
 		}
 
+		// 再添加用户的设备信息
 		for (int i = 0; i < list.size(); i++) {
 			UserDeviceConfig udc = list.get(i);
 			if (udc.getBelongsAttendee() == null) {
@@ -505,15 +543,17 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				mList.add(++index, new Wrapper(defaultWrapper.a, udc, 1));
 			}
 		}
-		//FIXME update status for already devices
+
+		// FIXME update status for already devices
 		adapter.notifyDataSetChanged();
 
 	}
 
-    /**
-     * Update attendee speaker image according to user speaking state
-     * @param at
-     */
+	/**
+	 * Update attendee speaker image according to user speaking state
+	 * 
+	 * @param at
+	 */
 	public void updateAttendeeSpeakingState(Attendee at) {
 		adapter.notifyDataSetChanged();
 	}
@@ -532,9 +572,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				continue;
 			}
 		}
-        //update attendee members
-        mAttendeeCount--;
-        updateStatist();
+		// update attendee members
+		mAttendeeCount--;
+		updateStatist();
 		adapter.notifyDataSetChanged();
 	}
 
@@ -928,6 +968,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	public void updateStatist() {
 		attendPersons.setText(onLinePersons + "/" + (mAttendeeCount));
+		adapter.notifyDataSetChanged();
+	}
+
+	public void updateDisplay() {
 		adapter.notifyDataSetChanged();
 	}
 

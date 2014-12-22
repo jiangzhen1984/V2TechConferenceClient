@@ -36,12 +36,12 @@ public class AddFriendHistroysHandler {
 	public static void addMeNeedAuthentication(Context context,
 			User remoteUser, String additInfo) {
 		String sql = null;
-		
-//		// 我加别人未处理的全删。
-//		// 别人加我未处理的也全删。
-//		sql = "delete from " + tableName + " where RemoteUserID="
-//				+ remoteUser.getmUserId() + " and " + "AddState=0";
-		
+
+		// // 我加别人未处理的全删。
+		// // 别人加我未处理的也全删。
+		// sql = "delete from " + tableName + " where RemoteUserID="
+		// + remoteUser.getmUserId() + " and " + "AddState=0";
+
 		// 我加别人已未处理的全删。
 		// 别人加我已未处理的也全删。
 		sql = "delete from " + tableName + " where RemoteUserID="
@@ -55,6 +55,7 @@ public class AddFriendHistroysHandler {
 		node.ownerUserID = currentUser.getmUserId();
 		node.ownerAuthType = currentUser.getAuthtype();
 		node.remoteUserID = remoteUser.getmUserId();
+		node.remoteUserNickname = remoteUser.getName();
 		node.fromUserID = node.remoteUserID;
 		node.toUserID = node.ownerUserID;
 		node.applyReason = additInfo;
@@ -65,12 +66,16 @@ public class AddFriendHistroysHandler {
 
 		sql = "insert into "
 				+ tableName
-				+ " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
+				+ " (OwnerUserID,OwnerAuthType,RemoteUserID,RemoteUserNickname,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
 				+ node.ownerUserID
 				+ ","
 				+ node.ownerAuthType
 				+ ","
 				+ node.remoteUserID
+				+ ","
+				+ (node.remoteUserNickname == null
+						|| node.remoteUserNickname.equals("") ? "NULL" : "'"
+						+ node.remoteUserNickname + "'")
 				+ ","
 				+ node.fromUserID
 				+ ","
@@ -129,7 +134,7 @@ public class AddFriendHistroysHandler {
 	// 参看becomeFriendHanler---------------------------------------
 	public static void addOtherNoNeedAuthentication(Context context,
 			User remoteUser) {
-		addOtherNeedAuthentication(context, remoteUser, null , false);
+		addOtherNeedAuthentication(context, remoteUser, null, false);
 	}
 
 	// 6
@@ -138,25 +143,24 @@ public class AddFriendHistroysHandler {
 	// 别人加我已未处理的也全删。
 	// 加一条我加别人未处理记录
 	public static void addOtherNeedAuthentication(Context context,
-			User remoteUser, String applyReason , boolean isRead) {
+			User remoteUser, String applyReason, boolean isRead) {
 		String sql = null;
 
 		if (remoteUser == null) {
 			return;
 		}
 
-//		// 我加别人未处理的全删。
-//		// 别人加我未处理的也全删。
-//
-//		sql = "delete from " + tableName + " where RemoteUserID="
-//				+ remoteUser.getmUserId() + " and " + "AddState=0";
+		// // 我加别人未处理的全删。
+		// // 别人加我未处理的也全删。
+		//
+		// sql = "delete from " + tableName + " where RemoteUserID="
+		// + remoteUser.getmUserId() + " and " + "AddState=0";
 		// 我加别人已未处理的全删。
 		// 别人加我已未处理的也全删。
 
 		sql = "delete from " + tableName + " where RemoteUserID="
 				+ remoteUser.getmUserId();
-		
-		
+
 		del(context, sql);
 
 		// 加一条我加别人的未处理记录
@@ -166,12 +170,13 @@ public class AddFriendHistroysHandler {
 		node.ownerUserID = currentUser.getmUserId();
 		node.ownerAuthType = currentUser.getAuthtype();
 		node.remoteUserID = remoteUser.getmUserId();
+		node.remoteUserNickname = remoteUser.getName();
 		node.fromUserID = node.ownerUserID;
 		node.toUserID = node.remoteUserID;
 		node.applyReason = applyReason;
 		node.refuseReason = null;
 		node.addState = 0;
-		if(!isRead)
+		if (!isRead)
 			node.readState = 0;
 		else
 			node.readState = 1;
@@ -179,12 +184,16 @@ public class AddFriendHistroysHandler {
 
 		sql = "insert into "
 				+ tableName
-				+ " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
+				+ " (OwnerUserID,OwnerAuthType,RemoteUserID,RemoteUserNickname,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
 				+ node.ownerUserID
 				+ ","
 				+ node.ownerAuthType
 				+ ","
 				+ node.remoteUserID
+				+ ","
+				+ (node.remoteUserNickname == null
+						|| node.remoteUserNickname.equals("") ? "NULL" : "'"
+						+ node.remoteUserNickname + "'")
 				+ ","
 				+ node.fromUserID
 				+ ","
@@ -227,7 +236,7 @@ public class AddFriendHistroysHandler {
 		String sql = null;
 		String[] sqlArgs = null;
 		Cursor cr = null;
-		
+
 		// 解析出字段
 		boolean ret1 = false;
 		boolean ret2 = false;
@@ -241,17 +250,17 @@ public class AddFriendHistroysHandler {
 			ret1 = true;
 		}
 		cr.close();
-		
-//		sql = "delete from " + tableName + " where FromUserID="
-//				+ remoteUser.getmUserId() + " and " + "AddState=0" + " and "
-//				+ "(OwnerAuthType=0 or OwnerAuthType=2)";
+
+		// sql = "delete from " + tableName + " where FromUserID="
+		// + remoteUser.getmUserId() + " and " + "AddState=0" + " and "
+		// + "(OwnerAuthType=0 or OwnerAuthType=2)";
 		sql = "delete from " + tableName + " where FromUserID="
-				+ remoteUser.getmUserId() + " and "+ "AddState=1";
+				+ remoteUser.getmUserId() + " and " + "AddState=1";
 		del(context, sql);
 
-		sql = "update " + tableName + " set AddState=1"
-				+ " where FromUserID=" + remoteUser.getmUserId() + " and "
-				+ "AddState=0" + " and " + "OwnerAuthType=1";
+		sql = "update " + tableName + " set AddState=1" + " where FromUserID="
+				+ remoteUser.getmUserId() + " and " + "AddState=0" + " and "
+				+ "OwnerAuthType=1";
 		update(context, sql);
 
 		// 我加别人的记录未处理的最多只有一条
@@ -264,7 +273,7 @@ public class AddFriendHistroysHandler {
 			ret2 = true;
 		}
 		cr.close();
-		
+
 		sql = "update " + tableName + " set AddState=1" + " where ToUserID="
 				+ remoteUser.getmUserId() + " and " + "AddState=0";
 		update(context, sql);
@@ -276,6 +285,7 @@ public class AddFriendHistroysHandler {
 			node.ownerUserID = currentUser.getmUserId();
 			node.ownerAuthType = currentUser.getAuthtype();
 			node.remoteUserID = remoteUser.getmUserId();
+			node.remoteUserNickname = remoteUser.getName();
 			node.fromUserID = node.remoteUserID;
 			node.toUserID = node.ownerUserID;
 			node.applyReason = null;
@@ -285,12 +295,16 @@ public class AddFriendHistroysHandler {
 			node.saveDate = GlobalConfig.getGlobalServerTime() / 1000;
 			sql = "insert into "
 					+ tableName
-					+ " (OwnerUserID,OwnerAuthType,RemoteUserID,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
+					+ " (OwnerUserID,OwnerAuthType,RemoteUserID,RemoteUserNickname,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
 					+ node.ownerUserID
 					+ ","
 					+ node.ownerAuthType
 					+ ","
 					+ node.remoteUserID
+					+ ","
+					+ (node.remoteUserNickname == null
+							|| node.remoteUserNickname.equals("") ? "NULL"
+							: "'" + node.remoteUserNickname + "'")
 					+ ","
 					+ node.fromUserID
 					+ ","

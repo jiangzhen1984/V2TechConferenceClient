@@ -41,7 +41,7 @@
    <string name="confs_title_button_logout_name">退出会议</string>
    <string name="confs_title_button_request_host_name">申请主讲</string>
    <string name="confs_title_button_release_host_name">释放主讲</string>
-   <string name="confs_toast_get_control_permission">您现在成为主讲人</string>
+   <string name="confs_toast_get_control_permission">您现在已成为主讲人</string>
    <string name="confs_toast_cancel_control_permission">您的主讲申请已被取消</string>
    <string name="confs_toast_reject_control_permission">您的主讲申请已被取消</string>
    <string name="confs_toast_release_control_permission">您的主讲权已被释放</string>

@@ -7,7 +7,7 @@
     <RelativeLayout
         android:id="@+id/video_layout_root"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="match_parent" >
 
         <RelativeLayout
             android:id="@+id/in_meeting_menu_button_ly"
@@ -159,8 +159,8 @@
 
         <FrameLayout
             android:id="@+id/in_meeting_content_main"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_below="@+id/in_meeting_video_separation_line1"
             android:background="#ffffff" >
 
@@ -227,6 +227,16 @@
                     android:orientation="vertical" >
                 </LinearLayout>
             </RelativeLayout>
+
+            <FrameLayout
+                android:id="@+id/video_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="63dp"
+                android:visibility="visible" >
+
+            </FrameLayout>
+
         </FrameLayout>
 
         <TextView

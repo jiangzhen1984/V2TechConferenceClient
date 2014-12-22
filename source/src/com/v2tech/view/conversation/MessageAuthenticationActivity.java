@@ -232,12 +232,13 @@ public class MessageAuthenticationActivity extends Activity {
 		return layout;
 	}
 
-    public void requestUpdateConversation(){
-        Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
-        i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-        i.putExtra("obj" , new ConversationNotificationObject(0 , Conversation.SPECIFIC_VERIFICATION_ID , false , true , -1));
-        mContext.sendBroadcast(i);
-    }
+	public void requestUpdateConversation() {
+		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
+		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		i.putExtra("obj", new ConversationNotificationObject(0,
+				Conversation.SPECIFIC_VERIFICATION_ID, false, true, -1));
+		mContext.sendBroadcast(i);
+	}
 
 	private BitmapChangedListener listener = new BitmapChangedListener() {
 
@@ -322,6 +323,10 @@ public class MessageAuthenticationActivity extends Activity {
 							int position, long id) {
 						if (isFriendAuthentication) {
 							FriendMAData data = friendMADataList.get(position);
+							//点击后跳转
+							
+							
+							
 							Intent intent = new Intent();
 							intent.putExtra("remoteUserID", data.remoteUserID);
 							intent.putExtra("authenticationMessage",
@@ -645,15 +650,10 @@ public class MessageAuthenticationActivity extends Activity {
 			break;
 		case FRIEND_AUTHENTICATION_RESULT:
 			if (data != null) {
-				// FIXME Should not fresh all
-				// long id = data.getLongExtra("remoteUserID", -1l);
-				// for (FriendMAData friend : friendMADataList) {
-				// if(friend.remoteUserID == id){
-				//
-				// }
-				// }
 				friendMADataList.clear();
-				loadFriendMessage();
+				friendMADataList.addAll(VerificationProvider
+						.loadFriendsVerifyMessages(LOAD_SIZE + offset));
+				firendAdapter.notifyDataSetChanged();
 			}
 			break;
 		}
@@ -695,7 +695,8 @@ public class MessageAuthenticationActivity extends Activity {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		ConversationNotificationObject obj = new ConversationNotificationObject(
-				Conversation.TYPE_VERIFICATION_MESSAGE, Conversation.SPECIFIC_VERIFICATION_ID , true , true , -1);
+				Conversation.TYPE_VERIFICATION_MESSAGE,
+				Conversation.SPECIFIC_VERIFICATION_ID, true, true, -1);
 		i.putExtra("obj", obj);
 		mContext.sendBroadcast(i);
 	}
@@ -731,10 +732,9 @@ public class MessageAuthenticationActivity extends Activity {
 			if (GlobalHolder.getInstance().getGroupById(
 					V2GlobalEnum.GROUP_TYPE_CROWD,
 					imsg.getCrowdGroup().getmGId()) != null) {
-				i.putExtra("obj",
-						new ConversationNotificationObject(
-								Conversation.TYPE_GROUP, imsg.getCrowdGroup()
-										.getmGId() , false , true , -1));
+				i.putExtra("obj", new ConversationNotificationObject(
+						Conversation.TYPE_GROUP,
+						imsg.getCrowdGroup().getmGId(), false, true, -1));
 				i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivity(i);
@@ -784,19 +784,19 @@ public class MessageAuthenticationActivity extends Activity {
 		} else {
 			Intent intent = new Intent();
 			intent.putExtra("tabType", currentRadioType);
-			if(currentRadioType == PROMPT_TYPE_FRIEND){
-				if(View.VISIBLE == ivGroupAuthenticationPrompt.getVisibility())
+			if (currentRadioType == PROMPT_TYPE_FRIEND) {
+				if (View.VISIBLE == ivGroupAuthenticationPrompt.getVisibility())
+					intent.putExtra("isOtherShowPrompt", true);
+				else
+					intent.putExtra("isOtherShowPrompt", false);
+			} else {
+				if (View.VISIBLE == ivFriendAuthenticationPrompt
+						.getVisibility())
 					intent.putExtra("isOtherShowPrompt", true);
 				else
 					intent.putExtra("isOtherShowPrompt", false);
 			}
-			else{
-				if(View.VISIBLE == ivFriendAuthenticationPrompt.getVisibility())
-					intent.putExtra("isOtherShowPrompt", true);
-				else
-					intent.putExtra("isOtherShowPrompt", false);
-			}
-			setResult(16 , intent);
+			setResult(16, intent);
 			super.onBackPressed();
 		}
 
@@ -1359,7 +1359,8 @@ public class MessageAuthenticationActivity extends Activity {
 						VerificationProvider.updateCrowdQualicationMessage(msg);
 						// startCrowdInvitationDetail(msg);
 					} else {
-						// Add crowd group to cache, we can't handle this after done
+						// Add crowd group to cache, we can't handle this after
+						// done
 						// because group information come before done event.
 						// GlobalHolder.getInstance().addGroupToList(
 						// GroupType.CHATING.intValue(), cg);

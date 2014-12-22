@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 public class FriendMAData {
 
+	public long _id;//应对数据库的_id
 	public Bitmap dheadImage;
 	public String name;
 	public String authenticationMessage;

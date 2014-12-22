@@ -115,11 +115,9 @@ public abstract class AbstractHandler extends Handler {
 					+ " " + arg1 + "  " + arg2 + "  " + obj);
 		}
 		
-		Log.i("temptag20141030 1","list.size():"+messageListenerList.size());
 		for (MessageListener messageListener : messageListenerList) {
 			Handler handler = messageListener.getHandler();
 			if (handler != null) {
-				Log.i("temptag20141030 1"," re.getWhat():"+messageListener.getWhat());
 				Message.obtain(handler, messageListener.getWhat(), arg1, arg2,
 						new AsyncResult(messageListener.getObject(), obj)).sendToTarget();
 			}

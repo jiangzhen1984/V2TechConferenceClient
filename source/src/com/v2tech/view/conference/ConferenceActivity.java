@@ -49,6 +49,9 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -112,6 +115,7 @@ import com.v2tech.vo.VMessage;
 
 public class ConferenceActivity extends Activity {
 	private static final String TAG = "ConferenceActivity";
+	// 左列表的显示模式标志
 	private static final int TAG_SUB_WINDOW_STATE_FIXED = 0x1;
 	private static final int TAG_SUB_WINDOW_STATE_FLOAT = 0x0;
 	private static final int TAG_SUB_WINDOW_STATE_FULL_SCRREN = 0x10;
@@ -152,7 +156,6 @@ public class ConferenceActivity extends Activity {
 
 	private PermissionState mControlState = PermissionState.NORMAL;
 
-	private boolean isSpeaking;
 	private boolean isMuteCamera = false;
 
 	private Handler mVideoHandler = new VideoHandler();
@@ -170,10 +173,14 @@ public class ConferenceActivity extends Activity {
 	private ImageView mChairmanControl;
 	private View mFeatureIV;
 	private View mMsgNotification;
+	private View mConfMsgRedDot;
 	private ImageView mSpeakerIV;
 	private ImageView mCameraIV;
 	private PopupWindow mSettingWindow;
 	private PopupWindow mChairControlWindow;
+	private PopupWindow moreWindow;
+	private TextView mRequestButtonName;
+	private ImageView mRequestButtonImage;
 	private VideoShowHostRequest mHostRequestWindow;
 
 	private Dialog mQuitDialog;
@@ -197,8 +204,8 @@ public class ConferenceActivity extends Activity {
 	private View localSurfaceViewLy;
 	private SurfaceView mLocalSurface;
 
-	private Conference conf;
 	private ConferenceGroup cg;
+	private Conference conf;
 
 	private ConferenceService cb;
 	private DocumentService ds;
@@ -238,6 +245,14 @@ public class ConferenceActivity extends Activity {
 	private int isSyn = 0;
 	private int isVoiceActivation = 0;
 
+	private boolean hasUnreadChiremanControllMsg = false;
+
+	// private boolean isSpeaking;
+
+	private Attendee currentAttendee;
+
+	private BroadcastReceiver mConfUserChangeReceiver = new ConfUserChangeReceiver();
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -266,10 +281,6 @@ public class ConferenceActivity extends Activity {
 		});
 		this.mCurrentShowedSV = new ArrayList<SurfaceViewW>();
 
-		this.mVideoLayout = new FrameLayout(this);
-		mContentLayoutMain.addView(this.mVideoLayout);
-		// mVideoLayout.setBackgroundColor(Color.rgb(255, 0, 0));
-		mVideoLayout.setVisibility(View.VISIBLE);
 		this.mSubWindowLayout = new FrameLayout(this);
 
 		mSubWindowLayout.setVisibility(View.GONE);
@@ -333,13 +344,14 @@ public class ConferenceActivity extends Activity {
 
 		mMenuButtonGroup = new View[] { mMenuInviteAttendeeButton,
 				mMenuMessageButton, mMenuAttendeeButton, mMenuDocButton };
-		// Initialize broadcast receiver
-		initConfsListener();
-		// Initialize conference object and show local camera
-		init();
 
-		// make sure local is in front of any view
-		localSurfaceViewLy.bringToFront();
+		this.mVideoLayout = (FrameLayout) findViewById(R.id.video_layout);
+		mVideoLayout.setBackgroundColor(Color.rgb(255, 0, 0));
+
+		// Initialize broadcast receiver
+		initBroadcastReceiver();
+		// Initialize conference object and show local camera
+		initConferenceDate();
 
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
@@ -355,14 +367,6 @@ public class ConferenceActivity extends Activity {
 		// Broadcast for user joined conference, to inform that quit P2P
 		// conversation
 		broadcastForJoined();
-		mVideoHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				initVideoLayout();
-			}
-		});
-		
 		showMuteCameraDialog();
 	}
 
@@ -385,8 +389,8 @@ public class ConferenceActivity extends Activity {
 		// keep screen on
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		// Adjust content layout
 		adjustContentLayout();
+		// Adjust content layout
 	}
 
 	@Override
@@ -412,7 +416,7 @@ public class ConferenceActivity extends Activity {
 		this.mContentHeight = -1;
 	}
 
-	private void initConfsListener() {
+	private void initBroadcastReceiver() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
@@ -437,7 +441,7 @@ public class ConferenceActivity extends Activity {
 
 	}
 
-	private void init() {
+	private void initConferenceDate() {
 		conf = (Conference) this.getIntent().getExtras().get("conf");
 
 		cg = (ConferenceGroup) GlobalHolder.getInstance().getGroupById(
@@ -446,6 +450,7 @@ public class ConferenceActivity extends Activity {
 			V2Log.e(" doesn't receive group information  yet");
 			return;
 		}
+
 		mGroupNameTV.setText(cg.getName());
 
 		Group confGroup = GlobalHolder.getInstance()
@@ -461,27 +466,45 @@ public class ConferenceActivity extends Activity {
 							+ " need to get user base infos");
 					ImRequest.getInstance().getUserBaseInfo(u.getmUserId());
 				}
-				mAttendeeList.add(new Attendee(u));
+				Attendee at = new Attendee(u);
+				mAttendeeList.add(at);
+				if (u.isCurrentLoggedInUser()) {
+					currentAttendee = at;
+				}
 			}
 		}
 		V2Log.i(" Conference size:" + mAttendeeList.size());
+
+		currentAttendee
+				.setChairMan(GlobalHolder.getInstance()
+						.findGroupById(conf.getId()).getOwnerUser()
+						.getmUserId() == currentAttendee.getAttId());
+
+		// 是主席又没有主讲则自己是主讲
+		if (currentAttendee.isChairMan()) {
+			currentAttendee.setLectureState(Attendee.LECTURE_STATE_GRANTED);
+			mControlState = PermissionState.GRANTED;
+		} else {
+			currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
+			mControlState = PermissionState.NORMAL;
+		}
+		// Set default speaking state if current user is owner, then should
+		// apply speaking default;
+		currentAttendee.setSpeakingState(currentAttendee.isChairMan());
 
 		mPendingMessageList = new ArrayList<VMessage>();
 
 		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
 
 		mHostRequestUsers = new HashSet<User>();
-		// Set default speaking state if current user is owner, then should
-		// apply speaking default;
-		isSpeaking = (conf.getCreator() == GlobalHolder.getInstance()
-				.getCurrentUserId() || conf.getChairman() == GlobalHolder
-				.getInstance().getCurrentUserId()) ? true : false;
+
 		if (confGroup.getOwnerUser().getmUserId() != GlobalHolder.getInstance()
 				.getCurrentUserId()) {
 			mChairmanControl.setVisibility(View.INVISIBLE);
 		} else {
-			//If current user is conference creatoer, than update control permission to granted
-			 mControlState = PermissionState.GRANTED;
+			// If current user is conference creatoer, than update control
+			// permission to granted
+			mControlState = PermissionState.GRANTED;
 		}
 	}
 
@@ -504,7 +527,8 @@ public class ConferenceActivity extends Activity {
 	 * @param flag
 	 */
 	private void updateSpeakerState(boolean flag) {
-		isSpeaking = flag;
+
+		currentAttendee.setSpeakingState(flag);
 		// set flag to speaking icon
 		if (!flag) {
 			mSpeakerIV.setImageResource(R.drawable.mute_button);
@@ -513,50 +537,70 @@ public class ConferenceActivity extends Activity {
 		}
 	}
 
-	/**
-	 * Update control permissionstate
-	 * 
-	 * @param flag
-	 */
-	private void updateControlState(PermissionState state, boolean reject) {
-
+	private void showCurrentAttendeeLectureStateToast(PermissionState state,
+			boolean reject) {
 		if (mControlState == PermissionState.APPLYING) {
 			if (state == PermissionState.GRANTED) {
+				// 20141221 1 同意主讲申请
+				// currentAttendee.setLectureState(Attendee.LECTURE_STATE_GRANTED);
 				Toast.makeText(mContext,
 						R.string.confs_toast_get_control_permission,
 						Toast.LENGTH_SHORT).show();
-				//Apply speaking
-				mSpeakerIV.performClick();
+				// Apply speaking
+				if (!currentAttendee.isSpeaking()) {
+					doApplyOrReleaseSpeak(!currentAttendee.isSpeaking());
+					// Make sure update start after send request,
+					// because update state will update isSpeaking value
+					updateSpeakerState(!currentAttendee.isSpeaking());
+				}
 				
 				((VideoDocLayout)initDocLayout()).requestShowSharedButton(true);
 				
 			} else if (state == PermissionState.NORMAL) {
 				if (reject) {
+					// 20141221 1 拒绝主讲申请
+					// currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
 					Toast.makeText(mContext,
 							R.string.confs_toast_reject_control_permission,
 							Toast.LENGTH_SHORT).show();
 				} else {
+					// 20141221 1 取消主讲申请
+					// currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
+
 					Toast.makeText(mContext,
 							R.string.confs_toast_cancel_control_permission,
 							Toast.LENGTH_SHORT).show();
+
 				}
 			}
+
 		} else if (mControlState == PermissionState.GRANTED) {
 			if (state == PermissionState.NORMAL) {
+				// 主动释放主讲
+				// currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
+
 				Toast.makeText(mContext,
 						R.string.confs_toast_release_control_permission,
 						Toast.LENGTH_SHORT).show();
 				((VideoDocLayout)initDocLayout()).requestShowSharedButton(false);
 			}
 		} else if (mControlState == PermissionState.NORMAL) {
-			if (state == PermissionState.APPLYING) {
-				Toast.makeText(mContext,
-						R.string.confs_title_button_request_host_name,
-						Toast.LENGTH_SHORT).show();
+			if (state == PermissionState.APPLYING) {// 申请中
+				// currentAttendee
+				// .setLectureState(Attendee.LECTURE_STATE_APPLYING);
+				// 如果不是主席才提示
+				if (!currentAttendee.isChairMan()) {
+					Toast.makeText(mContext,
+							R.string.confs_title_button_request_host_name,
+							Toast.LENGTH_SHORT).show();
+				}
 			}
 		}
-
 		mControlState = state;
+		// if (mAttendeeContainer != null) {
+		// mAttendeeContainer.updateDisplay();
+		// }
+
 	}
 
 	private void updateMCameraIVState(boolean flag) {
@@ -635,8 +679,9 @@ public class ConferenceActivity extends Activity {
 
 			mAttendeeContainer.bringToFront();
 			mAttendeeContainer.setListener(subViewListener);
+
 			// Initialize speaking
-			if (isSpeaking) {
+			if (currentAttendee.isSpeaking()) {
 
 				Attendee pa = null;
 				for (Attendee att : mAttendeeList) {
@@ -653,11 +698,13 @@ public class ConferenceActivity extends Activity {
 				}
 				pa.setSpeakingState(true);
 				mAttendeeContainer.updateAttendeeSpeakingState(pa);
+
 			}
 			// Update pending attendee state
 			for (PermissionUpdateIndication ind : mPendingPermissionUpdateList) {
-				updateAttendeePermissionStateIcon(ind);
+				updateAttendeePermissionState(ind);
 			}
+
 			mPendingPermissionUpdateList.clear();
 
 		} else {
@@ -751,7 +798,10 @@ public class ConferenceActivity extends Activity {
 		// Update width and height for video layout
 		FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mVideoLayout
 				.getLayoutParams();
-		width = mContentWidth - marginLeft;
+
+		width = ((WindowManager) getSystemService(Context.WINDOW_SERVICE))
+				.getDefaultDisplay().getWidth() - marginLeft;
+
 		height = mContentHeight;
 		if (fl == null) {
 			fl = new FrameLayout.LayoutParams(width, height);
@@ -772,39 +822,6 @@ public class ConferenceActivity extends Activity {
 
 		// make sure local is in front of any view
 		localSurfaceViewLy.bringToFront();
-	}
-
-	public void initVideoLayout() {
-
-		// Update width and height for video layout
-		FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mVideoLayout
-				.getLayoutParams();
-		if (mContentWidth == -1) {
-			mContentWidth = mContentLayoutMain.getWidth();
-		}
-		if (mContentHeight == -1) {
-			mContentHeight = mContentLayoutMain.getHeight();
-		}
-
-		int marginLeft = mMenuButtonContainer.getMeasuredWidth();
-
-		int width = mContentWidth - marginLeft;
-		int height = mContentHeight;
-		if (fl == null) {
-			fl = new FrameLayout.LayoutParams(width, height);
-		}
-
-		if (fl.leftMargin == marginLeft && fl.width == width
-				&& fl.height == height) {
-
-		} else {
-			fl.width = width;
-			fl.height = height;
-
-			fl.leftMargin = marginLeft;
-			mContentLayoutMain.updateViewLayout(mVideoLayout, fl);
-
-		}
 	}
 
 	/**
@@ -934,12 +951,20 @@ public class ConferenceActivity extends Activity {
 			// Call cancel full screen request first.
 			// because we can't make sure user press invitation layout or not,
 			// we have to restore first.
+			// 请求弹出的窗口为正常模式
 			requestSubViewRestore();
-			if (v.getTag().equals("msg")) {
-				content = initMsgLayout();
-				// If last state is fixed
-				if (mMessageContainer.getWindowSizeState()) {
-					requestSubViewFixed();
+
+			if (v.getTag().equals("invition")) {
+				if (cg.isCanInvitation() || currentAttendee.isChairMan()) {
+					// Make sure invitation layout fill full screen
+					// 请求弹出的窗口为全屏模式
+					requestSubViewFillScreen();
+					content = initInvitionContainer();
+
+				} else {
+					Toast.makeText(mContext,
+							R.string.error_no_permission_to_invitation,
+							Toast.LENGTH_SHORT).show();
 				}
 
 			} else if (v.getTag().equals("attendee")) {
@@ -949,9 +974,15 @@ public class ConferenceActivity extends Activity {
 					requestSubViewFixed();
 				}
 
+			} else if (v.getTag().equals("msg")) {
+				content = initMsgLayout();
+				// If last state is fixed
+				if (mMessageContainer.getWindowSizeState()) {
+					requestSubViewFixed();
+				}
+
 			} else if (v.getTag().equals("doc")) {
 				content = initDocLayout();
-
 				if (mDocContainer.isFullScreenSize()) {
 					requestSubViewFillScreen();
 				} else {
@@ -1006,10 +1037,10 @@ public class ConferenceActivity extends Activity {
 	private OnClickListener mApplySpeakerListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			doApplyOrReleaseSpeak(!isSpeaking);
+			doApplyOrReleaseSpeak(!currentAttendee.isSpeaking());
 			// Make sure update start after send request,
 			// because update state will update isSpeaking value
-			updateSpeakerState(!isSpeaking);
+			updateSpeakerState(!currentAttendee.isSpeaking());
 		}
 	};
 
@@ -1050,227 +1081,262 @@ public class ConferenceActivity extends Activity {
 					.setText(R.string.confs_title_button_request_host_name);
 
 			if ((mControlState == PermissionState.GRANTED || mControlState == PermissionState.APPLYING)) {
-				updateControlState(PermissionState.NORMAL, false);
+				// updateCurrentAttendeeLectureState(PermissionState.NORMAL,
+				// false);
 				cb.applyForReleasePermission(ConferencePermission.CONTROL, null);
+				// 释放主讲
 			} else {
-				updateControlState(PermissionState.APPLYING, false);
+				// updateCurrentAttendeeLectureState(PermissionState.APPLYING,
+				// false);
+				currentAttendee
+						.setLectureState(Attendee.LECTURE_STATE_APPLYING);
+				if (mAttendeeContainer != null) {
+					mAttendeeContainer.updateDisplay();
+				}
+				mControlState = PermissionState.APPLYING;
 				cb.applyForControlPermission(ConferencePermission.CONTROL, null);
+				// 申请主讲中
 			}
 		}
 	};
 
-	private PopupWindow moreWindow;
-	private TextView mRequestButtonName;
-	private ImageView mRequestButtonImage;
 	private OnClickListener mFeatureShowPopup = new OnClickListener() {
 		@Override
 		public void onClick(View anchor) {
-			DisplayMetrics dm = new DisplayMetrics();
-			((Activity) mContext).getWindowManager().getDefaultDisplay()
-					.getMetrics(dm);
-			if (moreWindow == null) {
-				LayoutInflater inflater = (LayoutInflater) mContext
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View layout = inflater.inflate(
-						R.layout.conference_pop_up_window, null);
-				layout.findViewById(R.id.conference_activity_logout_button)
-						.setOnClickListener(new OnClickListener() {
-
-							@Override
-							public void onClick(View v) {
-								moreWindow.dismiss();
-								mShowQuitWindowListener.onClick(v);
-							}
-
-						});
-
-				layout.findViewById(
-						R.id.conference_activity_request_host_button)
-						.setOnClickListener(new OnClickListener() {
-
-							@Override
-							public void onClick(View v) {
-								moreWindow.dismiss();
-								mRequestHostListener.onClick(v);
-							}
-
-						});
-
-				mRequestButtonName = (TextView) layout
-						.findViewById(R.id.conference_activity_request_host_tv);
-				mRequestButtonImage = (ImageView) layout
-						.findViewById(R.id.conference_activity_request_host_iv);
-
-				LinearLayout itemContainer = (LinearLayout) layout
-						.findViewById(R.id.common_pop_window_container);
-
-				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
-						View.MeasureSpec.UNSPECIFIED);
-				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
-
-				mRequestButtonName = (TextView) layout
-						.findViewById(R.id.conference_activity_request_host_tv);
-				mRequestButtonImage = (ImageView) layout
-						.findViewById(R.id.conference_activity_request_host_iv);
-
-				arrow.measure(View.MeasureSpec.UNSPECIFIED,
-						View.MeasureSpec.UNSPECIFIED);
-
-				int height = itemContainer.getMeasuredHeight()
-						+ arrow.getMeasuredHeight();
-
-				moreWindow = new PopupWindow(layout,
-						ViewGroup.LayoutParams.WRAP_CONTENT, height, true);
-				moreWindow.setOnDismissListener(new OnDismissListener() {
-					@Override
-					public void onDismiss() {
-						moreWindow.dismiss();
-					}
-
-				});
-				moreWindow.setBackgroundDrawable(new ColorDrawable(
-						Color.TRANSPARENT));
-				moreWindow.setFocusable(true);
-				moreWindow.setTouchable(true);
-				moreWindow.setOutsideTouchable(true);
-
-			}
-
-			if (mControlState == PermissionState.APPLYING) {
-				mRequestButtonName
-						.setTextColor(mContext.getResources().getColor(
-								R.color.conference_host_requesting_text_color));
-				mRequestButtonImage
-						.setImageResource(R.drawable.host_requesting);
-				mRequestButtonName
-						.setText(R.string.confs_title_button_request_host_name);
-			} else if (mControlState == PermissionState.GRANTED) {
-				mRequestButtonName.setTextColor(mContext.getResources()
-						.getColor(R.color.conference_acquired_host_text_color));
-				mRequestButtonImage.setImageResource(R.drawable.host_required);
-				mRequestButtonName
-						.setText(R.string.confs_title_button_release_host_name);
-			} else if (mControlState == PermissionState.NORMAL) {
-				mRequestButtonName.setTextColor(mContext.getResources()
-						.getColor(R.color.common_item_text_color_black));
-				mRequestButtonImage.setImageResource(R.drawable.host_request);
-				mRequestButtonName
-						.setText(R.string.confs_title_button_request_host_name);
-			}
-
-			int[] pos = new int[2];
-			anchor.getLocationInWindow(pos);
-			pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
-			// calculate arrow offset
-			View arrow = moreWindow.getContentView().findViewById(
-					R.id.common_pop_up_arrow_up);
-			arrow.bringToFront();
-
-			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
-					.getLayoutParams();
-			arrowRL.rightMargin = dm.widthPixels - pos[0]
-					- (anchor.getMeasuredWidth() / 2)
-					- arrow.getMeasuredWidth();
-			arrow.setLayoutParams(arrowRL);
-
-			moreWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			int marginRight = DensityUtils.dip2px(mContext, 5);
-			moreWindow.showAtLocation(anchor, Gravity.RIGHT | Gravity.TOP,
-					marginRight, pos[1]);
+			showMoreWindow(anchor);
 		}
+
 	};
+
+	private void showMoreWindow(View anchor) {
+		DisplayMetrics dm = new DisplayMetrics();
+		((Activity) mContext).getWindowManager().getDefaultDisplay()
+				.getMetrics(dm);
+		if (moreWindow == null) {
+			LayoutInflater inflater = (LayoutInflater) mContext
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View layout = inflater.inflate(R.layout.conference_pop_up_window,
+					null);
+
+			layout.findViewById(R.id.conference_activity_request_host_button)
+					.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							moreWindow.dismiss();
+							mRequestHostListener.onClick(v);
+						}
+
+					});
+
+			layout.findViewById(R.id.video_quality).setOnClickListener(
+					new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							moreWindow.dismiss();
+							mShowSettingListener.onClick(v);
+						}
+
+					});
+
+			layout.findViewById(R.id.conference_activity_logout_button)
+					.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							moreWindow.dismiss();
+							mShowQuitWindowListener.onClick(v);
+						}
+
+					});
+
+			mRequestButtonName = (TextView) layout
+					.findViewById(R.id.conference_activity_request_host_tv);
+			mRequestButtonImage = (ImageView) layout
+					.findViewById(R.id.conference_activity_request_host_iv);
+
+			LinearLayout itemContainer = (LinearLayout) layout
+					.findViewById(R.id.common_pop_window_container);
+
+			itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
+					View.MeasureSpec.UNSPECIFIED);
+			View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
+
+			mRequestButtonName = (TextView) layout
+					.findViewById(R.id.conference_activity_request_host_tv);
+			mRequestButtonImage = (ImageView) layout
+					.findViewById(R.id.conference_activity_request_host_iv);
+
+			arrow.measure(View.MeasureSpec.UNSPECIFIED,
+					View.MeasureSpec.UNSPECIFIED);
+
+			int height = itemContainer.getMeasuredHeight()
+					+ arrow.getMeasuredHeight();
+
+			moreWindow = new PopupWindow(layout,
+					ViewGroup.LayoutParams.WRAP_CONTENT, height, true);
+			moreWindow.setOnDismissListener(new OnDismissListener() {
+				@Override
+				public void onDismiss() {
+					moreWindow.dismiss();
+				}
+
+			});
+			moreWindow.setBackgroundDrawable(new ColorDrawable(
+					Color.TRANSPARENT));
+			moreWindow.setFocusable(true);
+			moreWindow.setTouchable(true);
+			moreWindow.setOutsideTouchable(true);
+
+		}
+
+		if (mControlState == PermissionState.APPLYING) {
+			mRequestButtonName.setTextColor(mContext.getResources().getColor(
+					R.color.conference_host_requesting_text_color));
+			mRequestButtonImage.setImageResource(R.drawable.host_requesting);
+			mRequestButtonName
+					.setText(R.string.confs_title_button_request_host_name);
+		} else if (mControlState == PermissionState.GRANTED) {
+			mRequestButtonName.setTextColor(mContext.getResources().getColor(
+					R.color.conference_acquired_host_text_color));
+			mRequestButtonImage.setImageResource(R.drawable.host_required);
+			mRequestButtonName
+					.setText(R.string.confs_title_button_release_host_name);
+		} else if (mControlState == PermissionState.NORMAL) {
+			mRequestButtonName.setTextColor(mContext.getResources().getColor(
+					R.color.common_item_text_color_black));
+			mRequestButtonImage.setImageResource(R.drawable.host_request);
+			mRequestButtonName
+					.setText(R.string.confs_title_button_request_host_name);
+		}
+
+		int[] pos = new int[2];
+		anchor.getLocationInWindow(pos);
+		pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
+		// calculate arrow offset
+		View arrow = moreWindow.getContentView().findViewById(
+				R.id.common_pop_up_arrow_up);
+		arrow.bringToFront();
+
+		RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
+				.getLayoutParams();
+		arrowRL.rightMargin = dm.widthPixels - pos[0]
+				- (anchor.getMeasuredWidth() / 2) - arrow.getMeasuredWidth();
+		arrow.setLayoutParams(arrowRL);
+
+		moreWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
+		int marginRight = DensityUtils.dip2px(mContext, 5);
+		moreWindow.showAtLocation(anchor, Gravity.RIGHT | Gravity.TOP,
+				marginRight, pos[1]);
+	}
 
 	private OnClickListener onClickMChairmanControl = new OnClickListener() {
 		public void onClick(View v) {
-
-			if (mChairControlWindow == null) {
-				LayoutInflater inflater = (LayoutInflater) mContext
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View view = inflater.inflate(
-						R.layout.in_meeting_chairman_control_pop_up_window,
-						null);
-
-				ImageView arrow = (ImageView) view.findViewById(R.id.arrow);
-				int widthSpec = View.MeasureSpec.makeMeasureSpec(0,
-						View.MeasureSpec.UNSPECIFIED);
-				int heightSpec = View.MeasureSpec.makeMeasureSpec(0,
-						View.MeasureSpec.UNSPECIFIED);
-				arrow.measure(widthSpec, heightSpec);
-				arrowWidth = arrow.getMeasuredWidth();
-
-				CheckBox slience = (CheckBox) view
-						.findViewById(R.id.cb_slience);
-				CheckBox invitation = (CheckBox) view
-						.findViewById(R.id.cb_invitation);
-
-				slience.setOnClickListener(new OnClickListener() {
-
-					@Override
-					public void onClick(View v) {
-						cb.muteConf();
-						mChairControlWindow.dismiss();
-
-					}
-				});
-
-				invitation
-						.setOnCheckedChangeListener(new OnCheckedChangeListener() {
-
-							@Override
-							public void onCheckedChanged(
-									CompoundButton buttonView, boolean isChecked) {
-								cb.updateConferenceAttribute(conf, cg.isSyn(),
-										isChecked, null);
-								mChairControlWindow.dismiss();
-							}
-						});
-
-				view.findViewById(R.id.conference_message).setOnClickListener(
-						new OnClickListener() {
-
-							@Override
-							public void onClick(View v) {
-								mChairControlWindow.dismiss();
-								if (mHostRequestWindow == null) {
-									mHostRequestWindow = new VideoShowHostRequest(
-											mContext, mHostRequestUsers, cb);
-								} else {
-									mHostRequestWindow
-											.updateList(mHostRequestUsers);
-								}
-
-								mHostRequestWindow.showAtLocation(
-										mRootContainer, Gravity.CENTER, 0, 0);
-								mMsgNotification.setVisibility(View.GONE);
-							}
-
-						});
-
-				// set
-				mChairControlWindow = new PopupWindow(view,
-						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-				mChairControlWindow.setBackgroundDrawable(new ColorDrawable(
-						Color.TRANSPARENT));
-				mChairControlWindow.setFocusable(true);
-				mChairControlWindow.setTouchable(true);
-				mChairControlWindow.setOutsideTouchable(true);
-
-			}
-
-			int[] pos = new int[2];
-			v.getLocationInWindow(pos);
-			pos[0] += v.getMeasuredWidth() / 2 - 15 * dm.density - arrowWidth
-					/ 2;
-			pos[1] += v.getMeasuredHeight();
-
-			mChairControlWindow
-					.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			mChairControlWindow.showAtLocation(v, Gravity.NO_GRAVITY, pos[0],
-					pos[1]);
-
+			showChairmanControlPopWindow(v);
 		}
 	};
 
+	private void showChairmanControlPopWindow(View v) {
+		if (mChairControlWindow == null) {
+			LayoutInflater inflater = (LayoutInflater) mContext
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View view = inflater.inflate(
+					R.layout.in_meeting_chairman_control_pop_up_window, null);
+
+			ImageView arrow = (ImageView) view.findViewById(R.id.arrow);
+			int widthSpec = View.MeasureSpec.makeMeasureSpec(0,
+					View.MeasureSpec.UNSPECIFIED);
+			int heightSpec = View.MeasureSpec.makeMeasureSpec(0,
+					View.MeasureSpec.UNSPECIFIED);
+			arrow.measure(widthSpec, heightSpec);
+			arrowWidth = arrow.getMeasuredWidth();
+
+			CheckBox slience = (CheckBox) view.findViewById(R.id.cb_slience);
+			CheckBox invitation = (CheckBox) view
+					.findViewById(R.id.cb_invitation);
+			CheckBox conferenceMessage = (CheckBox) view
+					.findViewById(R.id.conference_message);
+
+			mConfMsgRedDot = view
+					.findViewById(R.id.host_request_msg_notificator);
+			slience.setOnClickListener(new OnClickListener() {
+
+				@Override
+				public void onClick(View v) {
+					cb.muteConf();
+					mChairControlWindow.dismiss();
+
+				}
+			});
+
+			invitation
+					.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+						@Override
+						public void onCheckedChanged(CompoundButton buttonView,
+								boolean isChecked) {
+							cb.updateConferenceAttribute(conf, cg.isSyn(),
+									isChecked, null);
+							mChairControlWindow.dismiss();
+						}
+					});
+
+			conferenceMessage
+					.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+						@Override
+						public void onCheckedChanged(CompoundButton buttonView,
+								boolean isChecked) {
+							mChairControlWindow.dismiss();
+							showConfMsgPopWindow();
+						}
+
+					});
+
+			// set
+			mChairControlWindow = new PopupWindow(view,
+					LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+			mChairControlWindow.setBackgroundDrawable(new ColorDrawable(
+					Color.TRANSPARENT));
+			mChairControlWindow.setFocusable(true);
+			mChairControlWindow.setTouchable(true);
+			mChairControlWindow.setOutsideTouchable(true);
+
+		}
+
+		if (mConfMsgRedDot != null) {
+			if (hasUnreadChiremanControllMsg) {
+				mConfMsgRedDot.setVisibility(View.VISIBLE);
+			} else {
+				mConfMsgRedDot.setVisibility(View.GONE);
+			}
+		}
+
+		int[] pos = new int[2];
+		v.getLocationInWindow(pos);
+		pos[0] += v.getMeasuredWidth() / 2 - 15 * dm.density - arrowWidth / 2;
+		pos[1] += v.getMeasuredHeight();
+
+		mChairControlWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
+		mChairControlWindow.showAtLocation(v, Gravity.NO_GRAVITY, pos[0],
+				pos[1]);
+	}
+
+	private void showConfMsgPopWindow() {
+		if (mHostRequestWindow == null) {
+			mHostRequestWindow = new VideoShowHostRequest(mContext,
+					mHostRequestUsers, cb);
+		} else {
+			mHostRequestWindow.updateList(mHostRequestUsers);
+		}
+
+		mHostRequestWindow.showAtLocation(mRootContainer, Gravity.CENTER, 0, 0);
+		mMsgNotification.setVisibility(View.GONE);
+		hasUnreadChiremanControllMsg = false;
+	}
+
+	// 20141218 1
 	private OnClickListener mShowSettingListener = new OnClickListener() {
 
 		@Override
@@ -1372,40 +1438,13 @@ public class ConferenceActivity extends Activity {
 					}
 
 				});
-
-				/*
-				 * DisplayMetrics m = new DisplayMetrics();
-				 * getWindowManager().getDefaultDisplay().getMetrics(m);
-				 * v.measure(m.widthPixels, m.heightPixels);
-				 */
-				mSettingWindow
-						.getContentView()
-						.findViewById(R.id.arrow)
-						.measure(View.MeasureSpec.UNSPECIFIED,
-								View.MeasureSpec.UNSPECIFIED);
 			}
 
-			int[] pos = new int[2];
-			v.getLocationInWindow(pos);
-			pos[0] += v.getMeasuredWidth() / 2;
-			pos[1] += v.getMeasuredHeight();
 			// calculate arrow offset
-			View arrow = mSettingWindow.getContentView().findViewById(
-					R.id.arrow);
-			arrow.bringToFront();
-			RelativeLayout.LayoutParams rl = (RelativeLayout.LayoutParams) arrow
-					.getLayoutParams();
-			pos[0] -= (rl.leftMargin + arrow.getMeasuredWidth() / 2);
-
-			mSettingWindow
-					.setAnimationStyle(R.style.InMeetingCameraSettingAnim);
-			mSettingWindow
-					.showAtLocation(v, Gravity.NO_GRAVITY, pos[0], pos[1]);
+			mSettingWindow.showAtLocation(mRootContainer, Gravity.CENTER, 0, 0);
 		}
 
 	};
-
-	private BroadcastReceiver mConfUserChangeReceiver = new ConfUserChangeReceiver();
 
 	class ConfUserChangeReceiver extends BroadcastReceiver {
 		@Override
@@ -1424,6 +1463,7 @@ public class ConferenceActivity extends Activity {
 				V2Log.e(TAG, "JNI_BROADCAST_NEW_CONF_MESSAGE is coming");
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
+
 				long confID = intent.getLongExtra("gid", 0);
 				if (confID == conf.getId()) {
 					Group confGroup = GlobalHolder.getInstance().findGroupById(
@@ -1445,25 +1485,30 @@ public class ConferenceActivity extends Activity {
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
 					.equals(intent.getAction())) {
+
 				Object obj = intent.getExtras().get("obj");
 				Message.obtain(mVideoHandler, USER_DELETE_GROUP, obj)
 						.sendToTarget();
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
 					.getAction())) {
+
 				Object obj = intent.getExtras().get("obj");
 				Message.obtain(mVideoHandler, GROUP_ADD_USER, obj)
 						.sendToTarget();
 
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(intent.getAction())) {
+
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code == NetworkStateCode.CONNECTED_ERROR) {
 					finish();
 				}
+
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
+
 				long uid = intent.getExtras().getLong("uid");
 				Attendee at = findAttendee(uid);
 				// If exited user is not attendee in conference, then return
@@ -1480,6 +1525,7 @@ public class ConferenceActivity extends Activity {
 					Message.obtain(mVideoHandler, ATTENDEE_LISTENER, 0, 0, user)
 							.sendToTarget();
 				}
+
 			} else if (PublicIntent.PREPARE_FINISH_APPLICATION.equals(intent
 					.getAction())) {
 				// Listen quit request to make sure close all device
@@ -1489,6 +1535,7 @@ public class ConferenceActivity extends Activity {
 			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
 
 			} else if (Intent.ACTION_HEADSET_PLUG.equals(intent.getAction())) {
+
 				if (intent.hasExtra("state")) {
 					int state = intent.getIntExtra("state", 0);
 					if (state == 1) {
@@ -1515,6 +1562,7 @@ public class ConferenceActivity extends Activity {
 					isBluetoothHeadsetConnected = false;
 					headsetAndBluetoothHeadsetHandle();
 				}
+
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO
 					.equals(intent.getAction())) {
 				V2Log.d(V2Log.UI_BROADCAST,
@@ -1537,11 +1585,11 @@ public class ConferenceActivity extends Activity {
 
 				}
 
-
 				closeAttendeeVideo(userDeviceConfig);
 
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO
 					.equals(intent.getAction())) {
+
 				V2Log.d(V2Log.UI_BROADCAST,
 						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO");
 
@@ -1601,7 +1649,9 @@ public class ConferenceActivity extends Activity {
 				}
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE
 					.equals(intent.getAction())) {
-			
+
+				V2Log.d(V2Log.UI_BROADCAST,
+						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE");
 				// 传来的是设备ID
 				String dstDeviceID = intent.getStringExtra("sDstMediaID");
 				UserDeviceConfig userDeviceConfig = null;
@@ -1627,6 +1677,9 @@ public class ConferenceActivity extends Activity {
 
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE
 					.equals(intent.getAction())) {
+
+				V2Log.d(V2Log.UI_BROADCAST,
+						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE");
 				if (isSyn == 1) {
 					String xml = intent.getStringExtra("sSyncVideoMsgXML");
 					if (xml == null || xml.equals("")) {
@@ -2125,10 +2178,10 @@ public class ConferenceActivity extends Activity {
 			adjustVideoLayout();
 
 			// Send speaking status
-			doApplyOrReleaseSpeak(isSpeaking);
+			doApplyOrReleaseSpeak(currentAttendee.isSpeaking());
 			// Make sure update start after send request,
 			// because update state will update isSpeaking value
-			updateSpeakerState(isSpeaking);
+			updateSpeakerState(currentAttendee.isSpeaking());
 			// Resume audio
 			cb.updateAudio(true);
 
@@ -2252,8 +2305,8 @@ public class ConferenceActivity extends Activity {
 				if (mSubWindowLayout.getVisibility() == View.VISIBLE
 						&& mSubWindowLayout.getChildAt(0) == view
 						&& conf.getCreator() != GlobalHolder.getInstance()
-						.getCurrentUserId()) {
-					//close invitation view, remote forbbien invitation
+								.getCurrentUserId()) {
+					// close invitation view, remote forbbien invitation
 					showOrHideSubWindow(view);
 					Toast.makeText(mContext,
 							R.string.error_no_permission_to_invitation,
@@ -2318,11 +2371,6 @@ public class ConferenceActivity extends Activity {
 	 * @param udc
 	 */
 	private boolean showOrCloseAttendeeVideo(UserDeviceConfig udc) {
-		if (isSyn == 1) {
-			Toast.makeText(ConferenceActivity.this, "主席正在同步视频",
-					Toast.LENGTH_SHORT).show();
-			return false;
-		}
 		if (udc == null) {
 			V2Log.e(" can't not open or close device");
 			return false;
@@ -2349,6 +2397,7 @@ public class ConferenceActivity extends Activity {
 					Toast.LENGTH_SHORT).show();
 			return false;
 		}
+
 		VideoPlayer vp = new VideoPlayer();
 		udc.setSVHolder(new SurfaceView(this));
 		udc.setVp(vp);
@@ -2368,6 +2417,14 @@ public class ConferenceActivity extends Activity {
 		sw.observer.open();
 
 		udc.setShowing(true);
+
+		Log.i("20141220 2", "openAttendeeVideo() udc.id =" + udc.getDeviceID()
+				+ " udc.isShowing =" + udc.isShowing());
+
+		if (mAttendeeContainer != null) {
+			mAttendeeContainer.updateDisplay();
+		}
+
 		return true;
 	}
 
@@ -2381,6 +2438,12 @@ public class ConferenceActivity extends Activity {
 			for (SurfaceViewW sw : mCurrentShowedSV) {
 				if (sw.udc == udc) {
 					sw.observer.close();
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					mCurrentShowedSV.remove(sw);
 					mVideoLayout.removeView(sw.getView());
 					sw.rl.removeAllViews();
@@ -2390,6 +2453,10 @@ public class ConferenceActivity extends Activity {
 			udc.setShowing(false);
 			udc.doClose();
 			adjustVideoLayout();
+
+			if (mAttendeeContainer != null) {
+				mAttendeeContainer.updateDisplay();
+			}
 		}
 
 		return true;
@@ -2400,26 +2467,37 @@ public class ConferenceActivity extends Activity {
 	 * 
 	 * @param ind
 	 */
-	private boolean updateAttendeePermissionStateIcon(
-			PermissionUpdateIndication ind) {
-		Attendee pa = null;
+	private boolean updateAttendeePermissionState(PermissionUpdateIndication ind) {
+		Attendee attendee = null;
+
 		for (Attendee att : mAttendeeList) {
 			if (att.getAttId() == ind.getUid()) {
-				pa = att;
+				attendee = att;
 			}
 		}
 
-		if (pa != null && mAttendeeContainer != null) {
-			ConferencePermission cp = ConferencePermission.fromInt(ind
-					.getType());
-			PermissionState ps = PermissionState.fromInt(ind.getState());
-			if (cp == ConferencePermission.SPEAKING
-					&& ps == PermissionState.GRANTED) {
-				pa.setSpeakingState(true);
-			} else {
-				pa.setSpeakingState(false);
+		if (attendee != null) {
+
+			ConferencePermission conferencePermission = ConferencePermission
+					.fromInt(ind.getType());
+			PermissionState permissionState = PermissionState.fromInt(ind
+					.getState());
+
+			if (conferencePermission == ConferencePermission.SPEAKING) {
+				if (permissionState == PermissionState.GRANTED) {
+					attendee.setSpeakingState(true);
+				} else {
+					attendee.setSpeakingState(false);
+				}
+			} else if (conferencePermission == ConferencePermission.CONTROL) {
+				if (permissionState == PermissionState.GRANTED) {
+					attendee.setLectureState(Attendee.LECTURE_STATE_GRANTED);
+				} else if (permissionState == PermissionState.APPLYING) {
+					attendee.setLectureState(Attendee.LECTURE_STATE_APPLYING);
+				} else if (permissionState == PermissionState.NORMAL) {
+					attendee.setLectureState(Attendee.LECTURE_STATE_NOT);
+				}
 			}
-			mAttendeeContainer.updateAttendeeSpeakingState(pa);
 			return true;
 		} else {
 			return false;
@@ -2458,8 +2536,8 @@ public class ConferenceActivity extends Activity {
 						devices.set(j, svw.udc);
 					}
 				}
-
 			}
+
 			// Need to close video
 			if (closeFlag) {
 				layoutChanged = true;
@@ -2472,8 +2550,10 @@ public class ConferenceActivity extends Activity {
 		}
 
 		if (mAttendeeContainer != null) {
+			Log.i("20141220 1", "updateAttendeeDevice");
 			mAttendeeContainer.resetAttendeeDevices(at, devices);
 		}
+
 		// adjust layout if we closed video
 		if (layoutChanged) {
 			adjustVideoLayout();
@@ -2857,6 +2937,15 @@ public class ConferenceActivity extends Activity {
 
 		@Override
 		public void OnAttendeeClicked(Attendee at, UserDeviceConfig udc) {
+
+			if (isSyn == 1) {
+				Toast.makeText(getApplicationContext(), "主席正在同步视频",
+						Toast.LENGTH_LONG).show();
+				Log.i("20141220 3", "主席正在同步视频"
+						+ Thread.currentThread().getName());
+				return;
+			}
+
 			if (udc == null || at == null) {
 				return;
 			}
@@ -3047,6 +3136,11 @@ public class ConferenceActivity extends Activity {
 				}
 				break;
 			case ATTENDEE_DEVICE_LISTENER: {
+
+				V2Log.d(V2Log.UI_MESSAGE,
+						"CLASS = ConferenceActivity  MESSAGE = ATTENDEE_DEVICE_LISTENER");
+				Log.i("20141220 1",
+						"CLASS = ConferenceActivity  MESSAGE = ATTENDEE_DEVICE_LISTENER");
 				// need to update user device when remote user disable device
 				Object[] obj = (Object[]) (((AsyncResult) msg.obj).getResult());
 				List<UserDeviceConfig> list = (List<UserDeviceConfig>) obj[1];
@@ -3110,33 +3204,72 @@ public class ConferenceActivity extends Activity {
 				finish();
 			}
 				break;
-
 			// user permission updated
 			case NOTIFY_USER_PERMISSION_UPDATED:
 				PermissionUpdateIndication ind = (PermissionUpdateIndication) (((AsyncResult) msg.obj)
 						.getResult());
-				if (!updateAttendeePermissionStateIcon(ind)) {
+
+				if (ind.getType() == ConferencePermission.CONTROL.intValue()) {
+					if (ind.getState() == PermissionState.GRANTED.intValue()) {
+					} else if (ind.getState() == PermissionState.APPLYING
+							.intValue()) {
+					} else if (ind.getState() == PermissionState.NORMAL
+							.intValue()) {
+						// 取消申请
+						User user = null;
+						for (User tempUser : mHostRequestUsers) {
+							if (tempUser.getmUserId() == ind.getUid()) {
+								user = tempUser;
+								break;
+							}
+						}
+
+						if (user != null) {
+							mHostRequestUsers.remove(user);
+						}
+
+						if (mHostRequestUsers.size() == 0) {
+							hasUnreadChiremanControllMsg = false;
+							mMsgNotification.setVisibility(View.GONE);
+							if (mConfMsgRedDot != null) {
+								mConfMsgRedDot.setVisibility(View.GONE);
+							}
+						}
+
+						if (mHostRequestWindow != null) {
+							mHostRequestWindow.updateList(mHostRequestUsers);
+						}
+
+					}
+				}
+
+				// 更新参会人列表里的主讲和发言状态
+				if (!updateAttendeePermissionState(ind)) {
 					mPendingPermissionUpdateList.add(ind);
 				}
+
+				if (mAttendeeContainer != null) {
+					mAttendeeContainer.updateDisplay();
+				}
+
 				if (ind.getUid() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
-
-					if (ConferencePermission.SPEAKING.intValue() == ind
+					if (ConferencePermission.CONTROL.intValue() == ind
 							.getType()) {
+						// 更新自己的主讲状态和提示信息
+						showCurrentAttendeeLectureStateToast(
+								PermissionState.fromInt(ind.getState()), true);
+
+					} else if (ConferencePermission.SPEAKING.intValue() == ind
+							.getType()) {
+						// 更新自己的主讲图标
 						updateSpeakerState(PermissionState.fromInt(ind
 								.getState()) == PermissionState.GRANTED
 								&& ConferencePermission.SPEAKING.intValue() == ind
 										.getType());
-					} else if (ConferencePermission.CONTROL.intValue() == ind
-							.getType()) {
-						if (ind.getUid() == GlobalHolder.getInstance()
-								.getCurrentUserId()) {
-							updateControlState(
-									PermissionState.fromInt(ind.getState()),
-									true);
-						}
 					}
 				}
+
 				break;
 			case NOTIFY_HOST_PERMISSION_REQUESTED: {
 				PermissionRequestIndication rri = (PermissionRequestIndication) (((AsyncResult) msg.obj)
@@ -3145,8 +3278,23 @@ public class ConferenceActivity extends Activity {
 						.getCurrentUserId()) {
 					mHostRequestUsers.add(GlobalHolder.getInstance().getUser(
 							rri.getUid()));
-					mMsgNotification.setVisibility(View.VISIBLE);
+					if (mHostRequestWindow == null
+							|| !mHostRequestWindow.isShowing()) {
+						mMsgNotification.setVisibility(View.VISIBLE);
+						if (mConfMsgRedDot != null) {
+							mConfMsgRedDot.setVisibility(View.VISIBLE);
+						}
+					}
+					
+					hasUnreadChiremanControllMsg = true;
+
+					PermissionUpdateIndication pui = new PermissionUpdateIndication(
+							rri.getUid(), rri.getType(), rri.getState());
+
+					updateAttendeePermissionState(pui);
+
 				}
+
 				if (mHostRequestWindow != null) {
 					mHostRequestWindow.updateList(mHostRequestUsers);
 				}

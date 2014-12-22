@@ -243,11 +243,13 @@ public class VerificationProvider extends DatabaseProvider {
 						.getLong(cursor
 								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE));
 
+				tempData._id = cursor
+						.getLong(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.ID));
 				tempData.remoteUserID = tempNode.remoteUserID;
 				User user = GlobalHolder.getInstance().getUser(
 						tempData.remoteUserID);
 				tempData.dheadImage = user.getAvatarBitmap();
-				tempData.name = user.getName();
 
 				tempData.dbRecordIndex = cursor.getLong(0);
 				if ((tempNode.fromUserID == tempNode.remoteUserID)

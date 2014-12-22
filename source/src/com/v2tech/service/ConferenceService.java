@@ -635,7 +635,7 @@ public class ConferenceService extends DeviceService {
 		public void OnConfHostRequest(V2User user, int permission) {
 			super.OnConfHostRequest(user, permission);
 			JNIIndication jniInd = new PermissionRequestIndication(user.uid,
-					permission, 0);
+					permission, PermissionState.APPLYING.intValue());
 			notifyListenerWithPending(KEY_HOST_REQUEST_LISTNER, 0, 0, jniInd);
 
 		}
