@@ -2692,6 +2692,7 @@ public class ConferenceActivity extends Activity {
 			ConferencMessageSyncService cms = ((ConferencMessageSyncService.LocalBinder) binder)
 					.getService();
 			cb = cms.getConferenceService();
+
 			ds = cms.getDocService();
 
 			// register listener for conference service
@@ -2730,7 +2731,7 @@ public class ConferenceActivity extends Activity {
 					DOC_PAGE_CANVAS_NOTIFICATION, null);
 
 			Message.obtain(mVideoHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
-
+			cb.notifyAllMessage(cg.getmGId());
 			suspendOrResume(true);
 
 		}

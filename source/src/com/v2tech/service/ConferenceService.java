@@ -256,6 +256,13 @@ public class ConferenceService extends DeviceService {
 	public void muteConf() {
 		ConfRequest.getInstance().muteConf();
 	}
+	
+	
+	
+	
+	public void notifyAllMessage(long nGroupID) {
+		ConfRequest.getInstance().notifyAllMessage(nGroupID);
+	}
 
 	public void enableVideoDev(String szDeviceID, boolean bInuse) {
 		int _bInuse = 0;
