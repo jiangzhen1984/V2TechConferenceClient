@@ -113,19 +113,4 @@ public class ConferenceGroup extends Group {
 	public String toXml() {
 		return null;
 	}
-
-
-
-	public User getmChairMan() {
-		return mChairMan;
-	}
-
-
-
-	public void setmChairMan(User mChairMan) {
-		this.mChairMan = mChairMan;
-	}
-	
-	
-
 }
