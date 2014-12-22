@@ -346,7 +346,6 @@ public class ConferenceActivity extends Activity {
 				mMenuMessageButton, mMenuAttendeeButton, mMenuDocButton };
 
 		this.mVideoLayout = (FrameLayout) findViewById(R.id.video_layout);
-		mVideoLayout.setBackgroundColor(Color.rgb(255, 0, 0));
 
 		// Initialize broadcast receiver
 		initBroadcastReceiver();
@@ -2566,6 +2565,7 @@ public class ConferenceActivity extends Activity {
 	 * @param opt
 	 */
 	private void updateDocNotification(AsyncResult res, int opt) {
+		V2Log.d(TAG, "opt : " + opt);
 		V2Doc doc = null;
 		V2Doc.Page page = null;
 		V2Doc.PageArray pageArray = null;
@@ -2623,6 +2623,8 @@ public class ConferenceActivity extends Activity {
 			if (doc == null) {
 				doc = new V2Doc(docId, null, null, 0, null);
 				mDocs.put(docId, doc);
+				if(opt == DOC_DOWNLOADED_NOTIFICATION)
+					V2Log.e(TAG, "Update Doc Page failed , 没有获取到文件路径");
 			}
 			// If doc is not null, means new doc event or doc close event. need
 			// to update cache doc or not.

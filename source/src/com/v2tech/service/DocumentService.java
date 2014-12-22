@@ -187,7 +187,7 @@ public class DocumentService extends AbstractHandler {
 		}
 		
 		V2Log.e(doc.getId()+"   ====>"+ doc.getActivatePage().getNo());
-		WBRequest.getInstance().ActivePage(doc.getId(), doc.getActivatePage().getNo(), doc.getActivatePage().getNo(),  syncFlag);
+		WBRequest.getInstance().ActivePage(doc.getSharedUser().getmUserId() , doc.getId(), doc.getActivatePage().getNo(), 0,  syncFlag);
 	}
 	
 	

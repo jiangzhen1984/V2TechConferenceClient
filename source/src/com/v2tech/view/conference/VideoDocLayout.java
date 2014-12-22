@@ -40,6 +40,7 @@ import com.v2tech.R;
 import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2ShapeMeta;
+import com.v2tech.vo.VMessageImageItem;
 
 public class VideoDocLayout extends LinearLayout {
 
@@ -288,6 +289,7 @@ public class VideoDocLayout extends LinearLayout {
 
 	public void updateCurrentDoc(V2Doc d) {
 		if (d == null) {
+			V2Log.e("VideoDocLayout updateCurrentDoc --> Given V2Doc Object is null!");
 			return;
 		}
 
@@ -304,6 +306,7 @@ public class VideoDocLayout extends LinearLayout {
 		updatePageButton();
 
 		moveToShowedTab();
+		container.postInvalidate();
 	}
 
 	private void moveToShowedTab() {
@@ -413,7 +416,7 @@ public class VideoDocLayout extends LinearLayout {
 				src.bottom = ops.outHeight;
 				width = (int) src.right;
 				height = (int) src.bottom;
-
+				
 				ops.inJustDecodeBounds = false;
 				BitmapFactory.Options opsNew = new BitmapFactory.Options();
 				opsNew.inPurgeable = true;
@@ -433,6 +436,7 @@ public class VideoDocLayout extends LinearLayout {
 					sampl = 2;
 				}
 
+				V2Log.d("updateCurrentDocPage --> doc file path : " + p.getFilePath());
 				mBackgroundBitMap = BitmapFactory.decodeFile(p.getFilePath(),
 						opsNew);
 
@@ -449,19 +453,11 @@ public class VideoDocLayout extends LinearLayout {
 				// Merge bitmap
 				mergeBitmapToImage(mBackgroundBitMap, mShapeBitmap);
 				iv.setImageBitmap(mImageViewBitmap);
-//				FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(
-//						FrameLayout.LayoutParams.MATCH_PARENT,
-//						FrameLayout.LayoutParams.MATCH_PARENT);
-//				fl.leftMargin = (container.getWidth() - mImageViewBitmap.getWidth()) / 2;
-//				fl.topMargin = (container.getHeight() - mImageViewBitmap.getHeight()) / 2;
-//				if (fl.leftMargin < 0) {
-//					fl.leftMargin = 0;
-//				}
-//				if (fl.topMargin < 0) {
-//					fl.topMargin = 0;
-//				}
-//				container.addView(iv, fl);
-//				container.postInvalidate();
+				FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(
+						FrameLayout.LayoutParams.MATCH_PARENT,
+						FrameLayout.LayoutParams.MATCH_PARENT);
+				container.addView(iv , fl);
+				container.postInvalidate();
 			} else {
 				// Set interval timer for waiting page download
 				mTimeHanlder.postDelayed(new Runnable() {
@@ -521,7 +517,7 @@ public class VideoDocLayout extends LinearLayout {
 				}
 			}
 		}
-
+		V2Log.e("mergeBitmapToImage", "width : " + mImageViewBitmap.getWidth() + "height : " + mImageViewBitmap.getHeight());
 		Canvas target = new Canvas(mImageViewBitmap);
 		Paint paint = new Paint();
 		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));

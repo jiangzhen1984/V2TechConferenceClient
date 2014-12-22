@@ -977,13 +977,14 @@ public class GroupRequest {
 	};
 
 	/**
-	 * 会议中创建文档共享的回调 eWhiteShowType白板显示类型
+	 * 会议中创建文档共享的回调
 	 * 
 	 * @param eGroupType
 	 * @param nGroupID
 	 * @param szWBoardID
 	 * @param szFileName
 	 * @param eWhiteShowType
+	 * 			白板显示类型
 	 */
 	private void OnGroupCreateDocShare(int eGroupType, long nGroupID,
 			String szWBoardID, String szFileName, int eWhiteShowType) {

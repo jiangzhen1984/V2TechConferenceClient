@@ -72,6 +72,7 @@ public class WBRequest {
 	
 	/**
 	 * 白板激活一页
+	 * @param nUserId
 	 * @param szWBoardID
 	 * 			白板ID
 	 * @param nPageID
@@ -80,7 +81,7 @@ public class WBRequest {
 	 * @param bNotify
 	 * 			激活页是否通知其它成员
 	 */
-	public native void ActivePage(String szWBoardID, long nUserId, int nPageId, boolean bNotify);
+	public native void ActivePage(long nUserId , String szWBoardID, int nPageId, int nIndex , boolean bNotify);
 
 	private long lastgoupid = 0L;
 
@@ -99,9 +100,13 @@ public class WBRequest {
 
 	}
 
-	// 3d4805676-0f02-4fd6-bf98-b8166832e51a < pagelist><page
-	// id='1'/></pagelist> 1
-
+	
+	/**
+	 * 3d4805676-0f02-4fd6-bf98-b8166832e51a : <pagelist><pageid='1'/></pagelist> : 1
+	 * @param szWBoardID
+	 * @param szPageData
+	 * @param nPageID
+	 */
 	private void OnWBoardPageList(String szWBoardID, String szPageData,
 			int nPageID) {
 		Log.e("WBRequest UI", "OnWBoardPageList " + szWBoardID + " "
@@ -113,16 +118,22 @@ public class WBRequest {
 		}
 	}
 
-	// 3d4805676-0f02-4fd6-bf98-b8166832e51a 1
-	private void OnWBoardActivePage(long nUserID, String szWBoardID, int nPageID) {
-		Log.e("WBRequest UI", "OnWBoardActivePage " + szWBoardID + " "
-				+ nPageID);
+	/**
+	 * 
+	 * @param nUserID
+	 * @param szWBoardID
+	 * @param nPageID
+	 * @param index
+	 */
+	private void OnWBoardActivePage(long nUserID, String szWBoardID, int nPageID , int index) {
+		V2Log.e("WBRequest UI", "OnWBoardActivePage ---> nUserID :"
+				+ nUserID + " | szWBoardID: " + szWBoardID + " | nPageID: "
+				+ nPageID + " | index: " + index);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
 				wr.get().OnWBoardActivePageCallback(nUserID, szWBoardID, nPageID);
 			}
 		}
-
 	}
 	
 	private void OnWBoardAddPage(String szWBoardID, int nPageID) {
@@ -135,12 +146,20 @@ public class WBRequest {
 
 	}
 
-
+	/**
+	 * 
+	 * @param szWBoardID
+	 * @param nPageID
+	 * @param szFileName
+	 * @param result
+	 */
 	private void OnWBoardDocDisplay(String szWBoardID, int nPageID,
 			String szFileName, int result) {
 		// return ;
-		V2Log.d("---->OnWBoardDocDisplay " + szWBoardID
-				+ " " + nPageID + " " + szFileName);
+		szFileName = szFileName.replace("//", "/");
+		V2Log.e("WBRequest UI", "OnWBoardDocDisplay ---> szWBoardID :"
+				+ szWBoardID + " | nPageID: " + nPageID + " | szFileName: "
+				+ szFileName + " | result: " + result);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
 				wr.get().OnWBoardDocDisplayCallback(szWBoardID, nPageID, szFileName,
