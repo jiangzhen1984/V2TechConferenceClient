@@ -314,6 +314,13 @@ public class CrowdInvitationActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(mContext,
+						R.string.error_local_connect_to_server,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
 			if (!isInRejectReasonMode) {
 				updateView(!isInRejectReasonMode);
 			}

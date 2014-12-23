@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.v2tech.R;
+import com.v2tech.util.SPUtil;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
@@ -99,9 +100,10 @@ public class DiscussionBoardTopicUpdateActivity extends Activity {
 		@Override
 		public void onClick(View view) {
 			if (!GlobalHolder.getInstance().isServerConnected()) {
-				Toast.makeText(DiscussionBoardTopicUpdateActivity.this, R.string.error_discussion_no_network, Toast.LENGTH_SHORT).show();
+				Toast.makeText(DiscussionBoardTopicUpdateActivity.this, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
 				return;
 			}
+			
 			synchronized (mState) {
 				if (mState == State.PENDING) {
 					return;

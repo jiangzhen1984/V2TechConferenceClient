@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
@@ -44,6 +45,7 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.BitmapUtil;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.StorageUtil;
@@ -139,11 +141,13 @@ public class ConversationSelectFile extends Activity {
 			{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/jpeg"} ,
 			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/png"} ,
 			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/jpeg"}};
+	private Context mContext;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_selectfile);
+		mContext = this;
 		findview();
 		init();
 		setListener();
@@ -294,6 +298,12 @@ public class ConversationSelectFile extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+					return ;
+				}
+				
 				if(!isSended)
 					reutrnResult(3);
 				else

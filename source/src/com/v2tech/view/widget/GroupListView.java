@@ -465,8 +465,10 @@ public class GroupListView extends ListView {
 			GroupItemData groupItem = (GroupItemData) getItem(g);
 			if (!groupItem.isExpanded) {
 				int pos = getGroupItemPos(groupItem);
-				if (pos != -1)
+				if (pos != -1){
+					groupItem.isExpanded = true;
 					expand(groupItem, pos);
+				}
 			}
 		}
 		adapter.notifyDataSetChanged();

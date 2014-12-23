@@ -23,12 +23,14 @@
     <string name="title_bar_item_help">帮助</string>
     <string name="title_bar_item_about">关于</string>
     <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
+    <string name="error_local_connect_to_server">当前网络不可用，请确认网络连接</string>
     <!-- <string name="error_offline_of_no_network">您已处于离线状态，无法发送该请求，请上线后在尝试</string> -->
     <string name="error_offline_of_no_network">网络连接不可用，请稍后再试 </string>
     <string name="error_no_resource">资源不足，请联系管理员</string>
     <string name="error_resource_over_time">组织资源过期，请联系管理员</string>
     
     <string name="status_bar_title">正在运行..</string>
+    <string name="status_searching">搜索中..</string>
     <string name="status_bar_notification">通知</string>
     
     <string name="conversation_select_image_file_title">图片</string>

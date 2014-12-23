@@ -49,9 +49,6 @@ import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
-import android.view.ViewTreeObserver;
-import android.view.ViewTreeObserver.OnGlobalLayoutListener;
-import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -93,7 +90,6 @@ import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.bo.UserStatusObject;
-import com.v2tech.view.conversation.ConversationP2PTextActivity;
 import com.v2tech.view.conversation.ConversationSelectImage;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.Attendee;
@@ -1502,6 +1498,7 @@ public class ConferenceActivity extends Activity {
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code == NetworkStateCode.CONNECTED_ERROR) {
+//					quit();
 					finish();
 				}
 
@@ -1958,6 +1955,7 @@ public class ConferenceActivity extends Activity {
 
 	@Override
 	public void finish() {
+		quit();
 		super.finish();
 		// this.overridePendingTransition(R.animator.nonam_scale_null,
 		// R.animator.nonam_scale_center_100_0);
@@ -1966,12 +1964,10 @@ public class ConferenceActivity extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		// moveTaskToBack(true);
 	}
 
 	@Override
 	protected void onDestroy() {
-		quit();
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
 		super.onDestroy();
 		mAttendeeList.clear();
@@ -2101,8 +2097,8 @@ public class ConferenceActivity extends Activity {
 				public void onClick(View v) {
 					d.dismiss();
 					VerificationProvider.deleteCrowdVerificationMessage(conf.getId());
-					setResult(ConversationsTabFragment.CONFERENCE_ENTER_CODE);
-					ConferenceActivity.super.onBackPressed();
+					quit();
+					finish();
 				}
 
 			});
@@ -2145,9 +2141,12 @@ public class ConferenceActivity extends Activity {
 			mMuteCameraDialog = d;
 		}
 
-		TextView v = (TextView) mMuteCameraDialog.findViewById(R.id.content);
-		v.setText("是否禁用本地视频？");
-
+		TextView muteContent = (TextView) mMuteCameraDialog.findViewById(R.id.content);
+		TextView muteConfirm = (TextView) mMuteCameraDialog.findViewById(R.id.IMWOKButton);
+		TextView muteCancel = (TextView) mMuteCameraDialog.findViewById(R.id.IMWCancelButton);
+		muteContent.setText(R.string.in_meeting_mute_hit_content);
+		muteConfirm.setText(R.string.in_meeting_mute_button);
+		muteCancel.setText(R.string.in_meeting_mute_cancel_button);
 		mMuteCameraDialog.show();
 	}
 
@@ -2221,7 +2220,7 @@ public class ConferenceActivity extends Activity {
 	private void quit() {
 		Intent i = new Intent();
 		i.putExtra("gid", conf.getId());
-		setResult(0, i);
+		setResult(ConversationsTabFragment.CONFERENCE_ENTER_CODE, i);
 
 		// if bound, then conference service is initialized. Otherwise not.
 		if (mServiceBound) {
@@ -3203,7 +3202,7 @@ public class ConferenceActivity extends Activity {
 				}
 				Toast.makeText(mContext, resource, Toast.LENGTH_LONG).show();
 				// Do quit action
-				quit();
+//				quit();
 				finish();
 			}
 				break;

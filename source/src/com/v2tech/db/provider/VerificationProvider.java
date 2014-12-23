@@ -242,7 +242,9 @@ public class VerificationProvider extends DatabaseProvider {
 				tempNode.readState = cursor
 						.getLong(cursor
 								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE));
-
+				tempNode.remoteUserNickname = cursor
+						.getString(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_CROWD_REMOTE_USER_NICK_NAME));
 				tempData._id = cursor
 						.getLong(cursor
 								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.ID));
@@ -1275,7 +1277,7 @@ public class VerificationProvider extends DatabaseProvider {
 				return null;
 			}
 
-			if (cursor.moveToFirst()) {
+			if (cursor.moveToNext()) {
 				AddFriendHistorieNode tempNode = new AddFriendHistorieNode();
 				tempNode.ownerUserID = cursor
 						.getLong(cursor
@@ -1307,6 +1309,9 @@ public class VerificationProvider extends DatabaseProvider {
 				tempNode.readState = cursor
 						.getLong(cursor
 								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE));
+				tempNode.remoteUserNickname = cursor
+						.getString(cursor
+								.getColumnIndex(ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_CROWD_REMOTE_USER_NICK_NAME));
 				return tempNode;
 			}
 			return null;

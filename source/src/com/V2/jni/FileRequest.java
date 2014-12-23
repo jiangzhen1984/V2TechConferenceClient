@@ -322,7 +322,7 @@ public class FileRequest {
 	}
 
 	/**
-	 * 弃用
+	 * @deprecated
 	 * @param sFileID
 	 * @param errorCode
 	 * @param nTransType 1 send 2 download

@@ -209,6 +209,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 			@Override
 			public void onClick(View arg0) {
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext,
+							R.string.error_local_connect_to_server,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
+				
 				Intent intent = new Intent(ContactDetail.this,
 						AuthenticationActivity.class);
 				intent.putExtra("remoteUserID", ContactDetail.this.getIntent()
@@ -320,8 +327,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 	@Override
 	public void onBackPressed() {
-		Message m = Message.obtain(lh, UPDATE_USER_INFO);
-		lh.sendMessage(m);
+		if (!GlobalHolder.getInstance().isServerConnected() && isUpdating) {
+			Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+		}
+		else{
+			isUpdating = false;
+			Message m = Message.obtain(lh, UPDATE_USER_INFO);
+			lh.sendMessage(m);
+		}
 		super.onBackPressed();
 	}
 
@@ -496,7 +509,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			for (EditText et : mETArr) {
 				et.setVisibility(View.VISIBLE);
 				mTitleET.setVisibility(View.VISIBLE);
-				// et.addTextChangedListener(tw);
+				et.addTextChangedListener(tw);
 				et.setOnFocusChangeListener(hidenKeyboardListener);
 				et.setSelection(et.length());
 			}
@@ -573,6 +586,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	}
 
 	private void startVoiceCall() {
+		if (!GlobalHolder.getInstance().isServerConnected()) {
+			Toast.makeText(mContext,
+					R.string.error_local_connect_to_server,
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
 		// Update global audio state
 		GlobalHolder.getInstance().setAudioState(true, mUid);
 		Intent iv = new Intent();
@@ -708,12 +728,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		@Override
 		public void afterTextChanged(Editable ed) {
-			if (isUpdating) {
-				return;
-			}
-			isUpdating = true;
-			Message m = Message.obtain(lh, UPDATE_USER_INFO);
-			lh.sendMessageDelayed(m, 2000);
+			if(!TextUtils.isEmpty(ed.toString()))
+				isUpdating = true;
 		}
 
 		@Override
@@ -837,12 +853,13 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
+			if (!GlobalHolder.getInstance().isServerConnected()) {
 				Toast.makeText(mContext,
-						R.string.conversation_no_network_notification,
+						R.string.error_local_connect_to_server,
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
+			
 			if (mVideoCallButtonEnable) {
 				mVideoCallButtonEnable = false;
 				startVideoCall();

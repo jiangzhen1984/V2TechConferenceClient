@@ -39,8 +39,13 @@ public class ProgressUtils {
 			ll = null;
 		return showProgress(mContext, show, ll);
 	}
-
+	
 	public static ProgressDialog showNormalWithHintProgress(Context mContext,
+			boolean show) {
+		return showNormalWithHintProgress(mContext , "正在处理中...请稍后" , show);
+	}
+
+	public static ProgressDialog showNormalWithHintProgress(Context mContext, String hint ,
 			boolean show) {
 		LinearLayout ll = null;
 		if (show) {
@@ -57,7 +62,7 @@ public class ProgressUtils {
 			ll.setTag(iv);
 
 			TextView tv = new TextView(mContext);
-			tv.setText("正在处理中...请稍后");
+			tv.setText(hint);
 			ll.addView(tv, new LinearLayout.LayoutParams(
 					ViewGroup.LayoutParams.WRAP_CONTENT,
 					ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -106,7 +111,8 @@ public class ProgressUtils {
 	private static void dismissDialog() {
 		animation.cancel();
 		if (dialog != null) {
-			dialog.dismiss();
+			if(dialog.isShowing())
+				dialog.dismiss();
 			dialog.cannelTimeOut();
 			dialog = null;
 			return;

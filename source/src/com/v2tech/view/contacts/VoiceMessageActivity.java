@@ -132,6 +132,12 @@ public class VoiceMessageActivity extends Activity {
 					
 				}
 				else{
+					if (!GlobalHolder.getInstance().isServerConnected()) {
+						Toast.makeText(mContext,
+								R.string.error_local_connect_to_server,
+								Toast.LENGTH_SHORT).show();
+						return;
+					}
 					
 					Intent intent = new Intent();
 					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);

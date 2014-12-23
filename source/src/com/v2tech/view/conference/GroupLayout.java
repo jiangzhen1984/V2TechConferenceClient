@@ -206,7 +206,7 @@ public class GroupLayout extends LinearLayout {
 
 	};
 
-	public void updateNotificator(boolean flag) {
+	public void updateConversationNotificator(boolean flag) {
 		if (flag) {
 			mNotificatorIV.setVisibility(View.VISIBLE);
 		} else {
@@ -264,7 +264,6 @@ public class GroupLayout extends LinearLayout {
 		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER)
 			initNickName();
 		else{
-//			DiscussionConversation dis = (DiscussionConversation) mConv;
 			mConNameTV.setText(mConv.getName());
 			mGroupNameTV.setText(mConv.getName());
 		}

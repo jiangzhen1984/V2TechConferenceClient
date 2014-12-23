@@ -26,6 +26,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -341,6 +342,12 @@ public class CrowdMembersActivity extends Activity {
 
 				@Override
 				public void onClick(View v) {
+					if (!GlobalHolder.getInstance().isServerConnected()) {
+						Toast.makeText(mContext,
+								R.string.error_discussion_no_network,
+								Toast.LENGTH_SHORT).show();
+						return;
+					}
 					v.setVisibility(View.GONE);
 					service.removeMember(crowd, mUser, null);
 					mMembers.remove(mUser);

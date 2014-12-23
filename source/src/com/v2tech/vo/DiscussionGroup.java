@@ -3,24 +3,30 @@ package com.v2tech.vo;
 import java.util.Date;
 import java.util.List;
 
+import android.text.TextUtils;
+
 public class DiscussionGroup extends Group {
+
+	private boolean isCreatorExist;
 
 	public DiscussionGroup(long gId, String name, User owner, Date createDate) {
 		super(gId, GroupType.DISCUSSION, name, owner, createDate);
+		isCreatorExist = true;
 	}
 
 	public DiscussionGroup(long gId, String name, User owner) {
 		super(gId, GroupType.DISCUSSION, name, owner);
+		isCreatorExist = true;
 	}
 
 	@Override
 	public String getName() {
-		if (this.mName != null && !this.mName.isEmpty()) {
+		if (!TextUtils.isEmpty(mName)) {
 			return mName;
 		}
 		StringBuilder sb = new StringBuilder();
 		List<User> users = getUsers();
-		if(mOwnerUser != null){
+		if(mOwnerUser != null && isCreatorExist){
 			sb.append(mOwnerUser.getName());
 			for (User user : users) {
 				if (user.getmUserId() == this.mOwnerUser.getmUserId())
@@ -57,4 +63,11 @@ public class DiscussionGroup extends Group {
 		return xml.toString();
 	}
 
+	public boolean isCreatorExist() {
+		return isCreatorExist;
+	}
+
+	public void setCreatorExist(boolean isCreatorExist) {
+		this.isCreatorExist = isCreatorExist;
+	}
 }

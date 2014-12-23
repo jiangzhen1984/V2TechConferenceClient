@@ -370,6 +370,7 @@ public class VideoDocLayout extends LinearLayout {
 		recycleBitmap(mShapeBitmap);
 		// recycle image bitmap
 		recycleBitmap(mBackgroundBitMap);
+		recycleBitmap(mImageViewBitmap);
 
 		if (this.mCurrentDoc.getDocType() == V2Doc.DOC_TYPE_BLANK_BOARD) {
 			mShapeBitmap = Bitmap.createBitmap(800, 600,
@@ -493,30 +494,46 @@ public class VideoDocLayout extends LinearLayout {
 	 * @param shapesBm
 	 */
 	private void mergeBitmapToImage(Bitmap shareDocBm, Bitmap shapesBm) {
-		if (mImageViewBitmap == null || mImageViewBitmap.isRecycled()) {
-			if (shareDocBm != null && !shareDocBm.isRecycled()) {
-				mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
-						shareDocBm.getHeight(), Config.ARGB_8888);
-			} else if (shapesBm != null && !shapesBm.isRecycled()) {
-				mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
-						shapesBm.getHeight(), Config.ARGB_8888);
-			} else {
-				V2Log.e(" No available bitmap");
-				return;
-			}
+//		if (mImageViewBitmap == null || mImageViewBitmap.isRecycled()) {
+//			if (shareDocBm != null && !shareDocBm.isRecycled()) {
+//				mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
+//						shareDocBm.getHeight(), Config.ARGB_8888);
+//			} else if (shapesBm != null && !shapesBm.isRecycled()) {
+//				mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
+//						shapesBm.getHeight(), Config.ARGB_8888);
+//			} else {
+//				V2Log.e(" No available bitmap");
+//				return;
+//			}
+//		} else {
+//			if (shareDocBm != null && !shareDocBm.isRecycled()) {
+//				// Current image view bitmap is smaller than shared document
+//				// bitmap, we have to create new one
+//				if (mImageViewBitmap.getWidth() < shareDocBm.getWidth()
+//						|| mImageViewBitmap.getHeight() < shareDocBm
+//								.getHeight()) {
+//					mImageViewBitmap.recycle();
+//					mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
+//								shareDocBm.getHeight(), Config.ARGB_8888);
+////				}
+//			}
+//		}
+		
+		if (shareDocBm != null && !shareDocBm.isRecycled()) {
+//			if(mImageViewBitmap != null && !mImageViewBitmap.isRecycled())
+//				mImageViewBitmap.recycle();
+			mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
+					shareDocBm.getHeight(), Config.ARGB_8888);
+		} else if (shapesBm != null && !shapesBm.isRecycled()) {
+//			if(mImageViewBitmap != null && !mImageViewBitmap.isRecycled())
+//				mImageViewBitmap.recycle();
+			mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
+					shapesBm.getHeight(), Config.ARGB_8888);
 		} else {
-			if (shareDocBm != null && !shareDocBm.isRecycled()) {
-				// Current image view bitmap is smaller than shared document
-				// bitmap, we have to create new one
-				if (mImageViewBitmap.getWidth() < shareDocBm.getWidth()
-						|| mImageViewBitmap.getHeight() < shareDocBm
-								.getHeight()) {
-					mImageViewBitmap.recycle();
-					mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
-								shareDocBm.getHeight(), Config.ARGB_8888);
-				}
-			}
+			V2Log.e(" No available bitmap");
+			return;
 		}
+			
 		V2Log.e("mergeBitmapToImage", "width : " + mImageViewBitmap.getWidth() + "height : " + mImageViewBitmap.getHeight());
 		Canvas target = new Canvas(mImageViewBitmap);
 		Paint paint = new Paint();

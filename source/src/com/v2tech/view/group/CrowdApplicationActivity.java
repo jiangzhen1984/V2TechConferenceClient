@@ -149,6 +149,8 @@ public class CrowdApplicationActivity extends Activity {
         filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
         filter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
         filter.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+        filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
         registerReceiver(applyReceiver, filter);
     }
 
@@ -352,7 +354,20 @@ public class CrowdApplicationActivity extends Activity {
             			mRefuseTV.setText(msg.getRejectReason());
             		}
         		}
-            }
+            } else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
+					.equals(intent.getAction())
+					|| intent.getAction().equals(
+							JNIService.JNI_BROADCAST_KICED_CROWD)) {
+				GroupUserObject obj = intent.getParcelableExtra("group");
+				if (obj == null) {
+					V2Log.e("CrowdDetailActivity",
+							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
+					return;
+				}
+				if (obj.getmGroupId() == crowd.getId()) {
+					onBackPressed();
+				}
+			}
         }
     }
 

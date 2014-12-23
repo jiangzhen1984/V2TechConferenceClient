@@ -423,7 +423,7 @@ public final class ContentDescriptor {
 			public static final String HISTORY_FRIEND_FROM_USER_ID = "FromUserID";
 			public static final String HISTORY_FRIEND_TO_USER_ID = "ToUserID";
 			public static final String HISTORY_FRIEND_REMOTE_USER_ID = "RemoteUserID";
-			public static final String HISTORY_CROWD_REMOTE_USER_NICK_NAME = "RemoteUserNickname ";
+			public static final String HISTORY_CROWD_REMOTE_USER_NICK_NAME = "RemoteUserNickname";
 			public static final String HISTORY_FRIEND_APPLY_REASON = "ApplyReason";
 			public static final String HISTORY_FRIEND_REFUSE_REASON = "RefuseReason";
 			public static final String HISTORY_FRIEND_STATE = "AddState";

@@ -36,6 +36,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -416,10 +417,12 @@ public class ConferenceCreateActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-            mErrorNotificationLayout.setVisibility(View.GONE);
-
-			if (!SPUtil.checkCurrentAviNetwork(mContext))
+			if (!GlobalHolder.getInstance().isServerConnected()){
+				Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
 				return;
+			}
+			
+			mErrorNotificationLayout.setVisibility(View.GONE);
 
 			String title = mConfTitleET.getText().toString().trim();
 			if (title == null || title.length() == 0) {

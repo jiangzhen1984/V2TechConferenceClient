@@ -13,6 +13,9 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -109,6 +112,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private Resources res;
 	private int currentContactType;
 	private String fromActivity;
+	
+	private boolean isNeedUpdate;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -213,13 +218,19 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	@Override
 	protected void onStop() {
 		super.onStop();
-//		mNickNameET.removeTextChangedListener(tw);
+		mNickNameET.removeTextChangedListener(tw);
 	}
 
 	@Override
 	public void onBackPressed() {
-		Message m = Message.obtain(lh, UPDATE_USER_INFO);
-		lh.sendMessage(m);
+		if (!GlobalHolder.getInstance().isServerConnected() && isNeedUpdate) {
+			Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+		}
+		else{
+			isNeedUpdate = false;
+			Message m = Message.obtain(lh, UPDATE_USER_INFO);
+			lh.sendMessage(m);
+		}
 		super.onBackPressed();
 	}
 
@@ -409,7 +420,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
 
-//		mNickNameET.addTextChangedListener(tw);
+		mNickNameET.addTextChangedListener(tw);
 		if (!mNickNameET.getText().toString().equals(u.getNickName())) {
 			mNickNameET.setText(u.getNickName());
 		}
@@ -445,7 +456,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	}
 
 	private Dialog mDialog = null;
-
 	private void showConfirmDialog() {
 		if (mDialog == null) {
 			mDialog = new Dialog(mContext);
@@ -483,31 +493,27 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 	}
 
-//	private TextWatcher tw = new TextWatcher() {
-//
-//		@Override
-//		public void afterTextChanged(Editable ed) {
-//			if (isUpdating) {
-//				return;
-//			}
-//			isUpdating = true;
-//			Message m = Message.obtain(lh, UPDATE_USER_INFO);
-//			lh.sendMessageDelayed(m, 1500);
-//		}
-//
-//		@Override
-//		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
-//				int arg3) {
-//
-//		}
-//
-//		@Override
-//		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
-//				int arg3) {
-//
-//		}
-//
-//	};
+	private TextWatcher tw = new TextWatcher() {
+
+		@Override
+		public void afterTextChanged(Editable ed) {
+			if(!TextUtils.isEmpty(ed.toString()) && !ed.toString().equals(u.getName()))
+				isNeedUpdate = true;
+		}
+
+		@Override
+		public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+
+		}
+
+		@Override
+		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
+				int arg3) {
+
+		}
+
+	};
 
 	private View.OnClickListener mReturnButtonListener = new OnClickListener() {
 

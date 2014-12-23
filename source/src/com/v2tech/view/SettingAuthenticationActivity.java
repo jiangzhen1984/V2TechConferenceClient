@@ -1,17 +1,18 @@
 package com.v2tech.view;
 
-import com.v2tech.R;
-import com.v2tech.service.GlobalHolder;
-import com.v2tech.service.MessageListener;
-import com.v2tech.service.UserService;
-import com.v2tech.vo.User;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.RadioGroup;
+import android.widget.Toast;
+
+import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.MessageListener;
+import com.v2tech.service.UserService;
+import com.v2tech.vo.User;
 
 public class SettingAuthenticationActivity extends Activity {
 
@@ -42,7 +43,6 @@ public class SettingAuthenticationActivity extends Activity {
 				});
 
 		rgAutentication = (RadioGroup) findViewById(R.id.rg_authentication);
-
 		switch (GlobalHolder.getInstance().getCurrentUser().getAuthtype()) {
 		case 0:
 			rgAutentication.check(R.id.rb_allow_anybogy);
@@ -56,29 +56,34 @@ public class SettingAuthenticationActivity extends Activity {
 		}
 
 	}
-
+	
 	@Override
 	public void onBackPressed() {
-		int authtype = 0;
-		switch (rgAutentication.getCheckedRadioButtonId()) {
-		case R.id.rb_allow_anybogy:// 允许任何人
-			authtype = 0;
-			break;
-		case R.id.rb_require_authorization:// 需要验证
-			authtype = 1;
-			break;
-		case R.id.rb_unallow_anybogy:// 不允许任何人
-			authtype = 2;
-			break;
-		default:
-			authtype = 0;
-			break;
+		if (!GlobalHolder.getInstance().isServerConnected()) {
+			Toast.makeText(SettingAuthenticationActivity.this, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
 		}
+		else{
+			int authtype = 0;
+			switch (rgAutentication.getCheckedRadioButtonId()) {
+			case R.id.rb_allow_anybogy:// 允许任何人
+				authtype = 0;
+				break;
+			case R.id.rb_require_authorization:// 需要验证
+				authtype = 1;
+				break;
+			case R.id.rb_unallow_anybogy:// 不允许任何人
+				authtype = 2;
+				break;
+			default:
+				authtype = 0;
+				break;
+			}
 
-		User currentUser = GlobalHolder.getInstance().getCurrentUser();
-		currentUser.setAuthtype(authtype);
-		service.updateUser(currentUser, new MessageListener(mHandler,
-				UPDATEUSER_CALLBACK, null));
+			User currentUser = GlobalHolder.getInstance().getCurrentUser();
+			currentUser.setAuthtype(authtype);
+			service.updateUser(currentUser, new MessageListener(mHandler,
+					UPDATEUSER_CALLBACK, null));
+		}
 		super.onBackPressed();
 	}
 }

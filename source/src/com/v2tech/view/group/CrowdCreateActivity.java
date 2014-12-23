@@ -37,6 +37,7 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
@@ -423,6 +424,12 @@ public class CrowdCreateActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+			
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+				return ;
+			}
+			
             mErrorNotificationLayout.setVisibility(View.GONE);
 
 			String title = mGroupTitleET.getText().toString();

@@ -349,6 +349,7 @@ public class JNIService extends Service implements
 	private static final int JNI_GROUP_NOTIFY = 35;
 	private static final int JNI_GROUP_USER_INFO_NOTIFICATION = 60;
 	private static final int JNI_GROUP_LOADED = 63;
+	private static final int JNI_OFFLINE_LOADED = 64;
 	private static final int JNI_CONFERENCE_INVITATION = 61;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
 	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
@@ -543,7 +544,11 @@ public class JNIService extends Service implements
 				iv.putExtra("device", vjoi.getDeviceId());
 				mContext.startActivity(iv);
 				break;
-
+			case JNI_OFFLINE_LOADED:
+				boolean isOfflineEnd = (Boolean) msg.obj;
+				V2Log.e(TAG, "OFFLINE MESSAGE LOAD : " + isOfflineEnd);
+				GlobalHolder.getInstance().setOfflineLoaded(isOfflineEnd);
+				break;
 			}
 
 		}
@@ -684,13 +689,17 @@ public class JNIService extends Service implements
 		@Override
 		public void OnOfflineStart() {
 			super.OnOfflineStart();
-			GlobalHolder.getInstance().setOfflineLoaded(false);
+			Message.obtain(mCallbackHandler, JNI_OFFLINE_LOADED , false)
+				.sendToTarget();
+//			GlobalHolder.getInstance().setOfflineLoaded(false);
 		}
 		
 		@Override
 		public void OnOfflineEnd() {
 			super.OnOfflineEnd();
-			GlobalHolder.getInstance().setOfflineLoaded(true);
+			Message.obtain(mCallbackHandler, JNI_OFFLINE_LOADED , true)
+				.sendToTarget();
+//			GlobalHolder.getInstance().setOfflineLoaded(true);
 		}
 	}
 
@@ -1108,6 +1117,16 @@ public class JNIService extends Service implements
 				sendBroadcast(i);
 			}
 
+			if(groupType == GroupType.DISCUSSION.intValue()){
+				DiscussionGroup dis = (DiscussionGroup) GlobalHolder.getInstance().
+						getGroupById(groupType, nGroupID);
+				if(dis != null){
+					if(dis.getOwnerUser().getmUserId() == nUserID){
+						dis.setCreatorExist(false);
+					}
+				}
+			}
+			
 			GlobalHolder.getInstance().removeGroupUser(nGroupID, nUserID);
 			GroupUserObject obj = new GroupUserObject(groupType, nGroupID,
 					nUserID);
@@ -1206,6 +1225,16 @@ public class JNIService extends Service implements
 				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 				intent.putExtra("msgId", msgID);
 				sendOrderedBroadcast(intent, null);
+			} else if(gType == GroupType.DISCUSSION){
+				DiscussionGroup dis = (DiscussionGroup) GlobalHolder.getInstance().
+						getGroupById(groupType, nGroupID);
+				if(dis != null){
+					if(dis.getOwnerUser().getmUserId() == user.uid){
+						if(!dis.isCreatorExist()){
+							dis.setCreatorExist(true);
+						}
+					}
+				}
 			}
 
 			GroupUserObject object = new GroupUserObject(groupType, nGroupID,
@@ -2036,7 +2065,7 @@ public class JNIService extends Service implements
 		}
 
 		@Override
-		public void OnFileDownloadError(String szFileID, int errorCode,
+		public void OnFileTransError(String szFileID, int errorCode,
 				int nTransType) {
 			VMessage vm = new VMessage(0, 0, null, null);
 			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
@@ -2115,16 +2144,22 @@ public class JNIService extends Service implements
 
 		long uid = fileItem.getVm().getToUser().getmUserId();
 		Integer trans = GlobalConfig.mTransingFiles.get(uid);
-		if (isAdd) {
-			trans = trans + 1;
-			V2Log.d("TRANSING_File_SIZE" , "JNIService updateTransFileState --> 用户" + uid
-					+ "增加了一个文件传输，当前正在传输个数是：" + trans);
-		} else {
-			trans = trans - 1;
-			V2Log.e("TRANSING_File_SIZE" , "JNIService updateTransFileState --> 用户" + uid
-					+ "的一个文件传输完毕，当前正在传输个数是：" + trans);
+		if(trans == null){
+			trans = 0;
+			GlobalConfig.mTransingFiles.put(uid, trans);
 		}
-		GlobalConfig.mTransingFiles.put(uid, trans);
+		else{
+			if (isAdd) {
+				trans = trans + 1;
+				V2Log.d("TRANSING_File_SIZE" , "JNIService updateTransFileState --> 用户" + uid
+						+ "增加了一个文件传输，当前正在传输个数是：" + trans);
+			} else {
+				trans = trans - 1;
+				V2Log.e("TRANSING_File_SIZE" , "JNIService updateTransFileState --> 用户" + uid
+						+ "的一个文件传输完毕，当前正在传输个数是：" + trans);
+			}
+			GlobalConfig.mTransingFiles.put(uid, trans);
+		}
 	}
 
 	public class ContactsGroupRequestCBHandler {

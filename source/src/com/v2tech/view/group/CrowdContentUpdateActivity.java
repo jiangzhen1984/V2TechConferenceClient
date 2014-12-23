@@ -19,6 +19,7 @@ import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
+import com.v2tech.util.SPUtil;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.vo.CrowdGroup;
@@ -44,12 +45,13 @@ public class CrowdContentUpdateActivity extends Activity {
 	private int mType;
 	private LocalReceiver localReceiver;
 	private Toast mToast;
-
+	private Context mContext;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.crowd_content_activity);
-
+		mContext = this;
 		mContentET = (EditText) findViewById(R.id.crowd_content_et);
 		mContentTitle = (TextView) findViewById(R.id.crowd_content_title);
 
@@ -168,6 +170,11 @@ public class CrowdContentUpdateActivity extends Activity {
 				synchronized (mState) {
 					if (mState == State.PENDING) {
 						return;
+					}
+					
+					if (!GlobalHolder.getInstance().isServerConnected()) {
+						Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+						return ;
 					}
 					mState = State.PENDING;
 				}

@@ -14,10 +14,12 @@ import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.SearchService;
 import com.v2tech.service.UserService;
 import com.v2tech.service.jni.JNIResponse;
+import com.v2tech.util.ProgressUtils;
 import com.v2tech.vo.SearchedResult;
 
 public class SearchActivity extends Activity {
@@ -30,6 +32,7 @@ public class SearchActivity extends Activity {
 	private TextView mReturnButton;
 	private TextView mTitleText;
 	private TextView mContentText;
+	private TextView mEditTextBelowText;
 
 	private UserService usService = new UserService();
 	private CrowdGroupService crowdService = new CrowdGroupService();
@@ -50,6 +53,7 @@ public class SearchActivity extends Activity {
 
 		mTitleText = (TextView) findViewById(R.id.search_title_text);
 		mContentText = (TextView) findViewById(R.id.search_content_text);
+		mEditTextBelowText = (TextView) findViewById(R.id.search_below_hit);
 
 		int type = getIntent().getIntExtra("type", 0);
 		if (type == 0) {
@@ -82,14 +86,17 @@ public class SearchActivity extends Activity {
 	private void initView(Type type) {
 		int titleRid = R.string.search_title_crowd;
 		int contentRid = R.string.search_content_text_crowd;
+		int belowHit = R.string.search_crowd_rules_tips;
 		switch (type) {
 		case CROWD:
 			titleRid = R.string.search_title_crowd;
 			contentRid = R.string.search_content_text_crowd;
+			belowHit = R.string.search_crowd_rules_tips;
 			break;
 		case MEMBER:
 			titleRid = R.string.search_title_member;
 			contentRid = R.string.search_content_text_member;
+			belowHit = R.string.search_rules_tips;
 			break;
 		default:
 			break;
@@ -97,6 +104,7 @@ public class SearchActivity extends Activity {
 
 		mTitleText.setText(titleRid);
 		mContentText.setText(contentRid);
+		mEditTextBelowText.setText(belowHit);
 	}
 	
 	private void showToast(int res) {
@@ -117,6 +125,11 @@ public class SearchActivity extends Activity {
 							.getText(R.string.search_text_required));
 					return;
 				}
+				
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(SearchActivity.this, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+					return ;
+				}
 				mState = State.SEARCHING;
 
 			}
@@ -126,7 +139,8 @@ public class SearchActivity extends Activity {
 							mType == Type.CROWD ? SearchService.Type.CROWD
 									: SearchService.Type.MEMBER, mSearchedText
 									.getText().toString(), 1);
-
+			ProgressUtils.showNormalWithHintProgress(SearchActivity.this,
+					getResources().getString(R.string.status_searching), true);
 			searchService.search(par, new MessageListener(mLocalHandler,
 					SEARCH_DONE, null));
 
@@ -150,6 +164,8 @@ public class SearchActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case SEARCH_DONE:
+				ProgressUtils.showNormalWithHintProgress(SearchActivity.this,
+						getResources().getString(R.string.error_local_connect_to_server), false);
 				synchronized (mState) {
 					mState = State.DONE;
 				}

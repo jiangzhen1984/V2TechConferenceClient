@@ -742,7 +742,7 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	public void updateView(VMessageFileItem vfi) {
-		if (vfi == null || vfi.getVm() != mMsg) {
+		if (vfi == null || !vfi.getUuid().equals(mMsg.getFileItems().get(0).getUuid())) {
 			return;
 		}
 
@@ -968,12 +968,11 @@ public class MessageBodyView extends LinearLayout {
 
 			if (callback != null) {
 				if (mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD) {
-					if (item.getState() == VMessageAbstractItem.STATE_FILE_SENT ||
-							item.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED)
-						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_ACTIVITY);
-					else if (item.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
-							|| item.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
+					if (item.getState() == VMessageAbstractItem.STATE_FILE_SENDING ||
+							item.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
 						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_UPLOING_ACTIVITY);
+					else
+						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_ACTIVITY);
 				} else {
 					if (item.getState() == VMessageFileItem.STATE_FILE_DOWNLOADED) {
 						FileUitls.openFile(item.getFilePath());

@@ -4,8 +4,10 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.Date;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
+import com.v2tech.vo.Group.GroupType;
 
 public class VFile {
 
@@ -20,9 +22,52 @@ public class VFile {
 	protected int flag;
 
 	public enum State {
-		UNKNOWN,DOWNLOADED, DOWNLOADING, DOWNLOAD_PAUSE, UPLOADED, UPLOADING, UPLOAD_PAUSE,DOWNLOAD_FAILED,UPLOAD_FAILED,REMOVED
+		UNKNOWN(-1), REMOVED(-2), DOWNLOADED(
+				VMessageAbstractItem.STATE_FILE_DOWNLOADED), DOWNLOADING(
+				VMessageAbstractItem.STATE_FILE_DOWNLOADING), DOWNLOAD_PAUSE(
+				VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING), UPLOADED(
+				VMessageAbstractItem.STATE_FILE_SENT), UPLOADING(
+				VMessageAbstractItem.STATE_FILE_SENDING), UPLOAD_PAUSE(
+				VMessageAbstractItem.STATE_FILE_PAUSED_SENDING), DOWNLOAD_FAILED(
+				VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED), UPLOAD_FAILED(
+				VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+
+		private int state;
+
+		private State(int state) {
+			this.state = state;
+		}
+
+		public static State fromInt(int state) {
+			switch (state) {
+			case VMessageAbstractItem.STATE_FILE_DOWNLOADED:
+				return DOWNLOADED;
+			case VMessageAbstractItem.STATE_FILE_DOWNLOADING:
+				return DOWNLOADING;
+			case VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING:
+				return DOWNLOAD_PAUSE;
+			case VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED:
+				return DOWNLOAD_FAILED;
+			case VMessageAbstractItem.STATE_FILE_SENT:
+				return UPLOADED;
+			case VMessageAbstractItem.STATE_FILE_SENDING:
+				return UPLOADING;
+			case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
+				return UPLOAD_PAUSE;
+			case VMessageAbstractItem.STATE_FILE_SENT_FALIED:
+				return UPLOAD_FAILED;
+			case -2:
+				return REMOVED;
+			default:
+				return UNKNOWN;
+			}
+		}
+
+		public int intValue() {
+			return state;
+		}
 	}
-	
+
 	public VFile() {
 		this.state = State.UNKNOWN;
 	}
@@ -62,12 +107,13 @@ public class VFile {
 	public long getProceedSize() {
 		return proceedSize;
 	}
-	
+
 	public String getProceedSizeStr() {
 		Format df = new DecimalFormat("#.0");
 
 		if (proceedSize >= 1073741824) {
-			return (df.format((double) proceedSize / (double) 1073741824)) + "G";
+			return (df.format((double) proceedSize / (double) 1073741824))
+					+ "G";
 		} else if (proceedSize >= 1048576) {
 			return (df.format((double) proceedSize / (double) 1048576)) + "M";
 		} else if (proceedSize >= 1024) {
@@ -86,18 +132,19 @@ public class VFile {
 				this.state = State.UPLOADED;
 			}
 		}
-			
+
 	}
-	
+
 	public String getSpeedStr() {
 		if (startTime == null) {
 			startTime = new Date(GlobalConfig.getGlobalServerTime());
 			return "";
 		}
-		
-		int divder = (int)(GlobalConfig.getGlobalServerTime() - startTime.getTime()) /1000;
-		long speed = (proceedSize / (divder == 0? 1 :divder) );
-		
+
+		int divder = (int) (GlobalConfig.getGlobalServerTime() - startTime
+				.getTime()) / 1000;
+		long speed = (proceedSize / (divder == 0 ? 1 : divder));
+
 		Format df = new DecimalFormat("#.0");
 
 		if (speed >= 1073741824) {
@@ -110,8 +157,7 @@ public class VFile {
 			return speed + "B";
 		}
 	}
-	
-	
+
 	public String getFileSizeStr() {
 		Format df = new DecimalFormat("#.0");
 
@@ -157,9 +203,5 @@ public class VFile {
 	public void setFlag(int flag) {
 		this.flag = flag;
 	}
-	
-	
-	
-	
 
 }

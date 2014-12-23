@@ -131,8 +131,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private final int FILE_STATUS_LISTENER = 20;
 
 	private final int BATCH_COUNT = 10;
-	private static final int SELECT_PICTURE_CODE = 100;
-	private static final int SHOW_GROUP_DETAIL = 200;
 
 	private static final int SEND_MESSAGE_SUCCESS = 0;
 	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
@@ -140,7 +138,14 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
 	
 	private static final String TAG = "ConversationP2PTextActivity";
+	
+	/**
+	 * for activity result
+	 */
+	private static final int SELECT_PICTURE_CODE = 100;
+	private static final int SHOW_GROUP_DETAIL = 200;
 	protected static final int RECEIVE_SELECTED_FILE = 1000;
+	public static final int UPDATE_FILE_SENDING_STATE = 300;
 
 	private int offset = 0;
 	private long currentLoginUserID = 0;
@@ -1004,6 +1009,13 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	}
 
 	private void startVoiceCall() {
+		if (!GlobalHolder.getInstance().isServerConnected()) {
+			Toast.makeText(mContext,
+					R.string.error_local_connect_to_server,
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
 		Intent iv = new Intent();
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
@@ -1015,6 +1027,13 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	}
 
 	private void startVideoCall() {
+		if (!GlobalHolder.getInstance().isServerConnected()) {
+			Toast.makeText(mContext,
+					R.string.error_local_connect_to_server,
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+		
 		Intent iv = new Intent();
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
@@ -1702,7 +1721,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		} else if (requestCode == RECEIVE_SELECTED_FILE) {
 			if (data != null) {
 				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
-				if (mCheckedList == null && mCheckedList.size() <= 0)
+				if (mCheckedList == null || mCheckedList.size() <= 0)
 					return;
 
 				switch (currentConversationViewType) {
@@ -1742,6 +1761,27 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			Group group =  GlobalHolder.getInstance()
 					.getGroupById( remoteGroupID);
 			mUserTitleTV.setText(group.getName());
+		} else if(requestCode == UPDATE_FILE_SENDING_STATE){
+			if(data != null){
+				String[] updates = data.getStringArrayExtra("updateList");
+				if(updates != null && updates.length > 0){
+					for (int i = 0; i < updates.length; i++) {
+						for (int j = 0; j < messageArray.size(); j++) {
+							CommonAdapterItemWrapper wrapper = messageArray.get(i);
+							VMessage tempVm = (VMessage) wrapper.getItemObject();
+							if(tempVm.getFileItems().size() > 0){
+								VMessageFileItem vMessageFileItem = tempVm.getFileItems().get(0);
+								if (vMessageFileItem.getUuid().equals(updates[i])) {
+									VMessageFileItem queryFileItemByID = MessageLoader.
+											queryFileItemByID(V2GlobalEnum.GROUP_TYPE_CROWD, updates[i]);
+									((MessageBodyView) wrapper
+											.getView()).updateView(queryFileItemByID);
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 
 	}
@@ -1922,6 +1962,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		
 		//如果从个人资料界面发送消息，需要回调界面创建该会话
 		if(isFirstCall){
+			V2Log.d(TAG, "sendMessageToRemote --> need to create new conversation!");
 			isFirstCall = false;
 			CommonCallBack.getInstance().executeConversationCreate(currentConversationViewType
 					, remoteGroupID , remoteChatUserID);
@@ -2054,7 +2095,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("cid", remoteGroupID);
 			i.putExtra("crowdFileActivityType", type);
-			startActivity(i);
+			startActivityForResult(i, UPDATE_FILE_SENDING_STATE);
 		};
 
 		@Override
@@ -2430,6 +2471,16 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						V2Log.d(TAG, "executeUpdateFileState --> cancel downloading was called!");
 						mChat.updateFileOperation(item,
 								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING, null);
+						Integer downloadTrans = GlobalConfig.mTransingFiles.get(remoteChatUserID);
+						if(downloadTrans == null){
+							downloadTrans = 0;
+							GlobalConfig.mTransingFiles.put(remoteChatUserID, downloadTrans);
+						} else {
+							downloadTrans = downloadTrans - 1;
+							V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity executeUpdateFileState download --> 用户" + remoteChatUserID
+									+ "的一个文件传输失败，当前正在传输个数是：" + downloadTrans);
+							GlobalConfig.mTransingFiles.put(remoteChatUserID, downloadTrans);
+						}
 						break;
 					case VMessageAbstractItem.STATE_FILE_SENDING:
 					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
@@ -2437,14 +2488,21 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						MessageBuilder.updateVMessageItemToSentFalied(mContext,
 								vm);
 						Integer trans = GlobalConfig.mTransingFiles.get(remoteChatUserID);
-						trans = trans - 1;
-						V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity executeUpdateFileState --> 用户" + remoteChatUserID
-								+ "的一个文件传输失败，当前正在传输个数是：" + trans);
-						GlobalConfig.mTransingFiles.put(remoteChatUserID, trans);
+						if(trans == null){
+							trans = 0;
+							GlobalConfig.mTransingFiles.put(remoteChatUserID, trans);
+						}
+						else{
+							trans = trans - 1;
+							V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity executeUpdateFileState sending --> 用户" + remoteChatUserID
+									+ "的一个文件传输失败，当前正在传输个数是：" + trans);
+							GlobalConfig.mTransingFiles.put(remoteChatUserID, trans);
+						}
 						break;
 					default:
 						break;
 					}
+					
 
 					MessageBodyView view = (MessageBodyView) messageArray
 							.get(i).getView();

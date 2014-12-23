@@ -55,22 +55,26 @@ public class SearchUtils {
 			if (content.length() - 1 != 0) {
 				startIndex = content.length() - 1;
 				searchList.clear();
-				searchList.addAll(cacheList.get(content.length() - 1));
+				List<Object> lastCache = cacheList.get(content.length() - 1);
+				if(lastCache != null)
+					searchList.addAll(lastCache);
 			}
 
 			List<ScrollItem> searchItems = new ArrayList<ScrollItem>();
 			List<Object> search = search(content.toString());
-			for (Object object : search) {
-				searchItems.add((ScrollItem) object);
+			if(search != null){
+				for (Object object : search) {
+					searchItems.add((ScrollItem) object);
+				}
+	
+				List<Object> temp = new ArrayList<Object>();
+				temp.addAll(search);
+				cacheList.put(content.length(), temp);
+				V2Log.e(TAG, "put cache list : key --> " + content.length()
+						+ " and value --> " + search.size());
+				temp = null;
 			}
-
-			List<Object> temp = new ArrayList<Object>();
-			temp.addAll(search);
-			cacheList.put(content.length(), temp);
-			V2Log.e(TAG, "put cache list : key --> " + content.length()
-					+ " and value --> " + search.size());
 			search = null;
-			temp = null;
 			return searchItems;
 		}
 	}
@@ -109,22 +113,26 @@ public class SearchUtils {
 			if (content.length() - 1 != 0) {
 				startIndex = content.length() - 1;
 				searchList.clear();
-				searchList.addAll(cacheList.get(content.length() - 1));
+				List<Object> lastCache = cacheList.get(content.length() - 1);
+				if(lastCache != null)
+					searchList.addAll(lastCache);
 			}
 
 			List<User> searchUsers = new ArrayList<User>();
 			List<Object> search = search(content.toString());
-			for (Object object : search) {
-				searchUsers.add((User) object);
+			if(search != null){
+				for (Object object : search) {
+					searchUsers.add((User) object);
+				}
+	
+				List<Object> temp = new ArrayList<Object>();
+				temp.addAll(search);
+				cacheList.put(content.length(), temp);
+				V2Log.e(TAG, "put cache list : key --> " + content.length()
+						+ " and value --> " + search.size());
+				temp = null;
 			}
-
-			List<Object> temp = new ArrayList<Object>();
-			temp.addAll(search);
-			cacheList.put(content.length(), temp);
-			V2Log.e(TAG, "put cache list : key --> " + content.length()
-					+ " and value --> " + search.size());
 			search = null;
-			temp = null;
 			return searchUsers;
 		}
 	}
@@ -164,8 +172,10 @@ public class SearchUtils {
 						V2Log.e(TAG, "简拼找到结果 展示");
 					} else {
 						isShouldQP = true;
-						searchCacheList
-								.addAll(cacheList.get(content.length() - 1));
+						List<Object> cache = cacheList.get(content.length() - 1);
+						if(cache != null)
+							searchCacheList
+									.addAll(cacheList.get(content.length() - 1));
 						V2Log.e(TAG, "简拼没有结果 开启全拼");
 					}
 				}

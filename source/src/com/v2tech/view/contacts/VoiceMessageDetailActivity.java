@@ -244,6 +244,13 @@ public class VoiceMessageDetailActivity extends Activity implements
 					.show();
 			break;
 		case R.id.specific_voiceDetail_video_call_bottom_button:
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(mContext,
+						R.string.error_local_connect_to_server,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
 			Intent iv = new Intent();
 			iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
@@ -260,6 +267,13 @@ public class VoiceMessageDetailActivity extends Activity implements
 			startActivity(iv);
 			break;
 		case R.id.specific_voiceDetail_vioce_call_bottom_button:
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(mContext,
+						R.string.error_local_connect_to_server,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
 			Intent voice = new Intent();
 			voice.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			voice.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);

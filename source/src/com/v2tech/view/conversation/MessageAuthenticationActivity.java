@@ -879,7 +879,7 @@ public class MessageAuthenticationActivity extends Activity {
 						"Get FriendMAData Object is null ... please check!");
 				return arg1;
 			}
-
+			//设置头像
 			boolean isGetAvatar = false;
 			if (data.dheadImage != null) {
 				if (!data.dheadImage.isRecycled())
@@ -898,8 +898,14 @@ public class MessageAuthenticationActivity extends Activity {
 				else
 					viewTag.ivHeadImage.setImageResource(R.drawable.avatar);
 			}
-			viewTag.tvName.setText(data.name);
-
+			//设置姓名
+			User remoteUser = GlobalHolder.getInstance().getUser(data.remoteUserID);
+			if(remoteUser == null || TextUtils.isEmpty(remoteUser.getName()))
+				viewTag.tvName.setText(data.name);
+			else
+				viewTag.tvName.setText(remoteUser.getName());
+				
+			// 设置验证状态
 			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
 			// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
 			switch (data.state) {
@@ -1572,7 +1578,7 @@ public class MessageAuthenticationActivity extends Activity {
 				if (currentRadioType != PROMPT_TYPE_FRIEND)
 					updateTabPrompt(PROMPT_TYPE_FRIEND, true);
 				// Cancel next broadcast
-				this.abortBroadcast();
+//				this.abortBroadcast();
 			} else if (arg1.getAction().equals(
 					JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 				GroupUserObject guo = (GroupUserObject) arg1.getExtras().get(
