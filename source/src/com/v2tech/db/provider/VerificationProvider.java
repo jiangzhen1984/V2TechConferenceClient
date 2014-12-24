@@ -448,12 +448,18 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @param groupID
 	 */
 	public static int deleteFriendVerificationMessage(long userID) {
-
-		int ret = mContext
-				.getContentResolver()
-				.delete(ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
-						ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID
-								+ "=?", new String[] { String.valueOf(userID) });
+		int ret;
+		if (userID != -1)
+			ret = mContext
+					.getContentResolver()
+					.delete(ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
+							ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID
+									+ "=?",
+							new String[] { String.valueOf(userID) });
+		else
+			ret = mContext.getContentResolver().delete(
+					ContentDescriptor.HistoriesAddFriends.CONTENT_URI, null,
+					null);
 		if (ret <= 0)
 			V2Log.d(MessageLoader.TAG,
 					"May delete FriendVerificationMessage failed...groupID : "
@@ -467,11 +473,15 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @param groupID
 	 */
 	public static int deleteCrowdVerificationMessage(long groupID) {
-
-		int ret = mContext.getContentResolver().delete(
-				ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + "=?",
-				new String[] { String.valueOf(groupID) });
+		int ret;
+		if (groupID == -1)
+			ret = mContext.getContentResolver().delete(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI, null, null);
+		else
+			ret = mContext.getContentResolver().delete(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
+							+ "=?", new String[] { String.valueOf(groupID) });
 		if (ret <= 0)
 			V2Log.d(MessageLoader.TAG,
 					"May delete CrowdVerificationMessage failed...groupID : "
@@ -919,18 +929,23 @@ public class VerificationProvider extends DatabaseProvider {
 
 	/**
 	 * Update friend qualication message read state by remote user id
+	 * 
 	 * @param remoteUserID
 	 * @return
 	 */
-	public static int updateFriendQualicationReadState(long remoteUserID , ReadState readState) {
+	public static int updateFriendQualicationReadState(long remoteUserID,
+			ReadState readState) {
 		ContentValues values = new ContentValues();
 		values.put(
 				ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE,
 				readState.intValue());
-		return MessageBuilder.mContext.getContentResolver().update(
-				ContentDescriptor.HistoriesAddFriends.CONTENT_URI, values,
-				ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID + " = ? ", 
-				new String[]{String.valueOf(remoteUserID)});
+		return MessageBuilder.mContext
+				.getContentResolver()
+				.update(ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
+						values,
+						ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_REMOTE_USER_ID
+								+ " = ? ",
+						new String[] { String.valueOf(remoteUserID) });
 	}
 
 	/**
@@ -1186,16 +1201,18 @@ public class VerificationProvider extends DatabaseProvider {
 				cursor.close();
 		}
 	}
-	
-	public static AddFriendHistorieNode queryFriendQualMessageByUserId(long remoteUserID){
+
+	public static AddFriendHistorieNode queryFriendQualMessageByUserId(
+			long remoteUserID) {
 		Cursor cursor = null;
 		try {
-			cursor = mContext.getContentResolver().query(
-					ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
-					ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS, 
-					ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID + " = ?",
-					new String[]{String.valueOf(remoteUserID)}, 
-					null);
+			cursor = mContext
+					.getContentResolver()
+					.query(ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
+							ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS,
+							ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_FROM_USER_ID
+									+ " = ?",
+							new String[] { String.valueOf(remoteUserID) }, null);
 
 			if (cursor == null) {
 				return null;

@@ -14,7 +14,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.net.NetworkInfo.State;
 import android.text.TextUtils;
 
 import com.V2.jni.V2GlobalEnum;
@@ -720,14 +719,14 @@ public class MessageLoader {
 	}
 
 	/**
-	 * 查询指定群组中聊天中，正在上传的群文件集合
+	 * 查询指定群组中聊天中收发的文件，并转换为VCrowdFile对象集合
 	 * 
 	 * @param context
 	 * @param type
 	 * @param gid
 	 * @return
 	 */
-	public static List<VCrowdFile> loadGroupUpLoadingFileMessage(
+	public static List<VCrowdFile> loadGroupFileItemConvertToVCrowdFile(
 			Context context, int type, long gid, CrowdGroup crowd) {
 
 		if (!isTableExist(context, type, gid, 0, CROWD_TYPE)) {
@@ -781,10 +780,6 @@ public class MessageLoader {
 				boolean flag = loadFileMessageById(vm, mContext);
 				if (flag) {
 					for (VMessageFileItem vMessageFileItem : vm.getFileItems()) {
-						if(vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED){
-							deleteMessage(mContext, vm);
-							break;
-						}
 						crowdFile = new VCrowdFile();
 						crowdFile.setId(vMessageFileItem.getUuid());
 						crowdFile.setPath(vMessageFileItem.getFilePath());
@@ -1263,12 +1258,17 @@ public class MessageLoader {
 	public static int deleteVoiceMessage(long userID) {
 
 		DataBaseContext mContext = new DataBaseContext(context);
-		int ret = mContext
-				.getContentResolver()
-				.delete(ContentDescriptor.HistoriesMedia.CONTENT_URI,
-						ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID
-								+ "= ?",
-						new String[] { String.valueOf(userID) });
+		int ret;
+		if (userID == -1)
+			ret = mContext.getContentResolver().delete(
+					ContentDescriptor.HistoriesMedia.CONTENT_URI, null, null);
+		else
+			ret = mContext
+					.getContentResolver()
+					.delete(ContentDescriptor.HistoriesMedia.CONTENT_URI,
+							ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID
+									+ "= ?",
+							new String[] { String.valueOf(userID) });
 		if (ret <= 0)
 			V2Log.d(TAG, "May delete voice Message failed...groupID : "
 					+ userID);

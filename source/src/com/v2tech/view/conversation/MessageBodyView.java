@@ -507,7 +507,7 @@ public class MessageBodyView extends LinearLayout {
 				.findViewById(R.id.message_body_file_item_file_name);
 		fileName.setText(item.getFileName());
 
-		adapterFileIcon(item.getFileType(), fileIcon);
+		FileUitls.adapterFileIcon(item.getFileType());
 
 		TextView fileSize = (TextView) fileRootView
 				.findViewById(R.id.message_body_file_item_file_size);
@@ -524,45 +524,6 @@ public class MessageBodyView extends LinearLayout {
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT));
 
-	}
-
-	private void adapterFileIcon(FileType fileType, ImageView fileIcon) {
-
-		switch (fileType) {
-		case IMAGE:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_picture);
-			break;
-		case WORD:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_word);
-			break;
-		case EXCEL:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_excel);
-			break;
-		case PDF:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_pdf);
-			break;
-		case PPT:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_ppt);
-			break;
-		case ZIP:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_zip);
-			break;
-		case VIS:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_viso);
-			break;
-		case VIDEO:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_video);
-			break;
-		case AUDIO:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_sound);
-			break;
-		case UNKNOW:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_ohter);
-			break;
-		default:
-			fileIcon.setBackgroundResource(R.drawable.selectfile_type_ohter);
-			break;
-		}
 	}
 
 	private void updateSelectedBg(boolean selected) {

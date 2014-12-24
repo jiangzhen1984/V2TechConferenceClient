@@ -14,6 +14,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Toast;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 
@@ -66,12 +67,13 @@ public class CrowdDetailActivity extends Activity {
 	private CrowdGroupService service = new CrowdGroupService();
 	private State mState = State.NONE;
 	private LocalReceiver localReceiver;
+	private Context mContext;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.crowd_detail_activity);
-		
+		mContext = this;
 		mNoTV = (TextView) findViewById(R.id.crowd_detail_no);
 		mNameTV = (TextView) findViewById(R.id.crowd_detail_name);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_detail_creator);
@@ -280,6 +282,13 @@ public class CrowdDetailActivity extends Activity {
 
 		@Override
 		public void onCheckedChanged(RadioGroup rg, int id) {
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(mContext,
+						R.string.error_local_connect_to_server,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			
 			synchronized (mState) {
 				if (mState == State.PENDING) {
 					return;
@@ -305,7 +314,6 @@ public class CrowdDetailActivity extends Activity {
 						REQUEST_UPDATE_CROWD_DONE, null));
 			}
 		}
-
 	};
 	
 	private OnClickListener mContentButtonListener = new OnClickListener() {

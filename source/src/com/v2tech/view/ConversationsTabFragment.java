@@ -1847,6 +1847,20 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 								" Successfully remove contact conversation , id is : "
 										+ conversationID);
 					}
+					
+					if(temp.getType() == Conversation.TYPE_VERIFICATION_MESSAGE){
+						// -1 mean delete all messages
+						int friend = VerificationProvider.deleteFriendVerificationMessage(-1);
+						int group = VerificationProvider.deleteCrowdVerificationMessage(-1);
+						if (friend + group > 0) {
+							V2Log.e(TAG,
+									"Successfully delete verification , update conversaton!");
+						}
+					}
+					
+					if(temp.getType() == Conversation.TYPE_VOICE_MESSAGE){
+						MessageLoader.deleteVoiceMessage(-1);
+					}
 				}
 				// Now , Department conversation is not show in crowd interface.
 				// else if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) {

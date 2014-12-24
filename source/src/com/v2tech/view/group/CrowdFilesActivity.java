@@ -4,11 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import android.app.Activity;
@@ -50,13 +47,12 @@ import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.V2Toast;
 import com.v2tech.view.JNIService;
-import com.v2tech.view.SettingAuthenticationActivity;
 import com.v2tech.view.bo.GroupUserObject;
-import com.v2tech.view.conversation.ConversationP2PTextActivity;
+import com.v2tech.view.conversation.CommonCallBack;
+import com.v2tech.view.conversation.CommonCallBack.CrowdFileExeType;
 import com.v2tech.view.conversation.ConversationSelectFile;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
-import com.v2tech.view.group.CrowdFilesActivity.FileListAdapter.ViewItem;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.Group.GroupType;
@@ -67,7 +63,7 @@ import com.v2tech.vo.VFile.State;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageFileItem;
 
-public class CrowdFilesActivity extends Activity {
+public class CrowdFilesActivity extends Activity{
 
 	private static final String TAG = "CrowdFilesActivity";
 
@@ -91,10 +87,9 @@ public class CrowdFilesActivity extends Activity {
 
 	private Map<String, VCrowdFile> mShowProgressFileMap;
 	private HashMap<String, VCrowdFile> mLocalSaveFile;
-	private List<VCrowdFile> mFiles;
+	private List<VCrowdFile> mServerExistFiles;
 	private List<VCrowdFile> mUploadedFiles;
 	private ArrayList<FileInfoBean> mCheckedList;
-	private Set<String> requestUpdateFile;
 
 	private Context mContext;
 	private LinearLayout mUploadFinish;
@@ -140,10 +135,9 @@ public class CrowdFilesActivity extends Activity {
 		mShowUploadedFileButton
 				.setOnClickListener(mShowUploadedFileButtonListener);
 
-		mFiles = new ArrayList<VCrowdFile>();
+		mServerExistFiles = new ArrayList<VCrowdFile>();
 		mUploadedFiles = new ArrayList<VCrowdFile>();
 		mShowProgressFileMap = new HashMap<String, VCrowdFile>();
-		requestUpdateFile = new HashSet<String>();
 
 		initReceiver();
 		service = new CrowdGroupService();
@@ -261,18 +255,6 @@ public class CrowdFilesActivity extends Activity {
 			return;
 		} else if (showUploaded) {
 			if (isFromChatActivity) {
-				Intent intent = new Intent();
-				if (requestUpdateFile.size() > 0) {
-					String[] updates = new String[requestUpdateFile.size()];
-					Iterator<String> iterator = requestUpdateFile.iterator();
-					for (int i = 0; iterator.hasNext(); i++) {
-						updates[i] = iterator.next();
-					}
-					intent.putExtra("updateList", updates);
-				}
-				setResult(
-						ConversationP2PTextActivity.UPDATE_FILE_SENDING_STATE,
-						intent);
 				super.onBackPressed();
 				return;
 			}
@@ -311,20 +293,25 @@ public class CrowdFilesActivity extends Activity {
 			return;
 		}
 
-		// loading upLoading files from database;
+		// loading local files and judging whether show uploading icon
+		loadLocalSaveFile();
+		// fetch files from server
+		service.fetchGroupFiles(crowd, new MessageListener(mLocalHandler,
+				FETCH_FILES_DONE, null));
+	}
+
+	private void loadLocalSaveFile() {
 		List<VCrowdFile> fileItems = MessageLoader
-				.loadGroupUpLoadingFileMessage(mContext, crowd.getGroupType()
+				.loadGroupFileItemConvertToVCrowdFile(mContext, crowd.getGroupType()
 						.intValue(), crowd.getmGId(), crowd);
 		if (fileItems != null && fileItems.size() > 0) {
 			for (VCrowdFile vCrowdFile : fileItems) {
-				if (vCrowdFile.getState() == VCrowdFile.State.UPLOADING
-						|| vCrowdFile.getState() == VCrowdFile.State.UPLOAD_PAUSE) {
+				mLocalSaveFile.put(vCrowdFile.getId(), vCrowdFile);
+				if (vCrowdFile.getState() == VCrowdFile.State.UPLOADING ||
+					vCrowdFile.getState() == VCrowdFile.State.UPLOAD_PAUSE ||
+					vCrowdFile.getState() == VCrowdFile.State.UPLOAD_FAILED) {
 					mUploadedFiles.add(vCrowdFile);
 					mShowProgressFileMap.put(vCrowdFile.getId(), vCrowdFile);
-				} else if (vCrowdFile.getState() == VCrowdFile.State.UPLOAD_FAILED) {
-					// FIXME Should not delete
-				} else {
-					mLocalSaveFile.put(vCrowdFile.getId(), vCrowdFile);
 				}
 			}
 
@@ -334,9 +321,6 @@ public class CrowdFilesActivity extends Activity {
 				mUploadingFileNotificationIcon.setVisibility(View.GONE);
 		} else
 			mUploadingFileNotificationIcon.setVisibility(View.GONE);
-
-		service.fetchGroupFiles(crowd, new MessageListener(mLocalHandler,
-				FETCH_FILES_DONE, null));
 	}
 
 	/**
@@ -346,69 +330,46 @@ public class CrowdFilesActivity extends Activity {
 	 */
 	private void handleFetchFilesDone(List<VCrowdFile> fetchFiles) {
 		if (fetchFiles == null) {
-			V2Log.e("fetchFiles is null");
+			V2Log.e("Fetch files from server side failed ! Because get collection is null !");
 			return;
 		}
-		mFiles.clear();
-		mFiles.addAll(fetchFiles);
-		File groupPath = new File(GlobalConfig.getGlobalPath() + "/files/"
-				+ crowd.getmGId());
-		if (!groupPath.exists()) {
-			groupPath.mkdirs();
-		}
-
-		for (VCrowdFile f : mFiles) {
+		
+		mServerExistFiles.clear();
+		mServerExistFiles.addAll(fetchFiles);
+		File fileDirPath = new File(GlobalConfig.getGlobalFilePath());
+		for (VCrowdFile f : mServerExistFiles) { 
 			VCrowdFile temp = mLocalSaveFile.get(f.getId());
-			if (temp != null) {
-				State state = temp.getState();
-				if (state == State.UPLOADED
-						&& f.getUploader().getmUserId() != GlobalHolder
-								.getInstance().getCurrentUserId()) {
-					f.setState(State.UNKNOWN);
-				} else if (state == State.DOWNLOADING) {
-					mShowProgressFileMap.put(f.getId(), f);
-				} else {
-					f.setState(state);
-				}
-			} else {
+			if(temp == null){
 				f.setState(VCrowdFile.State.UNKNOWN);
+			} else {
+				//自己上传的文件，从数据库获取文件路径，判断文件是否存在
+				if(f.getUploader().getmUserId() == GlobalHolder.getInstance().getCurrentUserId()){
+					File tmpFile = new File(temp.getPath());
+					if(!tmpFile.exists()){
+						f.setState(VCrowdFile.State.UNKNOWN);
+					}
+					else{
+						f.setState(VCrowdFile.State.DOWNLOADED);
+					}
+				} else { 
+					//其他人的文件路径，则用默认路径
+					File tmpFile = new File(fileDirPath + "/" + f.getName());
+					//文件不存在(被删除)
+					if(!tmpFile.exists()){
+						f.setState(VCrowdFile.State.UNKNOWN);
+					}
+					else{
+						State state = temp.getState();
+						if (state == State.DOWNLOADING ||
+							state == State.DOWNLOAD_PAUSE){
+							mShowProgressFileMap.put(f.getId(), f);
+						} 
+						f.setState(state);
+					}
+				}
 			}
-			// update file state
-//			updaeFileState(groupPath, f);
 		}
 		adapter.notifyDataSetChanged();
-	}
-
-	private void updaeFileState(File groupPath, VCrowdFile f) {
-		if (groupPath.exists()) {
-			File file = new File(groupPath + "/" + f.getName());
-			if (file.exists()) {
-				if (file.length() == f.getSize()) {
-					if (f.getUploader().getmUserId() == GlobalHolder
-							.getInstance().getCurrentUserId()) {
-						f.setState(VCrowdFile.State.UPLOADED);
-					} else {
-						f.setState(VCrowdFile.State.DOWNLOADED);
-					}
-				}
-			} else {
-				if (f.getUploader().getmUserId() == GlobalHolder.getInstance()
-						.getCurrentUserId()) {
-					VMessageFileItem fileItem = MessageLoader
-							.queryFileItemByID(V2GlobalEnum.GROUP_TYPE_CROWD,
-									f.getId());
-					if (fileItem != null) {
-						f.setPath(fileItem.getFilePath());
-						f.setState(VCrowdFile.State.DOWNLOADED);
-					} else {
-						V2Log.e("CrowdFilesActivity loadFile ---> The File : "
-								+ f.getId() + " change state failed..."
-								+ "should changed to open file");
-					}
-				}
-			}
-		} else
-			f.setState(VCrowdFile.State.UNKNOWN);
 	}
 
 	private void handleFileTransNotification(FileTransStatusIndication ind) {
@@ -465,9 +426,9 @@ public class CrowdFilesActivity extends Activity {
 	 */
 	private void handleFileRemovedEvent(List<VCrowdFile> files) {
 		for (VCrowdFile removedFile : files) {
-			for (int i = 0; i < mFiles.size(); i++) {
-				if (mFiles.get(i).getId().equals(removedFile.getId())) {
-					VCrowdFile file = mFiles.get(i);
+			for (int i = 0; i < mServerExistFiles.size(); i++) {
+				if (mServerExistFiles.get(i).getId().equals(removedFile.getId())) {
+					VCrowdFile file = mServerExistFiles.get(i);
 					V2Log.d(TAG,
 							"handleFileRemovedEvent --> cancel downloading was called!");
 					service.handleCrowdFile(file,
@@ -497,8 +458,8 @@ public class CrowdFilesActivity extends Activity {
 	}
 
 	private void suspendOrResumeDownloadingFiles(boolean flag) {
-		for (int i = 0; i < this.mFiles.size(); i++) {
-			VCrowdFile vf = mFiles.get(i);
+		for (int i = 0; i < this.mServerExistFiles.size(); i++) {
+			VCrowdFile vf = mServerExistFiles.get(i);
 			if (flag) {
 				if (vf.getState() == VFile.State.DOWNLOADING) {
 					vf.setState(VFile.State.DOWNLOAD_PAUSE);
@@ -521,22 +482,14 @@ public class CrowdFilesActivity extends Activity {
 	 * @param files
 	 */
 	private void handleNewFileEvent(List<VCrowdFile> files) {
-		File groupPath = new File(GlobalConfig.getGlobalPath() + "/files/"
-				+ crowd.getmGId());
-		if (!groupPath.exists()) {
-			groupPath.mkdirs();
-		}
-
 		for (VCrowdFile vCrowdFile : files) {
-			updaeFileState(groupPath, vCrowdFile);
-			mFiles.add(0, vCrowdFile);
-			mShowProgressFileMap.put(vCrowdFile.getId(), vCrowdFile);
+			mServerExistFiles.add(0, vCrowdFile);
 		}
 		adapter.notifyDataSetChanged();
 	}
 
 	private void handleFileRemovedEvent(VCrowdFile file) {
-		List<VCrowdFile> list = mFiles;
+		List<VCrowdFile> list = mServerExistFiles;
 		if (this.showUploaded) {
 			list = this.mUploadedFiles;
 		}
@@ -547,6 +500,7 @@ public class CrowdFilesActivity extends Activity {
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).getId().equals(file.getId())) {
 				list.remove(i);
+				CommonCallBack.getInstance().executeUpdateCrowdFileState(false, file.getId(),  null , CrowdFileExeType.DELETE_FILE);
 				if (file.getState() == VCrowdFile.State.DOWNLOADING) {
 					V2Log.d(TAG,
 							"handleFileRemovedEvent --> cancel downloading was called!");
@@ -580,67 +534,6 @@ public class CrowdFilesActivity extends Activity {
 		}
 	}
 
-	/**
-	 * matching the crowd file type for show the icon
-	 * 
-	 * @param fileName
-	 * @param holder
-	 */
-	public void adapterFileIcon(String fileName, ViewItem holder) {
-
-		if (fileName.endsWith(".jpg") || fileName.endsWith(".png")
-				|| fileName.endsWith(".jpeg") || fileName.endsWith(".bmp")
-				|| fileName.endsWith("gif")) {
-
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_picture);
-
-		} else if (fileName.endsWith(".doc")) {
-
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_word);
-
-		} else if (fileName.endsWith(".xls")) {
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_excel);
-
-		} else if (fileName.endsWith(".pdf")) {
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_pdf);
-		} else if (fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_ppt);
-		} else if (fileName.endsWith(".zip") || fileName.endsWith(".rar")) {
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_zip);
-		} else if (fileName.endsWith(".vsd") || fileName.endsWith(".vss")
-				|| fileName.endsWith(".vst") || fileName.endsWith(".vdx")) {
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_viso);
-		} else if (fileName.endsWith(".mp4") || fileName.endsWith(".rmvb")
-				|| fileName.endsWith(".avi") || fileName.endsWith(".3gp")) {
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_video);
-		} else if (fileName.endsWith(".mp3") || fileName.endsWith(".wav")
-				|| fileName.endsWith(".ape") || fileName.endsWith(".wmv")) {
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_sound);
-		} else {
-			if (holder != null)
-				holder.mFileIcon
-						.setImageResource(R.drawable.selectfile_type_ohter);
-		}
-	}
-
 	private OnClickListener mBackButtonListener = new OnClickListener() {
 
 		@Override
@@ -654,17 +547,6 @@ public class CrowdFilesActivity extends Activity {
 
 		@Override
 		public void onClick(View v) {
-			// if (isInDeleteMode) {
-			// isInDeleteMode = false;
-			// // resume all uploading files
-			// if(showUploaded)
-			// suspendOrResumeUploadingFiles(false);
-			// else
-			// suspendOrResumeDownloadingFiles(false);
-			// adapter.notifyDataSetChanged();
-			// mCannelButton.setVisibility(View.INVISIBLE);
-			// return;
-			// }
 			onBackPressed();
 		}
 
@@ -728,7 +610,7 @@ public class CrowdFilesActivity extends Activity {
 						showDeleteMode = true;
 						suspendOrResumeDownloadingFiles(true);
 					} else {
-						for (VCrowdFile file : mFiles) {
+						for (VCrowdFile file : mServerExistFiles) {
 							if (file.getUploader().getmUserId() == currentLoginUserID) {
 								showDeleteMode = true;
 								break;
@@ -815,7 +697,7 @@ public class CrowdFilesActivity extends Activity {
 					return;
 				}
 				if (obj.getmGroupId() == crowd.getmGId()) {
-					for (VCrowdFile f : mFiles) {
+					for (VCrowdFile f : mServerExistFiles) {
 						if (f.getState() == VFile.State.DOWNLOADING) {
 							V2Log.d(TAG,
 									"JNI_BROADCAST_KICED_CROWD --> cancel downloading was called!");
@@ -906,7 +788,7 @@ public class CrowdFilesActivity extends Activity {
 			if (showUploaded) {
 				return mUploadedFiles.size();
 			} else {
-				return mFiles.size();
+				return mServerExistFiles.size();
 			}
 		}
 
@@ -915,7 +797,7 @@ public class CrowdFilesActivity extends Activity {
 			if (showUploaded) {
 				return mUploadedFiles.get(position);
 			} else {
-				return mFiles.get(position);
+				return mServerExistFiles.get(position);
 			}
 		}
 
@@ -924,7 +806,7 @@ public class CrowdFilesActivity extends Activity {
 			if (showUploaded) {
 				return mUploadedFiles.get(position).hashCode();
 			} else {
-				return mFiles.get(position).hashCode();
+				return mServerExistFiles.get(position).hashCode();
 			}
 		}
 
@@ -939,7 +821,7 @@ public class CrowdFilesActivity extends Activity {
 			if (showUploaded) {
 				file = mUploadedFiles.get(position);
 			} else {
-				file = mFiles.get(position);
+				file = mServerExistFiles.get(position);
 			}
 
 			ViewItem item = null;
@@ -1024,7 +906,7 @@ public class CrowdFilesActivity extends Activity {
 				file.setFlag(HIDE_DELETE_BUTTON_FLAG);
 			}
 
-			adapterFileIcon(file.getName(), item);
+			FileUitls.adapterFileIcon(file.getName());
 
 			switch (fs) {
 			case UNKNOWN:
@@ -1119,7 +1001,7 @@ public class CrowdFilesActivity extends Activity {
 			public void onClick(View v) {
 				VCrowdFile file = (VCrowdFile) v.getTag();
 				if (file.getState() == VFile.State.REMOVED) {
-					mFiles.remove(file);
+					mServerExistFiles.remove(file);
 					V2Toast.makeText(mContext,
 							R.string.crowd_files_deleted_notification,
 							Toast.LENGTH_SHORT).show();
@@ -1251,6 +1133,7 @@ public class CrowdFilesActivity extends Activity {
 							.getGlobalServerTime()));
 					((TextView) v)
 							.setText(R.string.crowd_files_button_name_pause);
+					mShowProgressFileMap.put(file.getId(), file);
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_START_DOWNLOAD, null);
 				} else if (file.getState() == VFile.State.DOWNLOADING) {
@@ -1265,7 +1148,6 @@ public class CrowdFilesActivity extends Activity {
 							.setText(R.string.crowd_files_button_name_pause);
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_PAUSE_SENDING, null);
-					requestUpdateFile.add(file.getId());
 				} else if (file.getState() == VFile.State.DOWNLOAD_PAUSE) {
 					file.setState(VFile.State.DOWNLOADING);
 					((TextView) v)
@@ -1285,18 +1167,18 @@ public class CrowdFilesActivity extends Activity {
 					v.invalidate();
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_RESUME_SEND, null);
-					requestUpdateFile.add(file.getId());
 				}
-
+				adapter.notifyDataSetChanged();
+				
+				//save state to database
 				VMessageFileItem fileItem = MessageLoader.queryFileItemByID(
 						V2GlobalEnum.GROUP_TYPE_CROWD, file.getId());
 				if (fileItem != null) {
 					fileItem.setState(file.getState().intValue());
 					fileItem.setUuid(file.getId());
-					int update = MessageBuilder.updateVMessageItem(mContext,
+					MessageBuilder.updateVMessageItem(mContext,
 							fileItem);
-					if (update <= 0)
-						Toast.makeText(mContext, "失败", 0).show();
+					CommonCallBack.getInstance().executeUpdateCrowdFileState(false, file.getId(), fileItem.getVm() , CrowdFileExeType.UPDATE_FILE);
 				} else {
 					VMessage vm = new VMessage(crowd.getGroupType().intValue(),
 							crowd.getmGId(), file.getUploader(), null,
@@ -1307,8 +1189,8 @@ public class CrowdFilesActivity extends Activity {
 					vm.setmXmlDatas(vm.toXml());
 					MessageBuilder.saveMessage(mContext, vm);
 					MessageBuilder.saveFileVMessage(mContext, vm);
+					CommonCallBack.getInstance().executeUpdateCrowdFileState(false, file.getId(), fileItem.getVm() , CrowdFileExeType.ADD_FILE);
 				}
-				adapter.notifyDataSetChanged();
 			}
 		};
 	}

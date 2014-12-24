@@ -263,6 +263,14 @@ public class CrowdApplicationActivity extends Activity {
 				if (mState == State.APPLYING) {
 					return;
 				}
+				
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext,
+							R.string.error_local_connect_to_server,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
+				
 				if (disableAuth) {
 					mState = State.APPLYING;
 					service.applyCrowd(crowd, "", new MessageListener(

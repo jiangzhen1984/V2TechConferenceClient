@@ -77,7 +77,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		}
 
 		if (fileType == FileType.UNKNOW && !TextUtils.isEmpty(this.fileName))
-			this.fileType = FileUitls.adapterFileIcon(this.fileName);
+			this.fileType = FileUitls.getFileType(this.fileName);
 
 		if (fileSize == 0 && !TextUtils.isEmpty(filePath)) {
 			File file = new File(filePath);

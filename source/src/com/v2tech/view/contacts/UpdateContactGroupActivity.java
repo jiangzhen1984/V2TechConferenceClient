@@ -160,16 +160,23 @@ public class UpdateContactGroupActivity extends Activity {
 		@Override
 		public void onCheckedChanged(RadioGroup rg, int id) {
 			if ((from != null) && from.equals("addFriend")) {
-
-				RadioButton rb = (RadioButton) rg.findViewById(id);
-				Group group = (Group) rb.getTag();
-				Intent intent = new Intent();
-				intent.putExtra("groupName", group.getName());
-				intent.putExtra("groupID", group.getmGId());
-				setResult(SELECT_GROUP_RESPONSE_CODE_DONE, intent);
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+				}
+				else{
+					RadioButton rb = (RadioButton) rg.findViewById(id);
+					Group group = (Group) rb.getTag();
+					Intent intent = new Intent();
+					intent.putExtra("groupName", group.getName());
+					intent.putExtra("groupID", group.getmGId());
+					setResult(SELECT_GROUP_RESPONSE_CODE_DONE, intent);
+				}
 				finish();
 			} else {
 				synchronized (state) {
+					if (!GlobalHolder.getInstance().isServerConnected()) 
+						Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+						
 					if (state == STATE.UPDATING) {
 						if (mToast == null) {
 							mToast = Toast

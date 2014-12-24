@@ -786,8 +786,7 @@ public class CrowdGroupService extends AbstractHandler {
 					vcf.setUploader(GlobalHolder.getInstance().getUser(
 							f.user.uid));
 				}
-				vcf.setPath(GlobalConfig.getGlobalPath() + "/files/" + group.id
-						+ "/" + f.fileName);
+				vcf.setPath(GlobalConfig.getGlobalFilePath() + "/" + f.fileName);
 				vfList.add(vcf);
 			}
 			return vfList;

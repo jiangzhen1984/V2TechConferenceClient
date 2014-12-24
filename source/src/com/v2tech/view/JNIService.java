@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -1475,7 +1476,7 @@ public class JNIService extends Service implements
 								GlobalConfig.getGlobalServerTime()));
 				VMessageFileItem item = new VMessageFileItem(vm,
 						fileJNIObject.fileName,
-						VMessageFileItem.STATE_FILE_SENT, fileJNIObject.fileId);
+						VMessageFileItem.STATE_FILE_SENT, UUID.randomUUID().toString());
 				item.setFileSize(fileJNIObject.fileSize);
 				item.setFileType(FileType.fromInt(fileJNIObject.fileType));
 				// save to database

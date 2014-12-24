@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.vo.VMessageFileItem.FileType;
 
@@ -20,8 +21,42 @@ import com.v2tech.vo.VMessageFileItem.FileType;
 public class FileUitls {
 
 	public static Context context;
+	
+	public static int adapterFileIcon(String fileName){
+		String postfixName = fileName.substring(fileName.indexOf("."));
+		V2Log.e("FileUtils --> get postfix name is : " + postfixName);
+		FileType fileType  = getFileType(postfixName);
+		return adapterFileIcon(fileType);
+	}
+	
+	public static int adapterFileIcon(FileType fileType) {
+		switch (fileType) {
+		case IMAGE:
+			return R.drawable.selectfile_type_picture;
+		case WORD:
+			return R.drawable.selectfile_type_word;
+		case EXCEL:
+			return R.drawable.selectfile_type_excel;
+		case PDF:
+			return R.drawable.selectfile_type_pdf;
+		case PPT:
+			return R.drawable.selectfile_type_ppt;
+		case ZIP:
+			return R.drawable.selectfile_type_zip;
+		case VIS:
+			return R.drawable.selectfile_type_viso;
+		case VIDEO:
+			return R.drawable.selectfile_type_video;
+		case AUDIO:
+			return R.drawable.selectfile_type_sound;
+		case UNKNOW:
+			return R.drawable.selectfile_type_ohter;
+		default:
+			return R.drawable.selectfile_type_ohter;
+		}
+	}
 
-	public static FileType adapterFileIcon(String postfixName) {
+	public static FileType getFileType(String postfixName) {
 		postfixName = postfixName.toLowerCase();
 		if (checkEndsWithInStringArray(postfixName, context.getResources()
 				.getStringArray(R.array.fileEndingImage))) {

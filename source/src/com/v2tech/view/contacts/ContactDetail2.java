@@ -284,32 +284,36 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 			@Override
 			public void onClick(View arg0) {
-				// 加为好友
-				Intent i = new Intent();
-				switch (u.getAuthtype()) {
-				case 0:
-					i.setClass(ContactDetail2.this,
-							FriendManagementActivity.class);
-					i.putExtra("uid", mUid);
-					i.putExtra("cause", "ContactDetail2");
-					ContactDetail2.this.startActivity(i);
-					break;
-				case 1:
-					i.setClass(ContactDetail2.this,
-							AuthenticationActivity.class);
-					i.putExtra("uid", mUid);
-					ContactDetail2.this.startActivity(i);
-					break;
-				case 2:
-					Toast.makeText(ContactDetail2.this, "对方不允许加为好友",
-							Toast.LENGTH_SHORT).show();
-					break;
-				default:
-					Toast.makeText(ContactDetail2.this, "对方不允许加为好友",
-							Toast.LENGTH_SHORT).show();
-					break;
+				
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+				} else {
+					// 加为好友
+					Intent i = new Intent();
+					switch (u.getAuthtype()) {
+					case 0:
+						i.setClass(ContactDetail2.this,
+								FriendManagementActivity.class);
+						i.putExtra("uid", mUid);
+						i.putExtra("cause", "ContactDetail2");
+						ContactDetail2.this.startActivity(i);
+						break;
+					case 1:
+						i.setClass(ContactDetail2.this,
+								AuthenticationActivity.class);
+						i.putExtra("uid", mUid);
+						ContactDetail2.this.startActivity(i);
+						break;
+					case 2:
+						Toast.makeText(ContactDetail2.this, "对方不允许加为好友",
+								Toast.LENGTH_SHORT).show();
+						break;
+					default:
+						Toast.makeText(ContactDetail2.this, "对方不允许加为好友",
+								Toast.LENGTH_SHORT).show();
+						break;
+					}
 				}
-
 			}
 		});
 

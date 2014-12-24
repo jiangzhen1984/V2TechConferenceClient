@@ -168,6 +168,7 @@ public class CrowdInvitationActivity extends Activity {
         filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
         filter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
         filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
+        filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
         registerReceiver(inviteReceiver, filter);
     }
 
@@ -390,8 +391,10 @@ public class CrowdInvitationActivity extends Activity {
                 VerificationProvider.updateCrowdQualicationMessage(vq);
                 isReturnData = true;
                 mReturnButton.performClick();
-            } else if(JNIService.JNI_BROADCAST_KICED_CROWD.equals(intent
-                    .getAction())){
+            } else if(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
+					.equals(intent.getAction())
+					|| intent.getAction().equals(
+							JNIService.JNI_BROADCAST_KICED_CROWD)){
             	GroupUserObject obj = intent.getParcelableExtra("group");
 				if (obj == null) {
 					V2Log.e("CrowdInvitationActivity",

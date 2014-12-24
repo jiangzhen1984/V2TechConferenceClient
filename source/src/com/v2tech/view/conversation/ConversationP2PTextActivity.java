@@ -94,7 +94,9 @@ import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.contacts.ContactDetail;
+import com.v2tech.view.conversation.CommonCallBack.CommonUpdateCrowdFileStateInterface;
 import com.v2tech.view.conversation.CommonCallBack.CommonUpdateMessageBodyPopupWindowInterface;
+import com.v2tech.view.conversation.CommonCallBack.CrowdFileExeType;
 import com.v2tech.view.group.CrowdDetailActivity;
 import com.v2tech.view.group.CrowdFilesActivity.CrowdFileActivityType;
 import com.v2tech.view.widget.CommonAdapter;
@@ -118,7 +120,9 @@ import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
 
-public class ConversationP2PTextActivity extends Activity implements CommonUpdateMessageBodyPopupWindowInterface{
+public class ConversationP2PTextActivity extends Activity implements
+		CommonUpdateMessageBodyPopupWindowInterface,
+		CommonUpdateCrowdFileStateInterface {
 
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
@@ -136,9 +140,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
 	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
 	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
-	
+
 	private static final String TAG = "ConversationP2PTextActivity";
-	
+
 	/**
 	 * for activity result
 	 */
@@ -151,7 +155,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private long currentLoginUserID = 0;
 	private long remoteChatUserID = 0;
 	private long remoteGroupID = 0;
-	
+
 	private User currentLoginUser;
 	private User remoteChatUser;
 	private int currentConversationViewType;
@@ -228,7 +232,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private long intervalTime = 15000; // 显示消息时间状态的间隔时间
 	private boolean isReLoading; // 用于onNewIntent判断是否需要重新加载界面聊天数据
 	private boolean sendFile; // 用于从个人信息中传递过来的文件，只发送一次
-	
+
 	/**
 	 * Record Audio item flags
 	 */
@@ -237,7 +241,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private MessageBodyView showingPopupWindow;
 	private boolean stopOhterAudio;
 	private boolean isCreate;
-	
+
 	/**
 	 * executeConversationCreate only called once
 	 */
@@ -264,10 +268,12 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			}
 			backEndHandler = new BackendHandler(thread.getLooper());
 		}
-		
+
 		initExtraObject();
 		initBroadcast();
+
 		CommonCallBack.getInstance().setMessageBodyPopup(this);
+		CommonCallBack.getInstance().setCrowdFileState(this);
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				avatarChangedListener);
@@ -280,7 +286,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				R.animator.nonam_scale_null);
 		// initalize vioce function that showing dialog
 		createVideoDialog();
-		// Initalize get members of file that file state is sending from database
+		// Initalize get members of file that file state is sending from
+		// database
 		initTransingObserver();
 		isCreate = true;
 	}
@@ -312,7 +319,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private void initModuleAndListener() {
 		messageAllID = new SparseArray<VMessage>();
 		messageArray = new ArrayList<CommonAdapterItemWrapper>();
-		
+
 		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
 		adapter = new MessageAdapter();
 		mMessagesContainer.setAdapter(adapter);
@@ -382,9 +389,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			startSendMoreFile();
 		}
 	}
-	
+
 	/**
-	 * Get the number of files that file state is transing , and put variable into the global collections
+	 * Get the number of files that file state is transing , and put variable
+	 * into the global collections
 	 */
 	private void initTransingObserver() {
 		List<VMessageFileItem> files;
@@ -399,21 +407,21 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					remoteChatUserID);
 			key = remoteChatUserID;
 		}
-		
+
 		Integer transing = GlobalConfig.mTransingFiles.get(key);
-		if(transing == null)
+		if (transing == null)
 			transing = 0;
-		
 
 		for (VMessageFileItem vMessageFileItem : files) {
 			if (vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
 				count += 1;
 			}
 		}
-		
-		if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-			V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity initTransingObserver --> 用户" + remoteChatUserID
-					+ "初始化文件传输个数：" + transing);
+
+		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+			V2Log.d("TRANSING_File_SIZE",
+					"ConversationP2PTextActivity initTransingObserver --> 用户"
+							+ remoteChatUserID + "初始化文件传输个数：" + transing);
 		transing = transing + count;
 		GlobalConfig.mTransingFiles.put(key, transing);
 	}
@@ -475,7 +483,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					START_LOAD_MESSAGE);
 			lh.sendMessageDelayed(m, 500);
 		}
-		
+
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
@@ -545,8 +553,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private void checkMessageEmpty() {
 		boolean isDelete = false;
 		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
-			isDelete = MessageLoader.getNewestMessage(mContext, currentLoginUserID,
-					remoteChatUserID) == null ? true : false;
+			isDelete = MessageLoader.getNewestMessage(mContext,
+					currentLoginUserID, remoteChatUserID) == null ? true
+					: false;
 		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 			isDelete = MessageLoader.getNewestGroupMessage(mContext,
 					V2GlobalEnum.GROUP_TYPE_CROWD, remoteGroupID) == null ? true
@@ -625,17 +634,19 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					1);
 		}
 
-//		this.getIntent().getBooleanExtra("fromContactDetail", false);
+		// this.getIntent().getBooleanExtra("fromContactDetail", false);
 		initConversationInfos();
 	}
 
 	private void initConversationInfos() {
 		currentLoginUserID = GlobalHolder.getInstance().getCurrentUserId();
-		currentLoginUser = GlobalHolder.getInstance().getUser(currentLoginUserID);
+		currentLoginUser = GlobalHolder.getInstance().getUser(
+				currentLoginUserID);
 		if (cov.getConversationType() == Conversation.TYPE_CONTACT) {
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
 			remoteChatUserID = cov.getExtId();
-			remoteChatUser = GlobalHolder.getInstance().getUser(remoteChatUserID);
+			remoteChatUser = GlobalHolder.getInstance().getUser(
+					remoteChatUserID);
 			if (remoteChatUser == null) {
 				remoteChatUser = new User(remoteChatUserID);
 			}
@@ -654,26 +665,29 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		} else if (cov.getConversationType() == Conversation.TYPE_GROUP) {
 			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
 			remoteGroupID = cov.getExtId();
-			Group group =  GlobalHolder.getInstance()
-					.getGroupById( remoteGroupID);
+			Group group = GlobalHolder.getInstance()
+					.getGroupById(remoteGroupID);
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.GONE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
 			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
 			mUserTitleTV.setText(group.getName());
-		} else if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT ||
-				cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
-			if(cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT ){
+		} else if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT
+				|| cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+			if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
-				OrgGroup departmentGroup = (OrgGroup) GlobalHolder.getInstance()
-						.getGroupById(V2GlobalEnum.GROUP_TYPE_DEPARTMENT, cov.getExtId());
+				OrgGroup departmentGroup = (OrgGroup) GlobalHolder
+						.getInstance().getGroupById(
+								V2GlobalEnum.GROUP_TYPE_DEPARTMENT,
+								cov.getExtId());
 				mUserTitleTV.setText(departmentGroup.getName());
-			}
-			else{
+			} else {
 				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DISCUSSION;
-				DiscussionGroup discussionGroup = (DiscussionGroup) GlobalHolder.getInstance()
-						.getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, cov.getExtId());
+				DiscussionGroup discussionGroup = (DiscussionGroup) GlobalHolder
+						.getInstance().getGroupById(
+								V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+								cov.getExtId());
 				mUserTitleTV.setText(discussionGroup.getName());
 			}
 			remoteGroupID = cov.getExtId();
@@ -683,7 +697,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			mSelectFileButtonIV.setVisibility(View.GONE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
 			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
-		} 
+		}
 	}
 
 	private void scrollToBottom() {
@@ -697,42 +711,42 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	}
 
 	private void scrollToPos(final int pos) {
-        V2Log.d(TAG, "currentItemPos:--" + currentItemPos);
-		if (pos < 0){
-            V2Log.d(TAG, "没有加载到数据 :" + pos);
-            return;
-        }
+		V2Log.d(TAG, "currentItemPos:--" + currentItemPos);
+		if (pos < 0) {
+			V2Log.d(TAG, "没有加载到数据 :" + pos);
+			return;
+		}
 
-        if(pos >= messageArray.size()) {
+		if (pos >= messageArray.size()) {
 			V2Log.d(TAG, "参数不合法或没有加载到数据 :" + pos);
 			return;
 		}
 
-//        if(pos >= 3)
-//            mMessagesContainer.setSelection(pos + 3);
-//        else
-//            mMessagesContainer.setSelection(pos);
+		// if(pos >= 3)
+		// mMessagesContainer.setSelection(pos + 3);
+		// else
+		// mMessagesContainer.setSelection(pos);
 
-		if(isCreate){
+		if (isCreate) {
 			isCreate = false;
 			mMessagesContainer.setSelection(pos);
-		}
-		else{
-			 adapter.notifyDataSetChanged();
-             if((LastFistItem >= messageArray.size() || LastFistItem < 0)){
-	//			// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
+		} else {
+			adapter.notifyDataSetChanged();
+			if ((LastFistItem >= messageArray.size() || LastFistItem < 0)) {
+				// //
+				// 次为了解决setSelection无效的问题，虽然能解决，但会造成界面卡顿。直接setSelection而不notifyDataSetChanged即可
 				mMessagesContainer.post(new Runnable() {
-	
+
 					@Override
 					public void run() {
 						mMessagesContainer.setSelection(pos);
 					}
-	
+
 				});
-             }
-             else{
-            	 mMessagesContainer.setSelectionFromTop(LastFistItem, LastFistItemOffset);
-             }
+			} else {
+				mMessagesContainer.setSelectionFromTop(LastFistItem,
+						LastFistItemOffset);
+			}
 		}
 	}
 
@@ -752,12 +766,12 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				List<VMessageAudioItem> items = vm.getAudioItems();
 				if (items.size() > 0
 						&& items.get(0).getReadState() == VMessageAbstractItem.STATE_UNREAD) {
-                    V2Log.d(TAG,
-                            "start palying next aduio item , id is : " + vm.getId() +
-                                    "and index in collections is : " + i + " collections size is : " + messageArray.size());
-                    VMessageAudioItem audio = items.get(0);
-                    if(i != 0)
-                        mMessagesContainer.setSelection(i);
+					V2Log.d(TAG, "start palying next aduio item , id is : "
+							+ vm.getId() + "and index in collections is : " + i
+							+ " collections size is : " + messageArray.size());
+					VMessageAudioItem audio = items.get(0);
+					if (i != 0)
+						mMessagesContainer.setSelection(i);
 					MessageBodyView foundView = (MessageBodyView) wrapper
 							.getView();
 					if (foundView == null) {
@@ -936,7 +950,6 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		// mAacEncoder = new AACEncoder(filePath);
 		// mAacEncoder.start();
 		// return true;+
-		
 
 		mRecorder = new MediaRecorder();
 		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -974,7 +987,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		// mAacEncoder.release();
 
 		try {
-			//Ignore stop fialed exception
+			// Ignore stop fialed exception
 			mRecorder.stop();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1010,12 +1023,11 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 	private void startVoiceCall() {
 		if (!GlobalHolder.getInstance().isServerConnected()) {
-			Toast.makeText(mContext,
-					R.string.error_local_connect_to_server,
+			Toast.makeText(mContext, R.string.error_local_connect_to_server,
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
-		
+
 		Intent iv = new Intent();
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
@@ -1028,12 +1040,11 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 	private void startVideoCall() {
 		if (!GlobalHolder.getInstance().isServerConnected()) {
-			Toast.makeText(mContext,
-					R.string.error_local_connect_to_server,
+			Toast.makeText(mContext, R.string.error_local_connect_to_server,
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
-		
+
 		Intent iv = new Intent();
 		iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
@@ -1242,7 +1253,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 							&& seconds > 1500) {
 						// send
 						VMessage vm = MessageBuilder.buildAudioMessage(
-								cov.getConversationType(), remoteGroupID, currentLoginUser, remoteChatUser,
+								cov.getConversationType(), remoteGroupID,
+								currentLoginUser, remoteChatUser,
 								audioFilePath, (int) (seconds / 1000));
 						// Send message to server
 						sendMessageToRemote(vm);
@@ -1370,8 +1382,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			// send
 			timeOutRecording = true;
 			realRecoding = false;
-			VMessage vm = MessageBuilder.buildAudioMessage(cov.getConversationType(),
-					remoteGroupID, currentLoginUser, remoteChatUser, audioFilePath, 60);
+			VMessage vm = MessageBuilder.buildAudioMessage(
+					cov.getConversationType(), remoteGroupID, currentLoginUser,
+					remoteChatUser, audioFilePath, 60);
 			// Send message to server
 			sendMessageToRemote(vm);
 
@@ -1714,8 +1727,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			VMessage vim = MessageBuilder.buildImageMessage(cov.getConversationType(),
-					remoteGroupID, currentLoginUser, remoteChatUser, filePath);
+			VMessage vim = MessageBuilder.buildImageMessage(
+					cov.getConversationType(), remoteGroupID, currentLoginUser,
+					remoteChatUser, filePath);
 			// Send message to server
 			sendMessageToRemote(vim);
 		} else if (requestCode == RECEIVE_SELECTED_FILE) {
@@ -1732,7 +1746,8 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 							continue;
 
 						VMessage vm = MessageBuilder.buildFileMessage(
-								cov.getConversationType(), remoteGroupID, currentLoginUser, remoteChatUser, bean);
+								cov.getConversationType(), remoteGroupID,
+								currentLoginUser, remoteChatUser, bean);
 						bean.fileUUID = vm.getFileItems().get(0).getUuid();
 						// // Save message
 						vm.setmXmlDatas(vm.toXml());
@@ -1758,29 +1773,30 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				}
 			}
 		} else if (requestCode == SHOW_GROUP_DETAIL) {
-			Group group =  GlobalHolder.getInstance()
-					.getGroupById( remoteGroupID);
+			Group group = GlobalHolder.getInstance()
+					.getGroupById(remoteGroupID);
 			mUserTitleTV.setText(group.getName());
-		} else if(requestCode == UPDATE_FILE_SENDING_STATE){
-			if(data != null){
-				String[] updates = data.getStringArrayExtra("updateList");
-				if(updates != null && updates.length > 0){
-					for (int i = 0; i < updates.length; i++) {
-						for (int j = 0; j < messageArray.size(); j++) {
-							CommonAdapterItemWrapper wrapper = messageArray.get(i);
-							VMessage tempVm = (VMessage) wrapper.getItemObject();
-							if(tempVm.getFileItems().size() > 0){
-								VMessageFileItem vMessageFileItem = tempVm.getFileItems().get(0);
-								if (vMessageFileItem.getUuid().equals(updates[i])) {
-									VMessageFileItem queryFileItemByID = MessageLoader.
-											queryFileItemByID(V2GlobalEnum.GROUP_TYPE_CROWD, updates[i]);
-									((MessageBodyView) wrapper
-											.getView()).updateView(queryFileItemByID);
-								}
-							}
-						}
-					}
-				}
+		} else if (requestCode == UPDATE_FILE_SENDING_STATE) {
+			if (data != null) {
+				// String[] updates = data.getStringArrayExtra("updateList");
+				// if(updates != null && updates.length > 0){
+				// for (int i = 0; i < updates.length; i++) {
+				// for (int j = 0; j < messageArray.size(); j++) {
+				// CommonAdapterItemWrapper wrapper = messageArray.get(i);
+				// VMessage tempVm = (VMessage) wrapper.getItemObject();
+				// if(tempVm.getFileItems().size() > 0){
+				// VMessageFileItem vMessageFileItem =
+				// tempVm.getFileItems().get(0);
+				// if (vMessageFileItem.getUuid().equals(updates[i])) {
+				// VMessageFileItem queryFileItemByID = MessageLoader.
+				// queryFileItemByID(V2GlobalEnum.GROUP_TYPE_CROWD, updates[i]);
+				// ((MessageBodyView) wrapper
+				// .getView()).updateView(queryFileItemByID);
+				// }
+				// }
+				// }
+				// }
+				// }
 			}
 		}
 
@@ -1816,8 +1832,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			remoteChatUser = new User(remoteChatUserID);
 		}
 		// 如果user2Id为0，则说明为群组聊天
-		VMessage vm = new VMessage(cov.getConversationType(), this.remoteGroupID, currentLoginUser, remoteChatUser,
-				new Date(GlobalConfig.getGlobalServerTime()));
+		VMessage vm = new VMessage(cov.getConversationType(),
+				this.remoteGroupID, currentLoginUser, remoteChatUser, new Date(
+						GlobalConfig.getGlobalServerTime()));
 		String[] array = content.split("\n");
 		for (int i = 0; i < array.length; i++) {
 			String str = array[i];
@@ -1952,20 +1969,22 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		vm.setmXmlDatas(vm.toXml());
 		vm.setState(VMessageAbstractItem.STATE_NORMAL);
 		vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
-		
+
 		MessageBuilder.saveMessage(this, vm);
 		MessageBuilder.saveFileVMessage(this, vm);
 		MessageBuilder.saveBinaryVMessage(this, vm);
 
 		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
-		
-		//如果从个人资料界面发送消息，需要回调界面创建该会话
-		if(isFirstCall){
-			V2Log.d(TAG, "sendMessageToRemote --> need to create new conversation!");
+
+		// 如果从个人资料界面发送消息，需要回调界面创建该会话
+		if (isFirstCall) {
+			V2Log.d(TAG,
+					"sendMessageToRemote --> need to create new conversation!");
 			isFirstCall = false;
-			CommonCallBack.getInstance().executeConversationCreate(currentConversationViewType
-					, remoteGroupID , remoteChatUserID);
+			CommonCallBack.getInstance().executeConversationCreate(
+					currentConversationViewType, remoteGroupID,
+					remoteChatUserID);
 		}
 	}
 
@@ -1994,7 +2013,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	private void addMessageToContainer(final VMessage msg) {
 		// make offset
 		runOnUiThread(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				offset++;
@@ -2004,15 +2023,15 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			}
 		});
 	}
-	
+
 	private void startSendMoreFile() {
 		for (int i = 0; i < mCheckedList.size(); i++) {
 			sendSelectedFile(mCheckedList.get(i));
 		}
 	}
 
-    private int LastFistItem;
-    private int LastFistItemOffset;
+	private int LastFistItem;
+	private int LastFistItemOffset;
 	private OnScrollListener scrollListener = new OnScrollListener() {
 		boolean scrolled = false;
 		int lastFirst = 0;
@@ -2029,10 +2048,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				android.os.Message.obtain(lh, START_LOAD_MESSAGE)
 						.sendToTarget();
 				currentItemPos = first;
-                LastFistItem = mMessagesContainer.getFirstVisiblePosition();
-                V2Log.e(TAG , "First visible position is : " + LastFistItem);
-                View v = mMessagesContainer.getChildAt(0);
-                LastFistItemOffset = (v == null) ? 0 : v.getTop();
+				LastFistItem = mMessagesContainer.getFirstVisiblePosition();
+				V2Log.e(TAG, "First visible position is : " + LastFistItem);
+				View v = mMessagesContainer.getChildAt(0);
+				LastFistItemOffset = (v == null) ? 0 : v.getTop();
 				// Do not clean image message state when loading message
 			} else {
 				if (lastFirst != first) {
@@ -2074,7 +2093,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				i.putExtra("type", currentConversationViewType);
 				i.putExtra("gid", remoteGroupID);
 				mContext.startActivity(i);
-				return ;
+				return;
 			}
 
 			List<VMessageLinkTextItem> linkItems = v.getLinkItems();
@@ -2086,10 +2105,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				Uri content_url = Uri.parse(linkItem.getUrl());
 				intent.setData(content_url);
 				startActivity(intent);
-				return ;
+				return;
 			}
 		}
-		
+
 		public void onCrowdFileMessageClicked(CrowdFileActivityType type) {
 			Intent i = new Intent(PublicIntent.START_CROWD_FILES_ACTIVITY);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -2106,8 +2125,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					CommonAdapterItemWrapper wrapper = messageArray.get(i);
 					VMessage tempVm = (VMessage) wrapper.getItemObject();
 					if (tempVm.getUUID().equals(playingAudioMessage.getUUID())) {
-						
-						tempVm.getAudioItems().get(0).setReadState(VMessageAbstractItem.STATE_READED);
+
+						tempVm.getAudioItems()
+								.get(0)
+								.setReadState(VMessageAbstractItem.STATE_READED);
 						playingAudioBodyView = (MessageBodyView) wrapper
 								.getView();
 					}
@@ -2133,8 +2154,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					item.setState(VMessageAbstractItem.STATE_NORMAL);
 			}
 			int update = MessageLoader.updateChatMessageState(mContext, v);
-			if(update <= 0)
-				V2Log.e(TAG, "Update chatMessage state failed...message uuid is : " + v.getUUID());
+			if (update <= 0)
+				V2Log.e(TAG,
+						"Update chatMessage state failed...message uuid is : "
+								+ v.getUUID());
 			Message.obtain(lh, SEND_MESSAGE, v).sendToTarget();
 		}
 
@@ -2253,22 +2276,24 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		List<VMessage> array = null;
 		switch (currentConversationViewType) {
 		case V2GlobalEnum.GROUP_TYPE_USER:
-			array = MessageLoader.loadMessageByPage(mContext, Conversation.TYPE_CONTACT ,
-					currentLoginUserID, remoteChatUserID,BATCH_COUNT, offset);
+			array = MessageLoader.loadMessageByPage(mContext,
+					Conversation.TYPE_CONTACT, currentLoginUserID,
+					remoteChatUserID, BATCH_COUNT, offset);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_CROWD:
-			array = MessageLoader.loadGroupMessageByPage(mContext,
-					Conversation.TYPE_GROUP, remoteGroupID, BATCH_COUNT, offset);
+			array = MessageLoader
+					.loadGroupMessageByPage(mContext, Conversation.TYPE_GROUP,
+							remoteGroupID, BATCH_COUNT, offset);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, remoteGroupID, BATCH_COUNT,
-					offset);
+					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, remoteGroupID,
+					BATCH_COUNT, offset);
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID, BATCH_COUNT,
-					offset);
+					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID,
+					BATCH_COUNT, offset);
 			break;
 		default:
 			break;
@@ -2276,19 +2301,24 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 		if (array != null) {
 			boolean isExist;
-			if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-				isExist = ConversationProvider.queryUserConversation(remoteChatUserID);
+			if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+				isExist = ConversationProvider
+						.queryUserConversation(remoteChatUserID);
 			else
-				isExist = ConversationProvider.queryGroupConversation(currentConversationViewType, remoteGroupID);
-			if(!isExist){
-				boolean flag = MessageLoader.deleteMessageByID(mContext, currentConversationViewType, 
-						remoteGroupID, remoteChatUserID, true);
-				if(flag){
-					if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-						MessageLoader.isTableExist(mContext, currentConversationViewType, remoteGroupID, 
+				isExist = ConversationProvider.queryGroupConversation(
+						currentConversationViewType, remoteGroupID);
+			if (!isExist) {
+				boolean flag = MessageLoader.deleteMessageByID(mContext,
+						currentConversationViewType, remoteGroupID,
+						remoteChatUserID, true);
+				if (flag) {
+					if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+						MessageLoader.isTableExist(mContext,
+								currentConversationViewType, remoteGroupID,
 								remoteChatUserID, MessageLoader.CONTACT_TYPE);
 					else
-						MessageLoader.isTableExist(mContext, currentConversationViewType, remoteGroupID,
+						MessageLoader.isTableExist(mContext,
+								currentConversationViewType, remoteGroupID,
 								remoteChatUserID, MessageLoader.CROWD_TYPE);
 				}
 				array.clear();
@@ -2312,19 +2342,20 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 		VMessage m;
 		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-			m = MessageLoader.loadUserMessageById(mContext, remoteChatUserID, msgId);
+			m = MessageLoader.loadUserMessageById(mContext, remoteChatUserID,
+					msgId);
 		else
 			m = MessageLoader.loadGroupMessageById(mContext,
 					currentConversationViewType, remoteGroupID, msgId);
 		if (m == null
 				|| (m.getFromUser().getmUserId() != this.remoteChatUserID && m
-						.getGroupId() == 0) || (m.getGroupId() != this.remoteGroupID)) {
+						.getGroupId() == 0)
+				|| (m.getGroupId() != this.remoteGroupID)) {
 			return false;
 		}
 
-		
-		//使当前正在显示popupWindow消失
-		if(showingPopupWindow != null)
+		// 使当前正在显示popupWindow消失
+		if (showingPopupWindow != null)
 			showingPopupWindow.dissmisPopupWindow();
 		judgeShouldShowTime(m);
 		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
@@ -2365,9 +2396,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		}
 		return false;
 	}
-	
+
 	/**
 	 * 用于判断指定的消息VMessage对象是否应该显示时间状态
+	 * 
 	 * @param message
 	 */
 	private void judgeShouldShowTime(VMessage message) {
@@ -2407,10 +2439,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					MessageBodyView mv = (MessageBodyView) common.getView();
 					if (mv != null) {
 						mv.updateView(vfi);
-					} 
-//					else {
-//						notificateConversationUpdate(true, vm.getId());
-//					}
+					}
+					// else {
+					// notificateConversationUpdate(true, vm.getId());
+					// }
 				}
 			}
 		}
@@ -2468,18 +2500,26 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
 						MessageBuilder.updateVMessageItemToSentFalied(mContext,
 								vm);
-						V2Log.d(TAG, "executeUpdateFileState --> cancel downloading was called!");
+						V2Log.d(TAG,
+								"executeUpdateFileState --> cancel downloading was called!");
 						mChat.updateFileOperation(item,
-								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING, null);
-						Integer downloadTrans = GlobalConfig.mTransingFiles.get(remoteChatUserID);
-						if(downloadTrans == null){
+								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
+								null);
+						Integer downloadTrans = GlobalConfig.mTransingFiles
+								.get(remoteChatUserID);
+						if (downloadTrans == null) {
 							downloadTrans = 0;
-							GlobalConfig.mTransingFiles.put(remoteChatUserID, downloadTrans);
+							GlobalConfig.mTransingFiles.put(remoteChatUserID,
+									downloadTrans);
 						} else {
 							downloadTrans = downloadTrans - 1;
-							V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity executeUpdateFileState download --> 用户" + remoteChatUserID
-									+ "的一个文件传输失败，当前正在传输个数是：" + downloadTrans);
-							GlobalConfig.mTransingFiles.put(remoteChatUserID, downloadTrans);
+							V2Log.d("TRANSING_File_SIZE",
+									"ConversationP2PTextActivity executeUpdateFileState download --> 用户"
+											+ remoteChatUserID
+											+ "的一个文件传输失败，当前正在传输个数是："
+											+ downloadTrans);
+							GlobalConfig.mTransingFiles.put(remoteChatUserID,
+									downloadTrans);
 						}
 						break;
 					case VMessageAbstractItem.STATE_FILE_SENDING:
@@ -2487,22 +2527,25 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 						MessageBuilder.updateVMessageItemToSentFalied(mContext,
 								vm);
-						Integer trans = GlobalConfig.mTransingFiles.get(remoteChatUserID);
-						if(trans == null){
+						Integer trans = GlobalConfig.mTransingFiles
+								.get(remoteChatUserID);
+						if (trans == null) {
 							trans = 0;
-							GlobalConfig.mTransingFiles.put(remoteChatUserID, trans);
-						}
-						else{
+							GlobalConfig.mTransingFiles.put(remoteChatUserID,
+									trans);
+						} else {
 							trans = trans - 1;
-							V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity executeUpdateFileState sending --> 用户" + remoteChatUserID
-									+ "的一个文件传输失败，当前正在传输个数是：" + trans);
-							GlobalConfig.mTransingFiles.put(remoteChatUserID, trans);
+							V2Log.d("TRANSING_File_SIZE",
+									"ConversationP2PTextActivity executeUpdateFileState sending --> 用户"
+											+ remoteChatUserID
+											+ "的一个文件传输失败，当前正在传输个数是：" + trans);
+							GlobalConfig.mTransingFiles.put(remoteChatUserID,
+									trans);
 						}
 						break;
 					default:
 						break;
 					}
-					
 
 					MessageBodyView view = (MessageBodyView) messageArray
 							.get(i).getView();
@@ -2511,7 +2554,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 				}
 			}
 		}
-		
+
 		Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 	}
 
@@ -2549,7 +2592,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 		@Override
 		public void onClick(View view) {
-			Group g = GlobalHolder.getInstance().getGroupById( cov.getExtId());
+			Group g = GlobalHolder.getInstance().getGroupById(cov.getExtId());
 			if (g.getGroupType() == GroupType.CHATING) {
 				Intent i = new Intent(mContext, CrowdDetailActivity.class);
 				i.putExtra("cid", cov.getExtId());
@@ -2594,9 +2637,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			if (user == null) {
 				return;
 			}
-//			if (user.getmUserId() == local.getmUserId()
-//					|| (remote != null && user.getmUserId() == remote
-//							.getmUserId())) {
+			// if (user.getmUserId() == local.getmUserId()
+			// || (remote != null && user.getmUserId() == remote
+			// .getmUserId())) {
 			for (int i = 0; i < messageArray.size(); i++) {
 				MessageBodyView mdv = (MessageBodyView) messageArray.get(i)
 						.getView();
@@ -2610,7 +2653,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					mdv.updateAvatar(bm);
 				}
 			}
-//			}
+			// }
 
 		}
 
@@ -2713,18 +2756,20 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 								.get(i).getView());
 						if (mdv != null) {
 							mdv.updateSendingFlag(false);
-							if(result != SEND_MESSAGE_SUCCESS)
+							if (result != SEND_MESSAGE_SUCCESS)
 								mdv.updateFailedFlag(true);
 						}
-						
-						if(result == SEND_MESSAGE_SUCCESS)
+
+						if (result == SEND_MESSAGE_SUCCESS)
 							vm.setState(VMessageAbstractItem.STATE_SENT_SUCCESS);
 						else
 							vm.setState(VMessageAbstractItem.STATE_SENT_FALIED);
-						
-						if(result == SEND_MESSAGE_SUCCESS){
-							CommonAdapterItemWrapper wrapper = messageArray.get(i);
-							MessageBodyView bodyView = (MessageBodyView) wrapper.getView();
+
+						if (result == SEND_MESSAGE_SUCCESS) {
+							CommonAdapterItemWrapper wrapper = messageArray
+									.get(i);
+							MessageBodyView bodyView = (MessageBodyView) wrapper
+									.getView();
 							if (bodyView != null)
 								bodyView.updateDate();
 							messageArray.remove(wrapper);
@@ -2756,7 +2801,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
 					return;
 				}
-				
+
 				if (obj.getmGroupId() == remoteGroupID) {
 					finish();
 				}
@@ -2779,13 +2824,14 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 						return;
 					}
 					// 自己上传文件不提示
-					if (list.get(0).user.uid == currentLoginUserID || groupID != remoteGroupID)
+					if (list.get(0).user.uid == currentLoginUserID
+							|| groupID != remoteGroupID)
 						return;
 					for (FileJNIObject fileJNIObject : list) {
 						User user = GlobalHolder.getInstance().getUser(
 								list.get(0).user.uid);
-						VMessage vm = new VMessage(cov.getConversationType(), remoteGroupID,
-								user, null, new Date(
+						VMessage vm = new VMessage(cov.getConversationType(),
+								remoteGroupID, user, null, new Date(
 										GlobalConfig.getGlobalServerTime()));
 						VMessageFileItem item = new VMessageFileItem(vm,
 								fileJNIObject.fileName,
@@ -2812,10 +2858,10 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 							"JNI_BROADCAST_GROUP_USER_REMOVED --> Update Conversation failed that the user removed ... given GroupUserObject is null");
 					return;
 				}
-				
-				if(currentConversationViewType ==  V2GlobalEnum.GROUP_TYPE_USER &&
-					obj.getmType() == V2GlobalEnum.GROUP_TYPE_CONTACT && 
-					obj.getmUserId() == remoteChatUserID){
+
+				if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER
+						&& obj.getmType() == V2GlobalEnum.GROUP_TYPE_CONTACT
+						&& obj.getmUserId() == remoteChatUserID) {
 					ConversationP2PTextActivity.super.onBackPressed();
 				}
 			}
@@ -2853,20 +2899,20 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 					}
 
 					for (int i = 0; i < array.size(); i++) {
-                        VMessage vm = array.get(i);
-                        if (messageAllID.get((int) vm.getId()) != null) {
-                            Log.e(TAG, "happen erupt , the message ："
-                                    + (int) array.get(i).getId()
-                                    + "  already save in messageArray!");
-                            loadSize = loadSize + 1;
-                            continue;
-                        }
-                        messageAllID.append((int) vm.getId(), vm);
-                        VMessageAdater adater = new VMessageAdater(vm);
-                        messageArray.add(0, adater);
+						VMessage vm = array.get(i);
+						if (messageAllID.get((int) vm.getId()) != null) {
+							Log.e(TAG, "happen erupt , the message ："
+									+ (int) array.get(i).getId()
+									+ "  already save in messageArray!");
+							loadSize = loadSize + 1;
+							continue;
+						}
+						messageAllID.append((int) vm.getId(), vm);
+						VMessageAdater adater = new VMessageAdater(vm);
+						messageArray.add(0, adater);
 					}
 					V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
-                    LastFistItem = LastFistItem + loadSize;
+					LastFistItem = LastFistItem + loadSize;
 					currentItemPos = loadSize - 1;
 					if (currentItemPos == -1)
 						currentItemPos = 0;
@@ -2917,14 +2963,17 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 			case REQUEST_DEL_MESSAGE:
 				VMessage message = (VMessage) msg.obj;
 				removeMessage(message);
-				Integer transing = GlobalConfig.mTransingFiles.get(remoteChatUserID);
-				if(transing != null){
-					V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity request_delete_message --> 用户" + remoteChatUserID
-							+ "的一个传输文件被删除：" + transing);
+				Integer transing = GlobalConfig.mTransingFiles
+						.get(remoteChatUserID);
+				if (transing != null) {
+					V2Log.d("TRANSING_File_SIZE",
+							"ConversationP2PTextActivity request_delete_message --> 用户"
+									+ remoteChatUserID + "的一个传输文件被删除："
+									+ transing);
 					transing = transing - 1;
 					GlobalConfig.mTransingFiles.put(remoteChatUserID, transing);
 				}
-				
+
 				adapter.notifyDataSetChanged();
 				break;
 			case FILE_STATUS_LISTENER:
@@ -3037,8 +3086,9 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 		if (bean == null || TextUtils.isEmpty(bean.filePath))
 			return;
 
-		VMessage vim = MessageBuilder.buildFileMessage(cov.getConversationType(), remoteGroupID,
-				currentLoginUser, remoteChatUser, bean);
+		VMessage vim = MessageBuilder.buildFileMessage(
+				cov.getConversationType(), remoteGroupID, currentLoginUser,
+				remoteChatUser, bean);
 		sendMessageToRemote(vim);
 	}
 
@@ -3046,7 +3096,7 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 
 		for (VMessageFileItem vMessageFileItem : fileItems) {
 			String fileName = vMessageFileItem.getFileName();
-			FileType fileType = FileUitls.adapterFileIcon(fileName);
+			FileType fileType = FileUitls.getFileType(fileName);
 			vMessageFileItem.setFileType(fileType);
 		}
 	}
@@ -3055,4 +3105,40 @@ public class ConversationP2PTextActivity extends Activity implements CommonUpdat
 	public void updateMessageBodyPopupWindow(MessageBodyView view) {
 		showingPopupWindow = view;
 	}
+
+	@Override
+	public void updateCrowdFileState(Boolean isFromP2PText, String fileID,
+			VMessage vm, CrowdFileExeType type) {
+
+		if (!isFromP2PText) {
+			switch (type) {
+			case ADD_FILE:
+				addMessageToContainer(vm);
+				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
+				break;
+			case DELETE_FILE:
+
+				break;
+			case UPDATE_FILE:
+				for (int i = 0; i < messageArray.size(); i++) {
+					CommonAdapterItemWrapper wrapper = messageArray.get(i);
+					VMessage tempVm = (VMessage) wrapper.getItemObject();
+					if (tempVm.getFileItems().size() > 0) {
+						VMessageFileItem vMessageFileItem = tempVm
+								.getFileItems().get(0);
+						if (vMessageFileItem.getUuid().equals(fileID)) {
+							MessageBodyView bodyView = (MessageBodyView) wrapper
+									.getView();
+							if (bodyView != null)
+								bodyView.updateView(tempVm);
+						}
+					}
+				}
+				// Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
+				break;
+			default:
+				break;
+			}
+		}
+	};
 }
