@@ -14,6 +14,7 @@ import android.support.v4.util.LongSparseArray;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -372,6 +373,10 @@ public class GroupListView extends ListView {
 
 					int pos = calculateIndex(startPos, endPos, user,
 							user.getmStatus());
+
+					Log.i("20141223 1", "组开始位置 = " + startPos + " ，组结束位置  = "
+							+ endPos + " ,插入位置 = " + pos);
+
 					if (pos != -1 && pos < mFilterList.size()) {
 						ItemData userItem = this.getItem(group, user);
 						((User) userItem.getObject()).updateStatus(user
@@ -525,6 +530,10 @@ public class GroupListView extends ListView {
 	 */
 	public void updateUser(User user) {
 		// FIXME optimze for avatar
+		adapter.notifyDataSetChanged();
+	}
+
+	public void updateDisplay() {
 		adapter.notifyDataSetChanged();
 	}
 
@@ -707,6 +716,7 @@ public class GroupListView extends ListView {
 		return calculateGroupStartIndex(item, group);
 	}
 
+// 好友有问题 开始位置为0是为什么要++
 	public int calculateGroupStartIndex(GroupItemData item, Group group) {
 		int itemStartPos = getGroupItemPos(item);
 		if (itemStartPos == 0)
@@ -714,6 +724,12 @@ public class GroupListView extends ListView {
 		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
 		return startPos + 1;
 	}
+	
+//	public int calculateGroupStartIndex(GroupItemData item, Group group) {
+//		int itemStartPos = getGroupItemPos(item);
+//		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
+//		return startPos;
+//	}
 
 	public int getExpandGroupSize(List<Group> groups) {
 		int groupLength = 0;
@@ -732,7 +748,7 @@ public class GroupListView extends ListView {
 		}
 		return groupLength;
 	}
-	
+
 	/**
 	 * According ItemData , get pos in mFilterList;
 	 * 

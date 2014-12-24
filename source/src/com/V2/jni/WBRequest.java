@@ -37,7 +37,7 @@ public class WBRequest {
 	public void addCallbacks(WBRequestCallback callback) {
 		mCallbacks.add(new WeakReference<WBRequestCallback>(callback));
 	}
-	
+
 	public void removeCallback(WBRequestCallback callback) {
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			if (mCallbacks.get(i).get() == callback) {
@@ -52,34 +52,35 @@ public class WBRequest {
 	public native void unInitialize();
 
 	public native void downLoadPageDoc(String bowardid, int pageid);
-	
+
 	/**
 	 * 取消文档打印
+	 * 
 	 * @param szWBoardID
-	 * 				ID白板ID
+	 *            ID白板ID
 	 */
 	public native void CanclePrint(String szWBoardID);
 
 	/**
 	 * 白板添加一页
+	 * 
 	 * @param szWBoardID
-	 * 				ID白板ID
+	 *            ID白板ID
 	 * @param nActive
-	 * 				是否激活所添中的页
+	 *            是否激活所添中的页
 	 */
 	public native void AddPage(String szWBoardID, boolean nActive);
-	
-	
+
 	/**
 	 * 白板激活一页
 	 * @param nUserId
 	 * @param szWBoardID
-	 * 			白板ID
+	 *            白板ID
 	 * @param nPageID
-	 * 			激页ID
+	 *            激页ID
 	 * @param nIndex
 	 * @param bNotify
-	 * 			激活页是否通知其它成员
+	 *            激活页是否通知其它成员
 	 */
 	public native void ActivePage(long nUserId , String szWBoardID, int nPageId, int nIndex , boolean bNotify);
 
@@ -113,7 +114,8 @@ public class WBRequest {
 				+ szPageData + " " + nPageID);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardPageListCallback(szWBoardID, szPageData, nPageID);
+				wr.get().OnWBoardPageListCallback(szWBoardID, szPageData,
+						nPageID);
 			}
 		}
 	}
@@ -131,11 +133,12 @@ public class WBRequest {
 				+ nPageID + " | index: " + index);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardActivePageCallback(nUserID, szWBoardID, nPageID);
+				wr.get().OnWBoardActivePageCallback(nUserID, szWBoardID,
+						nPageID);
 			}
 		}
 	}
-	
+
 	private void OnWBoardAddPage(String szWBoardID, int nPageID) {
 		Log.e("WBRequest UI", "OnWBoardAddPage " + szWBoardID + " " + nPageID);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
@@ -162,8 +165,8 @@ public class WBRequest {
 				+ szFileName + " | result: " + result);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardDocDisplayCallback(szWBoardID, nPageID, szFileName,
-						result);
+				wr.get().OnWBoardDocDisplayCallback(szWBoardID, nPageID,
+						szFileName, result);
 			}
 		}
 
@@ -171,13 +174,13 @@ public class WBRequest {
 
 	private void OnRecvAddWBoardData(String szWBoardID, int nPageID,
 			String szDataID, String szData) {
-		V2Log.d(
-				"OnRecvAddWBoardData " + szWBoardID + " " + nPageID + " "
-						+ szDataID + " " + szData + " " + szData.length());
+		V2Log.d("OnRecvAddWBoardData " + szWBoardID + " " + nPageID + " "
+				+ szDataID + " " + szData + " " + szData.length());
 
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnRecvAddWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
+				wr.get().OnRecvAddWBoardDataCallback(szWBoardID, nPageID,
+						szDataID, szData);
 			}
 		}
 	}
@@ -190,19 +193,19 @@ public class WBRequest {
 
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnRecvAppendWBoardDataCallback(szWBoardID, nPageID, szDataID, szData);
+				wr.get().OnRecvAppendWBoardDataCallback(szWBoardID, nPageID,
+						szDataID, szData);
 			}
 		}
 
 	}
 
 	// / �յ��Է��������ҵİװ�Ự����Ļص�
-	private void OnWBoardChatAccepted(long nGroupID, int nBuVideoActivityV2sinessType,
-			long nFromUserID, String szWBoardID, int nWhiteIndex,
-			String szFileName, int type) {
-		V2Log.d("OnWBoardChatAccepted " + nGroupID + " "
-				+ nFromUserID + " " + szWBoardID + " "
-				+ szFileName + " " + type);
+	private void OnWBoardChatAccepted(long nGroupID,
+			int nBuVideoActivityV2sinessType, long nFromUserID,
+			String szWBoardID, int nWhiteIndex, String szFileName, int type) {
+		V2Log.d("OnWBoardChatAccepted " + nGroupID + " " + nFromUserID + " "
+				+ szWBoardID + " " + szFileName + " " + type);
 	}
 
 	private void OnWBoardChating(long nGroupID, int nBusinessType,
@@ -218,21 +221,18 @@ public class WBRequest {
 				+ nBusinessType + " " + szWBoardID);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardClosedCallback(nGroupID, nBusinessType, nUserID,
-						szWBoardID);
+				wr.get().OnWBoardClosedCallback(nGroupID, nBusinessType,
+						nUserID, szWBoardID);
 			}
 		}
 	}
-	
-	
-	private void OnWBoardDetroy(int groupType, long nGroupID,
-			String szWBoardID) {
-		Log.e("WBRequest UI", "OnWBoardDetroy " + nGroupID + " "
-				+ groupType + " " + szWBoardID);
+
+	private void OnWBoardDetroy(int groupType, long nGroupID, String szWBoardID) {
+		Log.e("WBRequest UI", "OnWBoardDetroy " + nGroupID + " " + groupType
+				+ " " + szWBoardID);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
-				wr.get().OnWBoardClosedCallback(nGroupID, 0, 0,
-						szWBoardID);
+				wr.get().OnWBoardClosedCallback(nGroupID, 0, 0, szWBoardID);
 			}
 		}
 	}
@@ -251,7 +251,6 @@ public class WBRequest {
 				+ nPageID + " " + szDataID);
 
 	}
-
 
 	//
 	private void OnWBoardDeletePage(String szWBoardID, int nPageID) {

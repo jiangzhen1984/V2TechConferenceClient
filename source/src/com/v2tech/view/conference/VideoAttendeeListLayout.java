@@ -277,13 +277,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * 
 	 * @param wr
 	 * @param name
-	 * @param iv
+	 * @param cameraIV
 	 *            camera imave view
-	 * @param speaker
+	 * @param speakingIV
 	 *            speaker image view
 	 */
 	private void setStyle(Wrapper wr, TextView name, ImageView lectureStateIV,
-			ImageView speaker, ImageView iv) {
+			ImageView speakingIV, ImageView cameraIV) {
 		Attendee at = wr.a;
 		UserDeviceConfig udc = wr.udc;
 
@@ -299,7 +299,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
 			// set camera icon
-			iv.setImageResource(R.drawable.camera);
+			cameraIV.setImageResource(R.drawable.camera);
 		} else if (at.isJoined()) {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
@@ -317,25 +317,25 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		// set image view
 		if (at.isSelf()) {
-			iv.setImageResource(R.drawable.camera);
+			cameraIV.setImageResource(R.drawable.camera);
 		} else if (at.isJoined()) {
 			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
 				if (udc != null) {
-					iv.setImageResource(R.drawable.camera);
+					cameraIV.setImageResource(R.drawable.camera);
 				} else {
-					iv.setImageResource(R.drawable.camera_pressed);
+					cameraIV.setImageResource(R.drawable.camera_pressed);
 				}
 			} else {
-				iv.setImageResource(R.drawable.mixed_video_camera);
+				cameraIV.setImageResource(R.drawable.mixed_video_camera);
 			}
 		} else {
-			iv.setImageResource(R.drawable.camera_pressed);
+			cameraIV.setImageResource(R.drawable.camera_pressed);
 		}
 
 		// If attaendee is mixed video or is not default flag, then hide speaker
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO
 				|| wr.sortFlag != DEFAULT_DEVICE_FLAG) {
-			speaker.setVisibility(View.INVISIBLE);
+			speakingIV.setVisibility(View.INVISIBLE);
 		}
 
 		// if (udc != null && !udc.isEnable()
@@ -345,7 +345,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		if (udc != null && !udc.isEnable()
 				&& at.getType() == Attendee.TYPE_ATTENDEE) {
-			iv.setImageResource(R.drawable.camera_pressed);
+			cameraIV.setImageResource(R.drawable.camera_pressed);
 		}
 
 		if (wr.sortFlag == DEFAULT_DEVICE_FLAG) {
@@ -368,15 +368,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 			// Update speaking display
 			if (!at.isSpeaking()) {
-				speaker.setVisibility(View.INVISIBLE);
+				speakingIV.setVisibility(View.INVISIBLE);
 			} else {
-				speaker.setVisibility(View.VISIBLE);
-				speaker.setImageResource(R.drawable.conf_speaking);
-				((AnimationDrawable) speaker.getDrawable()).start();
+				speakingIV.setVisibility(View.VISIBLE);
+				speakingIV.setImageResource(R.drawable.conf_speaking);
+				((AnimationDrawable) speakingIV.getDrawable()).start();
 			}
 		} else {
 			lectureStateIV.setVisibility(View.INVISIBLE);
-			speaker.setVisibility(View.INVISIBLE);
+			speakingIV.setVisibility(View.INVISIBLE);
 		}
 
 	}
@@ -526,7 +526,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			// Remove attendee devices, leave one device item
 			if (wr.a.getAttId() == att.getAttId()) {
 				if (wr.sortFlag == DEFAULT_DEVICE_FLAG) {
-					wr.udc = null;
+					//wr.udc = null;
 					defaultWrapper = wr;
 					index = i;
 				} else {
@@ -546,9 +546,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			if (udc.getBelongsAttendee() == null) {
 				udc.setBelongsAttendee(att);
 			}
+			
 			if (udc.isDefault()) {
 				defaultWrapper.udc = udc;
-			} else if (!udc.isDefault()) {
+			} else if(defaultWrapper.udc.getDeviceID().equals(udc.getDeviceID())){
+				defaultWrapper.udc = udc;
+			}else if (!udc.isDefault()) {
 				mList.add(++index, new Wrapper(defaultWrapper.a, udc, 1));
 			}
 		}

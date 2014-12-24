@@ -138,6 +138,12 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		if (!mLoaded) {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
+//
+//		if (mContactsContainer != null) {
+//			mContactsContainer.updateDisplay();
+//			Log.i("20141223 1","mContactsContainer 刷新");
+//		}
+
 	}
 
 	@Override
@@ -259,15 +265,17 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
 					.getAction())) {
-				V2Log.d(TAG	, "JNI_BROADCAST_GROUP_USER_ADDED --> The New User Coming !");
+				V2Log.d(TAG,
+						"JNI_BROADCAST_GROUP_USER_ADDED --> The New User Coming !");
 				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
 						"obj");
-				if(guo == null){
-					V2Log.e(TAG, "JNI_BROADCAST_GROUP_USER_ADDED --> Add New User Failed ! Because"
-							+ "Given GroupUserObject is null!");
-					return ;
+				if (guo == null) {
+					V2Log.e(TAG,
+							"JNI_BROADCAST_GROUP_USER_ADDED --> Add New User Failed ! Because"
+									+ "Given GroupUserObject is null!");
+					return;
 				}
-				
+
 				if (flag == TAG_CONTACT
 						&& guo.getmType() == Group.GroupType.CONTACT.intValue()) {
 					mContactsContainer.addUser(
@@ -306,7 +314,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					V2Log.e("ContactsTabFragment BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
 					return;
 				}
-				
+
 				Message.obtain(mHandler, UPDATE_USER_SIGN, uid).sendToTarget();
 			}
 		}

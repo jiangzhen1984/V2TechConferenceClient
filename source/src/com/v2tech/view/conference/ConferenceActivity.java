@@ -144,10 +144,10 @@ public class ConferenceActivity extends Activity {
 	private static final int VIDEO_MIX_NOTIFICATION = 70;
 	private static final int TAG_CLOSE_DEVICE = 0;
 	private static final int TAG_OPEN_DEVICE = 1;
-	
+
 	private static final int FLAG_IS_SYNCING = 1;
 	private static final int FLAG_NO_SYNC = 0;
-	
+
 	private static final int SUB_ACTIVITY_CODE_SHARE_DOC = 100;
 
 	private PermissionState mControlState = PermissionState.NORMAL;
@@ -242,6 +242,7 @@ public class ConferenceActivity extends Activity {
 	private int isVoiceActivation = 0;
 
 	private boolean hasUnreadChiremanControllMsg = false;
+	// private boolean initConferenceDateFaile = false;
 
 	// private boolean isSpeaking;
 
@@ -253,6 +254,7 @@ public class ConferenceActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
+		initConferenceDate();
 		if (blueadapter != null
 				&& BluetoothProfile.STATE_CONNECTED == blueadapter
 						.getProfileConnectionState(BluetoothProfile.HEADSET)) {
@@ -342,11 +344,19 @@ public class ConferenceActivity extends Activity {
 				mMenuMessageButton, mMenuAttendeeButton, mMenuDocButton };
 
 		this.mVideoLayout = (FrameLayout) findViewById(R.id.video_layout);
+		mGroupNameTV.setText(cg.getName());
+
+		if (cg.getOwnerUser().getmUserId() != GlobalHolder.getInstance()
+				.getCurrentUserId()) {
+			mChairmanControl.setVisibility(View.INVISIBLE);
+		} else {
+			// If current user is conference creatoer, than update control
+			// permission to granted
+			mControlState = PermissionState.GRANTED;
+		}
 
 		// Initialize broadcast receiver
 		initBroadcastReceiver();
-		// Initialize conference object and show local camera
-		initConferenceDate();
 
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
@@ -358,7 +368,7 @@ public class ConferenceActivity extends Activity {
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
 		isBluetoothHeadsetConnected = audioManager.isBluetoothA2dpOn();
-		// audioManager.setMode(AudioManager.MODE_IN_CALL);
+		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 		// Broadcast for user joined conference, to inform that quit P2P
 		// conversation
 		broadcastForJoined();
@@ -436,55 +446,34 @@ public class ConferenceActivity extends Activity {
 
 	}
 
-	private void initConferenceDate() {
+	private boolean initConferenceDate() {
 		conf = (Conference) this.getIntent().getExtras().get("conf");
 
 		cg = (ConferenceGroup) GlobalHolder.getInstance().getGroupById(
 				V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId());
+
 		if (cg == null) {
 			V2Log.e(" doesn't receive group information  yet");
-			return;
+			return false;
 		}
 
-		mGroupNameTV.setText(cg.getName());
+		initAttendeeList(cg);
 
-		Group confGroup = GlobalHolder.getInstance()
-				.findGroupById(conf.getId());
-		// load conference attendee list
-		if (confGroup != null) {
-			List<User> l = confGroup.getUsers();
-			for (User u : l) {
-				if (TextUtils.isEmpty(u.getName())
-						&& GlobalHolder.getInstance().getGlobalState()
-								.isGroupLoaded()) {
-					V2Log.e(TAG, " User + " + u.getmUserId()
-							+ " need to get user base infos");
-					ImRequest.getInstance().getUserBaseInfo(u.getmUserId());
-				}
-				Attendee at = new Attendee(u);
-				mAttendeeList.add(at);
-				if (u.isCurrentLoggedInUser()) {
-					currentAttendee = at;
-				}
-			}
+		if (currentAttendee == null) {
+			currentAttendee = new Attendee(GlobalHolder.getInstance()
+					.getCurrentUser());
+			mAttendeeList.add(currentAttendee);
 		}
-		V2Log.i(" Conference size:" + mAttendeeList.size());
 
 		currentAttendee
 				.setChairMan(GlobalHolder.getInstance()
 						.findGroupById(conf.getId()).getOwnerUser()
 						.getmUserId() == currentAttendee.getAttId());
 
-		// 是主席又没有主讲则自己是主讲
-		if (currentAttendee.isChairMan()) {
-			currentAttendee.setLectureState(Attendee.LECTURE_STATE_GRANTED);
-			mControlState = PermissionState.GRANTED;
-		} else {
-			currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
-			mControlState = PermissionState.NORMAL;
-		}
-		// Set default speaking state if current user is owner, then should
-		// apply speaking default;
+		// 默认设置自己不是主讲，主讲会在入会后广播过来
+		currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
+		mControlState = PermissionState.NORMAL;
+
 		currentAttendee.setSpeakingState(currentAttendee.isChairMan());
 
 		mPendingMessageList = new ArrayList<VMessage>();
@@ -492,15 +481,39 @@ public class ConferenceActivity extends Activity {
 		mPendingPermissionUpdateList = new ArrayList<PermissionUpdateIndication>();
 
 		mHostRequestUsers = new HashSet<User>();
+		return true;
+	}
 
-		if (confGroup.getOwnerUser().getmUserId() != GlobalHolder.getInstance()
-				.getCurrentUserId()) {
-			mChairmanControl.setVisibility(View.INVISIBLE);
-		} else {
-			// If current user is conference creatoer, than update control
-			// permission to granted
-			mControlState = PermissionState.GRANTED;
+	private void initAttendeeList(Group confGroup) {
+		List<User> l = confGroup.getUsers();
+		for (User u : l) {
+			if (TextUtils.isEmpty(u.getName())
+					&& GlobalHolder.getInstance().getGlobalState()
+							.isGroupLoaded()) {
+				V2Log.e(TAG, " User + " + u.getmUserId()
+						+ " need to get user base infos");
+				ImRequest.getInstance().getUserBaseInfo(u.getmUserId());
+			}
+			Attendee at = new Attendee(u);
+
+			if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+				if (currentAttendee == null) {
+					currentAttendee = at;
+					mAttendeeList.add(at);
+				}
+			} else {
+				mAttendeeList.add(at);
+			}
 		}
+
+		// if(l.size()==0){
+		// mVideoHandler.postDelayed(new Runnable() {
+		// @Override
+		// public void run() {
+		// initAttendeeList(cg);
+		// }
+		// }, 100);
+		// }
 	}
 
 	/**
@@ -548,9 +561,10 @@ public class ConferenceActivity extends Activity {
 					// because update state will update isSpeaking value
 					updateSpeakerState(!currentAttendee.isSpeaking());
 				}
-				
-				((VideoDocLayout)initDocLayout()).requestShowSharedButton(true);
-				
+
+				((VideoDocLayout) initDocLayout())
+						.requestShowSharedButton(true);
+
 			} else if (state == PermissionState.NORMAL) {
 				if (reject) {
 					// 20141221 1 拒绝主讲申请
@@ -577,7 +591,8 @@ public class ConferenceActivity extends Activity {
 				Toast.makeText(mContext,
 						R.string.confs_toast_release_control_permission,
 						Toast.LENGTH_SHORT).show();
-				((VideoDocLayout)initDocLayout()).requestShowSharedButton(false);
+				((VideoDocLayout) initDocLayout())
+						.requestShowSharedButton(false);
 			}
 		} else if (mControlState == PermissionState.NORMAL) {
 			if (state == PermissionState.APPLYING) {// 申请中
@@ -885,20 +900,14 @@ public class ConferenceActivity extends Activity {
 		}
 	}
 
-	
-	
-	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == SUB_ACTIVITY_CODE_SHARE_DOC && resultCode != Activity.RESULT_CANCELED) {
+		if (requestCode == SUB_ACTIVITY_CODE_SHARE_DOC
+				&& resultCode != Activity.RESULT_CANCELED) {
 			String filePath = data.getStringExtra("checkedImage");
 			cb.shareDoc(conf, filePath, null);
 		}
 	}
-	
-
-
-
 
 	private OnClickListener mMenuButtonListener = new OnClickListener() {
 
@@ -983,7 +992,8 @@ public class ConferenceActivity extends Activity {
 				} else {
 					requestSubViewFixed();
 				}
-				//If current user is chairman or has get host rights then show shared doc button
+				// If current user is chairman or has get host rights then show
+				// shared doc button
 				if (conf.getChairman() == GlobalHolder.getInstance()
 						.getCurrentUserId()
 						|| mControlState == PermissionState.GRANTED) {
@@ -1468,7 +1478,19 @@ public class ConferenceActivity extends Activity {
 					List<User> l = confGroup.getUsers();
 					for (User u : l) {
 						Attendee at = new Attendee(u);
-						boolean bt = mAttendeeList.add(at);
+
+						boolean contain = false;
+						for (Attendee tempAt : mAttendeeList) {
+							if (at.getAttId() == tempAt.getAttId()) {
+								contain = true;
+							}
+						}
+
+						boolean bt = false;
+						if (!contain) {
+							bt = mAttendeeList.add(at);
+						}
+
 						if (bt) {
 							list.add(at);
 						}
@@ -1627,14 +1649,22 @@ public class ConferenceActivity extends Activity {
 							if (list == null) {
 								return;
 							}
+
+							boolean ret = false;
 							for (UserDeviceConfig udc : list) {
 								if (udc.getDeviceID().equals(dstDeviceID)) {
 									userDeviceConfig = udc;
+									ret = true;
+									break;
 								}
 							}
 
+							if (ret) {
+								break;
+							}
 						}
 					}
+
 					if (userDeviceConfig == null) {
 						return;
 					}
@@ -1728,13 +1758,46 @@ public class ConferenceActivity extends Activity {
 								if (list == null) {
 									return;
 								}
+
+								boolean ret = false;
 								for (UserDeviceConfig udc : list) {
 									if (udc.getDeviceID().equals(dstDeviceID)) {
 										userDeviceConfig = udc;
+										ret = true;
+										break;
 									}
 								}
 
+								if (ret) {
+									break;
+								}
+
 							}
+
+							// 混合视频的情况
+							if (attendee.getType() == Attendee.TYPE_MIXED_VIDEO) {
+
+								List<UserDeviceConfig> list = ((AttendeeMixedDevice) attendee)
+										.getmDevices();
+
+								if (list == null) {
+									return;
+								}
+
+								boolean ret = false;
+								for (UserDeviceConfig udc : list) {
+									if (udc.getDeviceID().equals(dstDeviceID)) {
+										userDeviceConfig = udc;
+										ret = true;
+										break;
+									}
+								}
+
+								if (ret) {
+									break;
+								}
+							}
+
 						}
 						if (userDeviceConfig == null) {
 							return;
@@ -1798,7 +1861,6 @@ public class ConferenceActivity extends Activity {
 			// udc = new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE,
 			// conf.getId(), atd.getAttId(),
 			// String.valueOf(atd.getAttId())+":Camera", null);
-			// //为什么默认设备要传""呢？
 			udc = new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE,
 					conf.getId(), atd.getAttId(), "", null);
 			// Make sure current user device is enable
@@ -1969,7 +2031,6 @@ public class ConferenceActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
-		super.onDestroy();
 		mAttendeeList.clear();
 		if (mCurrentShowedSV != null) {
 			mCurrentShowedSV.clear();
@@ -2026,10 +2087,11 @@ public class ConferenceActivity extends Activity {
 		// MessageLoader.deleteGroupMessage(mContext,
 		// V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
 		mVideoHandler = null;
-
-		audioManager.setSpeakerphoneOn(false);
-		audioManager.setMode(AudioManager.MODE_NORMAL);
-
+		if (audioManager != null) {
+			audioManager.setSpeakerphoneOn(false);
+			audioManager.setMode(AudioManager.MODE_NORMAL);
+		}
+		super.onDestroy();
 	}
 
 	@Override
@@ -2096,7 +2158,8 @@ public class ConferenceActivity extends Activity {
 				@Override
 				public void onClick(View v) {
 					d.dismiss();
-					VerificationProvider.deleteCrowdVerificationMessage(conf.getId());
+					VerificationProvider.deleteCrowdVerificationMessage(conf
+							.getId());
 					quit();
 					finish();
 				}
@@ -2310,6 +2373,17 @@ public class ConferenceActivity extends Activity {
 							R.string.error_no_permission_to_invitation,
 							Toast.LENGTH_SHORT).show();
 				}
+				if (mMenuInviteAttendeeButton != null) {
+					mMenuInviteAttendeeButton.setEnabled(false);
+					((ImageView) mMenuInviteAttendeeButton)
+							.setImageResource(R.drawable.video_menu_invite_attendee_button_disenable);
+				}
+			} else {
+				if (mMenuInviteAttendeeButton != null) {
+					mMenuInviteAttendeeButton.setEnabled(true);
+					((ImageView) mMenuInviteAttendeeButton)
+							.setImageResource(R.drawable.video_menu_invite_attendee_button);
+				}
 			}
 		}
 	}
@@ -2495,6 +2569,10 @@ public class ConferenceActivity extends Activity {
 				} else if (permissionState == PermissionState.NORMAL) {
 					attendee.setLectureState(Attendee.LECTURE_STATE_NOT);
 				}
+			}
+
+			if (mAttendeeContainer != null) {
+				mAttendeeContainer.updateDisplay();
 			}
 			return true;
 		} else {
@@ -2973,21 +3051,18 @@ public class ConferenceActivity extends Activity {
 
 		@Override
 		public void updateDoc(V2Doc doc, Page p) {
-			//If current user is host
+			// If current user is host
 			if (mControlState == PermissionState.GRANTED) {
 				ds.switchDoc(doc, isSyn == FLAG_IS_SYNCING, null);
 			}
 		}
-		
-		
 
 		@Override
 		public void requestShareImageDoc(View v) {
-			Intent intent = new Intent(mContext,
-					ConversationSelectImage.class);
-			//Make sure current doesn't hide to back;
+			Intent intent = new Intent(mContext, ConversationSelectImage.class);
+			// Make sure current doesn't hide to back;
 			isMoveTaskBack = true;
-			startActivityForResult(intent, SUB_ACTIVITY_CODE_SHARE_DOC);			
+			startActivityForResult(intent, SUB_ACTIVITY_CODE_SHARE_DOC);
 		}
 
 		@Override
@@ -3250,10 +3325,6 @@ public class ConferenceActivity extends Activity {
 					mPendingPermissionUpdateList.add(ind);
 				}
 
-				if (mAttendeeContainer != null) {
-					mAttendeeContainer.updateDisplay();
-				}
-
 				if (ind.getUid() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
 					if (ConferencePermission.CONTROL.intValue() == ind
@@ -3287,7 +3358,7 @@ public class ConferenceActivity extends Activity {
 							mConfMsgRedDot.setVisibility(View.VISIBLE);
 						}
 					}
-					
+
 					hasUnreadChiremanControllMsg = true;
 
 					PermissionUpdateIndication pui = new PermissionUpdateIndication(

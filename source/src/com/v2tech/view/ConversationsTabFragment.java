@@ -2398,19 +2398,27 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (mCurrentTabFlag == Conversation.TYPE_GROUP) {
 				showPopupWindow(v);
 			} else {
-				if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE)
+				if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
 					item = new String[] { mContext.getResources().getString(
 							R.string.conversations_delete_conf) };
-				else
+				} else {
 					// Conversation.TYPE_CONTACT
 					item = new String[] { mContext.getResources().getString(
 							R.string.conversations_delete_conversaion) };
+				}
 
 				AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 				builder.setTitle(mItemList.get(pos).cov.getName()).setItems(
 						item, new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
+								
+								if (!((MainApplication) getActivity()
+										.getApplication()).netWordIsConnected) {
+									dialog.dismiss();
+									return;
+								}
+
 								if (which == 0) {
 									switch (mCurrentTabFlag) {
 									case Conversation.TYPE_CONFERNECE:

@@ -29,8 +29,8 @@
         <item name="@android:windowEnterAnimation">@animator/nonam_scale_0_100</item>
         <item name="@android:windowExitAnimation">@animator/nonam_scale_100_0</item>
     </style>
-    
-     <style name="TitleBarPopupWindowAnim">
+
+    <style name="TitleBarPopupWindowAnim">
         <item name="@android:windowEnterAnimation">@animator/translation_down_to_up_related_self</item>
         <item name="@android:windowExitAnimation">@animator/translation_up_to_down_related_self</item>
     </style>

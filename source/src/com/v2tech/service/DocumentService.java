@@ -52,6 +52,7 @@ public class DocumentService extends AbstractHandler {
 
 	/**
 	 * Register listener for new document notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -61,7 +62,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 *  unRegister listener for new document notification
+	 * unRegister listener for new document notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -71,7 +73,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 *  Register listener for  document page updated notification
+	 * Register listener for document page updated notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -81,7 +84,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 *  unRegister listener for  document page updated notification
+	 * unRegister listener for document page updated notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -91,7 +95,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 *  Register listener for  document page activate notification
+	 * Register listener for document page activate notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -102,7 +107,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 * unRegister listener for  document page activate notification
+	 * unRegister listener for document page activate notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -113,7 +119,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 * Register listener for  document activation notification
+	 * Register listener for document activation notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -123,7 +130,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 * unRegister listener for  document page activation notification
+	 * unRegister listener for document page activation notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -133,7 +141,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 * Register listener for  document add new page  notification
+	 * Register listener for document add new page notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -143,7 +152,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 * unRegister listener for  document add new page  notification
+	 * unRegister listener for document add new page notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -154,7 +164,8 @@ public class DocumentService extends AbstractHandler {
 	}
 
 	/**
-	 *  Register listener for  document closed  notification
+	 * Register listener for document closed notification
+	 * 
 	 * @param h
 	 * @param what
 	 * @param obj
@@ -176,12 +187,12 @@ public class DocumentService extends AbstractHandler {
 			Object obj) {
 		unRegisterListener(KEY_PAGE_CANVAS_NOTIFY_LISTENER, h, what, obj);
 	}
-	
-	
+
 	public void switchDoc(V2Doc doc, boolean syncFlag, MessageListener listener) {
 		if (doc == null) {
 			if (listener != null) {
-				super.sendResult(listener, new JNIResponse(JNIResponse.Result.INCORRECT_PAR));
+				super.sendResult(listener, new JNIResponse(
+						JNIResponse.Result.INCORRECT_PAR));
 			}
 			return;
 		}
@@ -189,8 +200,6 @@ public class DocumentService extends AbstractHandler {
 		V2Log.e(doc.getId()+"   ====>"+ doc.getActivatePage().getNo());
 		WBRequest.getInstance().ActivePage(doc.getSharedUser().getmUserId() , doc.getId(), doc.getActivatePage().getNo(), 0,  syncFlag);
 	}
-	
-	
 
 	@Override
 	public void clearCalledBack() {
@@ -198,12 +207,8 @@ public class DocumentService extends AbstractHandler {
 		GroupRequest.getInstance().removeCallback(grCB);
 	}
 
-
-	
 	class GroupRequestCallbackCB extends GroupRequestCallbackAdapter {
-		
-		
-		
+
 		@Override
 		public void OnGroupWBoardNotification(V2Document doc, DocOpt opt) {
 			if (doc == null) {
@@ -211,14 +216,14 @@ public class DocumentService extends AbstractHandler {
 			}
 			Group g = GlobalHolder.getInstance().getGroupById(
 					GroupType.CONFERENCE.intValue(), doc.mGroup.id);
-			switch(opt) {
+			switch (opt) {
 			case CREATE: {
 				V2Doc v2doc = null;
-				//Blank board
+				// Blank board
 				if (doc.mType == V2Document.Type.BLANK_BOARD) {
-					v2doc =  new V2BlankBoardDoc(
-							doc.mId, "Blank board" + doc.mIndex, g, 0,null);
-					
+					v2doc = new V2BlankBoardDoc(doc.mId, "Blank board"
+							+ doc.mIndex, g, 0, null);
+
 				} else {
 					String name = doc.mFileName;
 					int pos = doc.mFileName.lastIndexOf("/");
@@ -228,29 +233,25 @@ public class DocumentService extends AbstractHandler {
 							name = doc.mFileName.substring(pos + 1);
 						}
 					}
-					v2doc =  new V2ImageDoc(
-							doc.mId, name, g, 0, null);
+					v2doc = new V2ImageDoc(doc.mId, name, g, 0, null);
 				}
-				notifyListenerWithPending(KEY_NEW_DOC_LISTENER, 0, 0,v2doc);
+				notifyListenerWithPending(KEY_NEW_DOC_LISTENER, 0, 0, v2doc);
 			}
 				break;
 			case DESTROY: {
-				notifyListenerWithPending(KEY_DOC_CLOSE_NOTIFY_LISTENER, 0, 0, new V2Doc(
-						doc.mId, "", g, 0, null));
+				notifyListenerWithPending(KEY_DOC_CLOSE_NOTIFY_LISTENER, 0, 0,
+						new V2Doc(doc.mId, "", g, 0, null));
 			}
 				break;
 			case RENAME:
 				break;
 			default:
 				break;
-			
+
 			}
 		}
-		
-		
-	}
-	
 
+	}
 
 	class WBRequestCallbackCB implements WBRequestCallback {
 
@@ -270,23 +271,24 @@ public class DocumentService extends AbstractHandler {
 			}
 
 			V2Doc doc = null;
-			//Blank board
+			// Blank board
 			if (type == 1) {
-				doc =  new V2BlankBoardDoc(
-						szWBoardID, "Blank board", g, nBusinessType, u);
-				
+				doc = new V2BlankBoardDoc(szWBoardID, "Blank board", g,
+						nBusinessType, u);
+
 			} else {
-				doc =  new V2ImageDoc(
-						szWBoardID, szFileName, g, nBusinessType, u);
+				doc = new V2ImageDoc(szWBoardID, szFileName, g, nBusinessType,
+						u);
 			}
-			notifyListenerWithPending(KEY_NEW_DOC_LISTENER, 0, 0,doc);
+			notifyListenerWithPending(KEY_NEW_DOC_LISTENER, 0, 0, doc);
 
 		}
 
 		@Override
 		public void OnWBoardPageListCallback(String szWBoardID,
 				String szPageData, int nPageID) {
-			notifyListenerWithPending(KEY_DOC_PAGE_NOTIFY_LISTENER, 0, 0,  XmlParser.parserDocPage(szWBoardID, szPageData));
+			notifyListenerWithPending(KEY_DOC_PAGE_NOTIFY_LISTENER, 0, 0,
+					XmlParser.parserDocPage(szWBoardID, szPageData));
 		}
 
 		@Override
@@ -311,8 +313,8 @@ public class DocumentService extends AbstractHandler {
 					GroupType.CONFERENCE.intValue(), nGroupID);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 
-			notifyListenerWithPending(KEY_DOC_CLOSE_NOTIFY_LISTENER, 0, 0, new V2Doc(
-					szWBoardID, "", g, nBusinessType, u));
+			notifyListenerWithPending(KEY_DOC_CLOSE_NOTIFY_LISTENER, 0, 0,
+					new V2Doc(szWBoardID, "", g, nBusinessType, u));
 		}
 
 		@Override
@@ -331,7 +333,8 @@ public class DocumentService extends AbstractHandler {
 			}
 			meta.setDocId(szWBoardID);
 			meta.setPageNo(nPageID);
-			notifyListenerWithPending(KEY_PAGE_CANVAS_NOTIFY_LISTENER, 0, 0, meta);
+			notifyListenerWithPending(KEY_PAGE_CANVAS_NOTIFY_LISTENER, 0, 0,
+					meta);
 		}
 
 		@Override
@@ -344,7 +347,8 @@ public class DocumentService extends AbstractHandler {
 			}
 			meta.setDocId(szWBoardID);
 			meta.setPageNo(nPageID);
-			notifyListenerWithPending(KEY_PAGE_CANVAS_NOTIFY_LISTENER, 0, 0, meta);
+			notifyListenerWithPending(KEY_PAGE_CANVAS_NOTIFY_LISTENER, 0, 0,
+					meta);
 		}
 
 	}

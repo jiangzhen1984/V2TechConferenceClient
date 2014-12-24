@@ -209,7 +209,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		}
 		
 		if (!uad.isIncoming() && uad.isAudioType()) {
-			audioManager.setMode(AudioManager.MODE_IN_CALL);
+			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 			headsetAndBluetoothHeadsetHandle(true);
 		}
 		
@@ -399,6 +399,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		
 		if(audioManager!=null){
 			audioManager.setSpeakerphoneOn(false);
+			audioManager.setMode(AudioManager.MODE_NORMAL);
 		}
 		
 	}

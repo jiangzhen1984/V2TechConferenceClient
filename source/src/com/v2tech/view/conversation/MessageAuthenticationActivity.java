@@ -287,9 +287,10 @@ public class MessageAuthenticationActivity extends Activity {
 									.getColor(R.color.button_text_color));
 							isFriendAuthentication = true;
 							changeMessageAuthenticationListView();
-							VerificationProvider.updateCrowdQualicationReadState(
-									VerificationMessageType.CONTACT_TYPE,
-									ReadState.READ, null, null);
+							VerificationProvider
+									.updateCrowdQualicationReadState(
+											VerificationMessageType.CONTACT_TYPE,
+											ReadState.READ, null, null);
 							updateTabPrompt(PROMPT_TYPE_FRIEND, false);
 						}
 
@@ -309,9 +310,10 @@ public class MessageAuthenticationActivity extends Activity {
 							isFriendAuthentication = false;
 							changeMessageAuthenticationListView();
 							updateTabPrompt(PROMPT_TYPE_GROUP, false);
-							VerificationProvider.updateCrowdQualicationReadState(
-									VerificationMessageType.CROWD_TYPE,
-									ReadState.READ, null, null);
+							VerificationProvider
+									.updateCrowdQualicationReadState(
+											VerificationMessageType.CROWD_TYPE,
+											ReadState.READ, null, null);
 						}
 					}
 				});
@@ -323,10 +325,8 @@ public class MessageAuthenticationActivity extends Activity {
 							int position, long id) {
 						if (isFriendAuthentication) {
 							FriendMAData data = friendMADataList.get(position);
-							//点击后跳转
-							
-							
-							
+							// 点击后跳转
+
 							Intent intent = new Intent();
 							intent.putExtra("remoteUserID", data.remoteUserID);
 							intent.putExtra("authenticationMessage",
@@ -406,68 +406,69 @@ public class MessageAuthenticationActivity extends Activity {
 
 				});
 
-		lvMessageAuthentication.setOnScrollListener(new OnScrollListener() {
-			private boolean isNeedLoad = false;
-			private boolean isLoading = false;
-
-			@Override
-			public void onScrollStateChanged(final AbsListView view,
-					int scrollState) {
-				if (!rbFriendAuthentication.isChecked()) {
-					return;
-				}
-				if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-					if (isNeedLoad && !isLoading) {
-						ListView listView = ((ListView) view);
-						listView.addFooterView(listViewFootView);
-						listView.setAdapter(firendAdapter);
-						isLoading = true;
-						new AsyncTask<Void, Void, List<FriendMAData>>() {
-							@Override
-							protected List<FriendMAData> doInBackground(
-									Void... arg0) {
-								List<FriendMAData> tempMessageAuthenticationDataList = VerificationProvider
-										.loadFriendsVerifyMessages(LOAD_SIZE
-												+ offset);
-								offset = tempMessageAuthenticationDataList
-										.size();
-								return tempMessageAuthenticationDataList;
-							}
-
-							@Override
-							protected void onPostExecute(
-									List<FriendMAData> result) {
-								lvMessageAuthentication
-										.removeFooterView(listViewFootView);
-								friendMADataList.clear();
-								if (result != null) {
-									friendMADataList.addAll(result);
-									firendAdapter.notifyDataSetChanged();
-								}
-								isLoading = false;
-
-							}
-
-						}.execute();
-					}
-
-				}
-			}
-
-			@Override
-			public void onScroll(AbsListView view, int firstVisibleItem,
-					int visibleItemCount, int totalItemCount) {
-				if (!rbFriendAuthentication.isChecked()) {
-					return;
-				}
-				if (firstVisibleItem + visibleItemCount == totalItemCount
-						&& totalItemCount > 0) {
-					isNeedLoad = true;
-				} else {
-					isNeedLoad = false;
-				}
-			}
-		});
+		// lvMessageAuthentication.setOnScrollListener(new OnScrollListener() {
+		// private boolean isNeedLoad = false;
+		// private boolean isLoading = false;
+		//
+		// @Override
+		// public void onScrollStateChanged(final AbsListView view,
+		// int scrollState) {
+		// if (!rbFriendAuthentication.isChecked()) {
+		// return;
+		// }
+		// if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
+		// if (isNeedLoad && !isLoading) {
+		// ListView listView = ((ListView) view);
+		// listView.addFooterView(listViewFootView);
+		// listView.setAdapter(firendAdapter);
+		// isLoading = true;
+		// new AsyncTask<Void, Void, List<FriendMAData>>() {
+		// @Override
+		// protected List<FriendMAData> doInBackground(
+		// Void... arg0) {
+		// List<FriendMAData> tempMessageAuthenticationDataList =
+		// VerificationProvider
+		// .loadFriendsVerifyMessages(LOAD_SIZE
+		// + offset);
+		// offset = tempMessageAuthenticationDataList
+		// .size();
+		// return tempMessageAuthenticationDataList;
+		// }
+		//
+		// @Override
+		// protected void onPostExecute(
+		// List<FriendMAData> result) {
+		// lvMessageAuthentication
+		// .removeFooterView(listViewFootView);
+		// friendMADataList.clear();
+		// if (result != null) {
+		// friendMADataList.addAll(result);
+		// firendAdapter.notifyDataSetChanged();
+		// }
+		// isLoading = false;
+		//
+		// }
+		//
+		// }.execute();
+		// }
+		//
+		// }
+		// }
+		//
+		// @Override
+		// public void onScroll(AbsListView view, int firstVisibleItem,
+		// int visibleItemCount, int totalItemCount) {
+		// if (!rbFriendAuthentication.isChecked()) {
+		// return;
+		// }
+		// if (firstVisibleItem + visibleItemCount == totalItemCount
+		// && totalItemCount > 0) {
+		// isNeedLoad = true;
+		// } else {
+		// isNeedLoad = false;
+		// }
+		// }
+		// });
 
 	}
 
@@ -538,8 +539,8 @@ public class MessageAuthenticationActivity extends Activity {
 			@Override
 			protected Void doInBackground(Void... params) {
 				List<VMessageQualification> list = VerificationProvider
-						.queryCrowdQualMessageList(GlobalHolder
-								.getInstance().getCurrentUser());
+						.queryCrowdQualMessageList(GlobalHolder.getInstance()
+								.getCurrentUser());
 				if (list == null) {
 					return null;
 				}
@@ -630,7 +631,8 @@ public class MessageAuthenticationActivity extends Activity {
 						if (message.getId() == id) {
 							if (state == QualificationState.INVALID) {
 								mMessageList.remove(wrapper);
-								VerificationProvider.deleteCrowdQualMessage(message.getId());
+								VerificationProvider
+										.deleteCrowdQualMessage(message.getId());
 							} else
 								message.setQualState(state);
 							groupAdapter.notifyDataSetChanged();
@@ -652,7 +654,7 @@ public class MessageAuthenticationActivity extends Activity {
 			if (data != null) {
 				friendMADataList.clear();
 				friendMADataList.addAll(VerificationProvider
-						.loadFriendsVerifyMessages(LOAD_SIZE + offset));
+						.loadFriendsVerifyMessages());
 				firendAdapter.notifyDataSetChanged();
 			}
 			break;
@@ -706,7 +708,7 @@ public class MessageAuthenticationActivity extends Activity {
 			@Override
 			protected List<FriendMAData> doInBackground(Void... arg0) {
 				List<FriendMAData> tempMessageAuthenticationDataList = VerificationProvider
-						.loadFriendsVerifyMessages(LOAD_SIZE);
+						.loadFriendsVerifyMessages();
 				return tempMessageAuthenticationDataList;
 			}
 
@@ -859,7 +861,8 @@ public class MessageAuthenticationActivity extends Activity {
 				viewTag.tvName = (TextView) arg1.findViewById(R.id.name);
 				viewTag.tvAuthenticationMessage = (TextView) arg1
 						.findViewById(R.id.authentication_message);
-				viewTag.bAccess = (TextView) arg1.findViewById(R.id.authentication_access);
+				viewTag.bAccess = (TextView) arg1
+						.findViewById(R.id.authentication_access);
 				viewTag.tvAccessOrNo = (TextView) arg1
 						.findViewById(R.id.access_or_no);
 				viewTag.ibDelete = (ImageView) arg1
@@ -1391,7 +1394,8 @@ public class MessageAuthenticationActivity extends Activity {
 							msg.setQualState(QualificationState.ACCEPTED);
 							msg.setReadState(ReadState.READ);
 							updateViewItem(tag.wrapper, tag.item);
-							VerificationProvider.updateCrowdQualicationMessage(msg);
+							VerificationProvider
+									.updateCrowdQualicationMessage(msg);
 						} else {
 							crowdService.acceptApplication(
 									vqac.getCrowdGroup(), vqac.getApplicant(),
@@ -1417,8 +1421,8 @@ public class MessageAuthenticationActivity extends Activity {
 		}
 
 		VMessageQualification currentMessage = null;
-		VMessageQualification vq = VerificationProvider.queryCrowdQualMessageByCrowdId(
-				userID, groupID);
+		VMessageQualification vq = VerificationProvider
+				.queryCrowdQualMessageByCrowdId(userID, groupID);
 		for (ListItemWrapper wrapper : mMessageList) {
 			VMessageQualification message = (VMessageQualification) wrapper.obj;
 			if (vq.getId() == message.getId()) {
