@@ -4,13 +4,11 @@
     android:layout_height="match_parent"
     android:background="#ffffff"
     android:orientation="vertical" >
-
     <RelativeLayout
         android:id="@+id/RelativeLayout1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#ffffff" >
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -21,7 +19,6 @@
             android:text="@string/activiy_contact_group_title"
             android:textColor="@color/title_color"
             android:textSize="@dimen/common_item_text_size" />
-
         <ImageView
             android:id="@+id/contact_detail_button"
             android:layout_width="wrap_content"
@@ -32,41 +29,40 @@
             android:paddingTop="10dp"
             android:src="@drawable/contact_detail_button_selector"
             android:visibility="invisible" />
-        
-         <TextView
-                android:id="@+id/contact_update_return_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="15dp"
-                 android:paddingBottom="10dp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="10dp"
-                android:text="@string/crowd_files_return_button"
-                android:textColor="@color/conf_create_button_color"
-                android:textSize="@dimen/common_item_text_size"  />
-         
+        <TextView
+            android:id="@+id/contact_update_return_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="15dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="10dp"
+            android:text="@string/crowd_files_return_button"
+            android:textColor="@color/conf_create_button_color"
+            android:textSize="@dimen/common_item_text_size" />
     </RelativeLayout>
-
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="1dp"
         android:background="#c0c0c0"
         android:orientation="vertical" >
     </LinearLayout>
-
     <ScrollView
         android:id="@+id/scrollView1"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
-
-        <RadioGroup
-            android:id="@+id/contact_update_group_list"
+        <LinearLayout
+            android:id="@+id/contact_update_group_list_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" >
-        </RadioGroup>
+            <RadioGroup
+                android:id="@+id/contact_update_group_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" >
+            </RadioGroup>
+        </LinearLayout>
     </ScrollView>
-
 </LinearLayout>

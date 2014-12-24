@@ -434,6 +434,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/crowd_detail_radio_group_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/detail_detail_2_item_margin_bottom"

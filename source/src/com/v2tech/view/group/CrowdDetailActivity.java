@@ -9,8 +9,10 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -29,6 +31,7 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
+import com.v2tech.vo.NetworkStateCode;
 
 public class CrowdDetailActivity extends Activity {
 
@@ -61,6 +64,7 @@ public class CrowdDetailActivity extends Activity {
 	private View mReturnButton;
 	private TextView mButtonText;
 	private RadioGroup mRulesRD;
+	private View mRulesLayout;
 	private View mNewFileNotificator;
 
 	private CrowdGroup crowd;
@@ -68,6 +72,8 @@ public class CrowdDetailActivity extends Activity {
 	private State mState = State.NONE;
 	private LocalReceiver localReceiver;
 	private Context mContext;
+	
+	private int defaultRule;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +89,7 @@ public class CrowdDetailActivity extends Activity {
 		mAdminBox = findViewById(R.id.crowd_detail_admistrator_box);
 		mButtonText = (TextView) findViewById(R.id.crowd_detail_button_text);
 		mRulesRD = (RadioGroup) findViewById(R.id.crowd_detail_radio_group);
+		mRulesLayout = findViewById(R.id.crowd_detail_radio_group_layout);
 		mQuitButton = findViewById(R.id.crowd_detail_button);
 		mQuitButton.setOnClickListener(mQuitButtonListener);
 		mReturnButton = findViewById(R.id.crowd_detail_return_button);
@@ -123,14 +130,22 @@ public class CrowdDetailActivity extends Activity {
 		
 		initRules();
 		mRulesRD.setOnCheckedChangeListener(mRulesChangedListener);
+		mRulesLayout.setOnTouchListener(new OnTouchListener() {
+			
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext,
+							R.string.error_discussion_no_network,
+							Toast.LENGTH_SHORT).show();
+				}
+				return false;
+			}
+		});
 		initReceiver();
 		updateGroupFileNotificator();
 	}
 	
-	
-	
-	
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == TYPE_BRIEF) {
@@ -173,6 +188,7 @@ public class CrowdDetailActivity extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		this.registerReceiver(localReceiver, filter);
@@ -193,8 +209,10 @@ public class CrowdDetailActivity extends Activity {
 						&& crowd.getAuthType() == CrowdGroup.AuthType.NEVER) {
 					rb.setChecked(true);
 				}
+				defaultRule = mRulesRD.getChildAt(i).getId();
 			}
 		}
+		
 	}
 
 	private Dialog mDialog;
@@ -274,28 +292,19 @@ public class CrowdDetailActivity extends Activity {
 		public void onClick(View view) {
 			onBackPressed();
 		}
-
 	};
 	
-
 	private OnCheckedChangeListener mRulesChangedListener = new OnCheckedChangeListener() {
 
 		@Override
 		public void onCheckedChanged(RadioGroup rg, int id) {
-			if (!GlobalHolder.getInstance().isServerConnected()) {
-				Toast.makeText(mContext,
-						R.string.error_local_connect_to_server,
-						Toast.LENGTH_SHORT).show();
-				return;
-			}
-			
+			RadioButton rb = (RadioButton) mRulesRD.findViewById(id);
 			synchronized (mState) {
 				if (mState == State.PENDING) {
 					return;
 				}
 				mState = State.PENDING;
 			}
-			RadioButton rb = (RadioButton) mRulesRD.findViewById(id);
 			CrowdGroup.AuthType at = null;
 			if (RULE_ALLOW_ALL.equals(rb.getTag())) {
 				at = CrowdGroup.AuthType.ALLOW_ALL;
@@ -434,9 +443,24 @@ public class CrowdDetailActivity extends Activity {
 					updateGroupFileNotificator();
 				}
 			}
-			
+			else if (intent.getAction().equals(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION)) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (code == NetworkStateCode.CONNECTED_ERROR) {
+					for (int i = 0; i < mRulesRD.getChildCount(); i++) {
+						if (mRulesRD.getChildAt(i) instanceof RadioButton) {
+							mRulesRD.getChildAt(i).setClickable(false);
+						} 
+					}
+				} else {
+					for (int i = 0; i < mRulesRD.getChildCount(); i++) {
+						if (mRulesRD.getChildAt(i) instanceof RadioButton) {
+							mRulesRD.getChildAt(i).setClickable(true);
+						} 
+					}
+				}
+			}
 		}
 		
 	}
-
 }

@@ -190,13 +190,19 @@ public class CrowdMembersActivity extends Activity {
 				adapter.notifyDataSetChanged();
 
 			} else {
-				// start CrowdCreateActivity 
-				Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
-				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				i.putExtra("cid", crowd.getmGId());
-				i.putExtra("mode", true);
-				startActivity(i);
-				onBackPressed();
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext,
+							R.string.error_discussion_no_network,
+							Toast.LENGTH_SHORT).show();
+				} else {
+					// start CrowdCreateActivity 
+					Intent i = new Intent(PublicIntent.START_GROUP_CREATE_ACTIVITY);
+					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					i.putExtra("cid", crowd.getmGId());
+					i.putExtra("mode", true);
+					startActivity(i);
+					onBackPressed();
+				}
 			}
 		}
 

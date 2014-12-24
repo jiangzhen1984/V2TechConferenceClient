@@ -210,12 +210,6 @@ public class ChatService extends DeviceService {
 						msg.getToUser() == null ? 0 : msg.getToUser()
 								.getmUserId(), msg.getUUID(), msg.toXml(),
 						msg.getTextContent().length());
-                V2Log.d(TAG , "sendVMessage --> eGroupType :"+ msg.getMsgCode() 
-                        + " | nGroupID: " + msg.getGroupId()
-                        + " | nFromUserID: " + msg.getFromUser() == null ? "null" : msg.getFromUser().getmUserId()
-                        + " | nToUserID: " + msg.getToUser() == null ? "null" : msg.getToUser().getmUserId()
-                        + " | sSeqID: " + msg.getUUID()
-                        + " | sXml: " + msg.toXml());
 
 				// send image message
 				List<VMessageImageItem> imageItems = msg.getImageItems();

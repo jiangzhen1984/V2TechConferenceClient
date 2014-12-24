@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -76,7 +78,6 @@ import com.v2tech.util.DateUtil;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.Notificator;
-import com.v2tech.util.SPUtil;
 import com.v2tech.util.SearchUtils;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.bo.GroupUserObject;
@@ -375,10 +376,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER && !isCallBack) {
-			isCallBack = true;
-			CommonCallBack.getInstance().executeUpdateConversationState();
-		}
 	}
 
 	/**
@@ -752,8 +749,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			 * 除了个人Conversation布局，其他组类Conversation布局默认可能不会显示时间，或者内容
 			 * 所以这里需要将布局改变为个人的Conversation布局
 			 */
+			if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 			if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
-				if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 					gp.updateDiscussionLayout();
 					gp.update();
 				} else
@@ -763,6 +760,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			ScrollItem newItem = new ScrollItem(cov, gp);
 			currentItem = newItem;
 			mItemList.add(0, newItem);
+		} else {
+			V2Log.d(TAG,
+					"addConversation -- The Group Conversation already exist, type is : "
+							+ cov.getType() + " and id is : " + cov.getExtId()
+							+ " and name is : " + cov.getName());
 		}
 
 		if (flag) {
@@ -903,6 +905,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 				isLoadedCov = true;
 				adapter.notifyDataSetChanged();
+				
+				if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER && !isCallBack) {
+					isCallBack = true;
+					CommonCallBack.getInstance().executeUpdateConversationState();
+				}
 			}
 		});
 	}
@@ -1372,9 +1379,16 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			verificationMessageItemData
 					.setReadFlag(Conversation.READ_FLAG_UNREAD);
 			sendVoiceNotify();
-		} else
-			verificationMessageItemData
+		} else{
+			if(isShowVerificationNotify){
+				verificationMessageItemData
+					.setReadFlag(Conversation.READ_FLAG_UNREAD);
+			}
+			else{
+				verificationMessageItemData
 					.setReadFlag(Conversation.READ_FLAG_READ);
+			}	
+		}
 		verificationItem.cov = verificationMessageItemData;
 		updateUnreadConversation(verificationItem);
 		sortAndUpdate();
@@ -1677,42 +1691,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		});
 	}
 
-	private void updateDiscussionGroup() {
-
-		service.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				while (!isLoadedCov) {
-					SystemClock.sleep(1000);
-					V2Log.e(TAG,
-							"updateDiscussionGroup --> waiting for message interface fill adapter ......");
-				}
-
-				for (int i = 0; i < mItemList.size(); i++) {
-					Conversation cov = mItemList.get(i).cov;
-					if (cov.getType() == Conversation.TYPE_DISCUSSION) {
-						GroupLayout currentGroupLayout = ((GroupLayout) mItemList
-								.get(i).gp);
-						DiscussionConversation discussion = (DiscussionConversation) cov;
-						Group newGroup = GlobalHolder.getInstance()
-								.getGroupById(
-										V2GlobalEnum.GROUP_TYPE_DISCUSSION,
-										discussion.getExtId());
-						if (newGroup != null) {
-							discussion.setDiscussionGroup(newGroup);
-							VMessage vm = MessageLoader.getNewestGroupMessage(
-									mContext,
-									V2GlobalEnum.GROUP_TYPE_DISCUSSION,
-									discussion.getExtId());
-							updateGroupInfo(currentGroupLayout, discussion, vm);
-						}
-					}
-				}
-			}
-		});
-	}
-
 	private void updateGroupInfo(final GroupLayout currentGroupLayout,
 			final Conversation con, final VMessage vm) {
 		getActivity().runOnUiThread(new Runnable() {
@@ -1725,11 +1703,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					CharSequence newMessage = MessageUtil
 							.getMixedConversationContent(mContext, vm);
 					con.setMsg(newMessage);
-					// currentGroupLayout.update(newMessage,
-					// DateUtil.getStringDate(vm.getDate().getTime()),
-					// crowd.getReadFlag() ==
-					// Conversation.READ_FLAG_READ ? false :
-					// true);
 					currentGroupLayout.update();
 				} else
 					V2Log.w(TAG, "没有获取到最新VMessage对象! 更新内容失败");
@@ -2021,41 +1994,104 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		mItemList.remove(verificationItem);
 		addVerificationConversation(true);
 	}
+	
+	/**
+	 * 判断是否有离线讨论组加进来
+	 */
+	private void checkNewGroup() {
+		List<String> databases = GlobalHolder.getInstance().getDataBaseTableCacheName();
+		for (int i = 0; i < databases.size(); i++) {
+			V2Log.e("NEW_GROUP", "iterator database name is : " + databases.get(i));
+			Pattern pattern = Pattern.compile("Histories_5_"); 
+			Matcher matcher = pattern.matcher(databases.get(i));
+			if(matcher.find()){
+				V2Log.e("NEW_GROUP", "match database name is : " + databases.get(i));
+				boolean alreadExist = false;
+				Conversation cov = null;
+				for (int j = 0; j < mItemList.size(); j++) {
+					cov = mItemList.get(j).cov;
+					if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+						String target = "Histories_5_" + cov.getExtId() + "_0";
+						if(databases.get(i).equals(target)){
+							V2Log.e("NEW_GROUP", "match conversation name is : " + databases.get(i) + " already exist!");
+							alreadExist = true;
+							break;
+						}
+					}
+				}
+				
+				if(!alreadExist){
+					V2Log.e("NEW_GROUP", "match conversation name is : " + databases.get(i) + " not exist!");
+					addConversation(GlobalHolder.getInstance().getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+							cov.getExtId()), true);
+				}
+			}
+		}
+	}
+
+	/**
+	 * 登陆后检测数据库里是否存有等待好友验证的消息，并且已经与他成为好友
+	 */
+	private void checkWaittingFriendExist() {
+		List<Long> remoteUsers = VerificationProvider
+				.getFriendWaittingVerifyMessage();
+		if (remoteUsers != null && remoteUsers.size() > 0) {
+			for (int i = 0; i < remoteUsers.size(); i++) {
+				V2Log.e(TAG,
+						"Waitting add friend id is : " + remoteUsers.get(i));
+				boolean isFinish = false;
+				User user = GlobalHolder.getInstance().getUser(
+						remoteUsers.get(i));
+				if (user.isDirty()) {
+					break;
+				}
+
+				Set<Group> belongsGroup = user.getBelongsGroup();
+				Iterator<Group> iterator = belongsGroup.iterator();
+				while (iterator.hasNext()) {
+					Group next = iterator.next();
+					if (next.getGroupType() == GroupType.CONTACT) {
+						isFinish = true;
+						break;
+					}
+				}
+
+				if (isFinish) {
+					V2Log.e(TAG,
+							"发现有等待的好友验证的消息已变为成为好友，用户id : " + user.getmUserId());
+					AddFriendHistroysHandler.becomeFriendHanler(mContext, user);
+					int update = VerificationProvider
+							.updateFriendQualicationReadState(
+									user.getmUserId(), ReadState.UNREAD);
+					if (update <= 0) {
+						V2Log.e(TAG, "更新等待的好友验证失败！");
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * 当所有信息都已接收完毕，检测消息界面中存在的讨论组和群会话，它们是否存在，如不删除点击就会报错
 	 */
 	private void checkGroupIsExist() {
-
-		service.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				while (!isLoadedCov) {
-					SystemClock.sleep(1000);
-					V2Log.e(TAG,
-							"checkGroupIsExist --> waiting for message interface fill adapter ......");
-				}
-
-				for (int i = 0; i < mItemList.size(); i++) {
-					Conversation cov = mItemList.get(i).cov;
-					if (cov.getType() == V2GlobalEnum.GROUP_TYPE_CROWD) {
-						Group crowd = GlobalHolder.getInstance().getGroupById(
-								V2GlobalEnum.GROUP_TYPE_CROWD, cov.getExtId());
-						if (crowd == null)
-							Message.obtain(mHandler, REMOVE_CONVERSATION,
-									cov.getExtId()).sendToTarget();
-					} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
-						Group crowd = GlobalHolder.getInstance().getGroupById(
-								V2GlobalEnum.GROUP_TYPE_DISCUSSION,
-								cov.getExtId());
-						if (crowd == null)
-							Message.obtain(mHandler, REMOVE_CONVERSATION,
-									cov.getExtId()).sendToTarget();
-					}
-				}
+		for (int i = 0; i < mItemList.size(); i++) {
+			Conversation cov = mItemList.get(i).cov;
+			if (cov.getType() == V2GlobalEnum.GROUP_TYPE_CROWD) {
+				Group crowd = GlobalHolder.getInstance().getGroupById(
+						V2GlobalEnum.GROUP_TYPE_CROWD, cov.getExtId());
+				if (crowd == null)
+					Message.obtain(mHandler, REMOVE_CONVERSATION,
+							cov.getExtId()).sendToTarget();
+			} else if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+				Group crowd = GlobalHolder.getInstance().getGroupById(
+						V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+						cov.getExtId());
+				if (crowd == null)
+					Message.obtain(mHandler, REMOVE_CONVERSATION,
+							cov.getExtId()).sendToTarget();
 			}
-		});
+		}
 	}
 
 	private void checkRepeatVerification() {
@@ -2093,6 +2129,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							});
 						}
 					}
+					
+					getActivity().runOnUiThread(new Runnable() {
+						
+						@Override
+						public void run() {
+							updateVerificationConversation();
+						}
+					});
 				}
 			}
 		});
@@ -2614,7 +2658,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				// Update name of creator of conversation
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
-
 				if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) {
 					for (ScrollItem item : mItemList) {
 						GroupLayout currentGroupLayout = ((GroupLayout) item.gp);
@@ -2638,9 +2681,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						updateGroupUserInfo(g, currentGroupLayout);
 					}
 				} else if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
+					int groupType = intent.getIntExtra("gtype", -1);
+					V2Log.e("DISCUSSION", "the New User Update Comming! Group Type is : " + groupType);
 					for (ScrollItem item : mItemList) {
 						GroupLayout currentGroupLayout = ((GroupLayout) item.gp);
 						Conversation currentConversation = item.cov;
+						V2Log.d("DISCUSSION", "current iterator conversation id is : "
+								+ "" + currentConversation.getExtId() + " type is : " + currentConversation.getType());
 						switch (currentConversation.getType()) {
 						case Conversation.TYPE_VERIFICATION_MESSAGE:
 							ConversationFirendAuthenticationData verification = ((ConversationFirendAuthenticationData) currentConversation);
@@ -2666,11 +2713,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 								contact.updateUser(user);
 								currentGroupLayout.update();
 								adapter.notifyDataSetChanged();
-								V2Log.d(TAG,
+								V2Log.w(TAG,
 										"Successfully updated the user infos , user name is :"
 												+ user.getName());
 							} else {
-								V2Log.e(TAG,
+								V2Log.d(TAG,
 										"update the user infos failed ... beacuse get user is null from globleHolder! id is : "
 												+ contact.getExtId());
 							}
@@ -2689,17 +2736,34 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 											+ currentConversation.getName());
 							break;
 						case Conversation.TYPE_DISCUSSION:
-							Group discussion = GlobalHolder.getInstance()
-									.getGroupById(Conversation.TYPE_DISCUSSION,
-											currentConversation.getExtId());
-							((DiscussionConversation) currentConversation)
-									.setDiscussionGroup(discussion);
-							currentGroupLayout.update();
-							V2Log.e(TAG,
-									"update discussion group successful , id is : "
-											+ currentConversation.getExtId()
-											+ " name is : "
-											+ currentConversation.getName());
+							DiscussionConversation discussion = (DiscussionConversation) currentConversation;
+							Group newGroup = GlobalHolder.getInstance()
+									.getGroupById(
+											V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+											discussion.getExtId());
+							if (newGroup != null) {
+								discussion.setDiscussionGroup(newGroup);
+								VMessage vm = MessageLoader.getNewestGroupMessage(
+										mContext,
+										V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+										discussion.getExtId());
+								if (vm != null) {
+									discussion.setDate(vm.getStringDate());
+									discussion.setDateLong(String.valueOf(vm.getmDateLong()));
+									CharSequence newMessage = MessageUtil
+											.getMixedConversationContent(mContext, vm);
+									discussion.setMsg(newMessage);
+									currentGroupLayout.update();
+								} else
+									V2Log.w("DISCUSSION", "没有获取到最新VMessage对象! 更新内容失败");
+								V2Log.e("DISCUSSION",
+										"update discussion group successful , id is : "
+												+ currentConversation.getExtId()
+												+ " name is : "
+												+ currentConversation.getName());
+							} else {
+								V2Log.w(TAG, "没有获取到讨论组对象! 更新失败！ id is : " + discussion.getExtId());
+							}
 							break;
 						case Conversation.TYPE_GROUP:
 							Group crowd = GlobalHolder.getInstance()
@@ -3044,6 +3108,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					node.readState = ReadState.UNREAD.intValue();
 				}
 
+				isShowVerificationNotify = true;
 				boolean isOutORG = intent.getBooleanExtra("isOutORG", false);
 				if (isOutORG) {
 					V2User v2User = intent.getParcelableExtra("v2User");
@@ -3168,10 +3233,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				checkWaittingFriendExist();
 				// 检测群组是否存在
 				checkGroupIsExist();
+				// 检测讨论组
+				checkNewGroup();
 				// 检测是否有重复验证会话
 				checkRepeatVerification();
-				// 更新消息界面讨论组
-				updateDiscussionGroup();
 			} else if (PublicIntent.BROADCAST_ADD_OTHER_FRIEND_WAITING_NOTIFICATION
 					.equals(intent.getAction())) {
 				boolean isAdd = true;
@@ -3275,48 +3340,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 		updateUnreadConversation(verificationItem);
 		return msg;
-	}
-
-	/**
-	 * 登陆后检测数据库里是否存有等待好友验证的消息，并且已经与他成为好友
-	 */
-	public void checkWaittingFriendExist() {
-		List<Long> remoteUsers = VerificationProvider
-				.getFriendWaittingVerifyMessage();
-		if (remoteUsers != null && remoteUsers.size() > 0) {
-			for (int i = 0; i < remoteUsers.size(); i++) {
-				V2Log.e(TAG,
-						"Waitting add friend id is : " + remoteUsers.get(i));
-				boolean isFinish = false;
-				User user = GlobalHolder.getInstance().getUser(
-						remoteUsers.get(i));
-				if (user.isDirty()) {
-					break;
-				}
-
-				Set<Group> belongsGroup = user.getBelongsGroup();
-				Iterator<Group> iterator = belongsGroup.iterator();
-				while (iterator.hasNext()) {
-					Group next = iterator.next();
-					if (next.getGroupType() == GroupType.CONTACT) {
-						isFinish = true;
-						break;
-					}
-				}
-
-				if (isFinish) {
-					V2Log.e(TAG,
-							"发现有等待的好友验证的消息已变为成为好友，用户id : " + user.getmUserId());
-					AddFriendHistroysHandler.becomeFriendHanler(mContext, user);
-					int update = VerificationProvider
-							.updateFriendQualicationReadState(
-									user.getmUserId(), ReadState.UNREAD);
-					if (update <= 0) {
-						V2Log.e(TAG, "更新等待的好友验证失败！");
-					}
-				}
-			}
-		}
 	}
 
 	class LocalHandler extends Handler {

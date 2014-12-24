@@ -3,16 +3,19 @@ package com.v2tech.view.contacts;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -24,9 +27,11 @@ import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.GroupServiceJNIResponse;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.Group;
+import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 
@@ -38,6 +43,7 @@ public class UpdateContactGroupActivity extends Activity {
 
 	private Context mContext;
 	private RadioGroup mGroupListLy;
+	private View mRadioGroupLy;
 	private ContactsService contactService = new ContactsService();
 
 	private STATE state = STATE.NONE;
@@ -48,6 +54,7 @@ public class UpdateContactGroupActivity extends Activity {
 	// 值为"addFriend"时是从加好友跳转而来，其他值为更改分组跳转而来。
 	private String from;
 	private TextView mReturnButton;
+	private LocalReceiver localReceiver;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,18 +65,44 @@ public class UpdateContactGroupActivity extends Activity {
 		mContext = this;
 		setContentView(R.layout.activity_contacts_update_group);
 		mGroupListLy = (RadioGroup) findViewById(R.id.contact_update_group_list);
+		mRadioGroupLy = findViewById(R.id.contact_update_group_list_layout);
 		mReturnButton = (TextView)findViewById(R.id.contact_update_return_button);
 		mReturnButton.setOnClickListener(mReturnButtonListener);
-		
+		mRadioGroupLy.setOnTouchListener(mRadioGroupLyListener);
 		if(from!=null&&from.equals("addFriend")){
 			((TextView)mReturnButton).setText("添加好友");
 		}else{
 			((TextView)mReturnButton).setText("返回");
 		}
+		initReceiver();
 		// build radio button first
 		buildList();
 		mGroupListLy.setOnCheckedChangeListener(mGroupChangedListener);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+	}
+	
+	@Override
+	protected void onStart() {
+		super.onStart();
+		initRadioGroup();
+	}
+	
+	private void initRadioGroup() {
+		if (!GlobalHolder.getInstance().isServerConnected()) {
+			for (int i = 0; i < mGroupListLy.getChildCount(); i++) {
+				if (mGroupListLy.getChildAt(i) instanceof RadioButton) {
+					mGroupListLy.getChildAt(i).setClickable(false);
+				} 
+			}		
+		}
+	}
+
+	private void initReceiver() {
+		localReceiver = new LocalReceiver(); 
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		this.registerReceiver(localReceiver, filter);
 	}
 
 	private void buildList() {
@@ -135,6 +168,7 @@ public class UpdateContactGroupActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		unregisterReceiver(localReceiver);
 		contactService.clearCalledBack();
 	}
 
@@ -152,6 +186,21 @@ public class UpdateContactGroupActivity extends Activity {
 		public void onClick(View v) {
 			onBackPressed();
 		}
+		
+	};
+	
+	private OnTouchListener mRadioGroupLyListener = new OnTouchListener() {
+
+		@Override
+		public boolean onTouch(View v, MotionEvent event) {
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(mContext,
+						R.string.error_discussion_no_network,
+						Toast.LENGTH_SHORT).show();
+			}
+			return false;
+		}
+
 		
 	};
 
@@ -209,6 +258,30 @@ public class UpdateContactGroupActivity extends Activity {
 		}
 
 	};
+	
+	class LocalReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION)) {
+				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
+						.get("state");
+				if (code == NetworkStateCode.CONNECTED_ERROR) {
+					for (int i = 0; i < mGroupListLy.getChildCount(); i++) {
+						if (mGroupListLy.getChildAt(i) instanceof RadioButton) {
+							mGroupListLy.getChildAt(i).setClickable(false);
+						} 
+					}
+				} else {
+					for (int i = 0; i < mGroupListLy.getChildCount(); i++) {
+						if (mGroupListLy.getChildAt(i) instanceof RadioButton) {
+							mGroupListLy.getChildAt(i).setClickable(true);
+						} 
+					}
+				}
+			}
+		}
+	}
 
 	private Handler mLocalHandler = new Handler() {
 

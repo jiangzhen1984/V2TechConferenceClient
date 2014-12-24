@@ -8,7 +8,6 @@ import android.text.TextUtils;
 public class DiscussionGroup extends Group {
 
 	private boolean isCreatorExist;
-
 	public DiscussionGroup(long gId, String name, User owner, Date createDate) {
 		super(gId, GroupType.DISCUSSION, name, owner, createDate);
 		isCreatorExist = true;

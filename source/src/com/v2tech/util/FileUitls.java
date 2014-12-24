@@ -232,9 +232,8 @@ public class FileUitls {
 	// android获取一个用于打开音频文件的intent
 	public static Intent getAudioFileIntent(File file) {
 		Intent intent = new Intent("android.intent.action.VIEW");
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.putExtra("oneshot", 0);
-		intent.putExtra("configchange", 0);
+		intent.addCategory("android.intent.category.DEFAULT");
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		Uri uri = Uri.fromFile(file);
 		intent.setDataAndType(uri, "audio/*");
 		return intent;
@@ -243,9 +242,11 @@ public class FileUitls {
 	// android获取一个用于打开视频文件的intent
 	public static Intent getVideoFileIntent(File file) {
 		Intent intent = new Intent("android.intent.action.VIEW");
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.putExtra("oneshot", 0);
-		intent.putExtra("configchange", 0);
+		intent.addCategory("android.intent.category.DEFAULT");
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//		intent.putExtra("oneshot", 0);
+//		intent.putExtra("configchange", 0);
 		Uri uri = Uri.fromFile(file);
 		intent.setDataAndType(uri, "video/*");
 		return intent;

@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.v2tech.R;
 import com.v2tech.service.ContactsService;
@@ -156,6 +157,11 @@ public class ContactsGroupManagerActivity extends Activity {
 		confirmButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+					return ;
+				}
+				
 				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(mGroupNameET.getWindowToken(), 0);
 
@@ -214,6 +220,11 @@ public class ContactsGroupManagerActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+				return ;
+			}
+			
 			updateGroup((ContactGroup) view.getTag(), OPT.DELETE);
 		}
 
@@ -242,6 +253,10 @@ public class ContactsGroupManagerActivity extends Activity {
 		@Override
 		public void onItemClick(AdapterView<?> adapter, View view, int pos,
 				long id) {
+			if (!GlobalHolder.getInstance().isServerConnected()) {
+				Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
+				return ;
+			}
 			showDialog((ContactGroup) mDataset.get(pos).getItemObject());
 		}
 

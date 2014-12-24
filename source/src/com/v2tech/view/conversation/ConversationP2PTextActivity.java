@@ -2300,30 +2300,31 @@ public class ConversationP2PTextActivity extends Activity implements
 		}
 
 		if (array != null) {
-			boolean isExist;
-			if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-				isExist = ConversationProvider
-						.queryUserConversation(remoteChatUserID);
-			else
-				isExist = ConversationProvider.queryGroupConversation(
-						currentConversationViewType, remoteGroupID);
-			if (!isExist) {
-				boolean flag = MessageLoader.deleteMessageByID(mContext,
-						currentConversationViewType, remoteGroupID,
-						remoteChatUserID, true);
-				if (flag) {
-					if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-						MessageLoader.isTableExist(mContext,
-								currentConversationViewType, remoteGroupID,
-								remoteChatUserID, MessageLoader.CONTACT_TYPE);
-					else
-						MessageLoader.isTableExist(mContext,
-								currentConversationViewType, remoteGroupID,
-								remoteChatUserID, MessageLoader.CROWD_TYPE);
-				}
-				array.clear();
-				return array;
-			}
+			// FIXME Don't delete these codes
+			// boolean isExist;
+			// if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+			// isExist = ConversationProvider
+			// .queryUserConversation(remoteChatUserID);
+			// else
+			// isExist = ConversationProvider.queryGroupConversation(
+			// currentConversationViewType, remoteGroupID);
+			// if (!isExist) {
+			// boolean flag = MessageLoader.deleteMessageByID(mContext,
+			// currentConversationViewType, remoteGroupID,
+			// remoteChatUserID, true);
+			// if (flag) {
+			// if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+			// MessageLoader.isTableExist(mContext,
+			// currentConversationViewType, remoteGroupID,
+			// remoteChatUserID, MessageLoader.CONTACT_TYPE);
+			// else
+			// MessageLoader.isTableExist(mContext,
+			// currentConversationViewType, remoteGroupID,
+			// remoteChatUserID, MessageLoader.CROWD_TYPE);
+			// }
+			// array.clear();
+			// return array;
+			// }
 			offset += array.size();
 			mIsInited = true;
 		}
@@ -2880,43 +2881,63 @@ public class ConversationP2PTextActivity extends Activity implements
 			switch (msg.what) {
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
-				if (array != null) {
-					int loadSize = array.size();
-					V2Log.d(TAG, "获取的消息数量" + loadSize);
-					// 设置VMessage是否应该显示时间
-					for (int i = 0; i < array.size(); i++) {
-						long currentMessage = array.get(i).getmDateLong();
+				if (array == null){
+					V2Log.d(TAG, "没有加载到任何聊天数据！");
+					return ;
+				}
+				
+				int loadSize = array.size();
+				V2Log.d(TAG, "此次加载的消息数量:" + loadSize);
 
-						if (i + 1 == array.size()) {
-							array.get(i).setShowTime(true);
-							break;
-						}
+				if (loadSize > 0 && messageArray == null) {
+					messageArray = new ArrayList<CommonAdapterItemWrapper>();
+				}
+
+				if (loadSize > 0 && messageAllID == null) {
+					messageAllID = new SparseArray<VMessage>();
+				}
+
+				for (int i = 0; i < array.size(); i++) {
+					// 防止消息重复
+					VMessage vm = array.get(i);
+					if (messageAllID.get((int) vm.getId()) != null) {
+						Log.e(TAG, "happen erupt , the message ："
+								+ (int) array.get(i).getId()
+								+ "  already save in messageArray!");
+						loadSize = loadSize + 1;
+						continue;
+					}
+					// 设置VMessage是否应该显示时间
+					long currentMessage = vm.getmDateLong();
+					if (i + 1 == array.size()) {
+						array.get(i).setShowTime(true);
+					} else{
 						long lastMessage = array.get(i + 1).getmDateLong();
 						if (currentMessage - lastMessage > intervalTime)
 							array.get(i).setShowTime(true);
 						else
 							array.get(i).setShowTime(false);
 					}
-
-					for (int i = 0; i < array.size(); i++) {
-						VMessage vm = array.get(i);
-						if (messageAllID.get((int) vm.getId()) != null) {
-							Log.e(TAG, "happen erupt , the message ："
-									+ (int) array.get(i).getId()
-									+ "  already save in messageArray!");
-							loadSize = loadSize + 1;
-							continue;
-						}
-						messageAllID.append((int) vm.getId(), vm);
-						VMessageAdater adater = new VMessageAdater(vm);
-						messageArray.add(0, adater);
+					// 群文件处理,如果是远端用户上传的文件，则强制更改状态为已上传
+					if (vm.getFileItems().size() > 0
+							&& vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD
+							&& vm.getFromUser().getmUserId() != GlobalHolder
+									.getInstance().getCurrentUserId()
+							&& vm.getFileItems().get(0).getState() != VMessageAbstractItem.STATE_FILE_SENT) {
+						vm.getFileItems()
+								.get(0)
+								.setState(
+										VMessageAbstractItem.STATE_FILE_SENT);
 					}
-					V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
-					LastFistItem = LastFistItem + loadSize;
-					currentItemPos = loadSize - 1;
-					if (currentItemPos == -1)
-						currentItemPos = 0;
+					messageAllID.append((int) vm.getId(), vm);
+					VMessageAdater adater = new VMessageAdater(vm);
+					messageArray.add(0, adater);
 				}
+				V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
+				LastFistItem = LastFistItem + loadSize;
+				currentItemPos = loadSize - 1;
+				if (currentItemPos == -1)
+					currentItemPos = 0;
 				android.os.Message.obtain(lh, END_LOAD_MESSAGE, array)
 						.sendToTarget();
 				break;
@@ -3130,11 +3151,10 @@ public class ConversationP2PTextActivity extends Activity implements
 							MessageBodyView bodyView = (MessageBodyView) wrapper
 									.getView();
 							if (bodyView != null)
-								bodyView.updateView(tempVm);
+								bodyView.updateView(vm.getFileItems().get(0));
 						}
 					}
 				}
-				// Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 				break;
 			default:
 				break;

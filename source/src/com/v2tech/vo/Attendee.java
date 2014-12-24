@@ -231,7 +231,11 @@ public class Attendee implements Comparable<Attendee>{
 		if (attendee.user == null) {
 			return -1;
 		}
-		return this.user.getmUserId() == attendee.user.getmUserId() ? 0: 1;
+		
+		if(this.user.getmUserId() == attendee.user.getmUserId())
+			return 0;
+		return 1;
+//		return this.user.getmUserId() == attendee.user.getmUserId() ? 0: 1;
 	}
 	
 	

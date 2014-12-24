@@ -507,7 +507,8 @@ public class MessageBodyView extends LinearLayout {
 				.findViewById(R.id.message_body_file_item_file_name);
 		fileName.setText(item.getFileName());
 
-		FileUitls.adapterFileIcon(item.getFileType());
+		fileIcon.setBackgroundResource(FileUitls.adapterFileIcon(item.getFileType()));
+		
 
 		TextView fileSize = (TextView) fileRootView
 				.findViewById(R.id.message_body_file_item_file_size);

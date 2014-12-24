@@ -452,7 +452,7 @@ public class JNIService extends Service implements
 								JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 						i.addCategory(JNI_BROADCAST_CATEGROY);
 						i.putExtra("gid", go.gId);
-						i.putExtra("gtype", go.gType);
+						i.putExtra("gtype", Integer.valueOf(go.gType));
 						mContext.sendBroadcast(i);
 					}
 				} else {
@@ -463,11 +463,17 @@ public class JNIService extends Service implements
 				V2Log.e(TAG, "The All Group Infos Loaded !");
 				//Update group loaded state
 				GlobalHolder.getInstance().setGroupLoaded();
-				
-				Intent loaded = new Intent();
-				loaded.addCategory(JNI_BROADCAST_CATEGROY);
-				loaded.setAction(JNI_BROADCAST_GROUPS_LOADED);
-				sendBroadcast(loaded);
+				if (!noNeedBroadcast) {
+					V2Log.d(TAG,
+							"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
+									+ JNI_GROUP_LOADED);
+					delayBroadcast.add(JNI_GROUP_LOADED);
+				} else {
+					Intent loaded = new Intent();
+					loaded.addCategory(JNI_BROADCAST_CATEGROY);
+					loaded.setAction(JNI_BROADCAST_GROUPS_LOADED);
+					sendBroadcast(loaded);
+				}
 				break;
 			case JNI_CONFERENCE_INVITATION:
 				Group g = (Group) msg.obj;
@@ -1491,8 +1497,7 @@ public class JNIService extends Service implements
 			intent.putExtra("groupID", group.id);
 			intent.putParcelableArrayListExtra("fileJniObjects",
 					new ArrayList<FileJNIObject>(list));
-			// Make sure Crowd file activity receive this event first
-			sendOrderedBroadcast(intent, null);
+			sendBroadcast(intent);
 		}
 
 		@Override
@@ -2110,10 +2115,17 @@ public class JNIService extends Service implements
 					V2Log.d(TAG,
 							"The delay broadcast was sending now , type is : "
 									+ type);
-					Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
-					gi.putExtra("gtype", type);
-					gi.addCategory(JNI_BROADCAST_CATEGROY);
-					mContext.sendBroadcast(gi);
+					if(type == JNI_GROUP_LOADED){
+						Intent loaded = new Intent();
+						loaded.addCategory(JNI_BROADCAST_CATEGROY);
+						loaded.setAction(JNI_BROADCAST_GROUPS_LOADED);
+						sendBroadcast(loaded);
+					} else {
+						Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
+						gi.putExtra("gtype", type);
+						gi.addCategory(JNI_BROADCAST_CATEGROY);
+						mContext.sendBroadcast(gi);
+					}
 				}
 
 				for (int i = 0; i < delayUserBroadcast.size(); i++) {

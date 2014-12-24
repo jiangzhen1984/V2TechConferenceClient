@@ -40,7 +40,6 @@ import com.v2tech.R;
 import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2ShapeMeta;
-import com.v2tech.vo.VMessageImageItem;
 
 public class VideoDocLayout extends LinearLayout {
 
@@ -167,7 +166,7 @@ public class VideoDocLayout extends LinearLayout {
 
 			mDocListWindowScroller = (ScrollView) view
 					.findViewById(R.id.video_doc_list_container_scroller);
-			mDocListWindow = new PopupWindow(view, LayoutParams.WRAP_CONTENT,
+			mDocListWindow = new PopupWindow(view, (int) (rootView.getWidth() * 0.5),
 					(int) (rootView.getHeight() * 0.5));
 			mDocListWindow.setBackgroundDrawable(new ColorDrawable(
 					Color.TRANSPARENT));

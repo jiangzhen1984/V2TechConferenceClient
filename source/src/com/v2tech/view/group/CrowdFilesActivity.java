@@ -187,41 +187,46 @@ public class CrowdFilesActivity extends Activity{
 				if (mCheckedList.size() > 0) {
 					for (int i = 0; i < mCheckedList.size(); i++) {
 						FileInfoBean fb = mCheckedList.get(i);
-						VCrowdFile vf = new VCrowdFile();
-						String uuid = UUID.randomUUID().toString();
-						vf.setCrowd(crowd);
-						vf.setUploader(GlobalHolder.getInstance()
-								.getCurrentUser());
-						vf.setId(uuid);
-						vf.setPath(fb.filePath);
-						vf.setName(fb.fileName);
-						vf.setSize(fb.fileSize);
-						vf.setState(VFile.State.UPLOADING);
-
-						service.handleCrowdFile(vf,
-								FileOperationEnum.OPERATION_START_SEND, null);
+						//对象转换
+						VCrowdFile vf = convertToVCrowdFile(fb);
+						//添加到集合
 						mUploadedFiles.add(vf);
 						mShowProgressFileMap.put(vf.getId(), vf);
-						// Save file message to database
+						//保存到数据库
 						VMessage vm = MessageBuilder.buildFileMessage(
 								V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getmGId(),
 								GlobalHolder.getInstance().getCurrentUser(),
 								null, fb);
-						vm.getFileItems().get(0).setUuid(uuid);
+						vm.getFileItems().get(0).setUuid(vf.getId());
 						vm.setmXmlDatas(vm.toXml());
 						vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
 						MessageBuilder.saveMessage(this, vm);
 						MessageBuilder.saveFileVMessage(this, vm);
+						//回调聊天界面产生气泡
+						CommonCallBack.getInstance().executeUpdateCrowdFileState(false, vf.getId(), vm , CrowdFileExeType.ADD_FILE);
+						//发送文件
+						service.handleCrowdFile(vf,
+								FileOperationEnum.OPERATION_START_SEND, null);
 					}
-
 					// Update screen to uploading UI
-					// showUploaded = true;
-					// mShowUploadedFileButton.setVisibility(View.GONE);
 					adapterUploadShow();
 					adapter.notifyDataSetChanged();
 				}
 			}
 		}
+	}
+	
+	private VCrowdFile convertToVCrowdFile(FileInfoBean fb){
+		VCrowdFile vf = new VCrowdFile();
+		vf.setCrowd(crowd);
+		vf.setUploader(GlobalHolder.getInstance()
+				.getCurrentUser());
+		vf.setId(UUID.randomUUID().toString());
+		vf.setPath(fb.filePath);
+		vf.setName(fb.fileName);
+		vf.setSize(fb.fileSize);
+		vf.setState(VFile.State.UPLOADING);
+		return vf;
 	}
 
 	@Override
@@ -742,7 +747,6 @@ public class CrowdFilesActivity extends Activity{
 					crowd.resetNewFileCount();
 				}
 			}
-
 		}
 
 	}
@@ -906,8 +910,8 @@ public class CrowdFilesActivity extends Activity{
 				file.setFlag(HIDE_DELETE_BUTTON_FLAG);
 			}
 
-			FileUitls.adapterFileIcon(file.getName());
-
+			item.mFileIcon.setImageResource(FileUitls.adapterFileIcon(file.getName()));
+			
 			switch (fs) {
 			case UNKNOWN:
 				item.mFileButton
@@ -1170,7 +1174,7 @@ public class CrowdFilesActivity extends Activity{
 				}
 				adapter.notifyDataSetChanged();
 				
-				//save state to database
+//				save state to database
 				VMessageFileItem fileItem = MessageLoader.queryFileItemByID(
 						V2GlobalEnum.GROUP_TYPE_CROWD, file.getId());
 				if (fileItem != null) {
@@ -1179,18 +1183,22 @@ public class CrowdFilesActivity extends Activity{
 					MessageBuilder.updateVMessageItem(mContext,
 							fileItem);
 					CommonCallBack.getInstance().executeUpdateCrowdFileState(false, file.getId(), fileItem.getVm() , CrowdFileExeType.UPDATE_FILE);
-				} else {
-					VMessage vm = new VMessage(crowd.getGroupType().intValue(),
-							crowd.getmGId(), file.getUploader(), null,
-							new Date(GlobalConfig.getGlobalServerTime()));
-					VMessageFileItem item = new VMessageFileItem(vm,
-							file.getPath(), VMessageFileItem.STATE_FILE_SENDING);
-					vm.getFileItems().get(0).setUuid(file.getId());
-					vm.setmXmlDatas(vm.toXml());
-					MessageBuilder.saveMessage(mContext, vm);
-					MessageBuilder.saveFileVMessage(mContext, vm);
-					CommonCallBack.getInstance().executeUpdateCrowdFileState(false, file.getId(), fileItem.getVm() , CrowdFileExeType.ADD_FILE);
+				} 
+				else{
+					V2Log.e(TAG, "没有从数据库获取到文件对象！");
 				}
+//				else {
+//					VMessage vm = new VMessage(crowd.getGroupType().intValue(),
+//							crowd.getmGId(), file.getUploader(), null,
+//							new Date(GlobalConfig.getGlobalServerTime()));
+//					VMessageFileItem item = new VMessageFileItem(vm,
+//							file.getPath(), VMessageFileItem.STATE_FILE_SENDING);
+//					vm.getFileItems().get(0).setUuid(file.getId());
+//					vm.setmXmlDatas(vm.toXml());
+//					MessageBuilder.saveMessage(mContext, vm);
+//					MessageBuilder.saveFileVMessage(mContext, vm);
+//					CommonCallBack.getInstance().executeUpdateCrowdFileState(false, file.getId(), item.getVm() , CrowdFileExeType.ADD_FILE);
+//				}
 			}
 		};
 	}
