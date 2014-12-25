@@ -2,7 +2,7 @@
 <resources>
 
     <string name="error_time_out">Time out!</string>
-    <string name="app_name">Omnipresence-iTP</string>
+    <string name="app_name">V-LINK</string>
     <string name="banner_desc">Global video conferencing leader</string>
     <string name="textOn">ON</string>
     <string name="textOff">OFF</string>
