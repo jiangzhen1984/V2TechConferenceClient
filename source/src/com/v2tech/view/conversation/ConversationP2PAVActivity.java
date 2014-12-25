@@ -207,12 +207,11 @@ public class ConversationP2PAVActivity extends Activity implements
 
 			Log.i(TAG, "蓝牙是连接的");
 		}
-		
+
 		if (!uad.isIncoming() && uad.isAudioType()) {
 			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 			headsetAndBluetoothHeadsetHandle(true);
 		}
-		
 
 		currentVideoBean = new VideoBean();
 		if (uad.isIncoming()) {
@@ -396,12 +395,12 @@ public class ConversationP2PAVActivity extends Activity implements
 		// if (hanguped == null) {
 		// chatService.cancelChattingCall(uad, null);
 		// }
-		
-		if(audioManager!=null){
+
+		if (audioManager != null) {
 			audioManager.setSpeakerphoneOn(false);
 			audioManager.setMode(AudioManager.MODE_NORMAL);
 		}
-		
+
 	}
 
 	@Override
@@ -1275,6 +1274,10 @@ public class ConversationP2PAVActivity extends Activity implements
 
 		if (!uad.isConnected()) {
 			return;
+		}
+
+		if (audioManager != null) {
+			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 		}
 
 		if (audioManager.isWiredHeadsetOn()) {

@@ -39,8 +39,10 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.Conference;
+import com.v2tech.vo.User.DeviceType;
 import com.v2tech.vo.UserDeviceConfig;
 
 public class VideoAttendeeListLayout extends LinearLayout {
@@ -92,7 +94,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	public VideoAttendeeListLayout(Conference conf, Context context) {
 		super(context);
-		this.conf = conf; 
+		this.conf = conf;
 		mList = new ArrayList<Wrapper>();
 		mFilterList = mList;
 		initLayout();
@@ -120,10 +122,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					long id) {
 				if (listener != null) {
 					Wrapper wr = (Wrapper) view.getTag();
-					if(!wr.a.isJoined()){
-						return ;
+					if (!wr.a.isJoined()) {
+						return;
 					}
-					
+
 					if (wr.udc == null || !wr.udc.isEnable()) {
 						V2Log.i("User device config is disabled ");
 						Toast.makeText(getContext(),
@@ -285,6 +287,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private void setStyle(Wrapper wr, TextView name, ImageView lectureStateIV,
 			ImageView speakingIV, ImageView cameraIV) {
 		Attendee at = wr.a;
+		DeviceType atDeviceType = GlobalHolder.getInstance()
+				.getUser(at.getAttId()).getDeviceType();
 		UserDeviceConfig udc = wr.udc;
 
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
@@ -299,7 +303,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
 			// set camera icon
-			cameraIV.setImageResource(R.drawable.camera);
+			if (atDeviceType == DeviceType.CELL_PHONE) {
+				cameraIV.setImageResource(R.drawable.phone_camera);
+			} else {
+				cameraIV.setImageResource(R.drawable.camera);
+			}
+
 		} else if (at.isJoined()) {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
@@ -307,9 +316,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color_offline));
 		}
-		
-		//如果是自己，则名字改成粗体
-		if(at.isSelf()){
+
+		// 如果是自己，则名字改成粗体
+		if (at.isSelf()) {
 			name.setTypeface(null, Typeface.BOLD);
 		} else {
 			name.setTypeface(null, Typeface.NORMAL);
@@ -317,24 +326,41 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		// set image view
 		if (at.isSelf()) {
-			cameraIV.setImageResource(R.drawable.camera);
+			if (atDeviceType == DeviceType.CELL_PHONE) {
+				cameraIV.setImageResource(R.drawable.phone_camera);
+			} else {
+				cameraIV.setImageResource(R.drawable.camera);
+			}
 		} else if (at.isJoined()) {
 			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
 				if (udc != null) {
-					cameraIV.setImageResource(R.drawable.camera);
+					if (atDeviceType == DeviceType.CELL_PHONE) {
+						cameraIV.setImageResource(R.drawable.phone_camera);
+					} else {
+						cameraIV.setImageResource(R.drawable.camera);
+					}
 				} else {
-					cameraIV.setImageResource(R.drawable.camera_pressed);
+					if (atDeviceType == DeviceType.CELL_PHONE) {
+						cameraIV.setImageResource(R.drawable.phone_camera_pressed);
+					} else {
+						cameraIV.setImageResource(R.drawable.camera_pressed);
+					}
 				}
 			} else {
 				cameraIV.setImageResource(R.drawable.mixed_video_camera);
 			}
 		} else {
-			cameraIV.setImageResource(R.drawable.camera_pressed);
+			if (atDeviceType == DeviceType.CELL_PHONE) {
+				cameraIV.setImageResource(R.drawable.phone_camera_pressed);
+			} else {
+				cameraIV.setImageResource(R.drawable.camera_pressed);
+			}
 		}
 
 		// If attaendee is mixed video or is not default flag, then hide speaker
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO
 				|| wr.sortFlag != DEFAULT_DEVICE_FLAG) {
+			lectureStateIV.setVisibility(View.INVISIBLE);
 			speakingIV.setVisibility(View.INVISIBLE);
 		}
 
@@ -345,7 +371,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		if (udc != null && !udc.isEnable()
 				&& at.getType() == Attendee.TYPE_ATTENDEE) {
-			cameraIV.setImageResource(R.drawable.camera_pressed);
+			if (atDeviceType == DeviceType.CELL_PHONE) {
+				cameraIV.setImageResource(R.drawable.phone_camera_pressed);
+			} else {
+				cameraIV.setImageResource(R.drawable.camera_pressed);
+			}
 		}
 
 		if (wr.sortFlag == DEFAULT_DEVICE_FLAG) {
@@ -462,6 +492,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		at.setmDevices(null);
 		at.setJoined(false);
 		at.setSpeakingState(false);
+		at.setLectureState(Attendee.LECTURE_STATE_NOT);
 		boolean found = false;
 		for (int i = 0; i < mList.size(); i++) {
 			Wrapper wr = mList.get(i);
@@ -526,7 +557,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			// Remove attendee devices, leave one device item
 			if (wr.a.getAttId() == att.getAttId()) {
 				if (wr.sortFlag == DEFAULT_DEVICE_FLAG) {
-					//wr.udc = null;
+					// wr.udc = null;
 					defaultWrapper = wr;
 					index = i;
 				} else {
@@ -546,12 +577,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			if (udc.getBelongsAttendee() == null) {
 				udc.setBelongsAttendee(att);
 			}
-			
+
 			if (udc.isDefault()) {
 				defaultWrapper.udc = udc;
-			} else if(defaultWrapper.udc.getDeviceID().equals(udc.getDeviceID())){
+			} else if (defaultWrapper.udc.getDeviceID().equals(
+					udc.getDeviceID())) {
 				defaultWrapper.udc = udc;
-			}else if (!udc.isDefault()) {
+			} else if (!udc.isDefault()) {
 				mList.add(++index, new Wrapper(defaultWrapper.a, udc, 1));
 			}
 		}

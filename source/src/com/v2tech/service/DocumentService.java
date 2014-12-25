@@ -188,7 +188,7 @@ public class DocumentService extends AbstractHandler {
 		unRegisterListener(KEY_PAGE_CANVAS_NOTIFY_LISTENER, h, what, obj);
 	}
 
-	public void switchDoc(V2Doc doc, boolean syncFlag, MessageListener listener) {
+	public void switchDoc(long currentUserId,V2Doc doc,boolean isNotify, MessageListener listener) {
 		if (doc == null) {
 			if (listener != null) {
 				super.sendResult(listener, new JNIResponse(
@@ -198,7 +198,7 @@ public class DocumentService extends AbstractHandler {
 		}
 		
 		V2Log.e(doc.getId()+"   ====>"+ doc.getActivatePage().getNo());
-		WBRequest.getInstance().ActivePage(doc.getSharedUser().getmUserId() , doc.getId(), doc.getActivatePage().getNo(), 0,  syncFlag);
+		WBRequest.getInstance().ActivePage(currentUserId , doc.getId(), doc.getActivatePage().getNo(), 0,isNotify);
 	}
 
 	@Override

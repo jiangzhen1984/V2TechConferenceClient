@@ -111,6 +111,20 @@ public class AudioRequest {
 	 */
 	public native void CloseAudioChat(String szSessionID, long nToUserID);
 
+	public native void RecordFile(String arg1);
+
+	public native void StopRecord();
+
+	public native void PlayFile(String arg1);
+
+	public native void StopPlay();
+
+	private void OnRecordStart(String arg1, int arg2) {
+	};
+
+	private void OnRecordStop(String arg1, String arg2, int arg3) {
+	};
+
 	/**
 	 * 
 	 * @param nGroupID
@@ -126,18 +140,16 @@ public class AudioRequest {
 
 	public native void CancelAudioChat(String szSessionID, long nToUserID);
 
-	
 	/**
 	 * 
 	 */
 	public native void PausePlayout();
-	
+
 	public native void ResumePlayout();
-	
+
 	// �յ���Ƶͨ��������Ļص�
 	private void OnAudioChatInvite(String szSessionID, long nFromUserID) {
-		V2Log.d("OnAudioChaInvite " + szSessionID + ":"
-				+ nFromUserID);
+		V2Log.d("OnAudioChaInvite " + szSessionID + ":" + nFromUserID);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
@@ -150,49 +162,50 @@ public class AudioRequest {
 	}
 
 	private void OnAudioChatAccepted(String szSessionID, long nFromUserID) {
-		V2Log.d("OnAudioChatAccepted " + szSessionID + ":"
-				+ nFromUserID);
+		V2Log.d("OnAudioChatAccepted " + szSessionID + ":" + nFromUserID);
 
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatAccepted(new AudioJNIObjectInd(szSessionID,
-						nFromUserID));
+				((AudioRequestCallback) obj)
+						.OnAudioChatAccepted(new AudioJNIObjectInd(szSessionID,
+								nFromUserID));
 			}
 		}
 	}
 
 	// ��Ƶͨ�����뱻�Է��ܾ�Ļص�
 	private void OnAudioChatRefused(String szSessionID, long nFromUserID) {
-		V2Log.d("OnAudioChatRefused " + szSessionID  + ":"
-				+ nFromUserID);
+		V2Log.d("OnAudioChatRefused " + szSessionID + ":" + nFromUserID);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatRefused(new AudioJNIObjectInd(szSessionID,
-						nFromUserID));
+				((AudioRequestCallback) obj)
+						.OnAudioChatRefused(new AudioJNIObjectInd(szSessionID,
+								nFromUserID));
 			}
 		}
 	}
 
 	// ��Ƶͨ�����ر���ص�
 	private void OnAudioChatClosed(String szSessionID, long nFromUserID) {
-		V2Log.d("OnAudioChatClosed " + szSessionID + ":"
-				+ nFromUserID);
+		V2Log.d("OnAudioChatClosed " + szSessionID + ":" + nFromUserID);
 		for (int i = 0; i < callbacks.size(); i++) {
 			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
 			Object obj = wr.get();
 			if (obj != null) {
-				((AudioRequestCallback) obj).OnAudioChatClosed(new AudioJNIObjectInd(szSessionID,
-						nFromUserID));
+				((AudioRequestCallback) obj)
+						.OnAudioChatClosed(new AudioJNIObjectInd(szSessionID,
+								nFromUserID));
 			}
 		}
 	}
 
 	// ��Ƶͨ��������
 	private void OnAudioChating(String szSessionID, long nFromUserID) {
-		Log.e("ImRequest UI", "OnAudioChating " + szSessionID + ":" + nFromUserID);
+		Log.e("ImRequest UI", "OnAudioChating " + szSessionID + ":"
+				+ nFromUserID);
 	}
 }

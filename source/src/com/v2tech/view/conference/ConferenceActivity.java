@@ -150,7 +150,8 @@ public class ConferenceActivity extends Activity {
 
 	private static final int SUB_ACTIVITY_CODE_SHARE_DOC = 100;
 
-	private PermissionState mControlState = PermissionState.NORMAL;
+	// private PermissionState mCurrentAttendeeLectureState =
+	// PermissionState.NORMAL;
 
 	private boolean isMuteCamera = false;
 
@@ -210,7 +211,7 @@ public class ConferenceActivity extends Activity {
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
 
 	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
-	private String mCurrentActivateDocId = null;
+	private String mCurrentLecturerActivateDocId = null;
 
 	private SubViewListener subViewListener = new SubViewListener();
 
@@ -350,9 +351,9 @@ public class ConferenceActivity extends Activity {
 				.getCurrentUserId()) {
 			mChairmanControl.setVisibility(View.INVISIBLE);
 		} else {
-			// If current user is conference creatoer, than update control
-			// permission to granted
-			mControlState = PermissionState.GRANTED;
+			// // If current user is conference creatoer, than update control
+			// // permission to granted
+			// mCurrentAttendeeLectureState = PermissionState.GRANTED;
 		}
 
 		// Initialize broadcast receiver
@@ -472,7 +473,7 @@ public class ConferenceActivity extends Activity {
 
 		// 默认设置自己不是主讲，主讲会在入会后广播过来
 		currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
-		mControlState = PermissionState.NORMAL;
+		// mCurrentAttendeeLectureState = PermissionState.NORMAL;
 
 		currentAttendee.setSpeakingState(currentAttendee.isChairMan());
 
@@ -547,10 +548,10 @@ public class ConferenceActivity extends Activity {
 
 	private void showCurrentAttendeeLectureStateToast(PermissionState state,
 			boolean reject) {
-		if (mControlState == PermissionState.APPLYING) {
+		int lectureState = currentAttendee.getLectureState();
+		if (lectureState == Attendee.LECTURE_STATE_APPLYING) {
 			if (state == PermissionState.GRANTED) {
 				// 20141221 1 同意主讲申请
-				// currentAttendee.setLectureState(Attendee.LECTURE_STATE_GRANTED);
 				Toast.makeText(mContext,
 						R.string.confs_toast_get_control_permission,
 						Toast.LENGTH_SHORT).show();
@@ -568,14 +569,11 @@ public class ConferenceActivity extends Activity {
 			} else if (state == PermissionState.NORMAL) {
 				if (reject) {
 					// 20141221 1 拒绝主讲申请
-					// currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
 					Toast.makeText(mContext,
 							R.string.confs_toast_reject_control_permission,
 							Toast.LENGTH_SHORT).show();
 				} else {
 					// 20141221 1 取消主讲申请
-					// currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
-
 					Toast.makeText(mContext,
 							R.string.confs_toast_cancel_control_permission,
 							Toast.LENGTH_SHORT).show();
@@ -583,21 +581,17 @@ public class ConferenceActivity extends Activity {
 				}
 			}
 
-		} else if (mControlState == PermissionState.GRANTED) {
+		} else if (lectureState == Attendee.LECTURE_STATE_GRANTED) {
 			if (state == PermissionState.NORMAL) {
 				// 主动释放主讲
-				// currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
-
 				Toast.makeText(mContext,
 						R.string.confs_toast_release_control_permission,
 						Toast.LENGTH_SHORT).show();
 				((VideoDocLayout) initDocLayout())
 						.requestShowSharedButton(false);
 			}
-		} else if (mControlState == PermissionState.NORMAL) {
+		} else if (lectureState == Attendee.LECTURE_STATE_NOT) {
 			if (state == PermissionState.APPLYING) {// 申请中
-				// currentAttendee
-				// .setLectureState(Attendee.LECTURE_STATE_APPLYING);
 				// 如果不是主席才提示
 				if (!currentAttendee.isChairMan()) {
 					Toast.makeText(mContext,
@@ -606,10 +600,7 @@ public class ConferenceActivity extends Activity {
 				}
 			}
 		}
-		mControlState = state;
-		// if (mAttendeeContainer != null) {
-		// mAttendeeContainer.updateDisplay();
-		// }
+		// mCurrentAttendeeLectureState = state;
 
 	}
 
@@ -728,7 +719,7 @@ public class ConferenceActivity extends Activity {
 
 		if (mDocContainer == null) {
 			mDocContainer = new VideoDocLayout(this, mDocs,
-					mCurrentActivateDocId);
+					mCurrentLecturerActivateDocId);
 			mDocContainer.setListener(subViewListener);
 			Group g = GlobalHolder.getInstance().findGroupById(conf.getId());
 			if (g != null && g instanceof ConferenceGroup) {
@@ -904,6 +895,10 @@ public class ConferenceActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == SUB_ACTIVITY_CODE_SHARE_DOC
 				&& resultCode != Activity.RESULT_CANCELED) {
+			if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_NOT) {
+				Toast.makeText(this, "您不是主讲不能共享文档", Toast.LENGTH_SHORT).show();
+				return;
+			}
 			String filePath = data.getStringExtra("checkedImage");
 			cb.shareDoc(conf, filePath, null);
 		}
@@ -996,7 +991,7 @@ public class ConferenceActivity extends Activity {
 				// shared doc button
 				if (conf.getChairman() == GlobalHolder.getInstance()
 						.getCurrentUserId()
-						|| mControlState == PermissionState.GRANTED) {
+						|| currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
 					((VideoDocLayout) content).requestShowSharedButton(true);
 				} else {
 					((VideoDocLayout) content).requestShowSharedButton(false);
@@ -1085,7 +1080,8 @@ public class ConferenceActivity extends Activity {
 					.findViewById(R.id.conference_activity_request_host_tv))
 					.setText(R.string.confs_title_button_request_host_name);
 
-			if ((mControlState == PermissionState.GRANTED || mControlState == PermissionState.APPLYING)) {
+			if ((currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED || currentAttendee
+					.getLectureState() == Attendee.LECTURE_STATE_APPLYING)) {
 				// updateCurrentAttendeeLectureState(PermissionState.NORMAL,
 				// false);
 				cb.applyForReleasePermission(ConferencePermission.CONTROL, null);
@@ -1098,7 +1094,8 @@ public class ConferenceActivity extends Activity {
 				if (mAttendeeContainer != null) {
 					mAttendeeContainer.updateDisplay();
 				}
-				mControlState = PermissionState.APPLYING;
+				currentAttendee
+						.setLectureState(Attendee.LECTURE_STATE_APPLYING);
 				cb.applyForControlPermission(ConferencePermission.CONTROL, null);
 				// 申请主讲中
 			}
@@ -1196,25 +1193,7 @@ public class ConferenceActivity extends Activity {
 
 		}
 
-		if (mControlState == PermissionState.APPLYING) {
-			mRequestButtonName.setTextColor(mContext.getResources().getColor(
-					R.color.conference_host_requesting_text_color));
-			mRequestButtonImage.setImageResource(R.drawable.host_requesting);
-			mRequestButtonName
-					.setText(R.string.confs_title_button_request_host_name);
-		} else if (mControlState == PermissionState.GRANTED) {
-			mRequestButtonName.setTextColor(mContext.getResources().getColor(
-					R.color.conference_acquired_host_text_color));
-			mRequestButtonImage.setImageResource(R.drawable.host_required);
-			mRequestButtonName
-					.setText(R.string.confs_title_button_release_host_name);
-		} else if (mControlState == PermissionState.NORMAL) {
-			mRequestButtonName.setTextColor(mContext.getResources().getColor(
-					R.color.common_item_text_color_black));
-			mRequestButtonImage.setImageResource(R.drawable.host_request);
-			mRequestButtonName
-					.setText(R.string.confs_title_button_request_host_name);
-		}
+		updateMoreWindowDisplay();
 
 		int[] pos = new int[2];
 		anchor.getLocationInWindow(pos);
@@ -1234,6 +1213,32 @@ public class ConferenceActivity extends Activity {
 		int marginRight = DensityUtils.dip2px(mContext, 5);
 		moreWindow.showAtLocation(anchor, Gravity.RIGHT | Gravity.TOP,
 				marginRight, pos[1]);
+	}
+
+	private void updateMoreWindowDisplay() {
+		if (mRequestButtonName == null || mRequestButtonImage == null) {
+			return;
+		}
+
+		if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_APPLYING) {
+			mRequestButtonName.setTextColor(mContext.getResources().getColor(
+					R.color.conference_host_requesting_text_color));
+			mRequestButtonImage.setImageResource(R.drawable.host_requesting);
+			mRequestButtonName
+					.setText(R.string.confs_title_button_request_host_name);
+		} else if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
+			mRequestButtonName.setTextColor(mContext.getResources().getColor(
+					R.color.conference_acquired_host_text_color));
+			mRequestButtonImage.setImageResource(R.drawable.host_required);
+			mRequestButtonName
+					.setText(R.string.confs_title_button_release_host_name);
+		} else if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_NOT) {
+			mRequestButtonName.setTextColor(mContext.getResources().getColor(
+					R.color.common_item_text_color_black));
+			mRequestButtonImage.setImageResource(R.drawable.host_request);
+			mRequestButtonName
+					.setText(R.string.confs_title_button_request_host_name);
+		}
 	}
 
 	private OnClickListener onClickMChairmanControl = new OnClickListener() {
@@ -1294,7 +1299,14 @@ public class ConferenceActivity extends Activity {
 						public void onCheckedChanged(CompoundButton buttonView,
 								boolean isChecked) {
 							mChairControlWindow.dismiss();
-							showConfMsgPopWindow();
+							// 您当前没有会议消息
+							if (mHostRequestUsers != null
+									&& mHostRequestUsers.size() > 0) {
+								showConfMsgPopWindow();
+							} else {
+								Toast.makeText(ConferenceActivity.this,
+										"您当前没有会议消息", Toast.LENGTH_SHORT).show();
+							}
 						}
 
 					});
@@ -1520,7 +1532,7 @@ public class ConferenceActivity extends Activity {
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code == NetworkStateCode.CONNECTED_ERROR) {
-//					quit();
+					// quit();
 					finish();
 				}
 
@@ -2204,9 +2216,12 @@ public class ConferenceActivity extends Activity {
 			mMuteCameraDialog = d;
 		}
 
-		TextView muteContent = (TextView) mMuteCameraDialog.findViewById(R.id.content);
-		TextView muteConfirm = (TextView) mMuteCameraDialog.findViewById(R.id.IMWOKButton);
-		TextView muteCancel = (TextView) mMuteCameraDialog.findViewById(R.id.IMWCancelButton);
+		TextView muteContent = (TextView) mMuteCameraDialog
+				.findViewById(R.id.content);
+		TextView muteConfirm = (TextView) mMuteCameraDialog
+				.findViewById(R.id.IMWOKButton);
+		TextView muteCancel = (TextView) mMuteCameraDialog
+				.findViewById(R.id.IMWCancelButton);
 		muteContent.setText(R.string.in_meeting_mute_hit_content);
 		muteConfirm.setText(R.string.in_meeting_mute_button);
 		muteCancel.setText(R.string.in_meeting_mute_cancel_button);
@@ -2678,11 +2693,12 @@ public class ConferenceActivity extends Activity {
 			break;
 		case DOC_PAGE_ADDED_NOTIFICATION:
 		case DOC_DOWNLOADED_NOTIFICATION:
-		case DOC_PAGE_ACTIVITE_NOTIFICATION:
+		case DOC_PAGE_ACTIVITE_NOTIFICATION:// 上下翻页
 			page = (V2Doc.Page) res.getResult();
 			docId = page.getDocId();
 			// Record current activate Id;
-			mCurrentActivateDocId = docId;
+			mCurrentLecturerActivateDocId = docId;
+
 			break;
 		case DOC_PAGE_CANVAS_NOTIFICATION:
 			shape = (V2ShapeMeta) res.getResult();
@@ -2700,7 +2716,7 @@ public class ConferenceActivity extends Activity {
 			if (doc == null) {
 				doc = new V2Doc(docId, null, null, 0, null);
 				mDocs.put(docId, doc);
-				if(opt == DOC_DOWNLOADED_NOTIFICATION)
+				if (opt == DOC_DOWNLOADED_NOTIFICATION)
 					V2Log.e(TAG, "Update Doc Page failed , 没有获取到文件路径");
 			}
 			// If doc is not null, means new doc event or doc close event. need
@@ -2731,7 +2747,9 @@ public class ConferenceActivity extends Activity {
 				page.addMeta(shape);
 			}
 		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
-			doc.setActivatePageNo(page.getNo());
+			if (isSyn == 1) {
+				doc.setActivatePageNo(page.getNo());
+			}
 		}
 
 		// Update UI
@@ -2749,7 +2767,11 @@ public class ConferenceActivity extends Activity {
 				mDocContainer.updatePageButton();
 				break;
 			case DOC_PAGE_ACTIVITE_NOTIFICATION:
-				doc.setActivatePageNo(page.getNo());
+				if (isSyn == 1) {
+					Log.i("20141224 1", "翻页");
+					doc.setActivatePageNo(page.getNo());
+				}
+				break;
 			case DOC_DOWNLOADED_NOTIFICATION:
 				mDocContainer.updateCurrentDoc(doc);
 				break;
@@ -2757,7 +2779,6 @@ public class ConferenceActivity extends Activity {
 				mDocContainer.drawShape(page.getDocId(), page.getNo(), shape);
 				break;
 			}
-			;
 		}
 
 	}
@@ -3052,8 +3073,10 @@ public class ConferenceActivity extends Activity {
 		@Override
 		public void updateDoc(V2Doc doc, Page p) {
 			// If current user is host
-			if (mControlState == PermissionState.GRANTED) {
-				ds.switchDoc(doc, isSyn == FLAG_IS_SYNCING, null);
+			if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
+				ds.switchDoc(currentAttendee.getAttId(), doc, true, null);
+			} else {
+				ds.switchDoc(currentAttendee.getAttId(), doc, false, null);
 			}
 		}
 
@@ -3204,9 +3227,23 @@ public class ConferenceActivity extends Activity {
 			case GROUP_ADD_USER:
 				GroupUserObject ro1 = (GroupUserObject) msg.obj;
 				if (ro1.getmType() == V2GlobalEnum.GROUP_TYPE_CONFERENCE) { // CONFGROUP
+
+					boolean contain = false;
+					for (Attendee attendee : mAttendeeList) {
+						if (ro1.getmUserId() == attendee.getAttId()) {
+							contain = true;
+							break;
+						}
+					}
+
+					if (contain) {
+						return;
+					}
+
 					Attendee a1 = new Attendee(GlobalHolder.getInstance()
 							.getUser(ro1.getmUserId()));
 					mAttendeeList.add(a1);
+
 					if (mAttendeeContainer != null) {
 						mAttendeeContainer.addNewAttendee(a1);
 					}
@@ -3277,9 +3314,42 @@ public class ConferenceActivity extends Activity {
 				}
 				Toast.makeText(mContext, resource, Toast.LENGTH_LONG).show();
 				// Do quit action
-//				quit();
+				// quit();
 				finish();
 			}
+				break;
+
+			case NOTIFY_HOST_PERMISSION_REQUESTED:
+				PermissionRequestIndication rri = (PermissionRequestIndication) (((AsyncResult) msg.obj)
+						.getResult());
+				if (rri.getUid() != GlobalHolder.getInstance()
+						.getCurrentUserId()) {
+					mHostRequestUsers.add(GlobalHolder.getInstance().getUser(
+							rri.getUid()));
+					if (mHostRequestWindow == null
+							|| !mHostRequestWindow.isShowing()) {
+						mMsgNotification.setVisibility(View.VISIBLE);
+						if (mConfMsgRedDot != null) {
+							mConfMsgRedDot.setVisibility(View.VISIBLE);
+						}
+					}
+
+					hasUnreadChiremanControllMsg = true;
+
+					PermissionUpdateIndication pui = new PermissionUpdateIndication(
+							rri.getUid(), rri.getType(), rri.getState());
+
+					updateAttendeePermissionState(pui);
+
+					if (moreWindow != null && moreWindow.isShowing()) {
+						updateMoreWindowDisplay();
+					}
+				}
+
+				if (mHostRequestWindow != null) {
+					mHostRequestWindow.updateList(mHostRequestUsers);
+				}
+
 				break;
 			// user permission updated
 			case NOTIFY_USER_PERMISSION_UPDATED:
@@ -3320,16 +3390,11 @@ public class ConferenceActivity extends Activity {
 					}
 				}
 
-				// 更新参会人列表里的主讲和发言状态
-				if (!updateAttendeePermissionState(ind)) {
-					mPendingPermissionUpdateList.add(ind);
-				}
-
 				if (ind.getUid() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
 					if (ConferencePermission.CONTROL.intValue() == ind
 							.getType()) {
-						// 更新自己的主讲状态和提示信息
+						// 显示提示信息
 						showCurrentAttendeeLectureStateToast(
 								PermissionState.fromInt(ind.getState()), true);
 
@@ -3343,36 +3408,20 @@ public class ConferenceActivity extends Activity {
 					}
 				}
 
-				break;
-			case NOTIFY_HOST_PERMISSION_REQUESTED: {
-				PermissionRequestIndication rri = (PermissionRequestIndication) (((AsyncResult) msg.obj)
-						.getResult());
-				if (rri.getUid() != GlobalHolder.getInstance()
+				// 更新参会人列表里的主讲和发言状态
+				if (!updateAttendeePermissionState(ind)) {
+					mPendingPermissionUpdateList.add(ind);
+				}
+
+				if (ind.getUid() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
-					mHostRequestUsers.add(GlobalHolder.getInstance().getUser(
-							rri.getUid()));
-					if (mHostRequestWindow == null
-							|| !mHostRequestWindow.isShowing()) {
-						mMsgNotification.setVisibility(View.VISIBLE);
-						if (mConfMsgRedDot != null) {
-							mConfMsgRedDot.setVisibility(View.VISIBLE);
+					if (ConferencePermission.CONTROL.intValue() == ind
+							.getType()) {
+						if (moreWindow != null && moreWindow.isShowing()) {
+							updateMoreWindowDisplay();
 						}
 					}
-
-					hasUnreadChiremanControllMsg = true;
-
-					PermissionUpdateIndication pui = new PermissionUpdateIndication(
-							rri.getUid(), rri.getType(), rri.getState());
-
-					updateAttendeePermissionState(pui);
-
 				}
-
-				if (mHostRequestWindow != null) {
-					mHostRequestWindow.updateList(mHostRequestUsers);
-				}
-
-			}
 
 				break;
 			case NEW_DOC_NOTIFICATION:
@@ -3397,6 +3446,7 @@ public class ConferenceActivity extends Activity {
 						mDocContainer.updateSyncStatus(false);
 					}
 				}
+
 				if (isSyn == 1) {
 					// 关闭所有打开的视频
 					Object[] surfaceViewWArray = mCurrentShowedSV.toArray();

@@ -169,7 +169,6 @@ public class ConversationSelectImage extends Activity {
 					initPictures(Uri.parse(selectArgs[i][0]) , selectArgs[i][1]);
 				}
 				handler.sendEmptyMessage(SCAN_SDCARD);
-
 			}
 		}).start();
 	}
