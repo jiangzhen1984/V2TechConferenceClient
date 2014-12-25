@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -88,9 +87,9 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
+import com.v2tech.vo.VMessageFileItem.FileType;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageQualification;
-import com.v2tech.vo.VMessageFileItem.FileType;
 import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
@@ -481,27 +480,28 @@ public class JNIService extends Service implements
 						GroupType.CONFERENCE.intValue(), g.getmGId());
 				// conference already in cache list
 				if (cache != null && g.getmGId() != 0) {
-					V2Log.i("Current user conference in group:"
+					V2Log.d("Current user conference in group:"
 							+ cache.getName() + "  " + cache.getmGId()
 							+ " only send Broadcast!");
 					Intent i = new Intent();
 					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", g.getmGId());
-					i.putExtra("justFresh", true);
 					sendBroadcast(i);
 					return;
 				}
-				GroupRequest.getInstance().getGroupInfo(
-						GroupType.CONFERENCE.intValue(), g.getmGId());
-				if (g != null) {
-					GlobalHolder.getInstance().addGroupToList(
-							GroupType.CONFERENCE.intValue(), g);
-					Intent i = new Intent();
-					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
-					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-					i.putExtra("gid", g.getmGId());
-					sendBroadcast(i);
+				else{
+					GroupRequest.getInstance().getGroupInfo(
+							GroupType.CONFERENCE.intValue(), g.getmGId());
+					if (g != null) {
+						GlobalHolder.getInstance().addGroupToList(
+								GroupType.CONFERENCE.intValue(), g);
+						Intent i = new Intent();
+						i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
+						i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+						i.putExtra("gid", g.getmGId());
+						sendBroadcast(i);
+					}
 				}
 				break;
 			case JNI_RECEIVED_MESSAGE:
@@ -1482,13 +1482,14 @@ public class JNIService extends Service implements
 								GlobalConfig.getGlobalServerTime()));
 				VMessageFileItem item = new VMessageFileItem(vm,
 						fileJNIObject.fileName,
-						VMessageFileItem.STATE_FILE_SENT, UUID.randomUUID().toString());
+						VMessageFileItem.STATE_FILE_SENT, fileJNIObject.fileId);
 				item.setFileSize(fileJNIObject.fileSize);
 				item.setFileType(FileType.fromInt(fileJNIObject.fileType));
 				// save to database
 				vm.setmXmlDatas(vm.toXml());
 				MessageBuilder.saveMessage(mContext, vm);
 				MessageBuilder.saveFileVMessage(mContext, vm);
+				fileJNIObject.vMessageID = vm.getUUID();
 			}
 
 			Intent intent = new Intent();
@@ -2073,17 +2074,26 @@ public class JNIService extends Service implements
 		@Override
 		public void OnFileTransError(String szFileID, int errorCode,
 				int nTransType) {
-			VMessage vm = new VMessage(0, 0, null, null);
-			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
-			item.setUuid(szFileID);
-			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
-				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-			else
-				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
-			int updates = MessageBuilder.updateVMessageItem(mContext, item);
-			V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
-			vm = null;
-			item = null;
+			VMessageFileItem fileItem = MessageLoader.queryFileItemByID(V2GlobalEnum.GROUP_TYPE_USER, szFileID);
+			if(fileItem != null){
+				if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
+					fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+				else if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING)
+					fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+				int updates = MessageBuilder.updateVMessageItem(mContext, fileItem);
+				V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+			}
+			else{
+				V2Log.e(TAG, "OnFileTransEnd updates failed , id : " + szFileID);
+			}
+//			VMessage vm = new VMessage(0, 0, null, null);
+//			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
+//			item.setUuid(szFileID);
+//			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
+//				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+//			else
+//				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+			fileItem = null;
 			updateTransFileState(szFileID, false);
 		}
 

@@ -931,7 +931,8 @@ public class MessageBodyView extends LinearLayout {
 			if (callback != null) {
 				if (mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD) {
 					if (item.getState() == VMessageAbstractItem.STATE_FILE_SENDING ||
-							item.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
+							item.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING ||
+							item.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED)
 						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_UPLOING_ACTIVITY);
 					else
 						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_ACTIVITY);

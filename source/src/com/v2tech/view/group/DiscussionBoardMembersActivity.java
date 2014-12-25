@@ -323,7 +323,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 			mNameTV.setText(user.getName());
 			mNameTV.setGravity(Gravity.CENTER_VERTICAL);
 			mNameTV.setTextColor(context.getResources().getColor(
-					R.color.contacts_user_view_item_color_offline));
+					R.color.common_black));
 			mNameTV.setEllipsize(TruncateAt.END);
 			RelativeLayout.LayoutParams mNameParams = new RelativeLayout.LayoutParams(
 					RelativeLayout.LayoutParams.WRAP_CONTENT,

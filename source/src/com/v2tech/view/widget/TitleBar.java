@@ -62,16 +62,16 @@ public class TitleBar {
 	private int[] items = new int[] { R.string.title_bar_item_detail,
 			R.string.title_bar_item_setting, R.string.title_bar_item_help,
 			R.string.title_bar_item_about };
-	
+
 	private int[] plusImgs = new int[] { R.drawable.conversation_video_button,
 			R.drawable.conversation_group_button,
 			R.drawable.conversation_discussion_button,
 			R.drawable.conversation_seach_crowd_button,
-			R.drawable.conversation_seach_member_button,
-			R.drawable.conversation_call_button,
-			R.drawable.conversation_sms_button,
-			R.drawable.conversation_email_button,
-			R.drawable.conversation_files_button };
+			R.drawable.conversation_seach_member_button };
+	// R.drawable.conversation_call_button,
+	// R.drawable.conversation_sms_button,
+	// R.drawable.conversation_email_button,
+	// R.drawable.conversation_files_button };
 
 	private int[] plusItems = new int[] {
 			R.string.conversation_popup_menu_video_call_button,
@@ -83,7 +83,7 @@ public class TitleBar {
 			R.string.conversation_popup_menu_sms_call_button,
 			R.string.conversation_popup_menu_email_button,
 			R.string.conversation_popup_menu_files_button };
-	
+
 	private int marginRight;
 
 	public TitleBar(Context context, View rootContainer) {
@@ -113,13 +113,14 @@ public class TitleBar {
 		moreButton.setOnClickListener(mMoreButtonListener);
 		searchEdit = (EditText) this.rootContainer
 				.findViewById(R.id.search_edit);
-		
+
 		// Initialise popupWindow padding
 		Configuration conf = context.getResources().getConfiguration();
-		int landscape = ((Activity)context).getRequestedOrientation();
+		int landscape = ((Activity) context).getRequestedOrientation();
 		if (landscape == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
 			padding = DensityUtils.dip2px(context, 2);
-		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1 && conf.densityDpi < 240) {
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1
+				&& conf.densityDpi < 240) {
 			padding = DensityUtils.dip2px(context, 2);
 		} else {
 			padding = DensityUtils.dip2px(context, 5);
@@ -158,7 +159,7 @@ public class TitleBar {
 
 			ImageView iv = new ImageView(context);
 			iv.setImageResource(imgs[i]);
-//			iv.setPadding(10, 5, 5, 10);
+			// iv.setPadding(10, 5, 5, 10);
 			iv.setPadding(10, padding, 5, padding);
 			LinearLayout.LayoutParams ivLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
@@ -169,7 +170,7 @@ public class TitleBar {
 
 			TextView tv = new TextView(context);
 			tv.setText(items[i]);
-//			tv.setPadding(10, 15, 5, 15);
+			// tv.setPadding(10, 15, 5, 15);
 			tv.setPadding(10, padding, 5, padding);
 			tv.setTextColor(Color.rgb(123, 123, 123));
 			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
@@ -197,7 +198,7 @@ public class TitleBar {
 			}
 		}
 	}
-	
+
 	public void initPlusItem() {
 		for (int i = 0; i < plusImgs.length; i++) {
 			LinearLayout ll = new LinearLayout(context);
@@ -216,12 +217,12 @@ public class TitleBar {
 			TextView tv = new TextView(context);
 			tv.setText(plusItems[i]);
 			tv.setPadding(5, padding, 5, padding);
-			//TODO gray disable button
-			if (i > 4) {
-				tv.setTextColor(Color.rgb(198, 198, 198));
-			} else {
-				tv.setTextColor(Color.rgb(123, 123, 123));
-			}
+			// DEPRECATE gray disable button
+			// if (i > 4) {
+//			   tv.setTextColor(Color.rgb(198, 198, 198));
+			// } else {
+			tv.setTextColor(Color.rgb(123, 123, 123));
+			// }
 			LinearLayout.LayoutParams tvLL = new LinearLayout.LayoutParams(0,
 					LinearLayout.LayoutParams.WRAP_CONTENT);
 			tvLL.gravity = Gravity.LEFT | Gravity.CENTER_VERTICAL;
@@ -268,14 +269,15 @@ public class TitleBar {
 		imm.hideSoftInputFromWindow(searchEdit.getWindowToken(),
 				InputMethodManager.RESULT_UNCHANGED_SHOWN);
 	}
-	
+
 	private OnClickListener titleBarMenuItemClickListener = new OnClickListener() {
 
 		@Override
 		public void onClick(View view) {
 			dismissPlusWindow();
 			if (!GlobalHolder.getInstance().isServerConnected()) {
-				Toast.makeText(context, R.string.error_offline_of_no_network, Toast.LENGTH_SHORT).show();
+				Toast.makeText(context, R.string.error_offline_of_no_network,
+						Toast.LENGTH_SHORT).show();
 				return;
 			}
 			int id = view.getId();
@@ -296,28 +298,25 @@ public class TitleBar {
 			}
 				break;
 			case R.drawable.conversation_seach_crowd_button: {
-				Intent i = new Intent(
-						PublicIntent.START_SEARCH_ACTIVITY);
+				Intent i = new Intent(PublicIntent.START_SEARCH_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				//For crowd search
+				// For crowd search
 				i.putExtra("type", 0);
 				context.startActivity(i);
 			}
 				break;
-			case R.drawable.conversation_discussion_button : {
+			case R.drawable.conversation_discussion_button: {
 				Intent i = new Intent(
 						PublicIntent.START_DISCUSSION_BOARD_CREATE_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				context.startActivity(i);
 			}
-			break;
-				
-			case R.drawable.conversation_seach_member_button:
-			{
-				Intent i = new Intent(
-						PublicIntent.START_SEARCH_ACTIVITY);
+				break;
+
+			case R.drawable.conversation_seach_member_button: {
+				Intent i = new Intent(PublicIntent.START_SEARCH_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-				//For member search
+				// For member search
 				i.putExtra("type", 1);
 				context.startActivity(i);
 			}
@@ -384,12 +383,12 @@ public class TitleBar {
 						LinearLayout.LayoutParams.WRAP_CONTENT,
 						LinearLayout.LayoutParams.WRAP_CONTENT);
 				lp.rightMargin = 20;
-				
+
 				initPlusItem();
 				if (additionList.size() <= 0) {
 					return;
 				}
-				
+
 				for (int i = 0; i < additionList.size(); i++) {
 					additionList.get(i).v.setPadding(0, padding, 15, padding);
 					itemContainer.addView(additionList.get(i).v, lp);
@@ -432,12 +431,14 @@ public class TitleBar {
 
 			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
 					.getLayoutParams();
-			arrowRL.rightMargin = dm.widthPixels - pos[0]  - 
-					(anchor.getMeasuredWidth() / 2) - arrow.getMeasuredWidth();
+			arrowRL.rightMargin = dm.widthPixels - pos[0]
+					- (anchor.getMeasuredWidth() / 2)
+					- arrow.getMeasuredWidth();
 			arrow.setLayoutParams(arrowRL);
 
 			plusWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			plusWindow.showAtLocation(anchor, Gravity.TOP | Gravity.RIGHT,  marginRight , pos[1]);
+			plusWindow.showAtLocation(anchor, Gravity.TOP | Gravity.RIGHT,
+					marginRight, pos[1]);
 		}
 
 	};
@@ -484,12 +485,14 @@ public class TitleBar {
 
 			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
 					.getLayoutParams();
-			arrowRL.rightMargin = dm.widthPixels - pos[0]  - (anchor.getMeasuredWidth() / 2) 
+			arrowRL.rightMargin = dm.widthPixels - pos[0]
+					- (anchor.getMeasuredWidth() / 2)
 					- arrow.getMeasuredWidth();
 			arrow.setLayoutParams(arrowRL);
 
 			moreWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			moreWindow.showAtLocation(anchor, Gravity.RIGHT | Gravity.TOP , marginRight , pos[1]);
+			moreWindow.showAtLocation(anchor, Gravity.RIGHT | Gravity.TOP,
+					marginRight, pos[1]);
 		}
 
 	};

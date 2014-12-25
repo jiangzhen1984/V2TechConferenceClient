@@ -12,6 +12,7 @@ import android.util.SparseArray;
 import com.V2.jni.util.V2Log;
 import com.v2tech.db.provider.SearchContentProvider;
 import com.v2tech.view.ConversationsTabFragment.ScrollItem;
+import com.v2tech.view.conference.VideoAttendeeListLayout.Wrapper;
 import com.v2tech.vo.User;
 
 public class SearchUtils {
@@ -19,6 +20,7 @@ public class SearchUtils {
 	private static final String TAG = "SearchUtils";
 	private static List<Object> searchList = new ArrayList<Object>();
 	private static List<Object> searchCacheList = new ArrayList<Object>();
+	private static List<Object> surplusList = new ArrayList<Object>();
 	private static SparseArray<List<Object>> cacheList = new SparseArray<List<Object>>();
 
 	public static List<Object> receiveList = new ArrayList<Object>();
@@ -30,6 +32,7 @@ public class SearchUtils {
 
 	private static final int TYPE_CONVERSATION = 10;
 	private static final int TYPE_ITEM_DATA = 11;
+	private static final int TYPE_WRAPPER = 12;
 	private static int type = TYPE_CONVERSATION;
 
 	/**
@@ -65,6 +68,47 @@ public class SearchUtils {
 			if(search != null){
 				for (Object object : search) {
 					searchItems.add((ScrollItem) object);
+				}
+	
+				List<Object> temp = new ArrayList<Object>();
+				temp.addAll(search);
+				cacheList.put(content.length(), temp);
+				V2Log.e(TAG, "put cache list : key --> " + content.length()
+						+ " and value --> " + search.size());
+				temp = null;
+			}
+			search = null;
+			return searchItems;
+		}
+	}
+	
+	public static List<Wrapper> startVideoAttendeeSearch(String content) {
+		type = TYPE_WRAPPER;
+
+		List<Object> cache = cacheList.get(content.length());
+		if (cache != null) {
+			V2Log.e(TAG, "find cache list : key --> " + content.length()
+					+ " and value --> " + cache.size());
+			List<Wrapper> cacheItems = new ArrayList<Wrapper>();
+			for (Object object : cache) {
+				cacheItems.add((Wrapper) object);
+			}
+			cacheList.delete(content.length() + 1);
+			return cacheItems;
+		} else {
+			if (content.length() - 1 != 0) {
+				startIndex = content.length() - 1;
+				searchList.clear();
+				List<Object> lastCache = cacheList.get(content.length() - 1);
+				if(lastCache != null)
+					searchList.addAll(lastCache);
+			}
+
+			List<Wrapper> searchItems = new ArrayList<Wrapper>();
+			List<Object> search = search(content.toString());
+			if(search != null){
+				for (Object object : search) {
+					searchItems.add((Wrapper) object);
 				}
 	
 				List<Object> temp = new ArrayList<Object>();
@@ -144,96 +188,50 @@ public class SearchUtils {
 				searchList.addAll(receiveList);
 			}
 
-			StringBuilder sb = new StringBuilder();
 			V2Log.e(TAG, "Editable :" + content.toString());
-
 			char[] charSimpleArray = content.toString()
 					.toLowerCase(Locale.getDefault()).toCharArray();
-			if (charSimpleArray.length < 6) {
-				// 搜字母查询
-				for (int i = startIndex; i < charSimpleArray.length; i++) {
-					if (isChineseWord(charSimpleArray[i])) {
-						V2Log.e(TAG, charSimpleArray[i] + " is Chinese");
-						searchCacheList = getSearchList(searchList,
-								String.valueOf(charSimpleArray[i]),
-								content.toString(), i, true, true);
-					} else {
-						V2Log.e(TAG, charSimpleArray[i] + " not Chinese");
-						searchCacheList = getSearchList(searchList,
-								String.valueOf(charSimpleArray[i]),
-								content.toString(), i, true, false);
-					}
-
-					searchList.clear();
-					if (searchCacheList.size() > 0) {
-						isShouldQP = false;
-						searchList.addAll(searchCacheList);
-						searchCacheList.clear();
-						V2Log.e(TAG, "简拼找到结果 展示");
-					} else {
-						isShouldQP = true;
-						List<Object> cache = cacheList.get(content.length() - 1);
-						if(cache != null)
-							searchCacheList
-									.addAll(cacheList.get(content.length() - 1));
-						V2Log.e(TAG, "简拼没有结果 开启全拼");
-					}
+			// 搜字母查询
+			for (int i = startIndex; i < charSimpleArray.length; i++) {
+				if (isChineseWord(charSimpleArray[i])) {
+					V2Log.e(TAG, "--- " + charSimpleArray[i] + " ---is Chinese");
+					searchCacheList = getSearchList(searchList,
+							String.valueOf(charSimpleArray[i]),
+							content.toString(), i, true, true);
+				} else {
+					V2Log.e(TAG, "--- " + charSimpleArray[i] + " ---not Chinese");
+					searchCacheList = getSearchList(searchList,
+							String.valueOf(charSimpleArray[i]),
+							content.toString(), i, true, false);
 				}
-			} else {
-				isShouldQP = true;
-				searchCacheList.addAll(cacheList.get(content.length() - 1));
-				V2Log.e(TAG, "简拼没有结果 开启全拼");
+
+				searchList.clear();
+				if (searchCacheList.size() > 0) {
+					isShouldQP = false;
+					searchList.addAll(searchCacheList);
+					searchCacheList.clear();
+					
+					V2Log.d(TAG, "简拼找到结果 , 全拼再搜索一遍");
+					if(surplusList.size() > 0){
+						searchCacheList.addAll(surplusList);
+						surplusList.clear();
+					}
+					startQPSearch(content);
+					searchCacheList.clear();
+				} else {
+					isShouldQP = true;
+					List<Object> cache = cacheList.get(content.length() - 1);
+					if(cache != null)
+						searchCacheList
+								.addAll(cacheList.get(content.length() - 1));
+					V2Log.e(TAG, "简拼没有结果 开启全拼搜索");
+				}
 			}
+			
 
 			if (isShouldQP) { // 如果长度大于5则不按首字母查询
 				searchList.clear();
-				V2Log.e(TAG, "searchCacheList size :" + searchCacheList.size());
-				for (int i = 0; i < searchCacheList.size(); i++) {
-					Object obj = searchCacheList.get(i);
-					V2Log.e(TAG, "current search word : " + getObjectValue(obj));
-					// 获取名字，将名字变成拼音串起来
-					//FIXME 包含有多音字，需要重新组合
-					char[] charArray = getObjectValue(obj).toCharArray();
-					for (char c : charArray) {
-						String charStr = null;
-						if (isChineseWord(c)) {
-							charStr = GlobalConfig.allChinese.get(String
-									.valueOf(c));
-						} else {
-							charStr = String.valueOf(c);
-						}
-						sb.append(charStr);
-					}
-					V2Log.e(TAG, "current searh material : " + sb.toString());
-					String material = sb.toString();
-					// 判断该昵称第一个字母，与输入的第一字母是否匹配
-					Character first = material.toCharArray()[0];
-					char[] targetChars = content.toString().toCharArray();
-					if (!first.equals(targetChars[0])) {
-						isShouldAdd = true;
-					} else {
-						for (int j = 0; j < targetChars.length; j++) {
-							if (j >= material.length()
-									|| targetChars[j] != material.charAt(j)) {
-								isShouldAdd = true;
-								V2Log.e(TAG, "material not contains "
-										+ targetChars[j]);
-								break;
-							}
-							isShouldAdd = false;
-						}
-					}
-
-					if (!isShouldAdd) {
-						V2Log.e(TAG, "added ---------" + getObjectValue(obj));
-						if (!searchList.contains(obj))
-							searchList.add(obj);
-					} else {
-						if (searchList.contains(obj))
-							searchList.remove(obj);
-					}
-					sb.delete(0, sb.length());
-				}
+				startQPSearch(content);
 			}
 			startIndex++;
 			return searchList;
@@ -255,6 +253,58 @@ public class SearchUtils {
 		}
 	}
 
+	public static void startQPSearch(String content){
+		content = content.toLowerCase();
+		V2Log.e(TAG, "全拼搜索的集合大小：" + searchCacheList.size());
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < searchCacheList.size(); i++) {
+			Object obj = searchCacheList.get(i);
+			V2Log.e(TAG, "current search word : " + getObjectValue(obj));
+			// 获取名字，将名字变成拼音串起来
+			//FIXME 包含有多音字，需要重新组合
+			char[] charArray = getObjectValue(obj).toCharArray();
+			for (char c : charArray) {
+				String charStr = null;
+				if (isChineseWord(c)) {
+					charStr = GlobalConfig.allChinese.get(String
+							.valueOf(c));
+				} else {
+					charStr = String.valueOf(c);
+				}
+				sb.append(charStr);
+			}
+			V2Log.e(TAG, "current searh material : " + sb.toString());
+			String material = sb.toString();
+			// 判断该昵称第一个字母，与输入的第一字母是否匹配
+			Character first = material.toCharArray()[0];
+			char[] targetChars = content.toString().toCharArray();
+			if (!first.equals(targetChars[0])) {
+				isShouldAdd = true;
+			} else {
+				for (int j = 0; j < targetChars.length; j++) {
+					if (j >= material.length()
+							|| targetChars[j] != material.charAt(j)) {
+						isShouldAdd = true;
+						V2Log.e(TAG, "material not contains "
+								+ targetChars[j]);
+						break;
+					}
+					isShouldAdd = false;
+				}
+			}
+
+			if (!isShouldAdd) {
+				V2Log.e(TAG, "added ---------" + getObjectValue(obj));
+				if (!searchList.contains(obj))
+					searchList.add(obj);
+			} else {
+				if (searchList.contains(obj))
+					searchList.remove(obj);
+			}
+			sb.delete(0, sb.length());
+		}
+	}
+	
 	/**
 	 * 根据 searchKey 获得搜索后的集合
 	 * 
@@ -281,8 +331,8 @@ public class SearchUtils {
 
 		String searchTarget;
 		for (int i = 0; i < list.size(); i++) { // 一级循环，循环所有消息
+			boolean isAdd = false;
 			Object obj = list.get(i);
-			// Conversation cov = list.get(i).cov;
 			// 判断是否能获取到消息item的名字
 			if (getObjectValue(obj) != null) {
 				// 将名字分割为字符数组遍历
@@ -291,7 +341,7 @@ public class SearchUtils {
 					searchTarget = String.valueOf(charArray[j]);
 					if (isFirstSearch && isChinese) {
 						if (searchKey.contains(searchTarget)) {
-							tempList.add(obj);
+							isAdd = true;
 							break;
 						}
 					} else if (isFirstSearch && !isChinese) {
@@ -308,7 +358,7 @@ public class SearchUtils {
 								if (indexOf == 0) { // &&
 													// content.indexOf(searchKey)
 													// == index
-									tempList.add(obj);
+									isAdd = true;
 									isBreak = true;
 									break;
 								}
@@ -326,41 +376,20 @@ public class SearchUtils {
 							int indexOf = searchTarget.indexOf(searchKey);
 							// if(searchTarget.contains(searchKey)){
 							if (indexOf != -1) {
-								tempList.add(obj);
+								isAdd = true;
 								break;
 							}
 						}
 					}
-					// else if (!isFirstSearch && isChinese) {
-					// String englishChar =
-					// GlobalConfig.allChinese.get(searchTarget);
-					// if (cov.getName().contains(searchKey) &&
-					// first.equals(searchKey)){
-					// tempList.add(Object);
-					// break;
-					// }
-					// }
-					// else if (!isFirstSearch && !isChinese) {
-					//
-					// }
 				}
-				// 判断该消息人的名字，在index位置是否能取到字符
-				// if (index >= cov.getName().length()) {
-				// continue;
-				// } else {
-				//
-				// searchTarget = String.valueOf(cov.getName().charAt(index));
-				// if (searchTarget == null) {
-				// continue;
-				// }
-				// }
+				
+				if(isAdd){
+					tempList.add(obj);
+				}
+				else{
+					surplusList.add(obj);
+				}
 			}
-
-			// 暂不要求消息内容
-			// else if (cov.getMsg() != null &&
-			// cov.getMsg().toString().contains(searchKey)) {
-			// newItemList.add(cov);
-			// }
 		}
 		return tempList;
 	}
@@ -372,6 +401,8 @@ public class SearchUtils {
 			return ((ScrollItem) obj).cov.getName();
 		case TYPE_ITEM_DATA:
 			return ((User) obj).getName();
+		case TYPE_WRAPPER:
+			return ((Wrapper) obj).a.getAttName();
 		default:
 			break;
 		}

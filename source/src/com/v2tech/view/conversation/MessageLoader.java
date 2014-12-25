@@ -42,7 +42,11 @@ public class MessageLoader {
 	public static final int CONTACT_TYPE = -5;
 	public static final int CROWD_TYPE = -6;
 	public static final String TAG = "MessageLoader";
-	public static Context context;
+	public static DataBaseContext mContext;
+
+	public static void init(Context context) {
+		mContext = new DataBaseContext(context);
+	}
 
 	/**
 	 * 查询前要判断该用户的数据库是否存在，不存在则创建
@@ -611,22 +615,23 @@ public class MessageLoader {
 	/**
 	 * 查询指定群组中聊天收发的所有文件
 	 * 
-	 * @param context
 	 * @param type
-	 * @param gid
+	 * @param remoteID
 	 * @return
 	 */
-	public static List<VMessageFileItem> loadFileMessages(int type, long id) {
-		// if(type == V2GlobalEnum.GROUP_TYPE_CROWD){
-		// if (!isTableExist(context, type, id, 0, CROWD_TYPE))
-		// return null;
-		// }
-		// else if(type == V2GlobalEnum.GROUP_TYPE_USER){
-		// if (!isTableExist(context, 0, 0, id, CONTACT_TYPE))
-		// return null;
-		// }
+	public static List<VMessageFileItem> loadFileMessages(int type,
+			long remoteID) {
+		// 传两个-1是在MainActivity中需要查出文件表中所有文件而传递的
+		if (type != -1 && remoteID != -1) {
+			if (type == V2GlobalEnum.GROUP_TYPE_CROWD) {
+				if (!isTableExist(mContext, type, remoteID, 0, CROWD_TYPE))
+					return null;
+			} else if (type == V2GlobalEnum.GROUP_TYPE_USER) {
+				if (!isTableExist(mContext, 0, 0, remoteID, CONTACT_TYPE))
+					return null;
+			}
+		}
 
-		DataBaseContext mContext = new DataBaseContext(context);
 		List<VMessageFileItem> fileItems = new ArrayList<VMessageFileItem>();
 		Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
 		String[] args = null;
@@ -634,7 +639,7 @@ public class MessageLoader {
 		String sortOrder = null;
 		Cursor cursor = null;
 		try {
-			if (type == -1 && id == -1) {
+			if (type == -1 && remoteID == -1) {
 				sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
 						+ " desc";
 				where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE
@@ -654,7 +659,7 @@ public class MessageLoader {
 						+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID
 						+ " = ? ";
 				args = new String[] {
-						String.valueOf(id),
+						String.valueOf(remoteID),
 						String.valueOf(GlobalHolder.getInstance()
 								.getCurrentUserId()) };
 				cursor = mContext.getContentResolver().query(uri, null, where,
@@ -668,43 +673,11 @@ public class MessageLoader {
 				return fileItems;
 			}
 
-			VMessageFileItem item;
-			VMessage current;
 			while (cursor.moveToNext()) {
-				int fromUserID = cursor
-						.getInt(cursor
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID));
-				long date = cursor
-						.getLong(cursor
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE));
-				int fileState = cursor
-						.getInt(cursor
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
-				String uuid = cursor
-						.getString(cursor
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID));
-				String filePath = cursor
-						.getString(cursor
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
-				long fileSize = cursor
-						.getLong(cursor
-								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
-				User fromUser = GlobalHolder.getInstance().getUser(fromUserID);
-				if (fromUser == null) {
-					V2Log.e("get null when loadImageMessage get fromUser :"
-							+ fromUserID);
-					continue;
-				}
-
-				if (type == V2GlobalEnum.GROUP_TYPE_CROWD) {
-					current = new VMessage(type, id, fromUser, new Date(date));
-				} else if (type == V2GlobalEnum.GROUP_TYPE_USER) {
-					current = new VMessage(type, 0, fromUser, new Date(date));
-				}
-				current = new VMessage(type, 0, fromUser, new Date(date));
-				fileItems.add(new VMessageFileItem(current, uuid, filePath,
-						null, fileSize, fileState, 0f, 0l, 0f, FileType.UNKNOW,
-						2));
+				VMessageFileItem fileItem = extractFileItem(cursor, type,
+						remoteID);
+				if (fileItem != null)
+					fileItems.add(fileItem);
 			}
 			return fileItems;
 		} catch (Exception e) {
@@ -726,86 +699,35 @@ public class MessageLoader {
 	 * @param gid
 	 * @return
 	 */
-	public static List<VCrowdFile> loadGroupFileItemConvertToVCrowdFile(
-			Context context, int type, long gid, CrowdGroup crowd) {
+	public static List<VMessageFileItem> loadGroupFileItemConvertToVCrowdFile(
+			long gid, CrowdGroup crowd) {
 
-		if (!isTableExist(context, type, gid, 0, CROWD_TYPE)) {
-			V2Log.d(TAG, "create database fialed...groupType : " + type
-					+ "  groupID : " + gid);
+		if(crowd == null){
+			V2Log.e(TAG, "loadGroupFileItemConvertToVCrowdFile --> Given CrowdGroup is null!");
+			return null;
+		}
+		
+		List<VMessageFileItem> fileItems = new ArrayList<VMessageFileItem>();
+		Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
+		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID
+				+ " = ?";
+		String[] args = new String[] { String.valueOf(gid) };
+		String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
+				+ " desc";
+		Cursor cursor = mContext.getContentResolver().query(uri, null, where,
+				args, sortOrder);
+		while (cursor.moveToNext()) {
+			VMessageFileItem fileItem = extractFileItem(cursor,
+					V2GlobalEnum.GROUP_TYPE_CROWD, gid);
+			if (fileItem != null) {
+				fileItems.add(fileItem);
+			}
+		}
+		if (fileItems == null || fileItems.size() < 0) {
 			return null;
 		}
 
-		DataBaseContext mContext = new DataBaseContext(context);
-		List<VCrowdFile> fileItems = new ArrayList<VCrowdFile>();
-		Cursor cursor = null;
-		try {
-
-			String sortOrder = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
-					+ " desc";
-			String where = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
-					+ "=? and "
-					+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
-					+ "= ?";
-			String[] args = new String[] { String.valueOf(type),
-					String.valueOf(gid) };
-			cursor = mContext.getContentResolver().query(
-					ContentDescriptor.HistoriesMessage.CONTENT_URI,
-					ContentDescriptor.HistoriesMessage.Cols.ALL_CLOS, where,
-					args, sortOrder);
-			if (cursor == null) {
-				return fileItems;
-			}
-
-			if (cursor.getCount() < 0) {
-				return fileItems;
-			}
-
-			VCrowdFile crowdFile;
-			while (cursor.moveToNext()) {
-
-				VMessage extract = extractMsg(cursor);
-				if (extract == null) {
-					V2Log.d("The extract VMessage from Cursor failed...get null , id is : "
-							+ cursor.getInt(0));
-					continue;
-				}
-
-				VMessage vm = XmlParser.parseForMessage(extract);
-				if (vm == null) {
-					V2Log.d("The parse VMessage from failed...get null , id is : "
-							+ cursor.getInt(0));
-					continue;
-				}
-
-				boolean flag = loadFileMessageById(vm, mContext);
-				if (flag) {
-					for (VMessageFileItem vMessageFileItem : vm.getFileItems()) {
-						crowdFile = new VCrowdFile();
-						crowdFile.setId(vMessageFileItem.getUuid());
-						crowdFile.setPath(vMessageFileItem.getFilePath());
-						crowdFile.setSize(vMessageFileItem.getFileSize());
-						crowdFile.setName(vMessageFileItem.getFileName());
-						crowdFile.setState(com.v2tech.vo.VFile.State
-								.fromInt(vMessageFileItem.getState()));
-						crowdFile.setProceedSize((long) vMessageFileItem
-								.getProgress());
-						crowdFile.setUploader(vm.getFromUser());
-						crowdFile.setStartTime(vm.getDate());
-						crowdFile.setCrowd(crowd);
-						fileItems.add(crowdFile);
-					}
-				}
-			}
-			return fileItems;
-		} catch (Exception e) {
-			e.printStackTrace();
-			CrashHandler.getInstance().saveCrashInfo2File(e);
-			return fileItems;
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
-		}
+		return fileItems;
 	}
 
 	/**
@@ -848,7 +770,6 @@ public class MessageLoader {
 			throw new RuntimeException(
 					"MessageLoader queryFileItemByID ---> the given VMessageFileItem fileID is null");
 
-		DataBaseContext mContext = new DataBaseContext(context);
 		String selection = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
 				+ "=?";
 		Cursor cursor = null;
@@ -1043,17 +964,18 @@ public class MessageLoader {
 
 				loadImageMessageById(vm, mContext);
 				loadAudioMessageById(vm, mContext);
-				boolean flag = loadFileMessageById(vm, mContext);
-				if (flag && vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD) {
-					VMessageFileItem fileItem = vm.getFileItems().get(0);
-					if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENT) {
-						if (vm.getFromUser() != null
-								&& vm.getFromUser().getmUserId() == GlobalHolder
-										.getInstance().getCurrentUserId()) {
-							continue;
-						}
-					}
-				}
+				loadFileMessageById(vm, mContext);
+//				boolean flag = loadFileMessageById(vm, mContext);
+//				if (flag && vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD) {
+//					VMessageFileItem fileItem = vm.getFileItems().get(0);
+//					if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENT) {
+//						if (vm.getFromUser() != null
+//								&& vm.getFromUser().getmUserId() == GlobalHolder
+//										.getInstance().getCurrentUserId()) {
+//							continue;
+//						}
+//					}
+//				}
 				vimList.add(vm);
 			}
 			return vimList;
@@ -1069,13 +991,17 @@ public class MessageLoader {
 	}
 
 	/**
-	 * delete the VMessage
+	 * According to given VMessage Object , delete it and ohter message (file ,
+	 * audio , image)
 	 * 
 	 * @param context
 	 * @param vm
+	 * @param isDeleteOhter
+	 *            true mean delete other messages(file . audio . image)
 	 * @return
 	 */
-	public static int deleteMessage(Context context, VMessage vm) {
+	public static int deleteMessage(Context context, VMessage vm,
+			boolean isDeleteOhter) {
 		if (vm == null)
 			return -1;
 
@@ -1110,36 +1036,41 @@ public class MessageLoader {
 				ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 						+ "=?", new String[] { String.valueOf(vm.getUUID()) });
 
-		List<VMessageAudioItem> audioItems = vm.getAudioItems();
-		for (int i = 0; i < audioItems.size(); i++) {
-			mContext.getContentResolver()
-					.delete(ContentDescriptor.HistoriesAudios.CONTENT_URI,
-							ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
-									+ "=?",
-							new String[] { String.valueOf(audioItems.get(i)
-									.getUuid()) });
-		}
+		if (isDeleteOhter) {
+			List<VMessageAudioItem> audioItems = vm.getAudioItems();
+			for (int i = 0; i < audioItems.size(); i++) {
+				mContext.getContentResolver().delete(
+						ContentDescriptor.HistoriesAudios.CONTENT_URI,
+						ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_ID
+								+ "=?",
+						new String[] { String.valueOf(audioItems.get(i)
+								.getUuid()) });
+			}
 
-		List<VMessageFileItem> fileItems = vm.getFileItems();
-		for (int i = 0; i < fileItems.size(); i++) {
-			mContext.getContentResolver()
-					.delete(ContentDescriptor.HistoriesFiles.CONTENT_URI,
-							ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
-									+ "=?",
-							new String[] { String.valueOf(fileItems.get(i)
-									.getUuid()) });
-		}
+			List<VMessageFileItem> fileItems = vm.getFileItems();
+			for (int i = 0; i < fileItems.size(); i++) {
+				deleteFileItem(fileItems.get(i).getUuid());
+			}
 
-		List<VMessageImageItem> imageItems = vm.getImageItems();
-		for (int i = 0; i < imageItems.size(); i++) {
-			mContext.getContentResolver()
-					.delete(ContentDescriptor.HistoriesGraphic.CONTENT_URI,
-							ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
-									+ "=?",
-							new String[] { String.valueOf(imageItems.get(i)
-									.getUuid()) });
+			List<VMessageImageItem> imageItems = vm.getImageItems();
+			for (int i = 0; i < imageItems.size(); i++) {
+				mContext.getContentResolver()
+						.delete(ContentDescriptor.HistoriesGraphic.CONTENT_URI,
+								ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
+										+ "=?",
+								new String[] { String.valueOf(imageItems.get(i)
+										.getUuid()) });
+			}
 		}
 		return ret;
+	}
+	
+	public static int deleteFileItem(String fileID){
+		return mContext.getContentResolver().delete(
+				ContentDescriptor.HistoriesFiles.CONTENT_URI,
+				ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID
+						+ "=?",
+				new String[] { fileID });
 	}
 
 	/**
@@ -1257,7 +1188,6 @@ public class MessageLoader {
 	 */
 	public static int deleteVoiceMessage(long userID) {
 
-		DataBaseContext mContext = new DataBaseContext(context);
 		int ret;
 		if (userID == -1)
 			ret = mContext.getContentResolver().delete(
@@ -1418,7 +1348,6 @@ public class MessageLoader {
 	 */
 	public static int updateFileItemStateToFailed(String fileID) {
 
-		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
 		if (TextUtils.isEmpty(fileID))
 			return -1;
@@ -1785,6 +1714,63 @@ public class MessageLoader {
 		vm.setState(state);
 		vm.setmXmlDatas(xml);
 		return vm;
+	}
+
+	private static VMessageFileItem extractFileItem(Cursor cursor,
+			int groupType, long groupID) {
+		int fromUserID = cursor
+				.getInt(cursor
+						.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_FROM_USER_ID));
+		long date = cursor
+				.getLong(cursor
+						.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE));
+		int fileState = cursor
+				.getInt(cursor
+						.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
+		String uuid = cursor
+				.getString(cursor
+						.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_ID));
+		String filePath = cursor
+				.getString(cursor
+						.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
+		long fileSize = cursor
+				.getLong(cursor
+						.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
+		User fromUser = GlobalHolder.getInstance().getUser(fromUserID);
+		if (fromUser == null) {
+			V2Log.e("get null when loadImageMessage get fromUser :"
+					+ fromUserID);
+			return null;
+		}
+
+		VMessage current = null;
+		if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			current = new VMessage(groupType, groupID, fromUser, new Date(date));
+		} else if (groupType == V2GlobalEnum.GROUP_TYPE_USER) {
+			current = new VMessage(groupType, 0, fromUser, new Date(date));
+		}
+		return new VMessageFileItem(current, uuid, filePath, null, fileSize,
+				fileState, 0f, 0l, 0f, FileType.UNKNOW, 2);
+	}
+	
+	public static List<VCrowdFile> convertToVCrowdFile(List<VMessageFileItem> fileItems , CrowdGroup crowd){
+		List<VCrowdFile> crowdFiles = new ArrayList<VCrowdFile>();
+		for (int i = 0; i < fileItems.size(); i++) {
+			VMessageFileItem vMessageFileItem = fileItems.get(i);
+			VCrowdFile crowdFile = new VCrowdFile();
+			crowdFile.setId(vMessageFileItem.getUuid());
+			crowdFile.setPath(vMessageFileItem.getFilePath());
+			crowdFile.setSize(vMessageFileItem.getFileSize());
+			crowdFile.setName(vMessageFileItem.getFileName());
+			crowdFile.setState(com.v2tech.vo.VFile.State
+					.fromInt(vMessageFileItem.getState()));
+			crowdFile.setProceedSize((long) vMessageFileItem.getProgress());
+			crowdFile.setUploader(vMessageFileItem.getVm().getFromUser());
+			crowdFile.setStartTime(vMessageFileItem.getVm().getDate());
+			crowdFile.setCrowd(crowd);
+			crowdFiles.add(crowdFile);
+		}
+		return crowdFiles;
 	}
 
 	/**

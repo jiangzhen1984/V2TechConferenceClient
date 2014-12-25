@@ -22,6 +22,7 @@ import android.widget.VideoView;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.util.DateUtil;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.vo.ConferenceGroup;
@@ -89,7 +90,7 @@ public class ConferenceMessageBodyView extends LinearLayout{
 
 	private void initData() {
 		senderTV.setText(this.mMsg.getFromUser().getName() + "  "
-				+ mMsg.getStringDate());
+				+ DateUtil.getStringDate(mMsg.getDate().getTime()));
 
 		TextView et = new TextView(this.getContext());
 		et.setBackgroundColor(Color.TRANSPARENT);

@@ -105,7 +105,7 @@ public class MessageBuilder {
 	 * @param vm
 	 * @return
 	 */
-	public static Uri saveMessage(Context context, VMessage vm) {
+	public static VMessage saveMessage(Context context, VMessage vm) {
 		if (vm == null)
 			throw new NullPointerException("the given VMessage object is null");
 
@@ -164,7 +164,7 @@ public class MessageBuilder {
 		Uri uri = mContext.getContentResolver().insert(
 				ContentDescriptor.HistoriesMessage.CONTENT_URI, values);
 		vm.setId(ContentUris.parseId(uri));
-		return uri;
+		return vm;
 	}
 
 	/**

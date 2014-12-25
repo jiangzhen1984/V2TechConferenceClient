@@ -69,6 +69,7 @@ public class VideoDocLayout extends LinearLayout {
 	private FrameLayout container;
 
 	private TextView mDocPageTV;
+	private TextView mDocTitle;
 
 	private ImageView mPrePageButton;
 
@@ -115,6 +116,14 @@ public class VideoDocLayout extends LinearLayout {
 		if (defaultDoc != null) {
 			updateCurrentDoc(defaultDoc);
 		}
+		
+		if(mDocs.size() <= 0)
+			mDocTitle.setText(R.string.confs_doc);
+		else{
+			if(mCurrentDoc != null)
+				mDocTitle.setText(mCurrentDoc.getDocName());
+		}
+			
 	}
 
 	private void initLayout() {
@@ -123,6 +132,7 @@ public class VideoDocLayout extends LinearLayout {
 		container = (FrameLayout) view.findViewById(R.id.video_doc_container);
 
 		mDocPageTV = (TextView) view.findViewById(R.id.video_doc_navgator);
+		mDocTitle = (TextView) view.findViewById(R.id.video_doc_title);
 		mPrePageButton = (ImageView) view
 				.findViewById(R.id.video_doc_pre_button);
 		mNextPageButton = (ImageView) view
@@ -145,7 +155,6 @@ public class VideoDocLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
 		rootView = this;
-
 	}
 
 	@Override
@@ -271,6 +280,7 @@ public class VideoDocLayout extends LinearLayout {
 			updatePageButton();
 			// recycle bitmap
 			cleanCache();
+			mDocTitle.setText(R.string.confs_doc);
 		}
 
 		for (int i = 0; mDodListContainer != null
@@ -293,7 +303,8 @@ public class VideoDocLayout extends LinearLayout {
 		}
 
 		mCurrentDoc = d;
-
+		mDocTitle.setText(mCurrentDoc.getDocName());
+		
 		mCurrentPage = mCurrentDoc.getActivatePage();
 
 		// draw shape
@@ -348,10 +359,10 @@ public class VideoDocLayout extends LinearLayout {
 				V2Log.w(" No Doc");
 				return;
 			}
+			mDocTitle.setText(mCurrentDoc.getDocName());
 		}
 
 		mCurrentPage = mCurrentDoc.getActivatePage();
-
 		updateCurrentDocPage(mCurrentPage);
 		updateLayoutPageInformation();
 		updatePageButton();
@@ -858,6 +869,8 @@ public class VideoDocLayout extends LinearLayout {
 				v.setBackgroundColor(getResources().getColor(
 						R.color.in_meeting_doc_list_activited_doc_bg));
 				mCurrentDoc = d;
+				if(mCurrentDoc != null)
+					mDocTitle.setText(mCurrentDoc.getDocName());
 				updateCurrentDoc();
 				mDocListWindow.dismiss();
 				if (listener != null) {

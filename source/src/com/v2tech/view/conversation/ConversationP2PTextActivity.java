@@ -70,7 +70,6 @@ import com.spoledge.aacplayer.ArrayDecoder;
 import com.spoledge.aacplayer.Decoder;
 import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
-import com.v2tech.db.provider.ConversationProvider;
 import com.v2tech.media.V2Encoder;
 import com.v2tech.service.AsyncResult;
 import com.v2tech.service.BitmapManager;
@@ -306,6 +305,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		filter.addAction(PublicIntent.BROADCAST_CROWD_QUIT_NOTIFICATION);
 		filter.addAction(PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION);
+		filter.addAction(PublicIntent.BROADCAST_CROWD_FILE_ACTIVITY_SEND_NOTIFICATION);
 		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
@@ -2382,20 +2382,34 @@ public class ConversationP2PTextActivity extends Activity implements
 			if (vm.getId() == message.getId()) {
 				if (message.getImageItems().size() >= 0)
 					va.setView(null);
-				messageArray.remove(i);
-				MessageLoader.deleteMessage(mContext, vm);
-				List<VMessage> messagePages = MessageLoader
-						.loadGroupMessageByPage(mContext,
-								Conversation.TYPE_GROUP, remoteGroupID, 1,
-								messageArray.size());
-				if (messagePages != null && messagePages.size() > 0)
-					messageArray
-							.add(0, new VMessageAdater(messagePages.get(0)));
-				V2Log.d(TAG, "现在集合长度：" + messageArray.size());
+				deleteMessage(message , i);
 				return true;
+			} else {
+				V2Log.d(TAG, "删除聊天消息失败,没有从集合中找到该消息 id : " + vm.getId());
 			}
 		}
 		return false;
+	}
+	
+	private void deleteMessage(VMessage vm , int location){
+		messageArray.remove(location);
+		boolean isDeleteOther = true;
+		if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD && 
+				vm.getFileItems().size() > 0 && vm.getFromUser().getmUserId() != GlobalHolder.getInstance().getCurrentUserId() &&
+				vm.getFileItems().get(0).getState() == VMessageAbstractItem.STATE_FILE_SENT){
+			isDeleteOther = false;
+		}
+		MessageLoader.deleteMessage(mContext, vm , isDeleteOther);
+		List<VMessage> messagePages = MessageLoader
+				.loadGroupMessageByPage(mContext,
+						Conversation.TYPE_GROUP, remoteGroupID, 1,
+						messageArray.size());
+		if (messagePages != null && messagePages.size() > 0 &&
+				messageAllID.get((int) messagePages.get(0).getId()) == null){
+			messageArray
+				.add(0, new VMessageAdater(messagePages.get(0)));
+		}
+		V2Log.d(TAG, "现在集合长度：" + messageArray.size());
 	}
 
 	/**
@@ -2414,7 +2428,6 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	private void updateFileProgressView(String uuid, long tranedSize,
 			int progressType) {
-		V2Log.e(TAG, "updateFileProgressView was called");
 		for (int i = 0; i < messageArray.size(); i++) {
 			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
 			if (vm.getItems().size() > 0) {
@@ -2834,6 +2847,7 @@ public class ConversationP2PTextActivity extends Activity implements
 						VMessage vm = new VMessage(cov.getConversationType(),
 								remoteGroupID, user, null, new Date(
 										GlobalConfig.getGlobalServerTime()));
+						vm.setUUID(fileJNIObject.vMessageID);
 						VMessageFileItem item = new VMessageFileItem(vm,
 								fileJNIObject.fileName,
 								VMessageFileItem.STATE_FILE_SENT,
@@ -2865,6 +2879,34 @@ public class ConversationP2PTextActivity extends Activity implements
 						&& obj.getmUserId() == remoteChatUserID) {
 					ConversationP2PTextActivity.super.onBackPressed();
 				}
+			} else if(intent.getAction().equals(
+					PublicIntent.BROADCAST_CROWD_FILE_ACTIVITY_SEND_NOTIFICATION)){
+				String fileID = intent.getStringExtra("fileID");
+				int exeType = intent.getIntExtra("exeType" , -1);
+				for (int i = 0; i < messageArray.size(); i++) {
+					CommonAdapterItemWrapper wrapper = messageArray.get(i);
+					VMessage tempVm = (VMessage) wrapper.getItemObject();
+					if (tempVm.getFileItems().size() > 0) {
+						VMessageFileItem vMessageFileItem = tempVm
+								.getFileItems().get(0);
+						if (vMessageFileItem.getUuid().equals(fileID)) {
+							MessageBodyView bodyView = (MessageBodyView) wrapper
+									.getView();
+							if(exeType == VMessageAbstractItem.STATE_FILE_SENDING)
+								vMessageFileItem.setState(VMessageAbstractItem.STATE_FILE_SENDING);
+							else
+								vMessageFileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+							if (bodyView != null)
+								bodyView.updateView(vMessageFileItem);
+							
+							if(vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED){
+								scrollToBottom();
+							}
+							break;
+						}
+					}
+				}
+				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 			}
 		}
 
@@ -2918,7 +2960,7 @@ public class ConversationP2PTextActivity extends Activity implements
 						else
 							array.get(i).setShowTime(false);
 					}
-					// 群文件处理,如果是远端用户上传的文件，则强制更改状态为已上传
+					// 群文件处理,如果是远端用户上传的文件，则强制更改状态为已上传，因为群中远端文件只有一种状态
 					if (vm.getFileItems().size() > 0
 							&& vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD
 							&& vm.getFromUser().getmUserId() != GlobalHolder
@@ -3128,37 +3170,49 @@ public class ConversationP2PTextActivity extends Activity implements
 	}
 
 	@Override
-	public void updateCrowdFileState(Boolean isFromP2PText, String fileID,
+	public void updateCrowdFileState(String fileID,
 			VMessage vm, CrowdFileExeType type) {
 
-		if (!isFromP2PText) {
-			switch (type) {
-			case ADD_FILE:
-				addMessageToContainer(vm);
-				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
-				break;
-			case DELETE_FILE:
-
-				break;
-			case UPDATE_FILE:
+		switch (type) {
+		case ADD_FILE:
+			addMessageToContainer(vm);
+			break;
+		case DELETE_FILE:
+			if(vm != null){
 				for (int i = 0; i < messageArray.size(); i++) {
-					CommonAdapterItemWrapper wrapper = messageArray.get(i);
-					VMessage tempVm = (VMessage) wrapper.getItemObject();
-					if (tempVm.getFileItems().size() > 0) {
-						VMessageFileItem vMessageFileItem = tempVm
-								.getFileItems().get(0);
-						if (vMessageFileItem.getUuid().equals(fileID)) {
-							MessageBodyView bodyView = (MessageBodyView) wrapper
-									.getView();
-							if (bodyView != null)
-								bodyView.updateView(vm.getFileItems().get(0));
-						}
+					VMessageAdater va = (VMessageAdater) messageArray.get(i);
+					VMessage message = (VMessage) va.getItemObject();
+					if(message.getFileItems().size() > 0 &&
+						message.getFileItems().get(0).getUuid().equals(fileID)){
+						va.setView(null);
+						deleteMessage(message , i);
+						break;
+					} else {
+						V2Log.d(TAG, "删除聊天消息失败,没有从集合中找到该消息 id : " + vm.getId());
 					}
 				}
-				break;
-			default:
-				break;
 			}
+			break;
+		case UPDATE_FILE:
+			for (int i = 0; i < messageArray.size(); i++) {
+				CommonAdapterItemWrapper wrapper = messageArray.get(i);
+				VMessage tempVm = (VMessage) wrapper.getItemObject();
+				if (tempVm.getFileItems().size() > 0) {
+					VMessageFileItem vMessageFileItem = tempVm
+							.getFileItems().get(0);
+					if (vMessageFileItem.getUuid().equals(fileID)) {
+						MessageBodyView bodyView = (MessageBodyView) wrapper
+								.getView();
+						if (bodyView != null)
+							bodyView.updateView(vm.getFileItems().get(0));
+						break;
+					}
+				}
+			}
+			break;
+		default:
+			break;
 		}
+		Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 	};
 }

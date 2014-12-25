@@ -125,8 +125,7 @@ public class PublicIntent {
 	public static final String FINISH_APPLICATION = "com.v2tech.finish_application";
 
 	public static final String PREPARE_FINISH_APPLICATION = "com.v2tech.prepare_finish_application";
-
-
+	
 	/**
 	 * broadcast for new crowd notification. if current logged in user created, this broadcast will be sent<br>
 	 * key : crowd : crowd id 
@@ -202,5 +201,10 @@ public class PublicIntent {
 	 * Broadcast for current user is in waitting for other person agree to become friend
 	 */
 	public static final String BROADCAST_ADD_OTHER_FRIEND_WAITING_NOTIFICATION = "com.v2tech.broadcast.add_other_friend_waiting_notification";
+	
+	/**
+	 * Broadcast for CrowdFileActivity notify ConversationP2PTEXTActivity
+	 */
+	public static final String BROADCAST_CROWD_FILE_ACTIVITY_SEND_NOTIFICATION = "com.v2tech.broadcast.add_other_friend_waiting_notification";
 	
 }

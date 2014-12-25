@@ -1188,7 +1188,7 @@ public class GroupListView extends ListView {
 	 */
 	class LocalFilter extends Filter {
 
-		private boolean isFirst = true;
+		private boolean isFirstSearch = true;
 
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
@@ -1198,7 +1198,7 @@ public class GroupListView extends ListView {
 			if (TextUtils.isEmpty(constraint.toString())) {
 				list = mBaseList;
 				SearchUtils.clearAll();
-				isFirst = true;
+				isFirstSearch = true;
 			} else {
 				// list = new ArrayList<ItemData>();
 				// for (Group g : mGroupList) {
@@ -1206,13 +1206,13 @@ public class GroupListView extends ListView {
 				// }
 				// Collections.sort(list);
 				list = new ArrayList<GroupListView.ItemData>();
-				if (isFirst) {
+				if (isFirstSearch) {
 					List<Object> users = new ArrayList<Object>();
 					for (Group group : mGroupList) {
 						convertGroupToUser(users, group);
 					}
 					SearchUtils.receiveList = users;
-					isFirst = false;
+					isFirstSearch = false;
 				}
 
 				searchUser = SearchUtils
@@ -1230,7 +1230,6 @@ public class GroupListView extends ListView {
 			fr.count = list.size();
 			list = null;
 			searchUser = null;
-			// filter = null;
 			return fr;
 		}
 

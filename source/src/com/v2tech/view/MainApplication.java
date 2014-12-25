@@ -95,7 +95,7 @@ public class MainApplication extends Application {
 
 		DatabaseProvider.init(getApplicationContext());
 		MessageBuilder.init(getApplicationContext());
-		MessageLoader.context = getApplicationContext();
+		MessageLoader.init(getApplicationContext());
         BitmapUtil.context = getApplicationContext();
         FileUitls.context = getApplicationContext();
 

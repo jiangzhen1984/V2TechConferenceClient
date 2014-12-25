@@ -30,8 +30,9 @@ public abstract class VMessageAbstractItem {
 	public static final int STATE_SENT_SUCCESS = 34;
 	public static final int STATE_SENT_FALIED = 35;
 	
-	//Use to mark file item
+	//Use to mark file item state
 	public static final int STATE_FILE_NORMAL = 10;
+	
 	public static final int STATE_FILE_UNDOWNLOAD = 11;
 	public static final int STATE_FILE_DOWNLOADING = 12;
 	public static final int STATE_FILE_PAUSED_DOWNLOADING = 13;
@@ -45,7 +46,6 @@ public abstract class VMessageAbstractItem {
 	public static final int STATE_FILE_SENT = 23;
 	public static final int STATE_FILE_PAUSED_SENDING = 24;
 	
-
 	protected VMessage vm;
 	
 	protected int id;

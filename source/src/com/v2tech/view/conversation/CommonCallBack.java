@@ -58,9 +58,9 @@ public class CommonCallBack {
 			messageBodyPopup.updateMessageBodyPopupWindow(view);
 	}
 	
-	public void executeUpdateCrowdFileState(Boolean isFromP2PText , String fileID , VMessage vm , CrowdFileExeType type) {
+	public void executeUpdateCrowdFileState(String fileID , VMessage vm , CrowdFileExeType type) {
 		if (crowdFileState != null)
-			crowdFileState.updateCrowdFileState(isFromP2PText, fileID , vm , type);
+			crowdFileState.updateCrowdFileState(fileID , vm , type);
 	}
 
 	/**
@@ -103,7 +103,7 @@ public class CommonCallBack {
 	 */
 	public static interface CommonUpdateCrowdFileStateInterface {
 
-		public void updateCrowdFileState(Boolean isFromP2PText , String fileID , VMessage vm , CrowdFileExeType type);
+		public void updateCrowdFileState(String fileID , VMessage vm , CrowdFileExeType type);
 	}
 	
 	public enum CrowdFileExeType{

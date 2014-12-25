@@ -39,6 +39,7 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.util.SearchUtils;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.Conference;
@@ -891,27 +892,30 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	class LocalFilter extends Filter {
 
+		private boolean isFirstSearch = true;
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults fr = new FilterResults();
 			List<Wrapper> list = null;
 			if (constraint == null || constraint.toString().isEmpty()) {
 				list = mList;
+				SearchUtils.clearAll();
+				isFirstSearch = true;
 			} else {
-				list = new ArrayList<Wrapper>();
-				for (int i = 0; i < mList.size(); i++) {
-					Wrapper wr = mList.get(i);
-					if (wr.a.getAbbraName().contains(constraint.toString())
-							|| wr.a.getAttName()
-									.contains(constraint.toString())) {
-						list.add(wr);
-					}
+				if (isFirstSearch) {
+					List<Object> wrappers = new ArrayList<Object>();
+					wrappers.addAll(mList);
+					SearchUtils.receiveList = wrappers;
+					isFirstSearch = false;
 				}
-				Collections.sort(list);
+				
+				list = SearchUtils
+						.startVideoAttendeeSearch(constraint.toString());
 			}
 
 			fr.values = list;
 			fr.count = list.size();
+			list = null;
 			return fr;
 		}
 
@@ -936,9 +940,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	}
 
-	class Wrapper implements Comparable<Wrapper> {
-		Attendee a;
-		UserDeviceConfig udc;
+	public class Wrapper implements Comparable<Wrapper> {
+		public Attendee a;
+		public UserDeviceConfig udc;
 		// Use to sort.
 		// we can remove view if sortFlag is DEFAULT_DEVICE_FLAG
 		int sortFlag;

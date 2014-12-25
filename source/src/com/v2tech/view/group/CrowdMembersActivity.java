@@ -332,7 +332,7 @@ public class CrowdMembersActivity extends Activity {
 			} else
 				mNameTV.setText(user.getName());
 			mNameTV.setTextColor(context.getResources().getColor(
-					R.color.contacts_user_view_item_color_offline));
+					R.color.common_black));
 
 			line.addView(mNameTV, lineRL);
 
