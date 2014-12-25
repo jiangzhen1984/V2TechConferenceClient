@@ -293,7 +293,7 @@ public class LoginActivity extends Activity {
 			final EditText et = (EditText) dialog.findViewById(R.id.ip);
 			final EditText port = (EditText) dialog.findViewById(R.id.port);
 
-			et.setText(SPUtil.getConfigStrValue(mContext, "ip") == null? "203.196.151.182" : SPUtil.getConfigStrValue(mContext, "ip"));
+			et.setText(SPUtil.getConfigStrValue(mContext, "ip") == null? "118.145.28.253" : SPUtil.getConfigStrValue(mContext, "ip"));
 			port.setText(SPUtil.getConfigStrValue(mContext, "port") == null?"5123":SPUtil.getConfigStrValue(mContext, "port"));
 
 			saveButton.setOnClickListener(new OnClickListener() {
