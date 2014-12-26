@@ -15,7 +15,6 @@ import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 
-
 public class GroupRequest {
 
 	private static final String TAG = "GroupRequest UI";
@@ -399,8 +398,8 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.g
-	 * i f ' / > < / f i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.
+	 * g i f ' / > < / f i l e l i s t >
 	 * 
 	 * @param groupType
 	 * @param nGroupId
@@ -629,7 +628,7 @@ public class GroupRequest {
 
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 			// 会议室
-			group.xml=sXml;
+			group.xml = sXml;
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
 			group.name = name;
@@ -666,10 +665,11 @@ public class GroupRequest {
 	}
 
 	/**
-	 * The CallBack that invited join group from other
-	 * 12-10 16:56:44.342: D/V2TECH(19079): OnInviteJoinGroup::==>3:
-	 * <crowd authtype='0' creatoruserid='11000102' id='14000128' name='qazzaq' size='500'/>:
-	 * <user id='11000102'/>:
+	 * The CallBack that invited join group from other 12-10 16:56:44.342:
+	 * D/V2TECH(19079): OnInviteJoinGroup::==>3: <crowd authtype='0'
+	 * creatoruserid='11000102' id='14000128' name='qazzaq' size='500'/>: <user
+	 * id='11000102'/>:
+	 * 
 	 * @param groupType
 	 * @param groupInfo
 	 * @param userInfo
@@ -702,7 +702,7 @@ public class GroupRequest {
 			group.owner = new V2User(Long.valueOf(createuserid));
 
 		} else if (groupType == V2Group.TYPE_CROWD) {
-			group = XmlAttributeExtractor.parseSingleCrowd(groupInfo , userInfo);
+			group = XmlAttributeExtractor.parseSingleCrowd(groupInfo, userInfo);
 		} else if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
 			String id = XmlAttributeExtractor.extract(userInfo, " id='", "'");
 			if (id == null || id.isEmpty()) {
@@ -839,7 +839,8 @@ public class GroupRequest {
 		V2Log.d("OnAcceptApplyJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "sXml:" + sXml);
 
-		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml , null);
+		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml,
+				null);
 		if (parseSingleCrowd == null)
 			return;
 
@@ -865,7 +866,8 @@ public class GroupRequest {
 		V2Log.d("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
 				+ "sXml:" + sXml + "," + "reason:" + reason);
 
-		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml , null);
+		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml,
+				null);
 		if (parseSingleCrowd == null)
 			return;
 
@@ -913,22 +915,23 @@ public class GroupRequest {
 		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
 				+ szWBoardID + " | nWhiteIndex: " + nWhiteIndex);
-		V2Document v2doc = new V2Document();
-		v2doc.mId = szWBoardID;
-		v2doc.mIndex = nWhiteIndex;
-		V2Group v2group = new V2Group(nGroupID, eGroupType);
-		v2doc.mGroup = v2group;
-		v2doc.mType = V2Document.Type.BLANK_BOARD;
-
-		for (int i = 0; i < mCallbacks.size(); i++) {
-			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
-			Object obj = wrcb.get();
-			if (obj != null) {
-				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnGroupWBoardNotification(v2doc,
-						GroupRequestCallback.DocOpt.CREATE);
-			}
-		}
+		//20141225 wzl 暂时不要白板功能
+		// V2Document v2doc = new V2Document();
+		// v2doc.mId = szWBoardID;
+		// v2doc.mIndex = nWhiteIndex;
+		// V2Group v2group = new V2Group(nGroupID, eGroupType);
+		// v2doc.mGroup = v2group;
+		// v2doc.mType = V2Document.Type.BLANK_BOARD;
+		//
+		// for (int i = 0; i < mCallbacks.size(); i++) {
+		// WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
+		// Object obj = wrcb.get();
+		// if (obj != null) {
+		// GroupRequestCallback callback = (GroupRequestCallback) obj;
+		// callback.OnGroupWBoardNotification(v2doc,
+		// GroupRequestCallback.DocOpt.CREATE);
+		// }
+		// }
 	};
 
 	/**
@@ -984,7 +987,7 @@ public class GroupRequest {
 	 * @param szWBoardID
 	 * @param szFileName
 	 * @param eWhiteShowType
-	 * 			白板显示类型
+	 *            白板显示类型
 	 */
 	private void OnGroupCreateDocShare(int eGroupType, long nGroupID,
 			String szWBoardID, String szFileName, int eWhiteShowType) {

@@ -50,7 +50,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private static final String TAG = "VideoAttendeeListLayout";
 
-	private static final int DEFAULT_DEVICE_FLAG = -1;
+	private static final int FIRST_DEVICE_FLAG = -1;
 
 	private Conference conf;
 
@@ -206,10 +206,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			int deviceIndex = 1;
 			do {
 				if (dList == null) {
-					mList.add(new Wrapper(at, null, DEFAULT_DEVICE_FLAG));
+					mList.add(new Wrapper(at, null, FIRST_DEVICE_FLAG));
 				} else {
 					mList.add(new Wrapper(at, dList.get(i),
-							i == 0 ? DEFAULT_DEVICE_FLAG : deviceIndex++));
+							i == 0 ? FIRST_DEVICE_FLAG : deviceIndex++));
 				}
 				i++;
 			} while (dList != null && i < dList.size());
@@ -247,7 +247,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		ImageView cameraIV = (ImageView) view
 				.findViewById(R.id.video_attendee_device_camera_icon);
 
-		if (wr.sortFlag != DEFAULT_DEVICE_FLAG) {
+		if (wr.sortFlag != FIRST_DEVICE_FLAG) {
 			nameTV.setText("     "
 					+ getContext().getText(
 							R.string.confs_user_video_device_item)
@@ -360,7 +360,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		// If attaendee is mixed video or is not default flag, then hide speaker
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO
-				|| wr.sortFlag != DEFAULT_DEVICE_FLAG) {
+				|| wr.sortFlag != FIRST_DEVICE_FLAG) {
 			lectureStateIV.setVisibility(View.INVISIBLE);
 			speakingIV.setVisibility(View.INVISIBLE);
 		}
@@ -379,7 +379,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 
-		if (wr.sortFlag == DEFAULT_DEVICE_FLAG) {
+		if (wr.sortFlag == FIRST_DEVICE_FLAG) {
 			// Update lecture state display
 			switch (at.getLectureState()) {
 			case Attendee.LECTURE_STATE_NOT:
@@ -422,13 +422,59 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			int deviceIndex = 1;
 			do {
 				if (dList == null || dList.size() <= 0) {
-					mList.add(new Wrapper(at, null, DEFAULT_DEVICE_FLAG));
+					mList.add(new Wrapper(at, null, FIRST_DEVICE_FLAG));
 				} else {
-					mList.add(new Wrapper(at, dList.get(i),
-							i == 0 ? DEFAULT_DEVICE_FLAG : deviceIndex++));
+					// mList.add(new Wrapper(at, dList.get(i),
+					// i == 0 ? DEFAULT_DEVICE_FLAG : deviceIndex++));
+					// 20141225 2
+					UserDeviceConfig tempUdc = dList.get(i);
+
+					if (i == 0) {
+						mList.add(new Wrapper(at, tempUdc, FIRST_DEVICE_FLAG));
+					} else {
+						mList.add(new Wrapper(at, tempUdc, deviceIndex++));
+					}
 				}
 				i++;
 			} while (dList != null && i < dList.size());
+
+			// 设备显示不出问题时删除这段注释
+			// 默认的设备在第一个，现在不需要
+			// int deviceIndex = 1;
+			//
+			// if (dList == null || dList.size() <= 0) {
+			// mList.add(new Wrapper(at, null, DEFAULT_DEVICE_FLAG));
+			// } else {
+			// UserDeviceConfig defaultDevice = null;
+			// for (int i = 0; i < dList.size(); i++) {
+			// UserDeviceConfig udc = dList.get(i);
+			// if (udc.isDefault()) {
+			// defaultDevice = udc;
+			// }
+			// }
+			//
+			// // 再添加用户的设备信息
+			// if (defaultDevice != null) {
+			// mList.add(new Wrapper(at, defaultDevice,
+			// DEFAULT_DEVICE_FLAG));
+			// for (int i = 0; i < dList.size(); i++) {
+			// UserDeviceConfig udc = dList.get(i);
+			// if (!udc.isDefault()) {
+			// mList.add(new Wrapper(at, udc, deviceIndex++));
+			// }
+			// }
+			// } else {
+			// for (int i = 0; i < dList.size(); i++) {
+			// UserDeviceConfig udc = dList.get(i);
+			// if (i == 0) {
+			// mList.add(new Wrapper(at, udc, DEFAULT_DEVICE_FLAG));
+			// } else {
+			// mList.add(new Wrapper(at, udc, deviceIndex++));
+			// }
+			// }
+			// }
+			//
+			// }
 
 			configAttendee(at);
 		}
@@ -444,33 +490,92 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		at.setJoined(true);
 		List<UserDeviceConfig> dList = at.getmDevices();
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
-			mList.add(new Wrapper(at, dList.get(0), DEFAULT_DEVICE_FLAG));
+			mList.add(new Wrapper(at, dList.get(0), FIRST_DEVICE_FLAG));
 		} else {
+
 			// boolean isNew = false;
 			int index = 0;
 			if (mList.size() > 0 && dList != null && dList.size() > 0) {
+
 				for (int i = 0; i < mList.size(); i++) {
 					Wrapper wr = mList.get(i);
 					if (wr.a.getAttId() == at.getAttId()) {
-						wr.udc = dList.get(0);
-						wr.sortFlag = DEFAULT_DEVICE_FLAG;
 						index = i;
 						break;
 					}
 				}
-			}
 
-			if (dList != null) {
-				for (int i = 1; i < dList.size(); i++) {
+			}
+			
+			int deviceIndex = 1;
+			for (int i = 0; i < dList.size(); i++) {
+				UserDeviceConfig udc = dList.get(i);
+				if (i == 0) {
+					mList.add(index, new Wrapper(at, udc,
+							FIRST_DEVICE_FLAG));
+				} else {
 					if (index + 1 == mList.size() - 1) {
-						mList.add(new Wrapper(at, dList.get(i), i));
+						mList.add(new Wrapper(at, udc, deviceIndex++));
 					} else {
-						mList.add(index + 1, new Wrapper(at, dList.get(i), i));
+						mList.add(index + 1, new Wrapper(at, udc,
+								deviceIndex++));
 					}
 					index++;
 					// isNew = true;
 				}
+
 			}
+
+			
+			// 设备显示不出问题时删除这段注释
+			// if (dList != null) {
+			// UserDeviceConfig defaultDevice = null;
+			// for (int i = 0; i < dList.size(); i++) {
+			// UserDeviceConfig udc = dList.get(i);
+			// if (udc.isDefault()) {
+			// defaultDevice = udc;
+			// }
+			// }
+			//
+			// int deviceIndex = 1;
+			// if (defaultDevice != null) {
+			// mList.add(index, new Wrapper(at, defaultDevice,
+			// FIRST_DEVICE_FLAG));
+			// for (int i = 0; i < dList.size(); i++) {
+			// UserDeviceConfig udc = dList.get(i);
+			// if (!udc.isDefault()) {
+			// if (index + 1 == mList.size() - 1) {
+			// mList.add(new Wrapper(at, udc, deviceIndex++));
+			// } else {
+			// mList.add(index + 1, new Wrapper(at, udc,
+			// deviceIndex++));
+			// }
+			// index++;
+			// // isNew = true;
+			// }
+			// }
+			// } else {
+			// for (int i = 0; i < dList.size(); i++) {
+			// UserDeviceConfig udc = dList.get(i);
+			// if (i == 0) {
+			// mList.add(index, new Wrapper(at, udc,
+			// FIRST_DEVICE_FLAG));
+			// } else {
+			// if (index + 1 == mList.size() - 1) {
+			// mList.add(new Wrapper(at, udc, deviceIndex++));
+			// } else {
+			// mList.add(index + 1, new Wrapper(at, udc,
+			// deviceIndex++));
+			// }
+			// index++;
+			// // isNew = true;
+			// }
+			//
+			// }
+			//
+			// }
+			//
+			// }
 
 			// if (isNew)
 			// mAttendeeCount++;
@@ -478,6 +583,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				onLinePersons++;
 			}
 			updateStatist();
+
 		}
 
 		Collections.sort(mList);
@@ -524,6 +630,24 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param att
 	 * @param udc
 	 */
+	// public void updateAttendeeDevice(Attendee att, UserDeviceConfig udc) {
+	//
+	// for (int i = 0; i < mList.size(); i++) {
+	// Wrapper wr = mList.get(i);
+	// // Remove attendee devices, leave one device item
+	// if (wr.a.getAttId() == att.getAttId()) {
+	// // If user doesn't exist device before, then set
+	// if (wr.udc == null) {
+	// wr.udc = udc;
+	// } else {
+	// wr.udc.setShowing(false);
+	// wr.udc.setEnable(udc.isEnable());
+	// }
+	// }
+	// }
+	// adapter.notifyDataSetChanged();
+	// }
+
 	public void updateAttendeeDevice(Attendee att, UserDeviceConfig udc) {
 
 		for (int i = 0; i < mList.size(); i++) {
@@ -533,9 +657,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				// If user doesn't exist device before, then set
 				if (wr.udc == null) {
 					wr.udc = udc;
+					break;
 				} else {
-					wr.udc.setShowing(false);
-					wr.udc.setEnable(udc.isEnable());
+					if (wr.udc.getDeviceID().equals(udc.getDeviceID())) {
+						wr.udc.setShowing(false);
+						wr.udc.setEnable(udc.isEnable());
+					}
 				}
 			}
 		}
@@ -550,16 +677,16 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	 * @param list
 	 */
 	public void resetAttendeeDevices(Attendee att, List<UserDeviceConfig> list) {
-		Wrapper defaultWrapper = null;
+		Wrapper attendeeFirstWrapper = null;
 		int index = -1;
 		// Remove exists devices
 		for (int i = 0; i < mList.size(); i++) {
 			Wrapper wr = mList.get(i);
 			// Remove attendee devices, leave one device item
 			if (wr.a.getAttId() == att.getAttId()) {
-				if (wr.sortFlag == DEFAULT_DEVICE_FLAG) {
-					// wr.udc = null;
-					defaultWrapper = wr;
+				if (wr.sortFlag == FIRST_DEVICE_FLAG) {
+					wr.udc = null;
+					attendeeFirstWrapper = wr;
 					index = i;
 				} else {
 					mList.remove(i--);
@@ -567,27 +694,70 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 
-		if (defaultWrapper == null) {
-			V2Log.e("Error no default device ");
+		if (attendeeFirstWrapper == null) {
+			V2Log.e("Error no first device ");
 			return;
 		}
-
-		// 再添加用户的设备信息
+		
+		int deviceIndex = 1;
 		for (int i = 0; i < list.size(); i++) {
 			UserDeviceConfig udc = list.get(i);
 			if (udc.getBelongsAttendee() == null) {
 				udc.setBelongsAttendee(att);
 			}
 
-			if (udc.isDefault()) {
-				defaultWrapper.udc = udc;
-			} else if (defaultWrapper.udc.getDeviceID().equals(
-					udc.getDeviceID())) {
-				defaultWrapper.udc = udc;
-			} else if (!udc.isDefault()) {
-				mList.add(++index, new Wrapper(defaultWrapper.a, udc, 1));
+			if (i == 0) {
+				attendeeFirstWrapper.udc = udc;
+			} else {
+				mList.add(++index, new Wrapper(attendeeFirstWrapper.a, udc,
+						deviceIndex++));
 			}
+
 		}
+		
+
+		// 设备显示不出问题时删除这段注释
+		// boolean hasDefaultDevice = false;
+		// for (int i = 0; i < list.size(); i++) {
+		// UserDeviceConfig udc = list.get(i);
+		// if (udc.isDefault()) {
+		// hasDefaultDevice = true;
+		// }
+		// }
+		// // 再添加用户的设备信息
+		// int deviceIndex = 1;
+		// if (hasDefaultDevice) {
+		// for (int i = 0; i < list.size(); i++) {
+		// UserDeviceConfig udc = list.get(i);
+		// if (udc.getBelongsAttendee() == null) {
+		// udc.setBelongsAttendee(att);
+		// }
+		//
+		// if (udc.isDefault()) {
+		// defaultWrapper.udc = udc;
+		// } else {
+		// mList.add(++index, new Wrapper(defaultWrapper.a, udc,
+		// deviceIndex++));
+		// }
+		//
+		// }
+		//
+		// } else {
+		// for (int i = 0; i < list.size(); i++) {
+		// UserDeviceConfig udc = list.get(i);
+		// if (udc.getBelongsAttendee() == null) {
+		// udc.setBelongsAttendee(att);
+		// }
+		//
+		// if (i == 0) {
+		// defaultWrapper.udc = udc;
+		// } else {
+		// mList.add(++index, new Wrapper(defaultWrapper.a, udc,
+		// deviceIndex++));
+		// }
+		//
+		// }
+		// }
 
 		// FIXME update status for already devices
 		adapter.notifyDataSetChanged();

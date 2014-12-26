@@ -126,7 +126,7 @@ public class ConferenceActivity extends Activity {
 	private static final int NOTIFY_HOST_PERMISSION_REQUESTED = 12;
 
 	private static final int ATTENDEE_DEVICE_LISTENER = 20;
-	private static final int ATTENDEE_LISTENER = 21;
+	private static final int ATTENDEE_ENTER_OR_EXIT_LISTNER = 21;
 	private static final int CONF_USER_DEVICE_EVENT = 23;
 	private static final int USER_DELETE_GROUP = 24;
 	private static final int GROUP_ADD_USER = 25;
@@ -138,8 +138,9 @@ public class ConferenceActivity extends Activity {
 	private static final int DOC_DOWNLOADED_NOTIFICATION = 54;
 	private static final int DOC_CLOSED_NOTIFICATION = 55;
 	private static final int DOC_PAGE_CANVAS_NOTIFICATION = 56;
-	private static final int DESKTOP_SYNC_NOTIFICATION = 57;
+	private static final int SYNC_STATE_NOTIFICATION = 57;
 	private static final int VOICEACTIVATION_NOTIFICATION = 58;
+	private static final int INVITATION_STATE_NOTIFICATION = 59;
 
 	private static final int VIDEO_MIX_NOTIFICATION = 70;
 	private static final int TAG_CLOSE_DEVICE = 0;
@@ -239,8 +240,10 @@ public class ConferenceActivity extends Activity {
 	private BluetoothAdapter blueadapter = BluetoothAdapter.getDefaultAdapter();
 
 	private int arrowWidth = 0;
-	private int isSyn = 0;
-	private int isVoiceActivation = 0;
+
+	private boolean isSyn = false;
+	private boolean isVoiceActivation = false;
+	private boolean canInvitation = false;
 
 	private boolean hasUnreadChiremanControllMsg = false;
 	// private boolean initConferenceDateFaile = false;
@@ -249,7 +252,7 @@ public class ConferenceActivity extends Activity {
 
 	private Attendee currentAttendee;
 
-	private BroadcastReceiver mConfUserChangeReceiver = new ConfUserChangeReceiver();
+	private BroadcastReceiver mConfUserChangeReceiver = new ConfBroadcastReceiver();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -319,24 +322,25 @@ public class ConferenceActivity extends Activity {
 		mMenuButtonContainer = findViewById(R.id.in_meeting_menu_layout);
 		mMenuSparationLine = findViewById(R.id.in_meeting_video_separation_line0);
 
-		// show message layout button
-		mMenuMessageButton = findViewById(R.id.in_meeting_menu_show_msg_button);
-		mMenuMessageButton.setTag("msg");
-		mMenuMessageButton.setOnClickListener(mMenuShowButtonListener);
+		// show invition button
+		mMenuInviteAttendeeButton = findViewById(R.id.in_meeting_menu_show_invition_attendees_button);
+		mMenuInviteAttendeeButton.setTag("invition");
+		mMenuInviteAttendeeButton.setOnClickListener(mMenuShowButtonListener);
+
 		// show attendee list layout button
 		mMenuAttendeeButton = findViewById(R.id.in_meeting_menu_show_attendees_button);
 		mMenuAttendeeButton.setTag("attendee");
 		mMenuAttendeeButton.setOnClickListener(mMenuShowButtonListener);
 
+		// show message layout button
+		mMenuMessageButton = findViewById(R.id.in_meeting_menu_show_msg_button);
+		mMenuMessageButton.setTag("msg");
+		mMenuMessageButton.setOnClickListener(mMenuShowButtonListener);
+
 		// show document display button
 		mMenuDocButton = findViewById(R.id.in_meeting_menu_show_doc_button);
 		mMenuDocButton.setTag("doc");
 		mMenuDocButton.setOnClickListener(mMenuShowButtonListener);
-
-		// show invition button
-		mMenuInviteAttendeeButton = findViewById(R.id.in_meeting_menu_show_invition_attendees_button);
-		mMenuInviteAttendeeButton.setTag("invition");
-		mMenuInviteAttendeeButton.setOnClickListener(mMenuShowButtonListener);
 
 		mConverseLocalCameraButton = findViewById(R.id.converse_camera_button);
 		mConverseLocalCameraButton.setOnClickListener(mConverseCameraListener);
@@ -477,7 +481,11 @@ public class ConferenceActivity extends Activity {
 						.getmUserId() == currentAttendee.getAttId());
 
 		// 默认设置自己不是主讲，主讲会在入会后广播过来
-		currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
+		if (currentAttendee.isChairMan()) {
+			currentAttendee.setLectureState(Attendee.LECTURE_STATE_GRANTED);
+		} else {
+			currentAttendee.setLectureState(Attendee.LECTURE_STATE_NOT);
+		}
 		// mCurrentAttendeeLectureState = PermissionState.NORMAL;
 
 		currentAttendee.setSpeakingState(currentAttendee.isChairMan());
@@ -901,7 +909,7 @@ public class ConferenceActivity extends Activity {
 		if (requestCode == SUB_ACTIVITY_CODE_SHARE_DOC
 				&& resultCode != Activity.RESULT_CANCELED) {
 			if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_NOT) {
-				Toast.makeText(this, "您不是主讲不能共享文档", Toast.LENGTH_SHORT).show();
+				Toast.makeText(this, "主讲权已被取消，共享失败", Toast.LENGTH_LONG).show();
 				return;
 			}
 			String filePath = data.getStringExtra("checkedImage");
@@ -1468,7 +1476,7 @@ public class ConferenceActivity extends Activity {
 
 	};
 
-	class ConfUserChangeReceiver extends BroadcastReceiver {
+	class ConfBroadcastReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE.equals(intent
@@ -1557,7 +1565,8 @@ public class ConferenceActivity extends Activity {
 				// If client applciation exit directly, we don't receive exit
 				// conference notification
 				if (st == User.Status.OFFLINE && user != null) {
-					Message.obtain(mVideoHandler, ATTENDEE_LISTENER, 0, 0, user)
+					Message.obtain(mVideoHandler,
+							ATTENDEE_ENTER_OR_EXIT_LISTNER, 0, 0, user)
 							.sendToTarget();
 				}
 
@@ -1628,7 +1637,7 @@ public class ConferenceActivity extends Activity {
 				V2Log.d(V2Log.UI_BROADCAST,
 						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO");
 
-				if (isSyn == 1 && isVoiceActivation == 1) {
+				if (isSyn && isVoiceActivation) {
 					String xml = intent.getStringExtra("xml");
 					if (xml == null || xml.equals("")) {
 						return;
@@ -1723,7 +1732,7 @@ public class ConferenceActivity extends Activity {
 
 				V2Log.d(V2Log.UI_BROADCAST,
 						"CLASS = ConferenceActivity  BROADCAST = JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE");
-				if (isSyn == 1) {
+				if (isSyn) {
 					String xml = intent.getStringExtra("sSyncVideoMsgXML");
 					if (xml == null || xml.equals("")) {
 						return;
@@ -2062,8 +2071,8 @@ public class ConferenceActivity extends Activity {
 					NOTIFY_USER_PERMISSION_UPDATED, null);
 			cb.removeRegisterOfKickedConfListener(mVideoHandler,
 					NOTIFICATION_KICKED, null);
-			cb.removeAttendeeListener(this.mVideoHandler, ATTENDEE_LISTENER,
-					null);
+			cb.removeAttendeeEnterOrExitListener(this.mVideoHandler,
+					ATTENDEE_ENTER_OR_EXIT_LISTNER, null);
 
 			cb.unRegisterPermissionUpdateListener(this.mVideoHandler,
 					NOTIFY_HOST_PERMISSION_REQUESTED, null);
@@ -2081,8 +2090,11 @@ public class ConferenceActivity extends Activity {
 					DOC_PAGE_ADDED_NOTIFICATION, null);
 			ds.unRegisterPageCanvasUpdateNotification(mVideoHandler,
 					DOC_PAGE_CANVAS_NOTIFICATION, null);
-			cb.removeSyncDesktopListener(mVideoHandler,
-					DESKTOP_SYNC_NOTIFICATION, null);
+			cb.removeSyncStateListener(mVideoHandler, SYNC_STATE_NOTIFICATION,
+					null);
+			cb.removeInvitationStateListener(mVideoHandler,
+					INVITATION_STATE_NOTIFICATION, null);
+
 			cb.removeVoiceActivationListener(mVideoHandler,
 					VOICEACTIVATION_NOTIFICATION, null);
 			cb.removeAttendeeDeviceListener(mVideoHandler,
@@ -2355,7 +2367,7 @@ public class ConferenceActivity extends Activity {
 		if (mAttendeeContainer != null) {
 			mAttendeeContainer.updateEnteredAttendee(att);
 		}
-		// 咱不提示进入或退出
+		// 暂不提示进入或退出
 		// showToastNotification(att.getAttName()
 		// + mContext.getText(R.string.conf_notification_joined_meeting));
 	}
@@ -2370,40 +2382,7 @@ public class ConferenceActivity extends Activity {
 
 	private void doUpdateSyncEvent(boolean flag, int type) {
 		if (type == 0) {
-			if (mDocContainer != null) {
-				if (flag) {
-					mDocContainer.updateSyncStatus(true);
-				} else {
-					mDocContainer.updateSyncStatus(false);
-				}
-			}
-			cg.setSyn(flag);
-		} else if (type == 1) {
-			cg.setCanInvitation(flag);
-			if (!cg.isCanInvitation()) {
-				View view = initInvitionContainer();
-				if (mSubWindowLayout.getVisibility() == View.VISIBLE
-						&& mSubWindowLayout.getChildAt(0) == view
-						&& conf.getCreator() != GlobalHolder.getInstance()
-								.getCurrentUserId()) {
-					// close invitation view, remote forbbien invitation
-					showOrHideSubWindow(view);
-					Toast.makeText(mContext,
-							R.string.error_no_permission_to_invitation,
-							Toast.LENGTH_SHORT).show();
-				}
-				if (mMenuInviteAttendeeButton != null) {
-					mMenuInviteAttendeeButton.setEnabled(false);
-					((ImageView) mMenuInviteAttendeeButton)
-							.setImageResource(R.drawable.video_menu_invite_attendee_button_disenable);
-				}
-			} else {
-				if (mMenuInviteAttendeeButton != null) {
-					mMenuInviteAttendeeButton.setEnabled(true);
-					((ImageView) mMenuInviteAttendeeButton)
-							.setImageResource(R.drawable.video_menu_invite_attendee_button);
-				}
-			}
+
 		}
 	}
 
@@ -2583,6 +2562,16 @@ public class ConferenceActivity extends Activity {
 			} else if (conferencePermission == ConferencePermission.CONTROL) {
 				if (permissionState == PermissionState.GRANTED) {
 					attendee.setLectureState(Attendee.LECTURE_STATE_GRANTED);
+					//取消自己的默认主讲
+					if (currentAttendee.isChairMan()) {
+						if (currentAttendee.getAttId() != attendee.getAttId()) {
+							if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
+								currentAttendee
+										.setLectureState(Attendee.LECTURE_STATE_NOT);
+							}
+						}
+					}
+
 				} else if (permissionState == PermissionState.APPLYING) {
 					attendee.setLectureState(Attendee.LECTURE_STATE_APPLYING);
 				} else if (permissionState == PermissionState.NORMAL) {
@@ -2666,7 +2655,10 @@ public class ConferenceActivity extends Activity {
 		V2Doc.Page page = null;
 		V2Doc.PageArray pageArray = null;
 		V2ShapeMeta shape = null;
-		if (opt == NEW_DOC_NOTIFICATION) {
+
+		String docId = null;
+		switch (opt) {
+		case NEW_DOC_NOTIFICATION:
 			doc = (V2Doc) res.getResult();
 			V2Doc cacheDoc = mDocs.get(doc.getId());
 			if (cacheDoc == null) {
@@ -2675,31 +2667,45 @@ public class ConferenceActivity extends Activity {
 				cacheDoc.updateDoc(doc);
 				doc = cacheDoc;
 			}
-		} else if (opt == DOC_CLOSED_NOTIFICATION) {
 			doc = (V2Doc) res.getResult();
+			docId = doc.getId();
+
+			V2Doc cache = mDocs.get(docId);
+			if (cache != doc) {
+				cache.updateDoc(doc);
+			}
+
+			break;
+		case DOC_CLOSED_NOTIFICATION:
+			doc = (V2Doc) res.getResult();
+
+			if (mDocs.get(doc.getId()) == null) {
+				return;
+			}
+
 			// Notice need to use cache document
 			// because cache document object is different from JNI's callback
 			doc = mDocs.remove(doc.getId());
-		}
-
-		String docId = null;
-		switch (opt) {
-		case NEW_DOC_NOTIFICATION:
-			doc = (V2Doc) res.getResult();
-			docId = doc.getId();
-			break;
-		case DOC_CLOSED_NOTIFICATION:
 			docId = doc.getId();
 			break;
 		case DOC_PAGE_NOTIFICATION:
 			pageArray = (V2Doc.PageArray) res.getResult();
 			docId = pageArray.getDocId();
+
+			if (mDocs.get(docId) == null) {
+				return;
+			}
+
 			break;
 		case DOC_PAGE_ADDED_NOTIFICATION:
 		case DOC_DOWNLOADED_NOTIFICATION:
 		case DOC_PAGE_ACTIVITE_NOTIFICATION:// 上下翻页
 			page = (V2Doc.Page) res.getResult();
 			docId = page.getDocId();
+
+			if (mDocs.get(docId) == null) {
+				return;
+			}
 			// Record current activate Id;
 			mCurrentLecturerActivateDocId = docId;
 
@@ -2707,12 +2713,16 @@ public class ConferenceActivity extends Activity {
 		case DOC_PAGE_CANVAS_NOTIFICATION:
 			shape = (V2ShapeMeta) res.getResult();
 			docId = shape.getDocId();
+
+			if (mDocs.get(docId) == null) {
+				return;
+			}
+
 			break;
 		default:
 			V2Log.e("Unknow doc operation:" + opt);
 			return;
 		}
-		;
 
 		if (doc == null) {
 			doc = mDocs.get(docId);
@@ -2727,16 +2737,12 @@ public class ConferenceActivity extends Activity {
 			// to update cache doc or not.
 			// If doc page event before new doc event, need to update cache
 			// update
-		} else if (NEW_DOC_NOTIFICATION == opt) {
-			V2Doc cache = mDocs.get(docId);
-			if (cache != doc) {
-				cache.updateDoc(doc);
-			}
 		}
 
 		if (pageArray != null) {
 			doc.updatePageArray(pageArray);
 		}
+
 		if (page != null) {
 			doc.addPage(page);
 		}
@@ -2751,7 +2757,7 @@ public class ConferenceActivity extends Activity {
 				page.addMeta(shape);
 			}
 		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
-			if (isSyn == 1) {
+			if (isSyn) {
 				doc.setActivatePageNo(page.getNo());
 			}
 		}
@@ -2771,7 +2777,7 @@ public class ConferenceActivity extends Activity {
 				mDocContainer.updatePageButton();
 				break;
 			case DOC_PAGE_ACTIVITE_NOTIFICATION:
-				if (isSyn == 1) {
+				if (isSyn) {
 					Log.i("20141224 1", "翻页");
 					doc.setActivatePageNo(page.getNo());
 				}
@@ -2784,7 +2790,6 @@ public class ConferenceActivity extends Activity {
 				break;
 			}
 		}
-
 	}
 
 	private ServiceConnection mLocalServiceConnection = new ServiceConnection() {
@@ -2802,17 +2807,20 @@ public class ConferenceActivity extends Activity {
 			// register listener for conference service
 			cb.registerPermissionUpdateListener(mVideoHandler,
 					NOTIFY_USER_PERMISSION_UPDATED, null);
-			cb.registerAttendeeListener(mVideoHandler, ATTENDEE_LISTENER, null);
+			cb.registerAttendeeEnterOrExitListener(mVideoHandler,
+					ATTENDEE_ENTER_OR_EXIT_LISTNER, null);
 			cb.registerKickedConfListener(mVideoHandler, NOTIFICATION_KICKED,
 					null);
-			cb.registerSyncDesktopListener(mVideoHandler,
-					DESKTOP_SYNC_NOTIFICATION, null);
+			cb.registerSyncStateListener(mVideoHandler,
+					SYNC_STATE_NOTIFICATION, null);
+			cb.registerInvitationStateListener(mVideoHandler,
+					INVITATION_STATE_NOTIFICATION, null);
 			cb.registerVoiceActivationListener(mVideoHandler,
 					VOICEACTIVATION_NOTIFICATION, null);
 			cb.registerVideoMixerListener(mVideoHandler,
 					VIDEO_MIX_NOTIFICATION, null);
 
-			cb.registerHostRequestListener(mVideoHandler,
+			cb.registerLectureRequestListener(mVideoHandler,
 					NOTIFY_HOST_PERMISSION_REQUESTED, null);
 
 			cb.registerAttendeeDeviceListener(mVideoHandler,
@@ -3043,7 +3051,7 @@ public class ConferenceActivity extends Activity {
 		@Override
 		public void OnAttendeeClicked(Attendee at, UserDeviceConfig udc) {
 
-			if (isSyn == 1) {
+			if (isSyn) {
 				Toast.makeText(getApplicationContext(), "主席正在同步视频",
 						Toast.LENGTH_LONG).show();
 				Log.i("20141220 3", "主席正在同步视频"
@@ -3272,7 +3280,8 @@ public class ConferenceActivity extends Activity {
 				}
 			}
 				break;
-			case ATTENDEE_LISTENER:
+			case ATTENDEE_ENTER_OR_EXIT_LISTNER:
+
 				User ut = (User) (((AsyncResult) msg.obj).getResult());
 				Attendee at = findAttendee(ut.getmUserId());
 				if (msg.arg1 == 1) {
@@ -3299,6 +3308,7 @@ public class ConferenceActivity extends Activity {
 					doHandleUserExited(at);
 				}
 				break;
+
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == TAG_CLOSE_DEVICE) {
 					cb.requestCloseVideoDevice(cg, (UserDeviceConfig) msg.obj,
@@ -3437,21 +3447,65 @@ public class ConferenceActivity extends Activity {
 			case DOC_PAGE_CANVAS_NOTIFICATION:
 				updateDocNotification((AsyncResult) (msg.obj), msg.what);
 				break;
-			case DESKTOP_SYNC_NOTIFICATION:
-				doUpdateSyncEvent(msg.arg1 == 1 ? true : false, msg.arg2);
+			case INVITATION_STATE_NOTIFICATION:
+				// 20141225 1
+				canInvitation = msg.arg1 == 1 ? true : false;
+				cg.setCanInvitation(canInvitation);
 
+				if (currentAttendee.isChairMan()) {
+					return;
+				}
+
+				if (!cg.isCanInvitation()) {
+					View view = initInvitionContainer();
+					if (mSubWindowLayout.getVisibility() == View.VISIBLE
+							&& mSubWindowLayout.getChildAt(0) == view
+							&& conf.getCreator() != GlobalHolder.getInstance()
+									.getCurrentUserId()) {
+						// close invitation view, remote forbbien invitation
+						showOrHideSubWindow(view);
+						Toast.makeText(mContext,
+								R.string.error_no_permission_to_invitation,
+								Toast.LENGTH_SHORT).show();
+					}
+					if (mMenuInviteAttendeeButton != null) {
+						mMenuInviteAttendeeButton.setEnabled(false);
+						((ImageView) mMenuInviteAttendeeButton)
+								.setImageResource(R.drawable.video_menu_invite_attendee_button_disenable);
+					}
+				} else {
+					if (mMenuInviteAttendeeButton != null) {
+						mMenuInviteAttendeeButton.setEnabled(true);
+						((ImageView) mMenuInviteAttendeeButton)
+								.setImageResource(R.drawable.video_menu_invite_attendee_button);
+					}
+				}
+
+				break;
+			case SYNC_STATE_NOTIFICATION:
 				V2Log.d(V2Log.UI_MESSAGE,
 						"CLASS = ConferenceActivity  MESSAGE = DESKTOP_SYNC_NOTIFICATION");
-				isSyn = msg.arg1;
+
+				isSyn = msg.arg1 == 1 ? true : false;
 				if (mDocContainer != null) {
-					if (isSyn == 1) {
+					if (isSyn) {
 						mDocContainer.updateSyncStatus(true);
 					} else {
 						mDocContainer.updateSyncStatus(false);
 					}
 				}
 
-				if (isSyn == 1) {
+				cg.setSyn(isSyn);
+
+				if (mDocContainer != null) {
+					if (isSyn) {
+						mDocContainer.updateSyncStatus(true);
+					} else {
+						mDocContainer.updateSyncStatus(false);
+					}
+				}
+
+				if (isSyn) {
 					// 关闭所有打开的视频
 					Object[] surfaceViewWArray = mCurrentShowedSV.toArray();
 					for (int i = 0; i < surfaceViewWArray.length; i++) {
@@ -3465,9 +3519,9 @@ public class ConferenceActivity extends Activity {
 				// 语音激励开启与关闭
 				V2Log.d(V2Log.UI_MESSAGE,
 						"CLASS = ConferenceActivity  MESSAGE = VOICEACTIVATION_NOTIFICATION");
-				isVoiceActivation = msg.arg1;
+				isVoiceActivation = msg.arg1 == 1 ? true : false;
 
-				if (isVoiceActivation == 0) {
+				if (!isVoiceActivation) {
 					// 关闭所有打开的视频
 					Object[] surfaceViewWArray = mCurrentShowedSV.toArray();
 					for (int i = 0; i < surfaceViewWArray.length; i++) {

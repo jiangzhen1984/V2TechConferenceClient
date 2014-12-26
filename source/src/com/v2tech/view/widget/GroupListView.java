@@ -374,8 +374,9 @@ public class GroupListView extends ListView {
 					int pos = calculateIndex(startPos, endPos, user,
 							user.getmStatus());
 
-					Log.i("20141223 1", "组开始位置 = " + startPos + " ，组结束位置  = "
-							+ endPos + " ,插入位置 = " + pos);
+					Log.i("20141223 1", "组名 = " + group.getName() + " 组开始位置 = "
+							+ startPos + " ，组结束位置  = " + endPos + " ,插入位置 = "
+							+ pos);
 
 					if (pos != -1 && pos < mFilterList.size()) {
 						ItemData userItem = this.getItem(group, user);
@@ -470,7 +471,7 @@ public class GroupListView extends ListView {
 			GroupItemData groupItem = (GroupItemData) getItem(g);
 			if (!groupItem.isExpanded) {
 				int pos = getGroupItemPos(groupItem);
-				if (pos != -1){
+				if (pos != -1) {
 					groupItem.isExpanded = true;
 					expand(groupItem, pos);
 				}
@@ -716,20 +717,21 @@ public class GroupListView extends ListView {
 		return calculateGroupStartIndex(item, group);
 	}
 
-// 好友有问题 开始位置为0是为什么要++
+	// 好友有问题 开始位置为0是为什么要++
 	public int calculateGroupStartIndex(GroupItemData item, Group group) {
 		int itemStartPos = getGroupItemPos(item);
 		if (itemStartPos == 0)
 			itemStartPos++;
 		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
+		// return startPos;
 		return startPos + 1;
 	}
-	
-//	public int calculateGroupStartIndex(GroupItemData item, Group group) {
-//		int itemStartPos = getGroupItemPos(item);
-//		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
-//		return startPos;
-//	}
+
+	// public int calculateGroupStartIndex(GroupItemData item, Group group) {
+	// int itemStartPos = getGroupItemPos(item);
+	// int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
+	// return startPos;
+	// }
 
 	public int getExpandGroupSize(List<Group> groups) {
 		int groupLength = 0;

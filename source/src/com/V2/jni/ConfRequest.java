@@ -142,7 +142,8 @@ public class ConfRequest {
 				"accounttype='", "'");
 		String nickName = XmlAttributeExtractor.extract(szUserInfos,
 				"nickname='", "'");
-
+		String strDeviceType = XmlAttributeExtractor.extract(szUserInfos,
+				"uetype='", "'");
 		if (uid == null) {
 			V2Log.e("Can not dispatch request for member joined, cause by uid is null");
 			return;
@@ -154,6 +155,7 @@ public class ConfRequest {
 			v2user.type = Integer.parseInt(act);
 		}
 		v2user.name = nickName;
+		v2user.deviceType=Integer.parseInt(strDeviceType);
 
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ConfRequestCallback> we = this.mCallbacks.get(i);

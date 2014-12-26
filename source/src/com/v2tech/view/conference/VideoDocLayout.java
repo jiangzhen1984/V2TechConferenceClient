@@ -101,9 +101,9 @@ public class VideoDocLayout extends LinearLayout {
 		public void requestDocViewFillParent(View v);
 
 		public void requestDocViewRestore(View v);
-		
-		public void requestShareImageDoc(View v);	
-		
+
+		public void requestShareImageDoc(View v);
+
 	};
 
 	public VideoDocLayout(Context context, Map<String, V2Doc> docs,
@@ -146,7 +146,7 @@ public class VideoDocLayout extends LinearLayout {
 		mRequestUpdateSizeButton = (ImageView) view
 				.findViewById(R.id.video_doc_screen_button);
 		mRequestUpdateSizeButton.setOnClickListener(mUpdateSizeListener);
-		
+
 		mSharedDocButton = view.findViewById(R.id.video_doc_share_button);
 		mSharedDocButton.setOnClickListener(mShareDocButtonListener);
 
@@ -175,7 +175,8 @@ public class VideoDocLayout extends LinearLayout {
 
 			mDocListWindowScroller = (ScrollView) view
 					.findViewById(R.id.video_doc_list_container_scroller);
-			mDocListWindow = new PopupWindow(view, (int) (rootView.getWidth() * 0.5),
+			mDocListWindow = new PopupWindow(view,
+					(int) (rootView.getWidth() * 0.5),
 					(int) (rootView.getHeight() * 0.5));
 			mDocListWindow.setBackgroundDrawable(new ColorDrawable(
 					Color.TRANSPARENT));
@@ -427,7 +428,7 @@ public class VideoDocLayout extends LinearLayout {
 				src.bottom = ops.outHeight;
 				width = (int) src.right;
 				height = (int) src.bottom;
-				
+
 				ops.inJustDecodeBounds = false;
 				BitmapFactory.Options opsNew = new BitmapFactory.Options();
 				opsNew.inPurgeable = true;
@@ -447,7 +448,8 @@ public class VideoDocLayout extends LinearLayout {
 					sampl = 2;
 				}
 
-				V2Log.d("updateCurrentDocPage --> doc file path : " + p.getFilePath());
+				V2Log.d("updateCurrentDocPage --> doc file path : "
+						+ p.getFilePath());
 				mBackgroundBitMap = BitmapFactory.decodeFile(p.getFilePath(),
 						opsNew);
 
@@ -467,7 +469,7 @@ public class VideoDocLayout extends LinearLayout {
 				FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(
 						FrameLayout.LayoutParams.MATCH_PARENT,
 						FrameLayout.LayoutParams.MATCH_PARENT);
-				container.addView(iv , fl);
+				container.addView(iv, fl);
 				container.postInvalidate();
 			} else {
 				// Set interval timer for waiting page download
@@ -491,10 +493,9 @@ public class VideoDocLayout extends LinearLayout {
 	public void setListener(DocListener listener) {
 		this.listener = listener;
 	}
-	
-	
+
 	public void requestShowSharedButton(boolean flag) {
-		mSharedDocButton.setVisibility(flag ? View.VISIBLE:View.GONE);
+		mSharedDocButton.setVisibility(flag ? View.VISIBLE : View.GONE);
 	}
 
 	/**
@@ -504,47 +505,48 @@ public class VideoDocLayout extends LinearLayout {
 	 * @param shapesBm
 	 */
 	private void mergeBitmapToImage(Bitmap shareDocBm, Bitmap shapesBm) {
-//		if (mImageViewBitmap == null || mImageViewBitmap.isRecycled()) {
-//			if (shareDocBm != null && !shareDocBm.isRecycled()) {
-//				mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
-//						shareDocBm.getHeight(), Config.ARGB_8888);
-//			} else if (shapesBm != null && !shapesBm.isRecycled()) {
-//				mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
-//						shapesBm.getHeight(), Config.ARGB_8888);
-//			} else {
-//				V2Log.e(" No available bitmap");
-//				return;
-//			}
-//		} else {
-//			if (shareDocBm != null && !shareDocBm.isRecycled()) {
-//				// Current image view bitmap is smaller than shared document
-//				// bitmap, we have to create new one
-//				if (mImageViewBitmap.getWidth() < shareDocBm.getWidth()
-//						|| mImageViewBitmap.getHeight() < shareDocBm
-//								.getHeight()) {
-//					mImageViewBitmap.recycle();
-//					mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
-//								shareDocBm.getHeight(), Config.ARGB_8888);
-////				}
-//			}
-//		}
-		
+		// if (mImageViewBitmap == null || mImageViewBitmap.isRecycled()) {
+		// if (shareDocBm != null && !shareDocBm.isRecycled()) {
+		// mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
+		// shareDocBm.getHeight(), Config.ARGB_8888);
+		// } else if (shapesBm != null && !shapesBm.isRecycled()) {
+		// mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
+		// shapesBm.getHeight(), Config.ARGB_8888);
+		// } else {
+		// V2Log.e(" No available bitmap");
+		// return;
+		// }
+		// } else {
+		// if (shareDocBm != null && !shareDocBm.isRecycled()) {
+		// // Current image view bitmap is smaller than shared document
+		// // bitmap, we have to create new one
+		// if (mImageViewBitmap.getWidth() < shareDocBm.getWidth()
+		// || mImageViewBitmap.getHeight() < shareDocBm
+		// .getHeight()) {
+		// mImageViewBitmap.recycle();
+		// mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
+		// shareDocBm.getHeight(), Config.ARGB_8888);
+		// // }
+		// }
+		// }
+
 		if (shareDocBm != null && !shareDocBm.isRecycled()) {
-//			if(mImageViewBitmap != null && !mImageViewBitmap.isRecycled())
-//				mImageViewBitmap.recycle();
+			// if(mImageViewBitmap != null && !mImageViewBitmap.isRecycled())
+			// mImageViewBitmap.recycle();
 			mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
 					shareDocBm.getHeight(), Config.ARGB_8888);
 		} else if (shapesBm != null && !shapesBm.isRecycled()) {
-//			if(mImageViewBitmap != null && !mImageViewBitmap.isRecycled())
-//				mImageViewBitmap.recycle();
+			// if(mImageViewBitmap != null && !mImageViewBitmap.isRecycled())
+			// mImageViewBitmap.recycle();
 			mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
 					shapesBm.getHeight(), Config.ARGB_8888);
 		} else {
 			V2Log.e(" No available bitmap");
 			return;
 		}
-			
-		V2Log.e("mergeBitmapToImage", "width : " + mImageViewBitmap.getWidth() + "height : " + mImageViewBitmap.getHeight());
+
+		V2Log.e("mergeBitmapToImage", "width : " + mImageViewBitmap.getWidth()
+				+ "height : " + mImageViewBitmap.getHeight());
 		Canvas target = new Canvas(mImageViewBitmap);
 		Paint paint = new Paint();
 		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
@@ -687,11 +689,16 @@ public class VideoDocLayout extends LinearLayout {
 			mNextPageButton
 					.setImageResource(R.drawable.video_doc_right_arrow_gray);
 			mShowDocListButton.setEnabled(false);
+			((ImageView) mShowDocListButton)
+					.setImageResource(R.drawable.video_show_doc_button_pressed);
 			mNextPageButton.setEnabled(false);
 			mPrePageButton.setEnabled(false);
+
 		} else {
 			updatePageButton();
 			mShowDocListButton.setEnabled(true);
+			((ImageView) mShowDocListButton)
+					.setImageResource(R.drawable.video_show_doc_button_selector);
 			mNextPageButton.setEnabled(true);
 			mPrePageButton.setEnabled(true);
 		}
@@ -810,7 +817,8 @@ public class VideoDocLayout extends LinearLayout {
 							.getActivatePageNo() + 1);
 					updateCurrentDoc();
 					if (listener != null) {
-						listener.updateDoc(mCurrentDoc, mCurrentDoc.getActivatePage());
+						listener.updateDoc(mCurrentDoc,
+								mCurrentDoc.getActivatePage());
 					}
 				}
 			} else if (view == mPrePageButton) {
@@ -819,7 +827,8 @@ public class VideoDocLayout extends LinearLayout {
 							.getActivatePageNo() - 1);
 					updateCurrentDoc();
 					if (listener != null) {
-						listener.updateDoc(mCurrentDoc, mCurrentDoc.getActivatePage());
+						listener.updateDoc(mCurrentDoc,
+								mCurrentDoc.getActivatePage());
 					}
 				}
 			} else {
@@ -904,7 +913,7 @@ public class VideoDocLayout extends LinearLayout {
 		}
 
 	};
-	
+
 	private OnClickListener mShareDocButtonListener = new OnClickListener() {
 
 		@Override

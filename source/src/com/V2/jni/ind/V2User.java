@@ -11,6 +11,8 @@ public class V2User implements Parcelable {
 	public String name;
 	// 2 means non-registered user
 	public int type;
+	
+	public int deviceType;
 
 	// Server transfer fields
 	// 通过OnGetGroupUserInfo传来

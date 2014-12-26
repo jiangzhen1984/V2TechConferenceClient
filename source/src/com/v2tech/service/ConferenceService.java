@@ -82,12 +82,13 @@ public class ConferenceService extends DeviceService {
 
 	private static final int KEY_KICKED_LISTNER = 100;
 	private static final int KEY_ATTENDEE_DEVICE_LISTNER = 101;
-	private static final int KEY_ATTENDEE_STATUS_LISTNER = 102;
-	private static final int KEY_SYNC_LISTNER = 103;
+	private static final int KEY_ATTENDEE_ENTER_OR_EXIT_LISTNER = 102;
+	private static final int KEY_SYNC_STATE_LISTNER = 103;
 	private static final int KEY_PERMISSION_CHANGED_LISTNER = 104;
 	private static final int KEY_MIXED_VIDEO_LISTNER = 105;
-	private static final int KEY_HOST_REQUEST_LISTNER = 106;
+	private static final int KEY_LECTURE_REQUEST_LISTNER = 106;
 	private static final int KEY_VOICEACTIVATION_LISTNER = 207;
+	private static final int KEY_INVITATION_STATE_LISTNER = 208;
 
 	private VideoRequestCB videoCallback;
 	private ConfRequestCB confCallback;
@@ -256,10 +257,7 @@ public class ConferenceService extends DeviceService {
 	public void muteConf() {
 		ConfRequest.getInstance().muteConf();
 	}
-	
-	
-	
-	
+
 	public void notifyAllMessage(long nGroupID) {
 		ConfRequest.getInstance().notifyAllMessage(nGroupID);
 	}
@@ -271,7 +269,7 @@ public class ConferenceService extends DeviceService {
 		} else {
 			_bInuse = 0;
 		}
-		
+
 		VideoRequest.getInstance().enableVideoDev(szDeviceID, _bInuse);
 	}
 
@@ -405,10 +403,10 @@ public class ConferenceService extends DeviceService {
 		}
 
 	}
-	
-	
+
 	/**
 	 * Shared image document for conference
+	 * 
 	 * @param conf
 	 * @param file
 	 * @param listener
@@ -422,14 +420,13 @@ public class ConferenceService extends DeviceService {
 			}
 			return;
 		}
-		GroupRequest.getInstance().groupCreateDocShare(GroupType.CONFERENCE.intValue(), conf.getId(),
-				file, 0, false);
-		
+		GroupRequest.getInstance().groupCreateDocShare(
+				GroupType.CONFERENCE.intValue(), conf.getId(), file, 0, false);
 
 		if (listener != null) {
-		JNIResponse jniRes = new JNIResponse(
-				RequestPermissionResponse.Result.SUCCESS);
-		sendResult(listener, jniRes);
+			JNIResponse jniRes = new JNIResponse(
+					RequestPermissionResponse.Result.SUCCESS);
+			sendResult(listener, jniRes);
 		}
 	}
 
@@ -474,12 +471,14 @@ public class ConferenceService extends DeviceService {
 	 * @param what
 	 * @param obj
 	 */
-	public void registerAttendeeListener(Handler h, int what, Object obj) {
-		registerListener(KEY_ATTENDEE_STATUS_LISTNER, h, what, obj);
+	public void registerAttendeeEnterOrExitListener(Handler h, int what,
+			Object obj) {
+		registerListener(KEY_ATTENDEE_ENTER_OR_EXIT_LISTNER, h, what, obj);
 	}
 
-	public void removeAttendeeListener(Handler h, int what, Object obj) {
-		unRegisterListener(KEY_ATTENDEE_STATUS_LISTNER, h, what, obj);
+	public void removeAttendeeEnterOrExitListener(Handler h, int what,
+			Object obj) {
+		unRegisterListener(KEY_ATTENDEE_ENTER_OR_EXIT_LISTNER, h, what, obj);
 	}
 
 	/**
@@ -489,12 +488,20 @@ public class ConferenceService extends DeviceService {
 	 * @param what
 	 * @param obj
 	 */
-	public void registerSyncDesktopListener(Handler h, int what, Object obj) {
-		registerListener(KEY_SYNC_LISTNER, h, what, obj);
+	public void registerSyncStateListener(Handler h, int what, Object obj) {
+		registerListener(KEY_SYNC_STATE_LISTNER, h, what, obj);
 	}
 
-	public void removeSyncDesktopListener(Handler h, int what, Object obj) {
-		unRegisterListener(KEY_SYNC_LISTNER, h, what, obj);
+	public void removeSyncStateListener(Handler h, int what, Object obj) {
+		unRegisterListener(KEY_SYNC_STATE_LISTNER, h, what, obj);
+	}
+
+	public void registerInvitationStateListener(Handler h, int what, Object obj) {
+		registerListener(KEY_INVITATION_STATE_LISTNER, h, what, obj);
+	}
+
+	public void removeInvitationStateListener(Handler h, int what, Object obj) {
+		unRegisterListener(KEY_INVITATION_STATE_LISTNER, h, what, obj);
 	}
 
 	public void registerVoiceActivationListener(Handler h, int what, Object obj) {
@@ -529,12 +536,12 @@ public class ConferenceService extends DeviceService {
 		unRegisterListener(KEY_MIXED_VIDEO_LISTNER, h, what, obj);
 	}
 
-	public void registerHostRequestListener(Handler h, int what, Object obj) {
-		registerListener(KEY_HOST_REQUEST_LISTNER, h, what, obj);
+	public void registerLectureRequestListener(Handler h, int what, Object obj) {
+		registerListener(KEY_LECTURE_REQUEST_LISTNER, h, what, obj);
 	}
 
-	public void unRegisterHostRequestListener(Handler h, int what, Object obj) {
-		unRegisterListener(KEY_HOST_REQUEST_LISTNER, h, what, obj);
+	public void unRegisterLectureRequestListener(Handler h, int what, Object obj) {
+		unRegisterListener(KEY_LECTURE_REQUEST_LISTNER, h, what, obj);
 	}
 
 	@Override
@@ -596,6 +603,7 @@ public class ConferenceService extends DeviceService {
 			User user = null;
 			if (v2user.type == V2GlobalEnum.USER_ACCOUT_TYPE_NON_REGISTERED) {
 				user = new User(v2user.uid, v2user.name);
+				user.setDeviceType(User.DeviceType.fromInt(v2user.deviceType));
 			} else {
 				user = GlobalHolder.getInstance().getUser(v2user.uid);
 				if (user == null) {
@@ -609,7 +617,8 @@ public class ConferenceService extends DeviceService {
 				}
 
 			}
-			notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 1, 0, user);
+			notifyListenerWithPending(KEY_ATTENDEE_ENTER_OR_EXIT_LISTNER, 1, 0,
+					user);
 		}
 
 		@Override
@@ -621,7 +630,8 @@ public class ConferenceService extends DeviceService {
 			if (u == null) {
 				u = new User(nUserID);
 			}
-			notifyListenerWithPending(KEY_ATTENDEE_STATUS_LISTNER, 0, 0, u);
+			notifyListenerWithPending(KEY_ATTENDEE_ENTER_OR_EXIT_LISTNER, 0, 0,
+					u);
 
 		}
 
@@ -643,7 +653,7 @@ public class ConferenceService extends DeviceService {
 			super.OnConfHostRequest(user, permission);
 			JNIIndication jniInd = new PermissionRequestIndication(user.uid,
 					permission, PermissionState.APPLYING.intValue());
-			notifyListenerWithPending(KEY_HOST_REQUEST_LISTNER, 0, 0, jniInd);
+			notifyListenerWithPending(KEY_LECTURE_REQUEST_LISTNER, 0, 0, jniInd);
 
 		}
 
@@ -727,8 +737,8 @@ public class ConferenceService extends DeviceService {
 					}
 
 					conferenceGroup.setCanInvitation(group.canInvitation);
-					notifyListenerWithPending(KEY_SYNC_LISTNER,
-							(group.canInvitation ? 1 : 0), 1, null);
+					notifyListenerWithPending(KEY_INVITATION_STATE_LISTNER,
+							(group.canInvitation ? 1 : 0), 0, null);
 
 				}
 
@@ -748,7 +758,7 @@ public class ConferenceService extends DeviceService {
 					}
 
 					conferenceGroup.setSyn(group.isSync);
-					notifyListenerWithPending(KEY_SYNC_LISTNER,
+					notifyListenerWithPending(KEY_SYNC_STATE_LISTNER,
 							(conferenceGroup.isSyn() ? 1 : 0), 0, null);
 
 				}
