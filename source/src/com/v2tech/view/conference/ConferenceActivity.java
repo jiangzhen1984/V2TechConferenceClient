@@ -253,12 +253,19 @@ public class ConferenceActivity extends Activity {
 	private Attendee currentAttendee;
 
 	private BroadcastReceiver mConfUserChangeReceiver = new ConfBroadcastReceiver();
+	
+	private boolean isFinish;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
-		initConferenceDate();
+		if(!initConferenceDate()){
+			isFinish = true;
+			super.finish();
+			return ;
+		}
+		
 		if (blueadapter != null
 				&& BluetoothProfile.STATE_CONNECTED == blueadapter
 						.getProfileConnectionState(BluetoothProfile.HEADSET)) {
@@ -2055,6 +2062,11 @@ public class ConferenceActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		if(isFinish){
+			super.onDestroy();
+			return ;
+		}
+		
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
 		mAttendeeList.clear();
 		if (mCurrentShowedSV != null) {

@@ -387,7 +387,8 @@ public class JNIService extends Service implements
 
 				if (gl != null && gl.size() > 0) {
 					GlobalHolder.getInstance().updateGroupList(msg.arg1, gl);
-					if (((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD) || (msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT))
+					if (((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD) ||
+						(msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT))
 							&& !noNeedBroadcast) {
 						V2Log.d(TAG,
 								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
@@ -994,7 +995,7 @@ public class JNIService extends Service implements
 			}
 			
 			AddFriendHistorieNode node = VerificationProvider.queryFriendQualMessageByUserId(user.uid);
-			if(node != null){
+			if(node != null && node.readState == ReadState.READ.intValue()){
 				V2Log.d(TAG, "OnRequestCreateRelationCallback --> Node readState : " + node.readState + " offlineLoad"
 						+ ": " + GlobalHolder.getInstance().isOfflineLoaded());
 				if(node.readState == ReadState.READ.intValue() && !GlobalHolder.getInstance().isOfflineLoaded()){
@@ -1052,21 +1053,26 @@ public class JNIService extends Service implements
 					i.putExtra("gid", nGroupID);
 					sendStickyBroadcast(i);
 
-					Intent intent = new Intent(mContext, MainActivity.class);
-					// intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-					intent.putExtra("initFragment", 3);
-					Notificator
-							.updateSystemNotification(
-									mContext,
-									mContext.getText(
-											R.string.requesting_delete_conference)
-											.toString(),
-									gName
-											+ mContext
-													.getText(R.string.confs_is_deleted_notification),
-									1, intent,
-									PublicIntent.VIDEO_NOTIFICATION_ID);
+					if (GlobalConfig.isApplicationBackground(mContext)
+							|| GlobalHolder.getInstance().isInMeeting()
+							|| GlobalHolder.getInstance().isInAudioCall()
+							|| GlobalHolder.getInstance().isInVideoCall()) {
+						Intent intent = new Intent(mContext, MainActivity.class);
+						// intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+						intent.putExtra("initFragment", 3);
+						Notificator
+						.updateSystemNotification(
+								mContext,
+								mContext.getText(
+										R.string.requesting_delete_conference)
+										.toString(),
+								gName
+										+ mContext
+												.getText(R.string.confs_is_deleted_notification),
+								1, intent,
+								PublicIntent.VIDEO_NOTIFICATION_ID);
+					}
 				}
 			} else if (groupType == GroupType.CHATING.intValue()) {
 				GlobalHolder.getInstance().removeGroup(
@@ -1438,8 +1444,14 @@ public class JNIService extends Service implements
 				i.putExtra("group", new GroupUserObject(
 						V2GlobalEnum.GROUP_TYPE_CROWD, crowd.id, -1));
 				sendBroadcast(i);
-			} else if (crowd.type == V2Group.TYPE_DISCUSSION_BOARD
-					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.creator.uid) {
+			} else if (crowd.type == V2Group.TYPE_DISCUSSION_BOARD) {
+				if(GlobalHolder.getInstance().getCurrentUserId()== crowd.creator.uid){
+					Group existGroup = GlobalHolder.getInstance().
+							getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, crowd.id);
+					if(existGroup != null)
+						return ;
+				}
+				
 				V2Log.e(TAG,
 						"onAddGroupInfo--> add a new discussion group , id is : "
 								+ crowd.id);

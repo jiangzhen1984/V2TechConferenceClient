@@ -1337,9 +1337,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (tempNode.readState == ReadState.UNREAD.intValue())
 			hasUnread = true;
 
-		String msg = "";
-		String date = "";
-		String dateLong = "";
 		String name = null;
 		if (remoteUserName != null)
 			name = remoteUserName;
@@ -1348,31 +1345,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					tempNode.remoteUserID);
 			name = user.getName();
 		}
-
-		// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-		// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
-		if ((tempNode.fromUserID == tempNode.remoteUserID)
-				&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-			msg = name + res.getString(R.string.friend_has_added);
-		} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-				&& (tempNode.ownerAuthType == 1)) {// 别人加我不管我有没有处理
-			msg = name + res.getString(R.string.friend_apply_add_you_friend);
-		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-				&& (tempNode.addState == 0)) {// 我加别人等待验证
-			msg = String.format(
-					res.getString(R.string.friend_apply_add_waiting_verify),
-					name);
-		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-				&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-			msg = res.getString(R.string.friend_relation) + name
-					+ res.getString(R.string.friend_becomed);
-		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-				&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-			msg = name + res.getString(R.string.friend_was_reject_apply);
-		}
-		date = DateUtil.getStringDate(tempNode.saveDate * 1000);
-		dateLong = String.valueOf(tempNode.saveDate * 1000);
-
+		String msg = buildFriendVerificationMsg(tempNode, name);
+		String date = DateUtil.getStringDate(tempNode.saveDate * 1000);
+		String dateLong = String.valueOf(tempNode.saveDate * 1000);
 		if (verificationMessageItemData != null) {
 			verificationMessageItemData.setMsg(msg);
 			verificationMessageItemData.setDate(date);
@@ -3073,6 +3048,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							cov.setReadFlag(Conversation.READ_FLAG_UNREAD);
 							updateUnreadConversation(mItemList.get(i));
 							break;
+						} else {
+							addConversation(g, true);
+							Conference c = new Conference((ConferenceGroup) g);
+							// Notify status bar
+							updateConferenceNotification(c);
 						}
 					}
 				} else {
@@ -3320,46 +3300,22 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private String showUnreadFriendAuthentication() {
-
 		// 查出未读的第一条按时间顺序
 		boolean hasUnread = VerificationProvider.getUNReandFriendMessage();
 
 		AddFriendHistorieNode tempNode = VerificationProvider
 				.getNewestFriendVerificationMessage();
-		String msg = "";
-		String date = "";
-		String dateLong = "";
-		User user = null;
-
-		user = GlobalHolder.getInstance().getUser(tempNode.remoteUserID);
+		if(tempNode == null){
+			return null; 
+		}
+		
+		User user = GlobalHolder.getInstance().getUser(tempNode.remoteUserID);
 		if (user == null)
 			user = new User(tempNode.remoteUserID);
 		String name = user.getName();
-
-		// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
-		// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
-		if ((tempNode.fromUserID == tempNode.remoteUserID)
-				&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
-			msg = name + res.getString(R.string.friend_has_added);
-		} else if ((tempNode.fromUserID == tempNode.remoteUserID)
-				&& (tempNode.ownerAuthType == 1)) {// 别人加我不管我有没有处理
-			msg = name + res.getString(R.string.friend_apply_add_you_friend);
-		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-				&& (tempNode.addState == 0)) {// 我加别人等待验证
-			msg = String.format(
-					res.getString(R.string.friend_apply_add_waiting_verify),
-					name);
-		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-				&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-			msg = res.getString(R.string.friend_relation) + name
-					+ res.getString(R.string.friend_becomed);
-		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-				&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-			msg = name + res.getString(R.string.friend_was_reject_apply);
-		}
-		date = DateUtil.getStringDate(tempNode.saveDate * 1000);
-		dateLong = String.valueOf(tempNode.saveDate * 1000);
-
+		String msg = buildFriendVerificationMsg(tempNode , name);
+		String date = DateUtil.getStringDate(tempNode.saveDate * 1000);
+		String dateLong = String.valueOf(tempNode.saveDate * 1000);
 		if (verificationMessageItemData != null) {
 			if (hasUnread)
 				verificationMessageItemData
@@ -3376,6 +3332,37 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 		updateUnreadConversation(verificationItem);
 		return msg;
+	}
+	
+	/**
+	 * 构建好友验证信息显示的内容
+	 * @param tempNode
+	 * @param name
+	 * @return
+	 */
+	private String buildFriendVerificationMsg(AddFriendHistorieNode tempNode , String name){
+		String content = null;
+		// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
+		// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
+		if ((tempNode.fromUserID == tempNode.remoteUserID)
+				&& (tempNode.ownerAuthType == 0)) {// 别人加我允许任何人
+			content = String.format(res.getString(R.string.friend_has_added), name);
+		} else if ((tempNode.fromUserID == tempNode.remoteUserID)
+				&& (tempNode.ownerAuthType == 1)) {// 别人加我不管我有没有处理
+			content = String.format(res.getString(R.string.friend_apply_add_you_friend), name);
+		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+				&& (tempNode.addState == 0)) {// 我加别人等待验证
+			content = String.format(
+					res.getString(R.string.friend_apply_add_waiting_verify),
+					name);
+		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+				&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
+			content = String.format(res.getString(R.string.friend_relation), name);
+		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
+				&& (tempNode.addState == 2)) {// 我加别人已被拒绝
+			content = String.format(res.getString(R.string.friend_was_reject_apply), name);
+		}
+		return content;
 	}
 
 	class LocalHandler extends Handler {

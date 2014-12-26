@@ -1051,7 +1051,8 @@ public class CrowdFilesActivity extends Activity {
 
 			float percent = 0;
 			float speed = 100L;
-			if (fs == VFile.State.DOWNLOADING || fs == VFile.State.UPLOADING) {
+			if (fs == VFile.State.DOWNLOADING || fs == VFile.State.UPLOADING || 
+					fs == VFile.State.DOWNLOAD_PAUSE || fs == VFile.State.UPLOAD_PAUSE) {
 				item.mFileProgress.setVisibility(View.VISIBLE);
 				item.mFileProgress.setText(file.getProceedSizeStr() + "/"
 						+ file.getFileSizeStr());
@@ -1065,6 +1066,9 @@ public class CrowdFilesActivity extends Activity {
 							.getSize());
 					speed = (size / sec) * 1000;
 					item.mVelocity.setText(file.getFileSize(speed) + "/S");
+				} else {
+					percent = 0;
+					speed = 100F;
 				}
 				updateProgress(item, percent , speed);
 			}

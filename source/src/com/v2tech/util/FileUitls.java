@@ -270,7 +270,7 @@ public class FileUitls {
 		intent.addCategory("android.intent.category.DEFAULT");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		Uri uri = Uri.fromFile(file);
-		intent.setDataAndType(uri, "application/msword");
+		intent.setDataAndType(uri, "application/*");
 		return intent;
 	}
 

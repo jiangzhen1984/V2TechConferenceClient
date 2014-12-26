@@ -90,7 +90,6 @@ public class MessageAuthenticationActivity extends Activity {
 	public final static int PROMPT_TYPE_GROUP = 3;
 	private final static int AUTHENTICATION_RESULT = 4;
 	private final static int FRIEND_AUTHENTICATION_RESULT = 5;
-	private final static int LOAD_SIZE = 20;
 
 	public static final String tableName = "AddFriendHistories";
 	// R.id.message_authentication

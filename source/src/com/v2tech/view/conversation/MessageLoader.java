@@ -1748,6 +1748,8 @@ public class MessageLoader {
 			current = new VMessage(groupType, groupID, fromUser, new Date(date));
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_USER) {
 			current = new VMessage(groupType, 0, fromUser, new Date(date));
+		} else {
+			current = new VMessage(-1, -1, fromUser, new Date(date));
 		}
 		return new VMessageFileItem(current, uuid, filePath, null, fileSize,
 				fileState, 0f, 0l, 0f, FileType.UNKNOW, 2);

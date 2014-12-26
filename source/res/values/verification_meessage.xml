@@ -35,11 +35,9 @@
     <string name="crowd_application_addition_hint">附加消息</string>
     
     <!-- 好友 -->
-     <string name="friend_has_added">已添加你为好友</string>
-     <string name="friend_apply_add_you_friend">申请加你为好友</string>
+     <string name="friend_has_added">%1$s已添加你为好友</string>
+     <string name="friend_apply_add_you_friend">%1$s申请加你为好友</string>
      <string name="friend_apply_add_waiting_verify">等待%1$s的好友验证</string>
-     <string name="friend_relation">你和</string>
-     <string name="friend_becomed">成为了好友</string>
-     
-     <string name="friend_was_reject_apply">拒绝你的好友申请</string>
+     <string name="friend_relation">你和%1$s成为了好友</string>
+     <string name="friend_was_reject_apply">%1$s拒绝你的好友申请</string>
 </resources>

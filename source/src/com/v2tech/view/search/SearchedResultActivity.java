@@ -5,6 +5,7 @@ import java.util.List;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -21,7 +22,9 @@ import android.widget.TextView;
 
 import com.V2.jni.ImRequest;
 import com.v2tech.R;
+import com.v2tech.service.BitmapManager;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.vo.Conversation;
@@ -30,6 +33,8 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.SearchedResult;
+import com.v2tech.vo.SearchedResult.SearchedResultItem;
+import com.v2tech.vo.SearchedResult.Type;
 import com.v2tech.vo.User;
 
 public class SearchedResultActivity extends Activity {
@@ -59,6 +64,9 @@ public class SearchedResultActivity extends Activity {
 				mListView.setAdapter(new LocalAdapter());
 			}
 		}
+		// Register listener for avatar changed
+		BitmapManager.getInstance().registerBitmapChangedListener(
+				listener);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
 	}
 
@@ -76,6 +84,7 @@ public class SearchedResultActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		BitmapManager.getInstance().unRegisterBitmapChangedListener(listener);
 	}
 
 
@@ -125,6 +134,9 @@ public class SearchedResultActivity extends Activity {
 						isGetInfo = true;
 					}
 				}
+				
+				if(u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId())
+					isGetInfo = true;
 				
 				if(!isGetInfo) {
                     ImRequest.getInstance().getUserBaseInfo(item.id);
@@ -198,6 +210,7 @@ public class SearchedResultActivity extends Activity {
 			if (srItem.mType == SearchedResult.Type.CROWD) {
 				item.iv.setImageResource(R.drawable.chat_group_icon);
 			} else if (srItem.mType == SearchedResult.Type.USER) {
+				
 				item.iv.setImageResource(R.drawable.avatar);
 			}
 			
@@ -206,5 +219,21 @@ public class SearchedResultActivity extends Activity {
 		
 	}
 
-
+	private BitmapChangedListener listener = new BitmapChangedListener() {
+		
+		@Override
+		public void notifyAvatarChanged(User user, Bitmap bm) {
+			if(user == null || bm == null)
+				return ;
+			
+//			for (SearchedResultItem item : mList) {
+//				if(item.mType == Type.USER){
+//					item.id
+//				}
+//				if(item..getmUserId() == user.getmUserId()){
+//					member.setAvatarBitmap(bm);
+//				}
+//			}
+		}
+	};
 }

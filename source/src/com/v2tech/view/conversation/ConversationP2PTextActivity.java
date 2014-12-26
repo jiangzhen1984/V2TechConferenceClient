@@ -2169,24 +2169,30 @@ public class ConversationP2PTextActivity extends Activity implements
 				VMessageAbstractItem item = items.get(i);
 				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
 					VMessageFileItem vfi = (VMessageFileItem) item;
-
-					switch (item.getState()) {
-					case VMessageAbstractItem.STATE_FILE_SENDING:
-						mChat.updateFileOperation(vfi,
-								FileOperationEnum.OPERATION_CANCEL_SENDING,
-								null);
-						break;
-					case VMessageAbstractItem.STATE_FILE_DOWNLOADED:
-						mChat.updateFileOperation(vfi,
-								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
-								null);
-						break;
-					default:
-						break;
+					if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD && 
+							v.getFromUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId() &&
+							v.getFileItems().get(0).getState() == VMessageAbstractItem.STATE_FILE_SENDING){
+						Message.obtain(lh, REQUEST_DEL_MESSAGE, v).sendToTarget();
+					}
+					else{
+						switch (item.getState()) {
+						case VMessageAbstractItem.STATE_FILE_SENDING:
+							mChat.updateFileOperation(vfi,
+									FileOperationEnum.OPERATION_CANCEL_SENDING,
+									null);
+							break;
+						case VMessageAbstractItem.STATE_FILE_DOWNLOADED:
+							mChat.updateFileOperation(vfi,
+									FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
+									null);
+							break;
+						default:
+							break;
+						}
+						Message.obtain(lh, REQUEST_DEL_MESSAGE, v).sendToTarget();
 					}
 				}
 			}
-			Message.obtain(lh, REQUEST_DEL_MESSAGE, v).sendToTarget();
 		}
 
 		@Override
@@ -2409,8 +2415,8 @@ public class ConversationP2PTextActivity extends Activity implements
 		messageArray.remove(location);
 		boolean isDeleteOther = true;
 		if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD && 
-				vm.getFileItems().size() > 0 && vm.getFromUser().getmUserId() != GlobalHolder.getInstance().getCurrentUserId() &&
-				vm.getFileItems().get(0).getState() == VMessageAbstractItem.STATE_FILE_SENT){
+				vm.getFileItems().size() > 0 && vm.getFromUser().getmUserId() == GlobalHolder.getInstance().getCurrentUserId() &&
+				vm.getFileItems().get(0).getState() == VMessageAbstractItem.STATE_FILE_SENDING){
 			isDeleteOther = false;
 		}
 		MessageLoader.deleteMessage(mContext, vm , isDeleteOther);
@@ -2721,6 +2727,8 @@ public class ConversationP2PTextActivity extends Activity implements
 
 		@Override
 		public View getView(int pos, View convertView, ViewGroup v) {
+			if(pos >= messageArray.size())
+				return convertView;
 			CommonAdapterItemWrapper wrapper = messageArray.get(pos);
 			if (wrapper.getView() == null) {
 				VMessage vm = (VMessage) wrapper.getItemObject();
@@ -2912,12 +2920,11 @@ public class ConversationP2PTextActivity extends Activity implements
 								vMessageFileItem.setState(VMessageAbstractItem.STATE_FILE_SENDING);
 							else
 								vMessageFileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-							if (bodyView != null)
+							if (bodyView != null){
+								bodyView.updateFailedFlag(false);
 								bodyView.updateView(vMessageFileItem);
-							
-							if(vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED){
-								scrollToBottom();
 							}
+							mMessagesContainer.setSelection(mMessagesContainer.getBottom());  
 							break;
 						}
 					}
@@ -3207,6 +3214,7 @@ public class ConversationP2PTextActivity extends Activity implements
 						V2Log.d(TAG, "删除聊天消息失败,没有从集合中找到该消息 id : " + vm.getId());
 					}
 				}
+				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 			}
 			break;
 		case UPDATE_FILE:
@@ -3229,6 +3237,5 @@ public class ConversationP2PTextActivity extends Activity implements
 		default:
 			break;
 		}
-		Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 	};
 }
