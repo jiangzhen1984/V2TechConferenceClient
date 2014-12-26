@@ -425,6 +425,7 @@ public class ConferenceActivity extends Activity {
 	private void initBroadcastReceiver() {
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE);
+		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
@@ -443,8 +444,12 @@ public class ConferenceActivity extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE);
 		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE);
 
-		mContext.registerReceiver(mConfUserChangeReceiver, filter);
-
+		Intent i = mContext.registerReceiver(mConfUserChangeReceiver, filter);
+		// means exist close broadcast, need to finish this activity
+		if (i != null) {
+			removeStickyBroadcast(i);
+			finish();
+		}
 	}
 
 	private boolean initConferenceDate() {
@@ -1821,8 +1826,7 @@ public class ConferenceActivity extends Activity {
 
 				}
 
-			}
-
+			} 
 		}
 	};
 
@@ -3409,7 +3413,7 @@ public class ConferenceActivity extends Activity {
 				}
 
 				// 更新参会人列表里的主讲和发言状态
-				if (!updateAttendeePermissionState(ind)) {
+				if (!updateAttendeePermissionState(ind) && mPendingPermissionUpdateList != null) {
 					mPendingPermissionUpdateList.add(ind);
 				}
 

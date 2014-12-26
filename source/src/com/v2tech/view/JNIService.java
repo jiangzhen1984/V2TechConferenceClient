@@ -1050,7 +1050,7 @@ public class JNIService extends Service implements
 					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", nGroupID);
-					sendBroadcast(i);
+					sendStickyBroadcast(i);
 
 					Intent intent = new Intent(mContext, MainActivity.class);
 					// intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
