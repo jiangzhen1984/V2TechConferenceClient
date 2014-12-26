@@ -31,7 +31,6 @@ public class ConferenceConversation extends Conversation {
 	public CharSequence getMsg() {
 		if (g != null) {
 			User u = g.getOwnerUser();
-			V2Log.e(TAG, "group name : " + g.getName());
 			// TODO need use localization
 			return u == null ? "" : "创建人:" + u.getName();
 		}

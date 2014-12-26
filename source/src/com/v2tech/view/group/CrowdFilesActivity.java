@@ -55,6 +55,7 @@ import com.v2tech.view.conversation.ConversationSelectFile;
 import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.FileDownLoadBean;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
@@ -1025,23 +1026,29 @@ public class CrowdFilesActivity extends Activity {
 				item.mFileDeleteButton.setVisibility(View.INVISIBLE);
 			}
 
-			if (fs == VFile.State.DOWNLOADING
-					|| file.getState() == VFile.State.UPLOADING) {
+			float percent = 0;
+			float speed = 100L;
+			if (fs == VFile.State.DOWNLOADING || fs == VFile.State.UPLOADING) {
 				item.mFileProgress.setVisibility(View.VISIBLE);
 				item.mFileProgress.setText(file.getProceedSizeStr() + "/"
 						+ file.getFileSizeStr());
-				item.mVelocity.setText(file.getSpeedStr() + "/S");
-			}
-
-			if (fs == VFile.State.DOWNLOADING || fs == VFile.State.UPLOADING) {
-				float percent = (float) ((double) file.getProceedSize() / (double) file
-						.getSize());
-				updateProgress(item, percent);
+				FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress.get(file.getId());
+				if(bean != null){
+					file.setProceedSize(bean.currentLoadSize);
+					V2Log.e(TAG, "lastUpdateTime : " +  bean.lastLoadTime);
+					long sec = (System.currentTimeMillis() -  bean.lastLoadTime);
+					long size = file.getProceedSize() - bean.lastLoadSize;
+					percent = (float) ((double) file.getProceedSize() / (double) file
+							.getSize());
+					speed = (size / sec) * 1000;
+					item.mVelocity.setText(file.getFileSize(speed) + "/S");
+				}
+				updateProgress(item, percent , speed);
 			}
 
 		}
 
-		private void updateProgress(ViewItem item, float percent) {
+		private void updateProgress(ViewItem item, float percent , float speed) {
 			int width = item.mProgressParent.getWidth();
 			ViewGroup.LayoutParams vl = item.mProgress.getLayoutParams();
 			vl.width = (int) (width * percent);

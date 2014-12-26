@@ -23,6 +23,7 @@ import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DiscussionGroup;
+import com.v2tech.vo.FileDownLoadBean;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group.GroupType;
@@ -60,11 +61,8 @@ public class GlobalHolder {
 	
 	private List<String> dataBaseTableCacheName = new ArrayList<String>();
 	
-	/**
-	 * May some people would add you become friend when user logined successfully , and need to give user hint. 
-	 */
-	private SparseArray<Long> addFriendToShow = new SparseArray<Long>(); 
-
+	public Map<String , FileDownLoadBean> globleFileProgress = new HashMap<String, FileDownLoadBean>();
+	
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
 			holder = new GlobalHolder();
@@ -721,10 +719,6 @@ public class GlobalHolder {
 	public Bitmap getUserAvatar(long id) {
 		Long key = Long.valueOf(id);
 		return mAvatarBmHolder.get(key);
-	}
-	
-	public SparseArray<Long> getAddFriendToShow() {
-		return addFriendToShow;
 	}
 	
 	public List<String> getDataBaseTableCacheName() {

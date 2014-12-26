@@ -1,5 +1,6 @@
 package com.v2tech.vo;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.Date;
@@ -134,8 +135,31 @@ public class VFile {
 		}
 
 	}
+	
+	/**
+	 * 获取文件大小
+	 * 
+	 * @param totalSpace
+	 * @return
+	 */
+	public String getFileSize(float totalSpace) {
 
-	public String getSpeedStr() {
+		BigDecimal filesize = new BigDecimal(totalSpace);
+		BigDecimal megabyte = new BigDecimal(1024 * 1024);
+		float returnValue = filesize.divide(megabyte, 2, BigDecimal.ROUND_UP)
+				.floatValue();
+		if (returnValue > 1)
+			return (returnValue + "MB");
+		BigDecimal kilobyte = new BigDecimal(1024);
+		returnValue = filesize.divide(kilobyte, 2, BigDecimal.ROUND_UP)
+				.floatValue();
+		if (returnValue > 1)
+			return (returnValue + "KB");
+		else
+			return (totalSpace + "B");
+	}
+
+	public String getSpeedStr(long proceedSize) {
 		if (startTime == null) {
 			startTime = new Date(GlobalConfig.getGlobalServerTime());
 			return "";

@@ -3,7 +3,9 @@ package com.v2tech.view;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import android.app.Activity;
@@ -77,6 +79,7 @@ import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DiscussionGroup;
+import com.v2tech.vo.FileDownLoadBean;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.GroupQualicationState;
@@ -147,6 +150,7 @@ public class JNIService extends Service implements
 	
 	
 	public static final String JNI_BROADCAST_GROUPS_LOADED = "com.v2tech.jni.broadcast.groups_loaded";
+	public static final String JNI_BROADCAST_OFFLINE_MESSAGE_END = "com.v2tech.jni.broadcast.offline_message_end";
 	/**
 	 * Current user kicked by crowd master key crowd : crowdId
 	 */
@@ -450,8 +454,8 @@ public class JNIService extends Service implements
 						Intent i = new Intent(
 								JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 						i.addCategory(JNI_BROADCAST_CATEGROY);
-						i.putExtra("gid", go.gId);
-						i.putExtra("gtype", Integer.valueOf(go.gType));
+						i.putExtra("gid",go.gId);
+						i.putExtra("gtype", go.gType);
 						mContext.sendBroadcast(i);
 					}
 				} else {
@@ -460,18 +464,29 @@ public class JNIService extends Service implements
 				break;
 			case JNI_GROUP_LOADED:
 				V2Log.e(TAG, "The All Group Infos Loaded !");
-				//Update group loaded state
-				GlobalHolder.getInstance().setGroupLoaded();
 				if (!noNeedBroadcast) {
 					V2Log.d(TAG,
-							"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
-									+ JNI_GROUP_LOADED);
+							"ConversationTabFragment no builed successfully! Need to delay sending , type is ：JNI_GROUP_LOADED");
 					delayBroadcast.add(JNI_GROUP_LOADED);
 				} else {
 					Intent loaded = new Intent();
 					loaded.addCategory(JNI_BROADCAST_CATEGROY);
 					loaded.setAction(JNI_BROADCAST_GROUPS_LOADED);
 					sendBroadcast(loaded);
+				}
+				break;
+			case JNI_OFFLINE_LOADED:
+				boolean isOfflineEnd = (Boolean) msg.obj;
+				V2Log.e(TAG, "OFFLINE MESSAGE LOAD : " + isOfflineEnd);
+				if (!noNeedBroadcast) {
+					V2Log.d(TAG,
+							"ConversationTabFragment no builed successfully! Need to delay sending , type is ：JNI_OFFLINE_LOADED");
+					delayBroadcast.add(JNI_OFFLINE_LOADED);
+				} else {
+					Intent i = new Intent();
+					i.addCategory(JNI_BROADCAST_CATEGROY);
+					i.setAction(JNI_BROADCAST_OFFLINE_MESSAGE_END);
+					sendBroadcast(i);
 				}
 				break;
 			case JNI_CONFERENCE_INVITATION:
@@ -550,11 +565,6 @@ public class JNIService extends Service implements
 				iv.putExtra("voice", false);
 				iv.putExtra("device", vjoi.getDeviceId());
 				mContext.startActivity(iv);
-				break;
-			case JNI_OFFLINE_LOADED:
-				boolean isOfflineEnd = (Boolean) msg.obj;
-				V2Log.e(TAG, "OFFLINE MESSAGE LOAD : " + isOfflineEnd);
-				GlobalHolder.getInstance().setOfflineLoaded(isOfflineEnd);
 				break;
 			}
 
@@ -696,9 +706,7 @@ public class JNIService extends Service implements
 		@Override
 		public void OnOfflineStart() {
 			super.OnOfflineStart();
-			Message.obtain(mCallbackHandler, JNI_OFFLINE_LOADED , false)
-				.sendToTarget();
-//			GlobalHolder.getInstance().setOfflineLoaded(false);
+			GlobalHolder.getInstance().setOfflineLoaded(false);
 		}
 		
 		@Override
@@ -706,7 +714,6 @@ public class JNIService extends Service implements
 			super.OnOfflineEnd();
 			Message.obtain(mCallbackHandler, JNI_OFFLINE_LOADED , true)
 				.sendToTarget();
-//			GlobalHolder.getInstance().setOfflineLoaded(true);
 		}
 	}
 
@@ -2022,7 +2029,7 @@ public class JNIService extends Service implements
 	class FileRequestCB extends FileRequestCallbackAdapter {
 
 		private JNICallbackHandler mCallbackHandler;
-
+		private Map<String , FileDownLoadBean> mark = new HashMap<String, FileDownLoadBean>();
 		public FileRequestCB(JNICallbackHandler mCallbackHandler) {
 			this.mCallbackHandler = mCallbackHandler;
 		}
@@ -2031,6 +2038,30 @@ public class JNIService extends Service implements
 		public void OnFileTransBegin(String szFileID, int nTransType,
 				long nFileSize) {
 			updateTransFileState(szFileID, true);
+		}
+		
+		@Override
+		public void OnFileTransProgress(String szFileID, long nBytesTransed,
+				int nTransType) {
+			super.OnFileTransProgress(szFileID, nBytesTransed, nTransType);
+			FileDownLoadBean lastBean = mark.get(szFileID);
+			if(lastBean == null){
+				lastBean = new FileDownLoadBean();
+				lastBean.lastLoadTime = System.currentTimeMillis();
+				lastBean.lastLoadSize = 0;
+				mark.put(szFileID, lastBean);
+			} else {
+				FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress.get(szFileID);
+				if(bean == null)
+					bean = new FileDownLoadBean();
+				
+				bean.lastLoadTime = lastBean.lastLoadTime;
+				bean.lastLoadSize = lastBean.lastLoadSize;
+				long time = System.currentTimeMillis();
+				bean.currentLoadTime = time;
+				bean.currentLoadSize = nBytesTransed;
+				GlobalHolder.getInstance().globleFileProgress.put(szFileID, bean);
+			}
 		}
 
 		@Override
@@ -2056,6 +2087,8 @@ public class JNIService extends Service implements
 		@Override
 		public void OnFileTransEnd(String szFileID, String szFileName,
 				long nFileSize, int nTransType) {
+			mark.remove(szFileID);
+			GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
 			VMessage vm = new VMessage(0, 0, null, null);
 			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
 			item.setUuid(szFileID);
@@ -2074,6 +2107,8 @@ public class JNIService extends Service implements
 		@Override
 		public void OnFileTransError(String szFileID, int errorCode,
 				int nTransType) {
+			mark.remove(szFileID);
+			GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
 			VMessageFileItem fileItem = MessageLoader.queryFileItemByID(V2GlobalEnum.GROUP_TYPE_USER, szFileID);
 			if(fileItem != null){
 				if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
@@ -2099,6 +2134,8 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnFileTransCancel(String szFileID) {
+			mark.remove(szFileID);
+			GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
 			VMessage vm = new VMessage(0, 0, null, null);
 			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
 			item.setUuid(szFileID);
@@ -2130,6 +2167,11 @@ public class JNIService extends Service implements
 						loaded.addCategory(JNI_BROADCAST_CATEGROY);
 						loaded.setAction(JNI_BROADCAST_GROUPS_LOADED);
 						sendBroadcast(loaded);
+					} else if(type == JNI_OFFLINE_LOADED){
+						Intent offline = new Intent();
+						offline.addCategory(JNI_BROADCAST_CATEGROY);
+						offline.setAction(JNI_BROADCAST_OFFLINE_MESSAGE_END);
+						sendBroadcast(offline);
 					} else {
 						Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
 						gi.putExtra("gtype", type);

@@ -45,6 +45,7 @@ import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.util.SPUtil;
 import com.v2tech.view.group.CrowdFilesActivity.CrowdFileActivityType;
+import com.v2tech.vo.FileDownLoadBean;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
@@ -745,14 +746,18 @@ public class MessageBodyView extends LinearLayout {
 
 			TextView speed = (TextView) rootView
 					.findViewById(R.id.message_body_file_item_progress_speed);
-			V2Log.e(TAG, "lastUpdateTime : " + lastUpdateTime);
-			if (lastUpdateTime == 0 || vfi.getSpeed() == 0) {
+			FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress.get(vfi.getUuid());
+			if(bean != null){
+				lastUpdateTime = bean.lastLoadTime;
+				vfi.setDownloadedSize(bean.currentLoadSize);
+				V2Log.e(TAG, "lastUpdateTime : " + lastUpdateTime);
+				long sec = (System.currentTimeMillis() - lastUpdateTime);
+				long size = vfi.getDownloadedSize() - bean.lastLoadSize;
+				vfi.setSpeed((size / sec) * 1000);
+			}
+			else{
 				vfi.setSpeed(100.0F);
 				lastUpdateTime = System.currentTimeMillis();
-			} else {
-				long sec = (System.currentTimeMillis() - lastUpdateTime);
-				vfi.setSpeed(sec == 0 ? 0
-						: ((vfi.getDownloadedSize() / sec) * 1000));
 			}
 			speed.setText(vfi.getSpeedStr());
 			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi

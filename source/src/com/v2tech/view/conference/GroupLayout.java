@@ -236,10 +236,6 @@ public class GroupLayout extends LinearLayout {
 		if(currentUser != null){
 			boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
 			String nickName = currentUser.getNickName();
-			if(TextUtils.isEmpty(nickName)){
-				V2Log.w(TAG, "updateName ---> Update NickName Failed ... get nickName is empty ! name is : "+ currentUser.getName()
-						+ " id is : " + currentUser.getmUserId());
-			}
 			
 			if(isFriend && !TextUtils.isEmpty(nickName)){
 				V2Log.d(TAG, "updateName ---> Update NickName successfully!");
