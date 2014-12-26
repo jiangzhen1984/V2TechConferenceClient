@@ -30,7 +30,7 @@ import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.util.ProgressUtils;
 import com.v2tech.util.V2Toast;
-import com.v2tech.view.conversation.MessageAuthenticationActivity;
+import com.v2tech.view.message.MessageAuthenticationActivity;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;

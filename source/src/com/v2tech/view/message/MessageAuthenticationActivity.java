@@ -1,4 +1,4 @@
-package com.v2tech.view.conversation;
+package com.v2tech.view.message;
 
 import java.util.ArrayList;
 import java.util.List;

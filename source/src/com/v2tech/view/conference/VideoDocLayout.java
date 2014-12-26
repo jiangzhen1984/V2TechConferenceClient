@@ -690,7 +690,7 @@ public class VideoDocLayout extends LinearLayout {
 					.setImageResource(R.drawable.video_doc_right_arrow_gray);
 			mShowDocListButton.setEnabled(false);
 			((ImageView) mShowDocListButton)
-					.setImageResource(R.drawable.video_show_doc_button_pressed);
+					.setImageResource(R.drawable.video_show_doc_button_gray);
 			mNextPageButton.setEnabled(false);
 			mPrePageButton.setEnabled(false);
 

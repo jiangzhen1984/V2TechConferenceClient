@@ -132,7 +132,7 @@
                     android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
                     android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
                     android:paddingTop="@dimen/conference_activity_title_bar_button_padding"
-                    android:src="@drawable/title_bar_feature_more_button_selector" />
+                    android:src="@drawable/title_bar_more_feature_button_gray" />
             </LinearLayout>
         </LinearLayout>
 

@@ -1835,7 +1835,7 @@ public class ConferenceActivity extends Activity {
 
 				}
 
-			} 
+			}
 		}
 	};
 
@@ -2562,7 +2562,7 @@ public class ConferenceActivity extends Activity {
 			} else if (conferencePermission == ConferencePermission.CONTROL) {
 				if (permissionState == PermissionState.GRANTED) {
 					attendee.setLectureState(Attendee.LECTURE_STATE_GRANTED);
-					//取消自己的默认主讲
+					// 取消自己的默认主讲
 					if (currentAttendee.isChairMan()) {
 						if (currentAttendee.getAttId() != attendee.getAttId()) {
 							if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
@@ -2650,6 +2650,135 @@ public class ConferenceActivity extends Activity {
 	 * @param opt
 	 */
 	private void updateDocNotification(AsyncResult res, int opt) {
+		V2Log.d(TAG, "opt : " + opt);
+		V2Doc doc = null;
+		V2Doc.Page page = null;
+		V2Doc.PageArray pageArray = null;
+		V2ShapeMeta shape = null;
+		if (opt == NEW_DOC_NOTIFICATION) {
+			doc = (V2Doc) res.getResult();
+			V2Doc cacheDoc = mDocs.get(doc.getId());
+			if (cacheDoc == null) {
+				mDocs.put(doc.getId(), doc);
+			} else {
+				cacheDoc.updateDoc(doc);
+				doc = cacheDoc;
+			}
+		} else if (opt == DOC_CLOSED_NOTIFICATION) {
+			doc = (V2Doc) res.getResult();
+			// Notice need to use cache document
+			// because cache document object is different from JNI's callback
+			doc = mDocs.remove(doc.getId());
+		}
+
+		String docId = null;
+		switch (opt) {
+		case NEW_DOC_NOTIFICATION:
+			doc = (V2Doc) res.getResult();
+			docId = doc.getId();
+			break;
+		case DOC_CLOSED_NOTIFICATION:
+			docId = doc.getId();
+			break;
+		case DOC_PAGE_NOTIFICATION:
+			pageArray = (V2Doc.PageArray) res.getResult();
+			docId = pageArray.getDocId();
+			break;
+		case DOC_PAGE_ADDED_NOTIFICATION:
+		case DOC_DOWNLOADED_NOTIFICATION:
+		case DOC_PAGE_ACTIVITE_NOTIFICATION:// 上下翻页
+			page = (V2Doc.Page) res.getResult();
+			docId = page.getDocId();
+			// Record current activate Id;
+			mCurrentLecturerActivateDocId = docId;
+
+			break;
+		case DOC_PAGE_CANVAS_NOTIFICATION:
+			shape = (V2ShapeMeta) res.getResult();
+			docId = shape.getDocId();
+			break;
+		default:
+			V2Log.e("Unknow doc operation:" + opt);
+			return;
+		}
+		;
+
+		if (doc == null) {
+			doc = mDocs.get(docId);
+			// Put fake doc, because page events before doc event;
+			if (doc == null) {
+				doc = new V2Doc(docId, null, null, 0, null);
+				mDocs.put(docId, doc);
+				if (opt == DOC_DOWNLOADED_NOTIFICATION)
+					V2Log.e(TAG, "Update Doc Page failed , 没有获取到文件路径");
+			}
+			// If doc is not null, means new doc event or doc close event. need
+			// to update cache doc or not.
+			// If doc page event before new doc event, need to update cache
+			// update
+		} else if (NEW_DOC_NOTIFICATION == opt) {
+			V2Doc cache = mDocs.get(docId);
+			if (cache != doc) {
+				cache.updateDoc(doc);
+			}
+		}
+
+		if (pageArray != null) {
+			doc.updatePageArray(pageArray);
+		}
+		if (page != null) {
+			doc.addPage(page);
+		}
+
+		if (opt == DOC_PAGE_CANVAS_NOTIFICATION) {
+			page = doc.getPage(shape.getPageNo());
+			if (page == null) {
+				page = new Page(shape.getPageNo(), docId, null);
+				page.addMeta(shape);
+				doc.addPage(page);
+			} else {
+				page.addMeta(shape);
+			}
+		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
+			if (isSyn) {
+				doc.setActivatePageNo(page.getNo());
+			}
+		}
+
+		// Update UI
+		if (mDocContainer != null) {
+			switch (opt) {
+			case NEW_DOC_NOTIFICATION:
+				mDocContainer.addDoc(doc);
+				break;
+			case DOC_CLOSED_NOTIFICATION:
+				mDocContainer.closeDoc(doc);
+				break;
+			case DOC_PAGE_NOTIFICATION:
+			case DOC_PAGE_ADDED_NOTIFICATION:
+				mDocContainer.updateLayoutPageInformation();
+				mDocContainer.updatePageButton();
+				break;
+			case DOC_PAGE_ACTIVITE_NOTIFICATION:
+				if (isSyn) {
+					Log.i("20141224 1", "翻页");
+					doc.setActivatePageNo(page.getNo());
+					mDocContainer.updateCurrentDoc();
+				}
+				break;
+			case DOC_DOWNLOADED_NOTIFICATION:
+				mDocContainer.updateCurrentDoc(doc);
+				break;
+			case DOC_PAGE_CANVAS_NOTIFICATION:
+				mDocContainer.drawShape(page.getDocId(), page.getNo(), shape);
+				break;
+			}
+		}
+
+	}
+
+	public void handleDocNotification(AsyncResult res, int opt) {
+
 		V2Log.d(TAG, "opt : " + opt);
 		V2Doc doc = null;
 		V2Doc.Page page = null;
@@ -2748,6 +2877,7 @@ public class ConferenceActivity extends Activity {
 		}
 
 		if (opt == DOC_PAGE_CANVAS_NOTIFICATION) {
+
 			page = doc.getPage(shape.getPageNo());
 			if (page == null) {
 				page = new Page(shape.getPageNo(), docId, null);
@@ -2756,6 +2886,7 @@ public class ConferenceActivity extends Activity {
 			} else {
 				page.addMeta(shape);
 			}
+
 		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
 			if (isSyn) {
 				doc.setActivatePageNo(page.getNo());
@@ -2780,6 +2911,7 @@ public class ConferenceActivity extends Activity {
 				if (isSyn) {
 					Log.i("20141224 1", "翻页");
 					doc.setActivatePageNo(page.getNo());
+					mDocContainer.updateCurrentDoc();
 				}
 				break;
 			case DOC_DOWNLOADED_NOTIFICATION:
@@ -2790,6 +2922,7 @@ public class ConferenceActivity extends Activity {
 				break;
 			}
 		}
+
 	}
 
 	private ServiceConnection mLocalServiceConnection = new ServiceConnection() {
@@ -3423,7 +3556,8 @@ public class ConferenceActivity extends Activity {
 				}
 
 				// 更新参会人列表里的主讲和发言状态
-				if (!updateAttendeePermissionState(ind) && mPendingPermissionUpdateList != null) {
+				if (!updateAttendeePermissionState(ind)
+						&& mPendingPermissionUpdateList != null) {
 					mPendingPermissionUpdateList.add(ind);
 				}
 
@@ -3445,7 +3579,7 @@ public class ConferenceActivity extends Activity {
 			case DOC_DOWNLOADED_NOTIFICATION:
 			case DOC_CLOSED_NOTIFICATION:
 			case DOC_PAGE_CANVAS_NOTIFICATION:
-				updateDocNotification((AsyncResult) (msg.obj), msg.what);
+				handleDocNotification((AsyncResult) (msg.obj), msg.what);
 				break;
 			case INVITATION_STATE_NOTIFICATION:
 				// 20141225 1
@@ -3488,11 +3622,10 @@ public class ConferenceActivity extends Activity {
 
 				isSyn = msg.arg1 == 1 ? true : false;
 				if (mDocContainer != null) {
-					if (isSyn) {
-						mDocContainer.updateSyncStatus(true);
-					} else {
-						mDocContainer.updateSyncStatus(false);
-					}
+
+					mDocContainer.updateSyncStatus(isSyn);
+					mDocContainer.updateCurrentDoc();
+
 				}
 
 				cg.setSyn(isSyn);

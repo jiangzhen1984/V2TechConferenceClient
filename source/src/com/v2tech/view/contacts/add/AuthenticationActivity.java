@@ -16,7 +16,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.view.conversation.MessageAuthenticationActivity;
+import com.v2tech.view.message.MessageAuthenticationActivity;
 import com.v2tech.vo.User;
 
 public class AuthenticationActivity extends Activity {

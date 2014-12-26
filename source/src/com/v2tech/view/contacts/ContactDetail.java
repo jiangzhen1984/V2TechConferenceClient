@@ -53,7 +53,7 @@ import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.contacts.add.AuthenticationActivity;
 import com.v2tech.view.contacts.add.FriendManagementActivity;
 import com.v2tech.view.conversation.ConversationSelectFileEntry;
-import com.v2tech.view.conversation.MessageAuthenticationActivity;
+import com.v2tech.view.message.MessageAuthenticationActivity;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;

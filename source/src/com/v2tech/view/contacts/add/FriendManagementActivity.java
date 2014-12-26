@@ -11,7 +11,7 @@ import com.v2tech.view.MainApplication;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.contacts.ContactDetail2;
 import com.v2tech.view.contacts.UpdateContactGroupActivity;
-import com.v2tech.view.conversation.MessageAuthenticationActivity;
+import com.v2tech.view.message.MessageAuthenticationActivity;
 import com.v2tech.vo.FriendGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.User;

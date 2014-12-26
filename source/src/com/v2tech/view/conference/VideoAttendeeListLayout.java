@@ -711,7 +711,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				mList.add(++index, new Wrapper(attendeeFirstWrapper.a, udc,
 						deviceIndex++));
 			}
-
 		}
 		
 

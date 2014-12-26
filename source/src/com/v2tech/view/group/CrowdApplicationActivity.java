@@ -28,7 +28,7 @@ import com.v2tech.service.jni.JNIResponse.Result;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
-import com.v2tech.view.conversation.MessageAuthenticationActivity;
+import com.v2tech.view.message.MessageAuthenticationActivity;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
