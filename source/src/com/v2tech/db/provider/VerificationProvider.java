@@ -1513,7 +1513,11 @@ public class VerificationProvider extends DatabaseProvider {
 			if (cursor.getCount() < 0) {
 				return false;
 			}
-			return true;
+			
+			if(cursor.moveToFirst()){
+				return true;
+			}
+			return false;
 		} catch (Exception e) {
 			e.printStackTrace();
 			CrashHandler.getInstance().saveCrashInfo2File(e);

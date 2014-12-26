@@ -29,7 +29,7 @@ import com.v2tech.vo.VMessage;
 public class GroupLayout extends LinearLayout {
 
 	private static final String TAG = "GroupLayout";
-	
+
 	private Conversation mConv;
 
 	private ImageView mGroupIV;
@@ -37,14 +37,14 @@ public class GroupLayout extends LinearLayout {
 	private TextView mGroupOwnerTV;
 	private TextView mGroupDateTV;
 	private ImageView mNotificatorIV;
-	
+
 	/**
 	 * The second layout , the discussion layout use it...
 	 */
 	private TextView mConNameTV;
 
 	private Handler hand = new Handler();
-	
+
 	public GroupLayout(Context context, AttributeSet attrs, Conversation group) {
 		super(context, attrs);
 		this.mConv = group;
@@ -104,7 +104,7 @@ public class GroupLayout extends LinearLayout {
 			mGroupIV.setImageResource(R.drawable.chat_group_discussion_icon);
 			DiscussionConversation dis = (DiscussionConversation) mConv;
 			mConNameTV.setText(dis.getName());
-			
+
 			mGroupNameTV.setVisibility(View.INVISIBLE);
 			mGroupOwnerTV.setVisibility(View.INVISIBLE);
 			mGroupDateTV.setVisibility(View.INVISIBLE);
@@ -131,25 +131,25 @@ public class GroupLayout extends LinearLayout {
 		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
 	}
-	
+
 	private void initNickName() {
-		
+
 		User currentUser = null;
-		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER){
+		if (mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER) {
 			ContactConversation con = (ContactConversation) mConv;
 			currentUser = con.getU();
 		}
-		
-		if(currentUser != null){
+
+		if (currentUser != null) {
 			boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
 			String nickName = currentUser.getNickName();
-			if(isFriend && !TextUtils.isEmpty(nickName))
+			if (isFriend && !TextUtils.isEmpty(nickName))
 				mGroupNameTV.setText(nickName);
 			else
 				mGroupNameTV.setText(mConv.getName());
-		}
-		else{
-			V2Log.e(TAG, "updateName ---> get current user is null or id is -1 , please check conversation user is exist");
+		} else {
+			V2Log.e(TAG,
+					"updateName ---> get current user is null or id is -1 , please check conversation user is exist");
 		}
 	}
 
@@ -167,14 +167,14 @@ public class GroupLayout extends LinearLayout {
 			mGroupOwnerTV.setText(content);
 
 		switch (mConv.getType()) {
-			case Conversation.TYPE_CONTACT:
-				ContactConversation contact = (ContactConversation)mConv;
-				contact.setDateLong(date);
-				mGroupDateTV.setText(contact.getDate());
-				break;
-			default:
-				mGroupDateTV.setText(date);
-				break;
+		case Conversation.TYPE_CONTACT:
+			ContactConversation contact = (ContactConversation) mConv;
+			contact.setDateLong(date);
+			mGroupDateTV.setText(contact.getDate());
+			break;
+		default:
+			mGroupDateTV.setText(date);
+			break;
 		}
 	}
 
@@ -215,51 +215,49 @@ public class GroupLayout extends LinearLayout {
 	}
 
 	public void updateUserContent(String content) {
-		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER)
+		if (mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER)
 			mGroupOwnerTV.setText(content);
 	}
-	
-	public void updateGroupContent(Group group){
-		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION)
-			return ;
-		
+
+	public void updateGroupContent(Group group) {
+		if (mConv.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION)
+			return;
+
 		User currentUser = null;
-		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_CROWD){
+		if (mConv.getType() == V2GlobalEnum.GROUP_TYPE_CROWD) {
 			CrowdConversation crowd = (CrowdConversation) mConv;
 			currentUser = crowd.getGroup().getOwnerUser();
-		}
-		else if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_CONFERENCE){
+		} else if (mConv.getType() == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 			ConferenceConversation conf = (ConferenceConversation) mConv;
 			currentUser = conf.getGroup().getOwnerUser();
 		}
-		
-		if(currentUser != null){
+
+		if (currentUser != null) {
 			boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
 			String nickName = currentUser.getNickName();
-			
-			if(isFriend && !TextUtils.isEmpty(nickName)){
+
+			if (isFriend && !TextUtils.isEmpty(nickName)) {
 				V2Log.d(TAG, "updateName ---> Update NickName successfully!");
 				mGroupOwnerTV.setText("创建人:" + nickName);
-			}
-			else{
+			} else {
 				mGroupOwnerTV.setText("创建人:" + currentUser.getName());
 			}
-		}
-		else{
-			V2Log.e(TAG, "updateName ---> Update NickName Failed ... get user Object is empty !");
+		} else {
+			V2Log.e(TAG,
+					"updateName ---> Update NickName Failed ... get user Object is empty !");
 		}
 	}
-	
-	public void updateGroupName(String name){
+
+	public void updateGroupName(String name) {
 		mConNameTV.setText(name);
 		mGroupNameTV.setText(name);
 	}
 
 	public void update() {
-		
-		if(mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER)
+
+		if (mConv.getType() == V2GlobalEnum.GROUP_TYPE_USER)
 			initNickName();
-		else{
+		else {
 			mConNameTV.setText(mConv.getName());
 			mGroupNameTV.setText(mConv.getName());
 		}
@@ -274,18 +272,25 @@ public class GroupLayout extends LinearLayout {
 			mGroupIV.setImageResource(R.drawable.avatar);
 		}
 	}
-	
-	public void updateCrowdLayout(){
+
+	public void updateCrowdLayout() {
 		mGroupDateTV.setVisibility(View.VISIBLE);
 	}
-	
-	public void updateDiscussionLayout(){
-		mGroupNameTV.setVisibility(View.VISIBLE);
-		mGroupOwnerTV.setVisibility(View.VISIBLE);
-		mGroupDateTV.setVisibility(View.VISIBLE);
-		mConNameTV.setVisibility(View.INVISIBLE);
+
+	public void updateDiscussionLayout(boolean isShowContactLayout) {
+		if (isShowContactLayout) {
+			mGroupNameTV.setVisibility(View.VISIBLE);
+			mGroupOwnerTV.setVisibility(View.VISIBLE);
+			mGroupDateTV.setVisibility(View.VISIBLE);
+			mConNameTV.setVisibility(View.INVISIBLE);
+		} else {
+			mGroupNameTV.setVisibility(View.INVISIBLE);
+			mGroupOwnerTV.setVisibility(View.INVISIBLE);
+			mGroupDateTV.setVisibility(View.INVISIBLE);
+			mConNameTV.setVisibility(View.VISIBLE);
+		}
 	}
-	
+
 	public Conversation getmConv() {
 		return mConv;
 	}

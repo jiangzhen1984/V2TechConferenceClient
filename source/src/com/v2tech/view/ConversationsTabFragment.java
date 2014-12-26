@@ -754,10 +754,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			 */
 			if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 				if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER) {
-					gp.updateDiscussionLayout();
+					gp.updateDiscussionLayout(true);
 					gp.update();
-				} else
-					gp.updateCrowdLayout();
+				} else{
+					gp.updateDiscussionLayout(false);
+				}
+				gp.update();
 			}
 
 			ScrollItem newItem = new ScrollItem(cov, gp);
@@ -898,7 +900,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					 * 所以这里需要将布局改变为个人的Conversation布局
 					 */
 					if (cov.getType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION)
-						layout.updateDiscussionLayout();
+						layout.updateDiscussionLayout(true);
 					else
 						layout.updateCrowdLayout();
 					layout.update();
@@ -1097,7 +1099,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		viewLayout.update();
 
 		if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION)
-			viewLayout.updateDiscussionLayout();
+			viewLayout.updateDiscussionLayout(true);
 		else
 			viewLayout.updateCrowdLayout();
 		// 添加到ListView中
