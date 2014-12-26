@@ -62,7 +62,6 @@ public class ConversationSelectFile extends Activity {
 	private static final int ITEM_CHECKED = 7;
 	private static final int ITEM_UNCHECKED = 8;
 	private static final int UPDATE_REMOVE = 9;
-	private static final int MAX_TRANS_FILE_SIZE = 4;
 	private String mCurrentPath = StorageUtil.getSdcardPath();
 	private TextView backButton;
 	private TextView finishButton;
@@ -85,7 +84,6 @@ public class ConversationSelectFile extends Activity {
 	private FileListAdapter adapter;
 	private ImageListAdapter imageAdapter;
 	private String type;
-	private long transing;
 	private long uid;
 	private int mScreenHeight;
 	private int mScreenWidth;
@@ -186,7 +184,6 @@ public class ConversationSelectFile extends Activity {
 		if(mCheckedList == null)
 			mCheckedList = new ArrayList<FileInfoBean>();
 		type = intent.getStringExtra("type");
-		transing = getIntent().getLongExtra("transing", -1);
 		uid = getIntent().getLongExtra("uid", -1);
 		// 创建初始对象
 		mCheckedNameList = new ArrayList<String>();
@@ -935,12 +932,12 @@ public class ConversationSelectFile extends Activity {
 			
 			V2Log.d("TRANSING_File_SIZE" , "ConversationSelectFile notifyListChange --> 用户" + uid
 					+ "当前传输的文件个数：" + transing);
-			if(transing + mCheckedList.size() > MAX_TRANS_FILE_SIZE){
+			if(transing + mCheckedList.size() > GlobalConfig.MAX_TRANS_FILE_SIZE){
 				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
 				return ;
 			}
 			
-			if(mCheckedList.size() > MAX_TRANS_FILE_SIZE){
+			if(mCheckedList.size() > GlobalConfig.MAX_TRANS_FILE_SIZE){
 				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，一次性只能发送5个文件", Toast.LENGTH_LONG).show();
 				return ;
 			}

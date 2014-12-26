@@ -606,16 +606,6 @@ public class ConferenceService extends DeviceService {
 				user.setDeviceType(User.DeviceType.fromInt(v2user.deviceType));
 			} else {
 				user = GlobalHolder.getInstance().getUser(v2user.uid);
-				if (user == null) {
-					if (GlobalHolder.getInstance().getGlobalState()
-							.isGroupLoaded()) {
-						ImRequest.getInstance().getUserBaseInfo(v2user.uid);
-					} else {
-						V2Log.e("User is null can not dispatch notification");
-						return;
-					}
-				}
-
 			}
 			notifyListenerWithPending(KEY_ATTENDEE_ENTER_OR_EXIT_LISTNER, 1, 0,
 					user);

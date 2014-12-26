@@ -469,6 +469,15 @@ public class CrowdFilesActivity extends Activity {
 					+ " file name is : "
 					+ file.getName()
 					+ " error code is : " + ind.errorCode);
+			
+			Integer transing = GlobalConfig.mTransingFiles.get(crowd.getmGId());
+			if(transing != null){
+				transing = transing - 1;
+				GlobalConfig.mTransingFiles.put(crowd.getmGId(), transing);
+				V2Log.d("TRANSING_File_SIZE" , "CrowdFilesActivity IND_TYPE_TRANS_ERR --> 群" + crowd.getmGId()
+						+ "传输数量减少1 , 当前传输的文件个数：" + transing);
+			}
+			
 			Intent i = new Intent();
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.setAction(PublicIntent.BROADCAST_CROWD_FILE_ACTIVITY_SEND_NOTIFICATION);
@@ -506,13 +515,17 @@ public class CrowdFilesActivity extends Activity {
 		for (int i = 0; i < this.mUploadedFiles.size(); i++) {
 			VCrowdFile vf = mUploadedFiles.get(i);
 			if (flag) {
-				vf.setState(VFile.State.UPLOAD_PAUSE);
-				service.handleCrowdFile(vf,
-						FileOperationEnum.OPERATION_PAUSE_SENDING, null);
+				if(vf.getState() != VFile.State.UPLOAD_FAILED){
+					vf.setState(VFile.State.UPLOAD_PAUSE);
+					service.handleCrowdFile(vf,
+							FileOperationEnum.OPERATION_PAUSE_SENDING, null);
+				}
 			} else {
-				vf.setState(VFile.State.UPLOADING);
-				service.handleCrowdFile(vf,
-						FileOperationEnum.OPERATION_RESUME_SEND, null);
+				if(vf.getState() != VFile.State.DOWNLOAD_FAILED){
+					vf.setState(VFile.State.UPLOADING);
+					service.handleCrowdFile(vf,
+							FileOperationEnum.OPERATION_RESUME_SEND, null);
+				}
 			}
 		}
 	}
@@ -560,6 +573,15 @@ public class CrowdFilesActivity extends Activity {
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).getId().equals(file.getId())) {
 				list.remove(i);
+				
+				Integer transing = GlobalConfig.mTransingFiles.get(crowd.getmGId());
+				if(transing != null){
+					transing = transing - 1;
+					GlobalConfig.mTransingFiles.put(crowd.getmGId(), transing);
+					V2Log.d("TRANSING_File_SIZE" , "CrowdFilesActivity notifyListChange --> 群" + crowd.getmGId()
+							+ "传输数量减少1 , 当前传输的文件个数：" + transing);
+				}
+				
 				CommonCallBack.getInstance().executeUpdateCrowdFileState(
 						file.getId(), null, CrowdFileExeType.DELETE_FILE);
 				if (file.getState() == VCrowdFile.State.DOWNLOADING) {
@@ -642,6 +664,7 @@ public class CrowdFilesActivity extends Activity {
 				Intent intent = new Intent(mContext,
 						ConversationSelectFile.class);
 				intent.putExtra("type", "crowdFile");
+				intent.putExtra("uid", crowd.getmGId());
 				startActivityForResult(intent, RECEIVE_SELECTED_FILE);
 			}
 		}
@@ -1066,7 +1089,6 @@ public class CrowdFilesActivity extends Activity {
 							Toast.LENGTH_SHORT).show();
 					return ;
 				}
-				
 				VCrowdFile file = (VCrowdFile) v.getTag();
 				if (file.getState() == VFile.State.REMOVED) {
 					mServerExistFiles.remove(file);
@@ -1074,6 +1096,22 @@ public class CrowdFilesActivity extends Activity {
 							R.string.crowd_files_deleted_notification,
 							Toast.LENGTH_SHORT).show();
 				} else {
+					Integer transing = GlobalConfig.mTransingFiles.get(crowd.getmGId());
+					if(transing == null){
+						transing = 0;
+						GlobalConfig.mTransingFiles.put(crowd.getmGId(), transing);
+					}
+					
+					V2Log.d("TRANSING_File_SIZE" , "CrowdFilesActivity notifyListChange --> 群" + crowd.getmGId()
+							+ "当前传输的文件个数：" + transing);
+					if(transing > GlobalConfig.MAX_TRANS_FILE_SIZE){
+						Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
+						return ;
+					} else {
+						transing = transing + 1;
+						GlobalConfig.mTransingFiles.put(crowd.getmGId(), transing);
+					}
+					
 					if (file.getState() == VFile.State.DOWNLOAD_FAILED) {
 						file.setState(VFile.State.DOWNLOADING);
 						file.setStartTime(new Date(GlobalConfig

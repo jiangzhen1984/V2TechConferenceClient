@@ -368,10 +368,10 @@ public class GroupListView extends ListView {
 				// obj == group 不能用地址比较，老是出错。
 				if (((GroupItemData) item).isExpanded) {
 					// Calculate group end position
-					int startPos = calculateGroupStartIndex(group);
+					int startPos = calculateAddGroupStartIndex(group);
 					int endPos = calculateGroupEnd(group, startPos);
 
-					int pos = calculateIndex(startPos, endPos, user,
+					int pos = calculateIndex(startPos, endPos - 1, user,
 							user.getmStatus());
 
 					Log.i("20141223 1", "组名 = " + group.getName() + " 组开始位置 = "
@@ -676,7 +676,7 @@ public class GroupListView extends ListView {
 		}
 		return false;
 	}
-
+	
 	/**
 	 * Calculate end index of current group
 	 * 
@@ -725,6 +725,13 @@ public class GroupListView extends ListView {
 		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
 		// return startPos;
 		return startPos + 1;
+	}
+	
+	public int calculateAddGroupStartIndex(Group group) {
+		GroupItemData item = (GroupItemData) getItem(group);
+		int itemStartPos = getGroupItemPos(item);
+		int startPos = itemStartPos + group.getChildGroup().size();
+		return startPos;
 	}
 
 	// public int calculateGroupStartIndex(GroupItemData item, Group group) {

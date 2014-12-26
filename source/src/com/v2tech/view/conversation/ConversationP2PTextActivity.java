@@ -1531,6 +1531,7 @@ public class ConversationP2PTextActivity extends Activity implements
 					intent = new Intent(ConversationP2PTextActivity.this,
 							ConversationSelectFile.class);
 					intent.putExtra("type", "crowdFile");
+					intent.putExtra("uid", remoteChatUserID);
 				} else {
 					return;
 				}
@@ -2261,6 +2262,11 @@ public class ConversationP2PTextActivity extends Activity implements
 			stopOhterAudio = true;
 			stopCurrentAudioPlaying();
 		}
+
+		@Override
+		public void requestFileTransUpdate() {
+			Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
+		}
 	};
 
 	protected void stopCurrentAudioPlaying() {
@@ -2361,6 +2367,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		judgeShouldShowTime(m);
 		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
 		mv.setCallback(listener);
+		setMessageBodyViewBelongId(mv);
 		VMessageAdater adater = new VMessageAdater(m);
 		adater.setView(mv);
 		messageArray.add(adater);
@@ -2370,6 +2377,13 @@ public class ConversationP2PTextActivity extends Activity implements
 			pending = true;
 
 		return true;
+	}
+	
+	private void setMessageBodyViewBelongId(MessageBodyView mv){
+		if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+			mv.setCurrentBelongID(remoteChatUserID);
+		else
+			mv.setCurrentBelongID(remoteGroupID);
 	}
 
 	private boolean removeMessage(VMessage vm) {
@@ -2635,6 +2649,7 @@ public class ConversationP2PTextActivity extends Activity implements
 				MessageBodyView mv = new MessageBodyView(mContext, vm,
 						vm.isShowTime());
 				mv.setCallback(listener);
+				setMessageBodyViewBelongId(mv);
 				convertView = mv;
 			} else {
 				((MessageBodyView) convertView).updateView(vm);
@@ -2717,6 +2732,7 @@ public class ConversationP2PTextActivity extends Activity implements
 				MessageBodyView mv = new MessageBodyView(mContext, vm,
 						vm.isShowTime());
 				mv.setCallback(listener);
+				setMessageBodyViewBelongId(mv);
 				((VMessageAdater) wrapper).setView(mv);
 			}
 			return wrapper.getView();

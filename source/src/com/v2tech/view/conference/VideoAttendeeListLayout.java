@@ -437,7 +437,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 				i++;
 			} while (dList != null && i < dList.size());
-
 			// 设备显示不出问题时删除这段注释
 			// 默认的设备在第一个，现在不需要
 			// int deviceIndex = 1;

@@ -184,8 +184,11 @@ public class GlobalHolder {
 			if (tmp == null) {
 				tmp = new User(id);
 				mUserHolder.put(key, tmp);
-				//if receive this callback , the dirty change false;
-				ImRequest.getInstance().getUserBaseInfo(id);
+				if (GlobalHolder.getInstance().getGlobalState()
+						.isGroupLoaded()) {
+					//if receive this callback , the dirty change false;
+					ImRequest.getInstance().getUserBaseInfo(id);
+				}
 			}
 			return tmp;
 		}

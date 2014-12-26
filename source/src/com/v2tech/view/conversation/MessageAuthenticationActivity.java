@@ -23,13 +23,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
@@ -993,6 +990,13 @@ public class MessageAuthenticationActivity extends Activity {
 			viewTag.bSuerDelete.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
+					if (!GlobalHolder.getInstance().isServerConnected()) {
+						Toast.makeText(mContext,
+								R.string.error_discussion_no_network,
+								Toast.LENGTH_SHORT).show();
+						return ;
+					}
+					
 					// 库中删除
 					String sql = "delete from " + tableName + " where _id="
 							+ list.get(position).dbRecordIndex;
@@ -1310,6 +1314,14 @@ public class MessageAuthenticationActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
+				
+				if (!GlobalHolder.getInstance().isServerConnected()) {
+					Toast.makeText(mContext,
+							R.string.error_discussion_no_network,
+							Toast.LENGTH_SHORT).show();
+					return ;
+				}
+				
 				ListItemWrapper wrapper = (ListItemWrapper) v.getTag();
 				if (wrapper == null) {
 					return;
@@ -1325,7 +1337,6 @@ public class MessageAuthenticationActivity extends Activity {
 				}
 				// delete message from database
 				VerificationProvider.deleteCrowdQualMessage(msg.getId());
-
 				groupAdapter.notifyDataSetChanged();
 			}
 

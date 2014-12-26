@@ -55,7 +55,6 @@ import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
 import com.v2tech.vo.VMessageTextItem;
-import com.v2tech.vo.VMessageFileItem.FileType;
 
 public class MessageBodyView extends LinearLayout {
 
@@ -108,6 +107,7 @@ public class MessageBodyView extends LinearLayout {
 
 	private RotateAnimation anima;
 	private MessageBodyType bodyType;
+	private long currentBelongID;
 
 	public MessageBodyView(Context context, VMessage m, boolean isShowTime) {
 		super(context);
@@ -310,6 +310,11 @@ public class MessageBodyView extends LinearLayout {
 				.findViewById(R.id.contact_message_pop_up_item_delete);
 		pwDeleteTV.setOnClickListener(mDeleteButtonListener);
 	}
+	
+	public void setCurrentBelongID(long currentBelongID) {
+		this.currentBelongID = currentBelongID;
+	}
+
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -1044,13 +1049,46 @@ public class MessageBodyView extends LinearLayout {
 			if (SPUtil.checkCurrentAviNetwork(getContext())) {
 				if (callback != null) {
 					View fileRootView = mContentContainer.getChildAt(0);
-					failedIcon.setVisibility(View.INVISIBLE);
-
 					if (mMsg.isLocal()) {
+						Integer transing = GlobalConfig.mTransingFiles.get(currentBelongID);
+						
+						if(transing == null){
+							transing = 0;
+							GlobalConfig.mTransingFiles.put(currentBelongID, transing);
+						}
+						
+						V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity notifyListChange --> " + currentBelongID
+								+ "当前传输的文件个数：" + transing);
+						if(transing > GlobalConfig.MAX_TRANS_FILE_SIZE){
+							callback.requestFileTransUpdate();
+							return ;
+						} else {
+							transing = transing + 1;
+							GlobalConfig.mTransingFiles.put(currentBelongID, transing);
+						}
+						
+						failedIcon.setVisibility(View.INVISIBLE);
 						callback.reSendMessageClicked(mMsg);
 					} else {
 						if (mMsg.getItems().size() > 0
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
+							Integer transing = GlobalConfig.mTransingFiles.get(currentBelongID);
+							if(transing == null){
+								transing = 0;
+								GlobalConfig.mTransingFiles.put(currentBelongID, transing);
+							}
+							
+							V2Log.d("TRANSING_File_SIZE" , "MessageBodyView notifyListChange --> " + currentBelongID
+									+ "当前传输的文件个数：" + transing);
+							if(transing > GlobalConfig.MAX_TRANS_FILE_SIZE){
+								callback.requestFileTransUpdate();
+								return ;
+							} else {
+								transing = transing + 1;
+								GlobalConfig.mTransingFiles.put(currentBelongID, transing);
+							}
+							
+							failedIcon.setVisibility(View.INVISIBLE);
 							mMsg.setState(VMessageAbstractItem.STATE_NORMAL);
 							VMessageFileItem fileItem = (VMessageFileItem) mMsg
 									.getItems().get(0);
@@ -1137,6 +1175,8 @@ public class MessageBodyView extends LinearLayout {
 				VMessageFileItem vfi);
 
 		public void requestStopOtherAudio(VMessage vm);
+		
+		public void requestFileTransUpdate();
 	}
 }
 

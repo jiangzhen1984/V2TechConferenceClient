@@ -17,6 +17,7 @@ import com.V2.jni.util.XmlAttributeExtractor;
 
 public class ConfRequest {
 
+	private static final String TAG = "ConfRequest-->UI";
 	private static ConfRequest mConfRequest;
 
 	private List<WeakReference<ConfRequestCallback>> mCallbacks;
@@ -134,7 +135,7 @@ public class ConfRequest {
 	 * @see ConfRequestCallback
 	 */
 	private void OnConfMemberEnter(long nConfID, long nTime, String szUserInfos) {
-		V2Log.d("-->OnConfMemberEnter " + nConfID + " " + nTime + " "
+		V2Log.d(TAG , "OnConfMemberEnter -> nConfID : " + nConfID + " | nTime : " + nTime + " | szUserInfos : "
 				+ szUserInfos);
 
 		String uid = XmlAttributeExtractor.extract(szUserInfos, "id='", "'");

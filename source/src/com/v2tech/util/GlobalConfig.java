@@ -38,6 +38,8 @@ public class GlobalConfig {
 	
 	public static String LOGIN_USER_ID = "";
 	
+	public static final int MAX_TRANS_FILE_SIZE = 4;
+	
 	/**
 	 * Get from Server , For distinguish different server
 	 */

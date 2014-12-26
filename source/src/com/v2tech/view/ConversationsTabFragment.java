@@ -2153,13 +2153,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						}
 					}
 
-					getActivity().runOnUiThread(new Runnable() {
-
-						@Override
-						public void run() {
-							updateVerificationConversation();
-						}
-					});
+//					getActivity().runOnUiThread(new Runnable() {
+//
+//						@Override
+//						public void run() {
+//							updateVerificationConversation();
+//						}
+//					});
 				}
 			}
 		});
