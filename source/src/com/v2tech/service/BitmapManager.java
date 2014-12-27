@@ -3,9 +3,14 @@ package com.v2tech.service;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v4.util.LruCache;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.BitmapUtil;
@@ -36,15 +41,26 @@ import com.v2tech.vo.User;
  */
 public class BitmapManager {
 
+	public static final int BITMAP_UPDATE = 0x0001;
+	
 	private static BitmapManager mInstance;
 
 	private List<WeakReference<BitmapChangedListener>> mListeners;
 
 	private List<WeakReference<BitmapChangedListener>> mLastListeners;
 
+	private LruCache<String, Bitmap> bitmapLru;
+	
+	private ExecutorService service;
+	
 	private BitmapManager() {
 		mListeners = new ArrayList<WeakReference<BitmapChangedListener>>();
 		mLastListeners = new ArrayList<WeakReference<BitmapChangedListener>>();
+		service = Executors.newCachedThreadPool();
+		// 设置LRU集合的大小
+		int maxMemory = (int) Runtime.getRuntime().maxMemory();
+		int mCacheSize = maxMemory / 8;
+		bitmapLru = new BitmapLRU(mCacheSize);
 	}
 
 	public synchronized static BitmapManager getInstance() {
@@ -170,6 +186,50 @@ public class BitmapManager {
 					((BitmapChangedListener) obj).notifyAvatarChanged(u, bm);
 				}
 			}
+		}
+	}
+	
+	public void loadBitmapFromPath(final Handler mHandler , final String filePath){
+		service.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					Bitmap bitmap = bitmapLru.get(filePath);
+					
+					if(bitmap == null || bitmap.isRecycled()){
+						bitmap = BitmapUtil.getCompressedBitmap(filePath);
+					}
+					
+					if(bitmap == null)
+						return ;
+							
+					if(bitmap.isRecycled()){
+						bitmap.recycle();
+						bitmap = null;
+						return ;
+					}
+					
+					bitmapLru.put(filePath, bitmap);
+					Message.obtain(mHandler, BITMAP_UPDATE, bitmap).sendToTarget();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	class BitmapLRU extends LruCache<String, Bitmap> {
+
+		public BitmapLRU(int maxSize) {
+			super(maxSize);
+		}
+
+		@Override
+		protected void entryRemoved(boolean evicted, String key,
+				Bitmap oldValue, Bitmap newValue) {
+			super.entryRemoved(evicted, key, oldValue, newValue);
+			oldValue.recycle();
+			oldValue = null;
 		}
 	}
 

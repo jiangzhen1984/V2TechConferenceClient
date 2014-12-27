@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -23,8 +24,9 @@ import android.widget.TextView;
 import com.V2.jni.ImRequest;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.BitmapManager.BitmapChangedListener;
+import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.BitmapUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.vo.Conversation;
@@ -33,8 +35,6 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.SearchedResult;
-import com.v2tech.vo.SearchedResult.SearchedResultItem;
-import com.v2tech.vo.SearchedResult.Type;
 import com.v2tech.vo.User;
 
 public class SearchedResultActivity extends Activity {
@@ -46,6 +46,8 @@ public class SearchedResultActivity extends Activity {
 
 	private SearchedResult sr;
 	private List<SearchedResult.SearchedResultItem> mList;
+	
+	private Handler mHandler;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +66,8 @@ public class SearchedResultActivity extends Activity {
 				mListView.setAdapter(new LocalAdapter());
 			}
 		}
+		
+		mHandler = new LocalHandler();
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				listener);
@@ -157,17 +161,6 @@ public class SearchedResultActivity extends Activity {
 		
 	};
 
-	private Handler mLocalHandler = new Handler() {
-
-		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			}
-		}
-
-	};
-	
-	
 	class LocalAdapter extends BaseAdapter {
 
 		class ViewItem {
@@ -210,13 +203,36 @@ public class SearchedResultActivity extends Activity {
 			if (srItem.mType == SearchedResult.Type.CROWD) {
 				item.iv.setImageResource(R.drawable.chat_group_icon);
 			} else if (srItem.mType == SearchedResult.Type.USER) {
-				
 				item.iv.setImageResource(R.drawable.avatar);
+//				String avatarPath = GlobalHolder.getInstance().getAvatarPath(srItem.id);
+//				if(TextUtils.isEmpty(avatarPath))
+//					item.iv.setImageResource(R.drawable.avatar);
+//				else {
+//					BitmapManager.getInstance().loadBitmapFromPath(mHandler, avatarPath);
+//					Bitmap bitmap = BitmapUtil.loadAvatarFromPath(avatarPath);
+//					item.iv.setImageBitmap(bitmap);
+//				}
 			}
-			
 			return view;
 		}
 		
+	}
+	
+	
+	class LocalHandler extends Handler{
+		
+		@Override
+		public void handleMessage(Message msg) {
+			super.handleMessage(msg);
+			
+			switch (msg.what) {
+			case BitmapManager.BITMAP_UPDATE:
+				
+				break;
+			default:
+				break;
+			}
+		}
 	}
 
 	private BitmapChangedListener listener = new BitmapChangedListener() {
@@ -236,4 +252,6 @@ public class SearchedResultActivity extends Activity {
 //			}
 		}
 	};
+	
+	
 }
