@@ -256,6 +256,8 @@ public class ConferenceActivity extends Activity {
 	
 	private boolean isFinish;
 
+	private boolean currentAttendeeTurnedpage = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -743,11 +745,15 @@ public class ConferenceActivity extends Activity {
 			mDocContainer.setListener(subViewListener);
 			Group g = GlobalHolder.getInstance().findGroupById(conf.getId());
 			if (g != null && g instanceof ConferenceGroup) {
-				mDocContainer.updateSyncStatus(((ConferenceGroup) g).isSyn());
+				mDocContainer
+						.updateSyncStatus(((ConferenceGroup) g).isSyn()
+								&& (currentAttendee.getLectureState() != Attendee.LECTURE_STATE_GRANTED));
+				mDocContainer.updateCurrentDoc();
 			}
 
-		} else
+		} else {
 			mDocContainer.updateCurrentDoc();
+		}
 		return mDocContainer;
 	}
 
@@ -2743,14 +2749,14 @@ public class ConferenceActivity extends Activity {
 		}
 
 		if (opt == DOC_PAGE_CANVAS_NOTIFICATION) {
-			page = doc.getPage(shape.getPageNo());
-			if (page == null) {
-				page = new Page(shape.getPageNo(), docId, null);
-				page.addMeta(shape);
-				doc.addPage(page);
-			} else {
-				page.addMeta(shape);
-			}
+			// page = doc.getPage(shape.getPageNo());
+			// if (page == null) {
+			// page = new Page(shape.getPageNo(), docId, null);
+			// page.addMeta(shape);
+			// doc.addPage(page);
+			// } else {
+			// page.addMeta(shape);
+			// }
 		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
 			if (isSyn) {
 				doc.setActivatePageNo(page.getNo());
@@ -2900,7 +2906,7 @@ public class ConferenceActivity extends Activity {
 			}
 
 		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
-			if (isSyn) {
+			if (isSyn || !isCurrentAttendeeTurnedpage()) {
 				doc.setActivatePageNo(page.getNo());
 			}
 		}
@@ -2920,9 +2926,10 @@ public class ConferenceActivity extends Activity {
 				mDocContainer.updatePageButton();
 				break;
 			case DOC_PAGE_ACTIVITE_NOTIFICATION:
-				if (isSyn) {
+				if (isSyn || !isCurrentAttendeeTurnedpage()) {
 					Log.i("20141224 1", "翻页");
 					doc.setActivatePageNo(page.getNo());
+					mDocContainer.updateCurrentDoc(doc);
 					mDocContainer.updateCurrentDoc();
 				}
 				break;
@@ -3534,16 +3541,22 @@ public class ConferenceActivity extends Activity {
 							mHostRequestUsers.remove(user);
 						}
 
+						if (mHostRequestWindow != null) {
+							mHostRequestWindow.updateList(mHostRequestUsers);
+						}
+
 						if (mHostRequestUsers.size() == 0) {
+
+							if (mHostRequestWindow != null
+									&& mHostRequestWindow.isShowing()) {
+								mHostRequestWindow.dismiss();
+							}
+
 							hasUnreadChiremanControllMsg = false;
 							mMsgNotification.setVisibility(View.GONE);
 							if (mConfMsgRedDot != null) {
 								mConfMsgRedDot.setVisibility(View.GONE);
 							}
-						}
-
-						if (mHostRequestWindow != null) {
-							mHostRequestWindow.updateList(mHostRequestUsers);
 						}
 
 					}
@@ -3579,6 +3592,14 @@ public class ConferenceActivity extends Activity {
 							.getType()) {
 						if (moreWindow != null && moreWindow.isShowing()) {
 							updateMoreWindowDisplay();
+						}
+
+						if (mDocContainer != null) {
+							mDocContainer
+									.updateSyncStatus(isSyn
+											&& (currentAttendee
+													.getLectureState() != Attendee.LECTURE_STATE_GRANTED));
+							mDocContainer.updateCurrentDoc();
 						}
 					}
 				}
@@ -3633,22 +3654,20 @@ public class ConferenceActivity extends Activity {
 						"CLASS = ConferenceActivity  MESSAGE = DESKTOP_SYNC_NOTIFICATION");
 
 				isSyn = msg.arg1 == 1 ? true : false;
+
+				if (isSyn) {
+					currentAttendeeTurnedpage = false;
+				}
 				if (mDocContainer != null) {
 
-					mDocContainer.updateSyncStatus(isSyn);
+					mDocContainer
+							.updateSyncStatus(isSyn
+									&& (currentAttendee.getLectureState() != Attendee.LECTURE_STATE_GRANTED));
 					mDocContainer.updateCurrentDoc();
 
 				}
 
 				cg.setSyn(isSyn);
-
-				if (mDocContainer != null) {
-					if (isSyn) {
-						mDocContainer.updateSyncStatus(true);
-					} else {
-						mDocContainer.updateSyncStatus(false);
-					}
-				}
 
 				if (isSyn) {
 					// 关闭所有打开的视频
@@ -3765,6 +3784,14 @@ public class ConferenceActivity extends Activity {
 			audioManager.setSpeakerphoneOn(true);
 			Log.i(TAG, "切换到了外放");
 		}
+	}
+
+	public boolean isCurrentAttendeeTurnedpage() {
+		return currentAttendeeTurnedpage;
+	}
+
+	public void setCurrentAttendeeTurnedpage(boolean currentAttendeeTurnedpage) {
+		this.currentAttendeeTurnedpage = currentAttendeeTurnedpage;
 	}
 
 	// @Override

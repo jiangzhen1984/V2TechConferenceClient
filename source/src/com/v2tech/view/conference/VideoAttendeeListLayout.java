@@ -43,6 +43,7 @@ import com.v2tech.util.SearchUtils;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.Conference;
+import com.v2tech.vo.User;
 import com.v2tech.vo.User.DeviceType;
 import com.v2tech.vo.UserDeviceConfig;
 
@@ -288,8 +289,18 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private void setStyle(Wrapper wr, TextView name, ImageView lectureStateIV,
 			ImageView speakingIV, ImageView cameraIV) {
 		Attendee at = wr.a;
-		DeviceType atDeviceType = GlobalHolder.getInstance()
-				.getUser(at.getAttId()).getDeviceType();
+
+		// 有可能是混合视频
+		DeviceType atDeviceType = null;
+		if (at.getType() == Attendee.TYPE_ATTENDEE) {
+			User user = GlobalHolder.getInstance().getUser(at.getAttId());
+			if (user != null) {
+				atDeviceType = user.getDeviceType();
+			}
+		} else if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
+
+		}
+
 		UserDeviceConfig udc = wr.udc;
 
 		if (at.isChairMan() || conf.getChairman() == at.getAttId()) {
@@ -304,7 +315,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			name.setTextColor(getContext().getResources().getColor(
 					R.color.video_attendee_name_color));
 			// set camera icon
-			if (atDeviceType == DeviceType.CELL_PHONE) {
+			if (atDeviceType != null && atDeviceType == DeviceType.CELL_PHONE) {
 				cameraIV.setImageResource(R.drawable.phone_camera);
 			} else {
 				cameraIV.setImageResource(R.drawable.camera);
@@ -327,7 +338,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		// set image view
 		if (at.isSelf()) {
-			if (atDeviceType == DeviceType.CELL_PHONE) {
+			if (atDeviceType != null && atDeviceType == DeviceType.CELL_PHONE) {
 				cameraIV.setImageResource(R.drawable.phone_camera);
 			} else {
 				cameraIV.setImageResource(R.drawable.camera);
@@ -335,13 +346,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		} else if (at.isJoined()) {
 			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
 				if (udc != null) {
-					if (atDeviceType == DeviceType.CELL_PHONE) {
+					if (atDeviceType != null
+							&& atDeviceType == DeviceType.CELL_PHONE) {
 						cameraIV.setImageResource(R.drawable.phone_camera);
 					} else {
 						cameraIV.setImageResource(R.drawable.camera);
 					}
 				} else {
-					if (atDeviceType == DeviceType.CELL_PHONE) {
+					if (atDeviceType != null
+							&& atDeviceType == DeviceType.CELL_PHONE) {
 						cameraIV.setImageResource(R.drawable.phone_camera_pressed);
 					} else {
 						cameraIV.setImageResource(R.drawable.camera_pressed);
@@ -351,7 +364,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				cameraIV.setImageResource(R.drawable.mixed_video_camera);
 			}
 		} else {
-			if (atDeviceType == DeviceType.CELL_PHONE) {
+			if (atDeviceType != null && atDeviceType == DeviceType.CELL_PHONE) {
 				cameraIV.setImageResource(R.drawable.phone_camera_pressed);
 			} else {
 				cameraIV.setImageResource(R.drawable.camera_pressed);
@@ -372,7 +385,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		if (udc != null && !udc.isEnable()
 				&& at.getType() == Attendee.TYPE_ATTENDEE) {
-			if (atDeviceType == DeviceType.CELL_PHONE) {
+			if (atDeviceType != null && atDeviceType == DeviceType.CELL_PHONE) {
 				cameraIV.setImageResource(R.drawable.phone_camera_pressed);
 			} else {
 				cameraIV.setImageResource(R.drawable.camera_pressed);
@@ -491,41 +504,78 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
 			mList.add(new Wrapper(at, dList.get(0), FIRST_DEVICE_FLAG));
 		} else {
-
+			
 			// boolean isNew = false;
 			int index = 0;
 			if (mList.size() > 0 && dList != null && dList.size() > 0) {
-
 				for (int i = 0; i < mList.size(); i++) {
 					Wrapper wr = mList.get(i);
 					if (wr.a.getAttId() == at.getAttId()) {
+						wr.udc = dList.get(0);
+						wr.sortFlag = FIRST_DEVICE_FLAG;
 						index = i;
 						break;
 					}
 				}
-
 			}
-			
-			int deviceIndex = 1;
-			for (int i = 0; i < dList.size(); i++) {
-				UserDeviceConfig udc = dList.get(i);
-				if (i == 0) {
-					mList.add(index, new Wrapper(at, udc,
-							FIRST_DEVICE_FLAG));
-				} else {
+
+			if (dList != null) {
+				for (int i = 1; i < dList.size(); i++) {
 					if (index + 1 == mList.size() - 1) {
-						mList.add(new Wrapper(at, udc, deviceIndex++));
+						mList.add(new Wrapper(at, dList.get(i), i));
 					} else {
-						mList.add(index + 1, new Wrapper(at, udc,
-								deviceIndex++));
+						mList.add(index + 1, new Wrapper(at, dList.get(i), i));
 					}
 					index++;
 					// isNew = true;
 				}
-
 			}
 
+			// if (isNew)
+			// mAttendeeCount++;
+			if ((at.isJoined() || at.isSelf())) {
+				onLinePersons++;
+			}
+			updateStatist();
 			
+			
+			
+			
+
+//			// boolean isNew = false;
+//			int index = 0;
+//			if (mList.size() > 0 && dList != null && dList.size() > 0) {
+//
+//				for (int i = 0; i < mList.size(); i++) {
+//					Wrapper wr = mList.get(i);
+//					if (wr.a.getAttId() == at.getAttId()) {
+//						index = i;
+//						break;
+//					}
+//				}
+//
+//			}
+//
+//			int deviceIndex = 1;
+//			for (int i = 0; i < dList.size(); i++) {
+//				UserDeviceConfig udc = dList.get(i);
+//				if (i == 0) {
+//					
+//					
+//					mList.add(index, new Wrapper(at, udc, FIRST_DEVICE_FLAG));
+//				} else {
+//					if (index + 1 == mList.size() - 1) {
+//						mList.add(new Wrapper(at, udc, deviceIndex++));
+//					} else {
+//						mList.add(index + 1,
+//								new Wrapper(at, udc, deviceIndex++));
+//					}
+//					index++;
+//					// isNew = true;
+//				}
+//
+//			}
+
 			// 设备显示不出问题时删除这段注释
 			// if (dList != null) {
 			// UserDeviceConfig defaultDevice = null;
@@ -578,10 +628,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 			// if (isNew)
 			// mAttendeeCount++;
-			if ((at.isJoined() || at.isSelf())) {
-				onLinePersons++;
-			}
-			updateStatist();
+//			if ((at.isJoined() || at.isSelf())) {
+//				onLinePersons++;
+//			}
+//			updateStatist();
 
 		}
 
@@ -697,7 +747,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			V2Log.e("Error no first device ");
 			return;
 		}
-		
+
 		int deviceIndex = 1;
 		for (int i = 0; i < list.size(); i++) {
 			UserDeviceConfig udc = list.get(i);
@@ -712,7 +762,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 						deviceIndex++));
 			}
 		}
-		
 
 		// 设备显示不出问题时删除这段注释
 		// boolean hasDefaultDevice = false;
@@ -1061,6 +1110,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	class LocalFilter extends Filter {
 
 		private boolean isFirstSearch = true;
+
 		@Override
 		protected FilterResults performFiltering(CharSequence constraint) {
 			FilterResults fr = new FilterResults();
@@ -1076,9 +1126,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					SearchUtils.receiveList = wrappers;
 					isFirstSearch = false;
 				}
-				
-				list = SearchUtils
-						.startVideoAttendeeSearch(constraint.toString());
+
+				list = SearchUtils.startVideoAttendeeSearch(constraint
+						.toString());
 			}
 
 			fr.values = list;

@@ -694,7 +694,7 @@ public class MessageLoader {
 	/**
 	 * 查询指定群组中聊天中收发的文件，并转换为VCrowdFile对象集合
 	 * 
-	 * @param context
+	 * @param mContext
 	 * @param type
 	 * @param gid
 	 * @return

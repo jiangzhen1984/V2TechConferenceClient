@@ -69,7 +69,7 @@ public class MessageUtil {
 	/**
 	 * Get text content from message. convert face item to special symbol
 	 * 
-	 * @param context
+	 * @param mContext
 	 * @param vm
 	 * @return
 	 * 
