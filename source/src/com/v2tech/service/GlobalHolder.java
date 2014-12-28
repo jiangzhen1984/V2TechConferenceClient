@@ -9,8 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.SparseArray;
+import android.widget.Toast;
 
 import com.V2.jni.ImRequest;
 import com.V2.jni.V2GlobalEnum;
@@ -22,10 +23,10 @@ import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.ContactGroup;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.FileDownLoadBean;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
@@ -730,6 +731,39 @@ public class GlobalHolder {
 
 	public void setDataBaseTableCacheName(List<String> dataBaseTableCacheName) {
 		this.dataBaseTableCacheName = dataBaseTableCacheName;
+	}
+	
+	public boolean changeGlobleTransFileMember(Context mContext , boolean isAdd , Long key , String tag){
+		Integer transing = GlobalConfig.mTransingFiles.get(key);
+		if(transing == null){
+			if(isAdd){
+				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , 正在传输文件加1 , 当前数量为1");
+				transing = 0;
+				GlobalConfig.mTransingFiles.put(key, transing);
+			}
+			return true;
+		} else {
+			if(isAdd){
+				if(transing > GlobalConfig.MAX_TRANS_FILE_SIZE){
+					Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
+					return false;
+				} else {
+					transing = transing + 1;
+					V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , 正在传输文件加1 , 当前数量为: " + transing);
+					GlobalConfig.mTransingFiles.put(key , transing);
+					return true;
+				}
+			}
+			else{
+				if(transing == 0)
+					return false;
+				transing = transing - 1;
+				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , 正在传输文件减1 , 当前数量为: " + transing);
+				GlobalConfig.mTransingFiles.put(key, transing);
+				return true;
+			}
+		}
+		
 	}
 
 	/**

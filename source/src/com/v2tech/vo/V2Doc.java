@@ -295,7 +295,8 @@ public class V2Doc {
 	 */
 	public Page getPage(int no) {
 		if (no <= 0 || no > pageArray.getPageSize()) {
-			throw new IndexOutOfBoundsException("Page no is incorrect ");
+//			throw new IndexOutOfBoundsException("Page no is incorrect ");
+			return null;
 		}
 		return pageArray.getPage(no);
 	}

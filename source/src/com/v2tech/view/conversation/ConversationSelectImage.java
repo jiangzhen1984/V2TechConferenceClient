@@ -63,6 +63,7 @@ public class ConversationSelectImage extends Activity {
 	private ArrayList<String> pictresClassify;
 	private ArrayList<FileInfoBean> pictures;
 	private Context mContext;
+	private long remoteID;
 	private boolean isBack;
 	private boolean isClassify = true;
 	private HashMap<String, ArrayList<FileInfoBean>> listMap;
@@ -133,6 +134,7 @@ public class ConversationSelectImage extends Activity {
 
 	private void findview() {
 
+		
 		title = (TextView) findViewById(R.id.ws_common_activity_title_content);
 		title.setText(R.string.conversation_select_image_file_title);
 		backButton = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
@@ -159,6 +161,7 @@ public class ConversationSelectImage extends Activity {
 		pictresClassify = new ArrayList<String>();
 		pictures = new ArrayList<FileInfoBean>();
 		listMap = new HashMap<String, ArrayList<FileInfoBean>>();
+		remoteID = getIntent().getLongExtra("uid", -1);
 		new Thread(new Runnable() {
 
 			@Override
@@ -237,7 +240,7 @@ public class ConversationSelectImage extends Activity {
 				}
 			}
 		});
-
+		
 		gridViews.setOnScrollListener(new OnScrollListener() {
 
 			@Override

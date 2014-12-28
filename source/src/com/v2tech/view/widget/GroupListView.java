@@ -1216,6 +1216,7 @@ public class GroupListView extends ListView {
 				// Collections.sort(list);
 				list = new ArrayList<GroupListView.ItemData>();
 				if (isFirstSearch) {
+					SearchUtils.clearAll();
 					List<Object> users = new ArrayList<Object>();
 					for (Group group : mGroupList) {
 						convertGroupToUser(users, group);

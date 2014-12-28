@@ -43,6 +43,7 @@ import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.VFile.State;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFileItem;
@@ -528,9 +529,12 @@ public class MainActivity extends FragmentActivity implements
 						.loadFileMessages(-1, -1);
 				if (loadFileMessages != null) {
 					for (VMessageFileItem fileItem : loadFileMessages) {
-						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING)
+						V2Log.d(TAG, "Iterator VMessageFileItem -- name is : " + fileItem.getFileName() + " state : " + State.fromInt(fileItem.getState()));
+						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
+								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING)
 							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
-						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
+						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING 
+								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
 							fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 						int update = MessageLoader.updateFileItemState(
 								mContext, fileItem);

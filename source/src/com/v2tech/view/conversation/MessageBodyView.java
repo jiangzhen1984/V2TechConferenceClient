@@ -1050,42 +1050,30 @@ public class MessageBodyView extends LinearLayout {
 				if (callback != null) {
 					View fileRootView = mContentContainer.getChildAt(0);
 					if (mMsg.isLocal()) {
-						Integer transing = GlobalConfig.mTransingFiles.get(currentBelongID);
-						
-						if(transing == null){
-							transing = 0;
-							GlobalConfig.mTransingFiles.put(currentBelongID, transing);
-						}
-						
-						V2Log.d("TRANSING_File_SIZE" , "ConversationP2PTextActivity notifyListChange --> " + currentBelongID
-								+ "当前传输的文件个数：" + transing);
-						if(transing > GlobalConfig.MAX_TRANS_FILE_SIZE){
-							callback.requestFileTransUpdate();
+						boolean flag;
+						if(mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER)
+							flag = GlobalHolder.getInstance().changeGlobleTransFileMember(
+									getContext(), true, mMsg.getToUser().getmUserId(), "MessageBodyView mResendButtonListener");
+						else
+							flag = GlobalHolder.getInstance().changeGlobleTransFileMember(
+									getContext(), true, mMsg.getGroupId(), "MessageBodyView mResendButtonListener");
+						if(!flag){
 							return ;
-						} else {
-							transing = transing + 1;
-							GlobalConfig.mTransingFiles.put(currentBelongID, transing);
 						}
-						
 						failedIcon.setVisibility(View.INVISIBLE);
 						callback.reSendMessageClicked(mMsg);
 					} else {
 						if (mMsg.getItems().size() > 0
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
-							Integer transing = GlobalConfig.mTransingFiles.get(currentBelongID);
-							if(transing == null){
-								transing = 0;
-								GlobalConfig.mTransingFiles.put(currentBelongID, transing);
-							}
-							
-							V2Log.d("TRANSING_File_SIZE" , "MessageBodyView notifyListChange --> " + currentBelongID
-									+ "当前传输的文件个数：" + transing);
-							if(transing > GlobalConfig.MAX_TRANS_FILE_SIZE){
-								callback.requestFileTransUpdate();
+							boolean flag;
+							if(mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER)
+								flag = GlobalHolder.getInstance().changeGlobleTransFileMember(
+										getContext(), true, mMsg.getToUser().getmUserId(), "MessageBodyView mResendButtonListener");
+							else
+								flag = GlobalHolder.getInstance().changeGlobleTransFileMember(
+										getContext(), true, mMsg.getGroupId(), "MessageBodyView mResendButtonListener");
+							if(!flag){
 								return ;
-							} else {
-								transing = transing + 1;
-								GlobalConfig.mTransingFiles.put(currentBelongID, transing);
 							}
 							
 							failedIcon.setVisibility(View.INVISIBLE);

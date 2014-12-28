@@ -7,8 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +24,6 @@ import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.GlobalHolder;
-import com.v2tech.util.BitmapUtil;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.vo.Conversation;
@@ -35,6 +32,8 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.SearchedResult;
+import com.v2tech.vo.SearchedResult.SearchedResultItem;
+import com.v2tech.vo.SearchedResult.Type;
 import com.v2tech.vo.User;
 
 public class SearchedResultActivity extends Activity {
@@ -47,7 +46,7 @@ public class SearchedResultActivity extends Activity {
 	private SearchedResult sr;
 	private List<SearchedResult.SearchedResultItem> mList;
 	
-	private Handler mHandler;
+	private LocalAdapter adapter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,15 +58,16 @@ public class SearchedResultActivity extends Activity {
 		
 		mReturnButton = (TextView) findViewById(R.id.search_title_return_button);
 		mReturnButton.setOnClickListener(mReturnButtonListener);
+		
+		adapter = new LocalAdapter();
 		if (getIntent().getExtras() != null) {
 			sr = (SearchedResult)getIntent().getExtras().get("result");
 			if (sr != null) {
 				mList = sr.getList();
-				mListView.setAdapter(new LocalAdapter());
+				mListView.setAdapter(adapter);
 			}
 		}
 		
-		mHandler = new LocalHandler();
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				listener);
@@ -163,6 +163,7 @@ public class SearchedResultActivity extends Activity {
 
 	class LocalAdapter extends BaseAdapter {
 
+		ViewItem item = null;
 		class ViewItem {
 			ImageView iv;
 			TextView tv;
@@ -186,7 +187,7 @@ public class SearchedResultActivity extends Activity {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View view = convertView;
-			ViewItem item = null;
+			item = null;
 			if (view == null) {
 				view = LayoutInflater.from(mContext).inflate(
 						R.layout.searched_result_list_item, null,
@@ -203,55 +204,42 @@ public class SearchedResultActivity extends Activity {
 			if (srItem.mType == SearchedResult.Type.CROWD) {
 				item.iv.setImageResource(R.drawable.chat_group_icon);
 			} else if (srItem.mType == SearchedResult.Type.USER) {
-				item.iv.setImageResource(R.drawable.avatar);
-//				String avatarPath = GlobalHolder.getInstance().getAvatarPath(srItem.id);
-//				if(TextUtils.isEmpty(avatarPath))
-//					item.iv.setImageResource(R.drawable.avatar);
-//				else {
-//					BitmapManager.getInstance().loadBitmapFromPath(mHandler, avatarPath);
-//					Bitmap bitmap = BitmapUtil.loadAvatarFromPath(avatarPath);
-//					item.iv.setImageBitmap(bitmap);
-//				}
+				String avatarPath = GlobalHolder.getInstance().getAvatarPath(srItem.id);
+				if(TextUtils.isEmpty(avatarPath))
+					item.iv.setImageResource(R.drawable.avatar);
+				else {
+					BitmapManager.getInstance().loadBitmapFromPath(BitmapManager.getInstance().
+							new LoadBitmapCallBack(avatarPath) {
+						
+						@Override
+						public void bitmapCallBack(Bitmap bitmap) {
+							//FIXME There is a warning to deal with
+							try{
+								item.iv.setImageBitmap(bitmap);
+							}
+							catch(Exception e){}
+						}
+					});
+				}
 			}
 			return view;
 		}
 		
 	}
 	
-	
-	class LocalHandler extends Handler{
-		
-		@Override
-		public void handleMessage(Message msg) {
-			super.handleMessage(msg);
-			
-			switch (msg.what) {
-			case BitmapManager.BITMAP_UPDATE:
-				
-				break;
-			default:
-				break;
-			}
-		}
-	}
-
 	private BitmapChangedListener listener = new BitmapChangedListener() {
 		
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
 			if(user == null || bm == null)
-				return ;
-			
-//			for (SearchedResultItem item : mList) {
-//				if(item.mType == Type.USER){
-//					item.id
-//				}
-//				if(item..getmUserId() == user.getmUserId()){
-//					member.setAvatarBitmap(bm);
-//				}
-//			}
+				return 
+						;
+			adapter.notifyDataSetChanged();
+			for (SearchedResultItem item : mList) {
+				if(item.mType == Type.USER){
+					adapter.notifyDataSetChanged();
+				}
+			}
 		}
 	};
-	
-	
 }

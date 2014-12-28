@@ -11,6 +11,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.util.LruCache;
+import android.widget.ImageView;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.BitmapUtil;
@@ -189,28 +190,29 @@ public class BitmapManager {
 		}
 	}
 	
-	public void loadBitmapFromPath(final Handler mHandler , final String filePath){
+	public void loadBitmapFromPath(final LoadBitmapCallBack callback){
 		service.execute(new Runnable() {
 			@Override
 			public void run() {
 				try {
-					Bitmap bitmap = bitmapLru.get(filePath);
-					
+					Bitmap bitmap = bitmapLru.get(callback.filePath);
 					if(bitmap == null || bitmap.isRecycled()){
-						bitmap = BitmapUtil.getCompressedBitmap(filePath);
+						bitmap = BitmapUtil.loadAvatarFromPath(callback.filePath);
+						
+						if(bitmap == null)
+							return ;
+								
+						if(bitmap.isRecycled()){
+							bitmap.recycle();
+							bitmap = null;
+							return ;
+						}
+						
+						bitmapLru.put(callback.filePath, bitmap);
+						callback.bitmapCallBack(bitmap);
+					} else {
+						callback.bitmapCallBack(bitmap);
 					}
-					
-					if(bitmap == null)
-						return ;
-							
-					if(bitmap.isRecycled()){
-						bitmap.recycle();
-						bitmap = null;
-						return ;
-					}
-					
-					bitmapLru.put(filePath, bitmap);
-					Message.obtain(mHandler, BITMAP_UPDATE, bitmap).sendToTarget();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -231,6 +233,16 @@ public class BitmapManager {
 			oldValue.recycle();
 			oldValue = null;
 		}
+	}
+	
+	public abstract class LoadBitmapCallBack{
+		
+		public String filePath;
+		public LoadBitmapCallBack(String filePath){
+			this.filePath = filePath;
+		}
+		
+		public abstract void bitmapCallBack(Bitmap bitmap);
 	}
 
 	/**

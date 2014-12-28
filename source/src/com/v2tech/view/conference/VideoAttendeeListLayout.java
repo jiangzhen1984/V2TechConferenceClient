@@ -1121,6 +1121,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				isFirstSearch = true;
 			} else {
 				if (isFirstSearch) {
+					SearchUtils.clearAll();
 					List<Object> wrappers = new ArrayList<Object>();
 					wrappers.addAll(mList);
 					SearchUtils.receiveList = wrappers;

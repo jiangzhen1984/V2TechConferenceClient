@@ -263,7 +263,12 @@ public class ConferenceActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
 		if(!initConferenceDate()){
+			
 			isFinish = true;
+			Intent i = new Intent();
+			i.putExtra("gid", conf.getId());
+			setResult(ConversationsTabFragment.CONFERENCE_ENTER_CODE, i);
+			Toast.makeText(getApplicationContext(), R.string.confs_is_deleted_notification, Toast.LENGTH_LONG).show();
 			super.finish();
 			return ;
 		}
@@ -459,10 +464,11 @@ public class ConferenceActivity extends Activity {
 
 		Intent i = mContext.registerReceiver(mConfUserChangeReceiver, filter);
 		// means exist close broadcast, need to finish this activity
-		if (i != null) {
-			removeStickyBroadcast(i);
-			finish();
-		}
+//		if (i != null) {
+//			removeStickyBroadcast(i);
+//			Toast.makeText(mContext, R.string.confs_is_deleted_notification, Toast.LENGTH_LONG).show();
+//			finish();
+//		}
 	}
 
 	private boolean initConferenceDate() {
@@ -1558,7 +1564,6 @@ public class ConferenceActivity extends Activity {
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code == NetworkStateCode.CONNECTED_ERROR) {
-					// quit();
 					finish();
 				}
 
@@ -2206,7 +2211,6 @@ public class ConferenceActivity extends Activity {
 					d.dismiss();
 					VerificationProvider.deleteCrowdVerificationMessage(conf
 							.getId());
-					quit();
 					finish();
 				}
 
@@ -3480,7 +3484,6 @@ public class ConferenceActivity extends Activity {
 				}
 				Toast.makeText(mContext, resource, Toast.LENGTH_LONG).show();
 				// Do quit action
-				// quit();
 				finish();
 			}
 				break;

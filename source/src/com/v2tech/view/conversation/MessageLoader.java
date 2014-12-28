@@ -645,10 +645,16 @@ public class MessageLoader {
 				where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE
 						+ " = ? or "
 						+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE
-						+ " = ? ";
+						+ " = ? or "
+						+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE
+						+ " = ? or "
+						+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE
+						+ " = ?";
 				args = new String[] {
 						String.valueOf(VMessageAbstractItem.STATE_FILE_DOWNLOADING),
-						String.valueOf(VMessageAbstractItem.STATE_FILE_SENDING) };
+						String.valueOf(VMessageAbstractItem.STATE_FILE_SENDING),
+						String.valueOf(VMessageAbstractItem.STATE_FILE_PAUSED_SENDING),
+						String.valueOf(VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING)};
 				cursor = mContext.getContentResolver().query(uri, null, where,
 						args, sortOrder);
 			} else {
@@ -707,27 +713,40 @@ public class MessageLoader {
 			return null;
 		}
 		
-		List<VMessageFileItem> fileItems = new ArrayList<VMessageFileItem>();
-		Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
-		String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID
-				+ " = ?";
-		String[] args = new String[] { String.valueOf(gid) };
-		String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
-				+ " desc";
-		Cursor cursor = mContext.getContentResolver().query(uri, null, where,
-				args, sortOrder);
-		while (cursor.moveToNext()) {
-			VMessageFileItem fileItem = extractFileItem(cursor,
-					V2GlobalEnum.GROUP_TYPE_CROWD, gid);
-			if (fileItem != null) {
-				fileItems.add(fileItem);
+		Cursor cursor = null;
+		try {
+			
+			List<VMessageFileItem> fileItems = new ArrayList<VMessageFileItem>();
+			Uri uri = ContentDescriptor.HistoriesFiles.CONTENT_URI;
+			String where = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_REMOTE_USER_ID
+					+ " = ?";
+			String[] args = new String[] { String.valueOf(gid) };
+			String sortOrder = ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SAVEDATE
+					+ " desc";
+			cursor = mContext.getContentResolver().query(uri, null, where,
+					args, sortOrder);
+			
+			if (cursor == null || cursor.getCount() < 0) {
+				return null;
+			}
+
+			while (cursor.moveToNext()) {
+				VMessageFileItem fileItem = extractFileItem(cursor,
+						V2GlobalEnum.GROUP_TYPE_CROWD, gid);
+				if (fileItem != null) {
+					fileItems.add(fileItem);
+				}
+			}
+			return fileItems;
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
+			return null;
+		} finally {
+			if (cursor != null) {
+				cursor.close();
 			}
 		}
-		if (fileItems == null || fileItems.size() < 0) {
-			return null;
-		}
-
-		return fileItems;
 	}
 
 	/**
@@ -813,8 +832,9 @@ public class MessageLoader {
 					vm = new VMessage(groupType, remoteUserID, GlobalHolder
 							.getInstance().getUser(fromUserID), null, new Date(
 							saveDate));
-
-				return new VMessageFileItem(vm, filePath, fileState);
+				VMessageFileItem fileItem = new VMessageFileItem(vm, filePath, fileState);
+				fileItem.setUuid(uuid);
+				return fileItem;
 			}
 			return null;
 		} finally {

@@ -995,7 +995,9 @@ public class JNIService extends Service implements
 			}
 			
 			AddFriendHistorieNode node = VerificationProvider.queryFriendQualMessageByUserId(user.uid);
-			if(node != null && node.readState == ReadState.READ.intValue()){
+			if(node != null && 
+					node.addState == 0 &&
+					node.readState == ReadState.READ.intValue()){
 				V2Log.d(TAG, "OnRequestCreateRelationCallback --> Node readState : " + node.readState + " offlineLoad"
 						+ ": " + GlobalHolder.getInstance().isOfflineLoaded());
 				if(node.readState == ReadState.READ.intValue() && !GlobalHolder.getInstance().isOfflineLoaded()){
@@ -1051,7 +1053,7 @@ public class JNIService extends Service implements
 					i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("gid", nGroupID);
-					sendStickyBroadcast(i);
+					sendBroadcast(i);
 
 					if (GlobalConfig.isApplicationBackground(mContext)
 							|| GlobalHolder.getInstance().isInMeeting()
@@ -1896,8 +1898,8 @@ public class JNIService extends Service implements
 						nToUserID, nTime, messageId, binaryPath);
 				break;
 			case BINARY_TYPE_AUDIO:
-				handlerChatAudioCallback(eGroupType, nGroupID, nFromUserID,
-						nToUserID, nTime, messageId, binaryPath);
+//				handlerChatAudioCallback(eGroupType, nGroupID, nFromUserID,
+//						nToUserID, nTime, messageId, binaryPath);
 				break;
 			default:
 				break;
@@ -2049,7 +2051,6 @@ public class JNIService extends Service implements
 		@Override
 		public void OnFileTransBegin(String szFileID, int nTransType,
 				long nFileSize) {
-			updateTransFileState(szFileID, true);
 		}
 		
 		@Override
@@ -2112,8 +2113,6 @@ public class JNIService extends Service implements
 			V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
-
-			updateTransFileState(szFileID, false);
 		}
 
 		@Override
@@ -2133,15 +2132,7 @@ public class JNIService extends Service implements
 			else{
 				V2Log.e(TAG, "OnFileTransEnd updates failed , id : " + szFileID);
 			}
-//			VMessage vm = new VMessage(0, 0, null, null);
-//			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
-//			item.setUuid(szFileID);
-//			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
-//				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-//			else
-//				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
 			fileItem = null;
-			updateTransFileState(szFileID, false);
 		}
 
 		@Override
@@ -2156,7 +2147,6 @@ public class JNIService extends Service implements
 			V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
 			vm = null;
 			item = null;
-			updateTransFileState(szFileID, false);
 		}
 	}
 
@@ -2208,35 +2198,6 @@ public class JNIService extends Service implements
 			delayBroadcast.clear();
 		}
 		noNeedBroadcast = true;
-	}
-
-	private void updateTransFileState(String szFileID, boolean isAdd) {
-		VMessageFileItem fileItem = MessageLoader.queryFileItemByID(
-				V2GlobalEnum.GROUP_TYPE_USER, szFileID);
-		if (fileItem == null || fileItem.getVm().getToUser() == null) {
-			V2Log.d(TAG, "update transing file size failed...file id is : "
-					+ szFileID);
-			return;
-		}
-
-		long uid = fileItem.getVm().getToUser().getmUserId();
-		Integer trans = GlobalConfig.mTransingFiles.get(uid);
-		if(trans == null){
-			trans = 0;
-			GlobalConfig.mTransingFiles.put(uid, trans);
-		}
-		else{
-			if (isAdd) {
-				trans = trans + 1;
-				V2Log.d("TRANSING_File_SIZE" , "JNIService updateTransFileState --> 用户" + uid
-						+ "增加了一个文件传输，当前正在传输个数是：" + trans);
-			} else {
-				trans = trans - 1;
-				V2Log.e("TRANSING_File_SIZE" , "JNIService updateTransFileState --> 用户" + uid
-						+ "的一个文件传输完毕，当前正在传输个数是：" + trans);
-			}
-			GlobalConfig.mTransingFiles.put(uid, trans);
-		}
 	}
 
 	public class ContactsGroupRequestCBHandler {

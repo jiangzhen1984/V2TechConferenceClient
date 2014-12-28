@@ -21,9 +21,11 @@ public class SearchUtils {
 	private static List<Object> searchList = new ArrayList<Object>();
 	private static List<Object> searchCacheList = new ArrayList<Object>();
 	private static List<Object> surplusList = new ArrayList<Object>();
-	private static SparseArray<List<Object>> cacheList = new SparseArray<List<Object>>();
-
+	private static List<Object> singleCacheList = new ArrayList<Object>();
+	private static SparseArray<List<Object>> contentCacheList = new SparseArray<List<Object>>();
+	private static SparseArray<String> contentLengthCacheList = new SparseArray<String>();
 	public static List<Object> receiveList = new ArrayList<Object>();
+	
 	private static boolean isShouldAdd;
 	private static boolean isShouldQP; // 是否需要启动全拼
 	private static int startIndex = 0;
@@ -44,35 +46,39 @@ public class SearchUtils {
 	public static List<ScrollItem> startConversationSearch(Editable content) {
 		type = TYPE_CONVERSATION;
 
-		List<Object> cache = cacheList.get(content.length());
-		if (cache != null) {
+		List<Object> cache = contentCacheList.get(content.length());
+		if (cache != null && 
+				contentLengthCacheList.get(content.length()) != null &&
+				contentLengthCacheList.get(content.length()).equals(content.toString())) {
 			V2Log.e(TAG, "find cache list : key --> " + content.length()
 					+ " and value --> " + cache.size());
 			List<ScrollItem> cacheItems = new ArrayList<ScrollItem>();
 			for (Object object : cache) {
 				cacheItems.add((ScrollItem) object);
 			}
-			cacheList.delete(content.length() + 1);
+			contentCacheList.delete(content.length() + 1);
+			contentLengthCacheList.delete(content.length() + 1);
 			return cacheItems;
 		} else {
 			if (content.length() - 1 != 0) {
 				startIndex = content.length() - 1;
 				searchList.clear();
-				List<Object> lastCache = cacheList.get(content.length() - 1);
+				List<Object> lastCache = contentCacheList.get(content.length() - 1);
 				if(lastCache != null)
 					searchList.addAll(lastCache);
 			}
 
 			List<ScrollItem> searchItems = new ArrayList<ScrollItem>();
 			List<Object> search = search(content.toString());
-			if(search != null){
+			if(search != null && search.size() > 0){
 				for (Object object : search) {
 					searchItems.add((ScrollItem) object);
 				}
 	
 				List<Object> temp = new ArrayList<Object>();
 				temp.addAll(search);
-				cacheList.put(content.length(), temp);
+				contentCacheList.put(content.length(), temp);
+				contentLengthCacheList.put(content.length(), content.toString());
 				V2Log.e(TAG, "put cache list : key --> " + content.length()
 						+ " and value --> " + search.size());
 				temp = null;
@@ -85,7 +91,7 @@ public class SearchUtils {
 	public static List<Wrapper> startVideoAttendeeSearch(String content) {
 		type = TYPE_WRAPPER;
 
-		List<Object> cache = cacheList.get(content.length());
+		List<Object> cache = contentCacheList.get(content.length());
 		if (cache != null) {
 			V2Log.e(TAG, "find cache list : key --> " + content.length()
 					+ " and value --> " + cache.size());
@@ -93,27 +99,27 @@ public class SearchUtils {
 			for (Object object : cache) {
 				cacheItems.add((Wrapper) object);
 			}
-			cacheList.delete(content.length() + 1);
+			contentCacheList.delete(content.length() + 1);
 			return cacheItems;
 		} else {
 			if (content.length() - 1 != 0) {
 				startIndex = content.length() - 1;
 				searchList.clear();
-				List<Object> lastCache = cacheList.get(content.length() - 1);
+				List<Object> lastCache = contentCacheList.get(content.length() - 1);
 				if(lastCache != null)
 					searchList.addAll(lastCache);
 			}
 
 			List<Wrapper> searchItems = new ArrayList<Wrapper>();
 			List<Object> search = search(content.toString());
-			if(search != null){
+			if(search != null && search.size() > 0){
 				for (Object object : search) {
 					searchItems.add((Wrapper) object);
 				}
 	
 				List<Object> temp = new ArrayList<Object>();
 				temp.addAll(search);
-				cacheList.put(content.length(), temp);
+				contentCacheList.put(content.length(), temp);
 				V2Log.e(TAG, "put cache list : key --> " + content.length()
 						+ " and value --> " + search.size());
 				temp = null;
@@ -143,35 +149,39 @@ public class SearchUtils {
 	public static List<User> startGroupUserFilterSearch(String content) {
 		type = TYPE_ITEM_DATA;
 
-		List<Object> cache = cacheList.get(content.length());
-		if (cache != null) {
+		List<Object> cache = contentCacheList.get(content.length());
+		if (cache != null &&
+				contentLengthCacheList.get(content.length()) != null &&
+				contentLengthCacheList.get(content.length()).equals(content.toString())) {
 			V2Log.e(TAG, "find cache list : key --> " + content.length()
 					+ " and value --> " + cache.size());
 			List<User> cacheUsers = new ArrayList<User>();
 			for (Object object : cache) {
 				cacheUsers.add((User) object);
 			}
-			cacheList.delete(content.length() + 1);
+			contentCacheList.delete(content.length() + 1);
+			contentLengthCacheList.delete(content.length() + 1);
 			return cacheUsers;
 		} else {
 			if (content.length() - 1 != 0) {
 				startIndex = content.length() - 1;
 				searchList.clear();
-				List<Object> lastCache = cacheList.get(content.length() - 1);
+				List<Object> lastCache = contentCacheList.get(content.length() - 1);
 				if(lastCache != null)
 					searchList.addAll(lastCache);
 			}
 
 			List<User> searchUsers = new ArrayList<User>();
 			List<Object> search = search(content.toString());
-			if(search != null){
+			if(search != null && search.size() > 0){
 				for (Object object : search) {
 					searchUsers.add((User) object);
 				}
 	
 				List<Object> temp = new ArrayList<Object>();
 				temp.addAll(search);
-				cacheList.put(content.length(), temp);
+				contentCacheList.put(content.length(), temp);
+				contentLengthCacheList.put(content.length(), content.toString());
 				V2Log.e(TAG, "put cache list : key --> " + content.length()
 						+ " and value --> " + search.size());
 				temp = null;
@@ -208,7 +218,7 @@ public class SearchUtils {
 				searchList.clear();
 				if (searchCacheList.size() > 0) {
 					isShouldQP = false;
-					searchList.addAll(searchCacheList);
+					singleCacheList.addAll(searchCacheList);
 					searchCacheList.clear();
 					
 					V2Log.d(TAG, "简拼找到结果 , 全拼再搜索一遍");
@@ -217,13 +227,15 @@ public class SearchUtils {
 						surplusList.clear();
 					}
 					startQPSearch(content);
+					searchList.addAll(singleCacheList);
 					searchCacheList.clear();
+					singleCacheList.clear();
 				} else {
 					isShouldQP = true;
-					List<Object> cache = cacheList.get(content.length() - 1);
+					List<Object> cache = contentCacheList.get(content.length() - 1);
 					if(cache != null)
 						searchCacheList
-								.addAll(cacheList.get(content.length() - 1));
+								.addAll(contentCacheList.get(content.length() - 1));
 					V2Log.e(TAG, "简拼没有结果 开启全拼搜索");
 				}
 			}
@@ -247,7 +259,9 @@ public class SearchUtils {
 			receiveList.clear();
 			searchCacheList.clear();
 			searchList.clear();
-			cacheList.clear();
+			contentCacheList.clear();
+			surplusList.clear();
+			singleCacheList.clear();
 			mIsStartedSearch = false;
 			startIndex = 0;
 		}
@@ -274,7 +288,7 @@ public class SearchUtils {
 				sb.append(charStr);
 			}
 			V2Log.e(TAG, "current searh material : " + sb.toString());
-			String material = sb.toString();
+			String material = sb.toString().toLowerCase();
 			// 判断该昵称第一个字母，与输入的第一字母是否匹配
 			Character first = material.toCharArray()[0];
 			char[] targetChars = content.toString().toCharArray();

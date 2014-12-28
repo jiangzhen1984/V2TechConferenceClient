@@ -23,11 +23,14 @@ public class FileUitls {
 	public static Context context;
 	
 	public static int adapterFileIcon(String fileName){
+		FileType fileType;
 		if(fileName.indexOf(".") == -1)
-			return FileType.UNKNOW.intValue();
-		String postfixName = fileName.substring(fileName.indexOf("."));
-		V2Log.e("FileUtils --> get postfix name is : " + postfixName);
-		FileType fileType  = getFileType(postfixName);
+			fileType = FileType.UNKNOW;
+		else{
+			String postfixName = fileName.substring(fileName.indexOf("."));
+			V2Log.e("FileUtils --> get postfix name is : " + postfixName);
+			fileType  = getFileType(postfixName);
+		}
 		return adapterFileIcon(fileType);
 	}
 	

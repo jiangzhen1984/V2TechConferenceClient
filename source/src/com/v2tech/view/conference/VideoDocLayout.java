@@ -125,6 +125,8 @@ public class VideoDocLayout extends LinearLayout {
 		else {
 			if (mCurrentDoc != null)
 				mDocTitle.setText(mCurrentDoc.getDocName());
+			else
+				mDocTitle.setText(R.string.confs_doc);
 		}
 
 	}
@@ -307,7 +309,10 @@ public class VideoDocLayout extends LinearLayout {
 		}
 
 		mCurrentDoc = d;
-		mDocTitle.setText(mCurrentDoc.getDocName());
+		if (mCurrentDoc != null)
+			mDocTitle.setText(mCurrentDoc.getDocName());
+		else
+			mDocTitle.setText(R.string.confs_doc);
 
 		mCurrentPage = mCurrentDoc.getActivatePage();
 
@@ -363,9 +368,8 @@ public class VideoDocLayout extends LinearLayout {
 				V2Log.w(" No Doc");
 				return;
 			}
-			mDocTitle.setText(mCurrentDoc.getDocName());
 		}
-
+		mDocTitle.setText(mCurrentDoc.getDocName());
 		mCurrentPage = mCurrentDoc.getActivatePage();
 		updateCurrentDocPage(mCurrentPage);
 		updateLayoutPageInformation();
@@ -887,6 +891,8 @@ public class VideoDocLayout extends LinearLayout {
 				mCurrentDoc = d;
 				if (mCurrentDoc != null)
 					mDocTitle.setText(mCurrentDoc.getDocName());
+				else
+					mDocTitle.setText(R.string.confs_doc);
 				updateCurrentDoc();
 				mDocListWindow.dismiss();
 				if (listener != null) {
