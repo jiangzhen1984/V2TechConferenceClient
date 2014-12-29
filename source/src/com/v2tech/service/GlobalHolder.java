@@ -733,13 +733,20 @@ public class GlobalHolder {
 		this.dataBaseTableCacheName = dataBaseTableCacheName;
 	}
 	
-	public boolean changeGlobleTransFileMember(Context mContext , boolean isAdd , Long key , String tag){
-		Integer transing = GlobalConfig.mTransingFiles.get(key);
+	public boolean changeGlobleTransFileMember(int transType ,Context mContext , boolean isAdd , Long key , String tag){
+		Map<Long, Integer> transingCollection = getFileTypeColl(transType);
+		Integer transing = transingCollection.get(key);
+		String typeString = null;
+		if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
+			typeString = "发送或上传";
+		else
+			typeString = "下载";
 		if(transing == null){
 			if(isAdd){
-				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , 正在传输文件加1 , 当前数量为1");
-				transing = 0;
-				GlobalConfig.mTransingFiles.put(key, transing);
+				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , "
+						+ "传输类型 : " + typeString + " 正在传输文件加1 , 当前数量为1");
+				transing = 1;
+				transingCollection.put(key, transing);
 			}
 			return true;
 		} else {
@@ -749,8 +756,9 @@ public class GlobalHolder {
 					return false;
 				} else {
 					transing = transing + 1;
-					V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , 正在传输文件加1 , 当前数量为: " + transing);
-					GlobalConfig.mTransingFiles.put(key , transing);
+					V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , "
+							+ "传输类型 : " + typeString + " 正在传输文件加1 , 当前数量为: " + transing);
+					transingCollection.put(key , transing);
 					return true;
 				}
 			}
@@ -758,12 +766,20 @@ public class GlobalHolder {
 				if(transing == 0)
 					return false;
 				transing = transing - 1;
-				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , 正在传输文件减1 , 当前数量为: " + transing);
-				GlobalConfig.mTransingFiles.put(key, transing);
+				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , "
+						+ "传输类型 : " + typeString + " 正在传输文件减1 , 当前数量为: " + transing);
+				transingCollection.put(key, transing);
 				return true;
 			}
 		}
 		
+	}
+	
+	private Map<Long, Integer> getFileTypeColl(int transType){
+		if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
+			return GlobalConfig.mTransingFiles;
+		else
+			return GlobalConfig.mDownLoadingFiles;
 	}
 
 	/**

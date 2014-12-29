@@ -932,12 +932,12 @@ public class ConversationSelectFile extends Activity {
 			
 			V2Log.d("TRANSING_FILE_SIZE" , "ConversationSelectFile notifyListChange --> ID -" + uid
 					+ " - 当前传输的文件个数：" + transing);
-			if(transing + mCheckedList.size() > GlobalConfig.MAX_TRANS_FILE_SIZE){
+			if(transing + mCheckedList.size() >= GlobalConfig.MAX_TRANS_FILE_SIZE){
 				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
 				return ;
 			}
 			
-			if(mCheckedList.size() > GlobalConfig.MAX_TRANS_FILE_SIZE){
+			if(mCheckedList.size() >= GlobalConfig.MAX_TRANS_FILE_SIZE){
 				Toast.makeText(getApplicationContext(), "发送文件个数已达上限，一次性只能发送5个文件", Toast.LENGTH_LONG).show();
 				return ;
 			}

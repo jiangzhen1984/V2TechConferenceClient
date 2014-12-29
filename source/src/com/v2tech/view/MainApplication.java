@@ -66,8 +66,7 @@ public class MainApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 
-		V2Log.isDebuggable = (0 != (getApplicationInfo().flags &
-				ApplicationInfo.FLAG_DEBUGGABLE));
+		V2Log.isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 		V2Log.d(TAG, "isDebuggable : " + V2Log.isDebuggable);
 
 		try {
@@ -90,14 +89,14 @@ public class MainApplication extends Application {
 
 		initGloblePath();
 		String path = GlobalConfig.getGlobalPath();
-        initConfigSP();
+		initConfigSP();
 		initConfFile();
 
 		DatabaseProvider.init(getApplicationContext());
 		MessageBuilder.init(getApplicationContext());
 		MessageLoader.init(getApplicationContext());
-        BitmapUtil.context = getApplicationContext();
-        FileUitls.context = getApplicationContext();
+		BitmapUtil.context = getApplicationContext();
+		FileUitls.context = getApplicationContext();
 
 		// Load native library
 		System.loadLibrary("event");
@@ -133,49 +132,55 @@ public class MainApplication extends Application {
 			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());
 		}
 
-
 		initSQLiteFile();
 		initDPI();
 		initResource();
 	}
 
-    private void initConfigSP() {
-        SharedPreferences sf = getSharedPreferences("config",
-                Context.MODE_PRIVATE);
-        Editor ed = sf.edit();
-        ed.putInt("LoggedIn", 0);
-        ed.commit();
+	private void initConfigSP() {
+		SharedPreferences sf = getSharedPreferences("config",
+				Context.MODE_PRIVATE);
+		Editor ed = sf.edit();
+		ed.putInt("LoggedIn", 0);
+		ed.commit();
 
-        boolean isAppFirstLoad = sf.getBoolean("isAppFirstLoad" , true);
-        if(isAppFirstLoad){
-            new Thread(new Runnable(){
-                @Override
-                public void run() {
-                    File file = new File(GlobalConfig.getGlobalPath());
-                    recursionDeleteOlderFiles(file);
-                }
+		boolean isAppFirstLoad = sf.getBoolean("isAppFirstLoad", true);
+		if (isAppFirstLoad) {
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					File file = new File(GlobalConfig.getGlobalPath());
+					if (file.exists()) {
+						recursionDeleteOlderFiles(file);
+					}
+				}
 
-                private void recursionDeleteOlderFiles(File file) {
-                    File[] files = file.listFiles();
-                    for(int i = 0 ; i < files.length ; i++){
-                        File temp = files[i];
-                        if(temp.isDirectory()){
-                            recursionDeleteOlderFiles(temp);
-                        } else {
-                            V2Log.d(TAG , "成功删除文件：" + temp.getAbsolutePath());
-                            temp.delete();
-                        }
-                    }
-                }
-            }).start();
+				private void recursionDeleteOlderFiles(File file) {
+					File[] files = file.listFiles();
+					if (files != null) {
+						for (int i = 0; i < files.length; i++) {
+							File temp = files[i];
+							if (temp.exists()) {
+								if (temp.isDirectory()) {
+									recursionDeleteOlderFiles(temp);
+								} else {
+									V2Log.d(TAG,
+											"成功删除文件：" + temp.getAbsolutePath());
+									temp.delete();
+								}
+							}
+						}
+					}
+				}
+			}).start();
 
-            Editor editor = sf.edit();
-            editor.putBoolean("isAppFirstLoad", false);
-            editor.commit();
-        }
-    }
+			Editor editor = sf.edit();
+			editor.putBoolean("isAppFirstLoad", false);
+			editor.commit();
+		}
+	}
 
-    private void initResource() {
+	private void initResource() {
 		GlobalConfig.Resource.CONTACT_DEFAULT_GROUP_NAME = this
 				.getApplicationContext().getResources()
 				.getText(R.string.contacts_default_group_name).toString();
@@ -453,8 +458,8 @@ public class MainApplication extends Application {
 
 				refCount++;
 				if (refCount == 1) {
-//					Notificator.udpateApplicationNotification(
-//							getApplicationContext(), false, null);
+					// Notificator.udpateApplicationNotification(
+					// getApplicationContext(), false, null);
 				}
 				Notificator
 						.cancelAllSystemNotification(getApplicationContext());
@@ -470,11 +475,11 @@ public class MainApplication extends Application {
 			synchronized (mLock) {
 				refCount--;
 				if (refCount == 0) {
-//					Intent i = activity.getIntent();
-//					i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-//							| Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//					Notificator.udpateApplicationNotification(
-//							getApplicationContext(), true, i);
+					// Intent i = activity.getIntent();
+					// i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+					// | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+					// Notificator.udpateApplicationNotification(
+					// getApplicationContext(), true, i);
 				}
 			}
 		}

@@ -23,6 +23,9 @@ public class V2GlobalEnum {
 	public static final int GROUP_TYPE_CONFERENCE = 4;
 	public static final int GROUP_TYPE_DISCUSSION = 5;
 	
+	public static final int FILE_TRANS_SENDING = 10;
+	public static final int FILE_TRANS_DOWNLOADING = 11;
+	
 	/**
 	 * User state for on line
 	 */

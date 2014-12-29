@@ -46,13 +46,10 @@ public class DateUtil {
 	 */
 	public static String getShortDate(long mTimeLine) {
 
-		mTimeLine = mTimeLine / 1000;
-		int hour = (int) mTimeLine / 3600;
-		int minute = (int) (mTimeLine - (hour * 3600)) / 60;
-		int second = (int) mTimeLine - (hour * 3600 + minute * 60);
-		return (hour < 10 ? "0" + hour : hour) + ":"
-				+ (minute < 10 ? "0" + minute : minute) + ":"
-				+ (second < 10 ? "0" + second : second);
+		SimpleDateFormat formatter = new SimpleDateFormat("HH:mm:ss");
+		Date currentTime = new Date(mTimeLine);
+		String dateString = formatter.format(currentTime);
+		return dateString;
 	}
 
 	/**

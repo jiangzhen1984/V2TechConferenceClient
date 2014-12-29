@@ -130,6 +130,13 @@ public class CrowdInvitationActivity extends Activity {
 				crowd.getCreator(), null);
 		g.setAuthType(AuthType.fromInt(crowd.getAuth()));
 		vq = VerificationProvider.queryCrowdQualMessageByCrowdId(crowd.getCreator().getmUserId(), g.getmGId());
+		if(vq == null){
+			Toast.makeText(getApplicationContext(), getResources().getString(R.string.crowd_Authentication_hit), 
+					Toast.LENGTH_LONG).show();
+			super.onBackPressed();
+			return ;
+		}
+		
 		updateView(false);
 		mRejectResasonLayout.setVisibility(View.GONE);
 	}

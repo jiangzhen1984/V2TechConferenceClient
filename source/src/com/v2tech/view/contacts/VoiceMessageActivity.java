@@ -220,6 +220,7 @@ public class VoiceMessageActivity extends Activity {
 						.entrySet().iterator(); i.hasNext();) {
 					Entry<Integer, AudioVideoMessageBean> entry = i.next();
 					mListItem.remove(entry.getValue());
+					deleteList.remove(entry.getKey());
 					AudioVideoMessageBean value = entry.getValue();
 					String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID
 							+ " = ?";
@@ -231,16 +232,18 @@ public class VoiceMessageActivity extends Activity {
 						Log.e(TAG, "delete failed...");
 				}
 				
-				isEditing = false;
-				deleteLayout.setVisibility(View.GONE);
-				deleteOperator.setVisibility(View.INVISIBLE);
-				cannelOperator.setVisibility(View.INVISIBLE);
-				cannelOperator.setClickable(false);
+				if (mListItem.size() <= 0){
+					isEditing = false;
+					deleteLayout.setVisibility(View.GONE);
+					deleteOperator.setVisibility(View.INVISIBLE);
+					cannelOperator.setVisibility(View.INVISIBLE);
+					cannelOperator.setClickable(false);
 
-				callBack.setVisibility(View.VISIBLE);
-				callBack.setClickable(true);
-				
-				isVisibile = false;
+					callBack.setVisibility(View.VISIBLE);
+					callBack.setClickable(true);
+					
+					isVisibile = false;
+				}
 				adapter.notifyDataSetChanged();
 			}
 		});

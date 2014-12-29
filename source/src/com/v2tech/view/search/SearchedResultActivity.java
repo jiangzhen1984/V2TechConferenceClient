@@ -3,8 +3,10 @@ package com.v2tech.view.search;
 import java.util.List;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -24,6 +26,7 @@ import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.BitmapManager.BitmapChangedListener;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.vo.Conversation;
@@ -47,6 +50,8 @@ public class SearchedResultActivity extends Activity {
 	private List<SearchedResult.SearchedResultItem> mList;
 	
 	private LocalAdapter adapter;
+	
+	private LocalReceiver localReceiver;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,11 +72,19 @@ public class SearchedResultActivity extends Activity {
 				mListView.setAdapter(adapter);
 			}
 		}
-		
+		initReceiver();
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				listener);
 		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+	}
+	
+	private void initReceiver() {
+		localReceiver = new LocalReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		this.registerReceiver(localReceiver, filter);
 	}
 
 	@Override
@@ -88,6 +101,7 @@ public class SearchedResultActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		this.unregisterReceiver(localReceiver);
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(listener);
 	}
 
@@ -160,6 +174,27 @@ public class SearchedResultActivity extends Activity {
 		}
 		
 	};
+	
+	class LocalReceiver extends BroadcastReceiver {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_UPDATED)) {
+				long gid = intent.getLongExtra("gid", 0);
+				for (int i = 0; i < mList.size(); i++) {
+					SearchedResultItem item = mList.get(i);
+					if(item.mType == Type.CROWD && item.id == gid){
+						Group searchGroup = GlobalHolder.getInstance().getGroupById(item.id);
+						if(searchGroup != null){
+							item.name = searchGroup.getName();
+							adapter.notifyDataSetChanged();
+						}
+						break;
+					}
+				}
+			}
+		}
+	}
 
 	class LocalAdapter extends BaseAdapter {
 

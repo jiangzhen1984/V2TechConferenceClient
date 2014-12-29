@@ -130,26 +130,6 @@ public class FileService extends Service {
 						.sendToTarget();
 			}
 		}
-
-		@Override
-		public void OnFileTransError(String szFileID, int errorCode,
-				int nTransType) {
-			if (mMoniterMap.containsKey(szFileID)) {
-				Message.obtain(mLocalHandler, UPDATE_FILE_STATE,
-						new TransObject(szFileID, FileState.ERROR))
-						.sendToTarget();
-			}
-		}
-
-		@Override
-		public void OnFileTransCancel(String szFileID) {
-			if (mMoniterMap.containsKey(szFileID)) {
-				Message.obtain(mLocalHandler, UPDATE_FILE_STATE,
-						new TransObject(szFileID, FileState.CANCEL))
-						.sendToTarget();
-			}
-		}
-
 	}
 
 	enum FileState {

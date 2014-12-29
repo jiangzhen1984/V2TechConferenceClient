@@ -89,7 +89,7 @@
         android:layout_marginLeft="@dimen/text_margin_left"
         android:ellipsize="end"
         android:gravity="bottom"
-        android:maxWidth="120dp"
+        android:maxWidth="150dp"
         android:paddingRight="15dp"
         android:singleLine="true"
         android:text="2014-11-20 17:20:32"

@@ -244,7 +244,8 @@ public class ImRequest {
 	private void OnChangeAvatar(int nAvatarType, long nUserID, String AvatarName) {
 		V2Log.d("OnChangeAvatar--> nAvatarType:" + nAvatarType + "    nUserID:"
 				+ nUserID + " AvatarName:" + AvatarName);
-		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;

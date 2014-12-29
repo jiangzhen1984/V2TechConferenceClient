@@ -640,31 +640,27 @@ public class ChatService extends DeviceService {
 							FileTransStatusIndication.IND_TYPE_PROGRESS_END));
 		}
 
-		@Override
-		public void OnFileDownloadError(String szFileID, int errorCode,
-				int nTransType) {
-			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileDownLoadErrorIndication(szFileID, errorCode,
-							nTransType));
-			MessageLoader.updateFileItemStateToFailed(szFileID);
-		}
+//		@Override
+//		public void OnFileDownloadError(String szFileID, int errorCode,
+//				int nTransType) {
+//			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+//					new FileDownLoadErrorIndication(szFileID, errorCode,
+//							nTransType));
+//		}
 
-		@Override
-		public void OnFileTransError(String szFileID, int errorCode,
-				int nTransType) {
-			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileTransErrorIndication(szFileID, errorCode,
-							nTransType));
-			MessageLoader.updateFileItemStateToFailed(szFileID);
-		}
-
-		@Override
-		public void OnFileTransCancel(String szFileID) {
-			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-					new FileTransCannelIndication(szFileID));
-			MessageLoader.updateFileItemStateToFailed(szFileID);
-		}
-
+//		@Override
+//		public void OnFileTransError(String szFileID, int errorCode,
+//				int nTransType) {
+//			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+//					new FileTransErrorIndication(szFileID, errorCode,
+//							nTransType));
+//		}
+//
+//		@Override
+//		public void OnFileTransCancel(String szFileID) {
+//			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+//					new FileTransCannelIndication(szFileID));
+//		}
 	}
 
 }

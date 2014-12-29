@@ -1,12 +1,9 @@
 package com.v2tech.vo;
 
-import com.V2.jni.util.V2Log;
-import com.v2tech.vo.Group.GroupType;
 
 
 public class ConferenceConversation extends Conversation {
 
-	private static final String TAG = "ConferenceConversation";
 	private Group g;
 
 	public ConferenceConversation(Group g) {
@@ -49,4 +46,7 @@ public class ConferenceConversation extends Conversation {
 		return g;
 	}
 
+	public void setG(Group g) {
+		this.g = g;
+	}
 }

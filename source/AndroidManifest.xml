@@ -3,7 +3,7 @@
     package="com.v2tech"
     android:sharedUserLabel="@string/app_name"
     android:versionCode="2"
-    android:versionName="4.0.0.39" >
+    android:versionName="4.0.0.40" >
 
     <uses-sdk
         android:minSdkVersion="14"

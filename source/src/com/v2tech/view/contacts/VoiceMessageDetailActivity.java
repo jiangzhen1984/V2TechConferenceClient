@@ -240,8 +240,8 @@ public class VoiceMessageDetailActivity extends Activity implements
 					+ "= ?";
 			String[] selectionArgs = new String[] { String.valueOf(remoteID) };
 			int result = getContentResolver().delete(url, where, selectionArgs);
-			Toast.makeText(getApplicationContext(), "本次共删除" + result + "条记录", Toast.LENGTH_SHORT)
-					.show();
+//			Toast.makeText(getApplicationContext(), "本次共删除" + result + "条记录", Toast.LENGTH_SHORT)
+//					.show();
 			break;
 		case R.id.specific_voiceDetail_video_call_bottom_button:
 			if (!GlobalHolder.getInstance().isServerConnected()) {

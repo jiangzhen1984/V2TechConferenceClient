@@ -217,8 +217,6 @@ public class CrowdFilesActivity extends Activity {
 						CommonCallBack.getInstance()
 								.executeUpdateCrowdFileState(vf.getId(), vm,
 										CrowdFileExeType.ADD_FILE);
-						GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, true, 
-								crowd.getmGId(), "CrowdFilesActivity onActivityResult ");
 						// 发送文件
 						service.handleCrowdFile(vf,
 								FileOperationEnum.OPERATION_START_SEND, null);
@@ -482,12 +480,6 @@ public class CrowdFilesActivity extends Activity {
 					+ "receive progress upload file state.... normal , file id is : "
 					+ file.getId() + " file name is : " + file.getName());
 			if (progress.progressType == FileTransStatusIndication.IND_TYPE_PROGRESS_END) {
-				boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, false, 
-						crowd.getmGId(), "CrowdFilesActivity IND_TYPE_PROGRESS");
-				if(!flag){
-					V2Log.e("TRANSING_FILE_SIZE", "CrowdFilesActivity IND_TYPE_PROGRESS --> "
-							+ "update transing file size failed ... ");
-				}
 				file.setProceedSize(file.getSize());
 			} else {
 				file.setProceedSize(progress.nTranedSize);
@@ -522,12 +514,12 @@ public class CrowdFilesActivity extends Activity {
 					+ file.getName()
 					+ " error code is : " + ind.errorCode);
 			
-			boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, false, 
-					crowd.getmGId(), "CrowdFilesActivity IND_TYPE_TRANS_ERR ");
-			if(!flag){
-				V2Log.e("TRANSING_FILE_SIZE", "CrowdFilesActivity handleFileRemovedEvent --> "
-						+ "update transing file size failed ... ");
-			}
+//			boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, false, 
+//					crowd.getmGId(), "CrowdFilesActivity IND_TYPE_TRANS_ERR ");
+//			if(!flag){
+//				V2Log.e("TRANSING_FILE_SIZE", "CrowdFilesActivity handleFileRemovedEvent --> "
+//						+ "update transing file size failed ... ");
+//			}
 			
 			Intent i = new Intent();
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -624,18 +616,6 @@ public class CrowdFilesActivity extends Activity {
 		for (int i = 0; i < list.size(); i++) {
 			if (list.get(i).getId().equals(file.getId())) {
 				list.remove(i);
-				
-				
-				if(file.getState() == State.DOWNLOADING ||
-						file.getState() == State.UPLOADING){
-					boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, false, 
-							crowd.getmGId(), "CrowdFilesActivity handleFileRemovedEvent ");
-					if(!flag){
-						V2Log.e("TRANSING_FILE_SIZE", "CrowdFilesActivity handleFileRemovedEvent --> "
-								+ "update transing file size failed ... ");
-					}
-				}
-				
 				CommonCallBack.getInstance().executeUpdateCrowdFileState(
 						file.getId(), null, CrowdFileExeType.DELETE_FILE);
 				if (file.getState() == VCrowdFile.State.DOWNLOADING) {
@@ -858,44 +838,6 @@ public class CrowdFilesActivity extends Activity {
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
-					for (VCrowdFile file : mUploadedFiles) {
-						
-						if(file.getState() == State.UPLOADING){
-							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, false, 
-									crowd.getmGId(), "CrowdFilesActivity CONNECT_STATE_NOTIFICATION ");
-							if(!flag){
-								V2Log.e("TRANSING_FILE_SIZE", "CrowdFilesActivity CONNECT_STATE_NOTIFICATION --> "
-										+ "update transing file size failed ... ");
-							}
-								
-						}
-						
-						if(file.getState() == State.UPLOADING ||
-								file.getState() == State.UPLOAD_FAILED){
-							file.setState(VFile.State.UPLOAD_FAILED);
-							MessageLoader.updateFileItemStateToFailed(file.getId());
-							break;
-						}
-					}
-					
-					for (VCrowdFile file : mServerExistFiles) {
-						
-						if(file.getState() == State.DOWNLOADING){
-							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, false, 
-									crowd.getmGId(), "CrowdFilesActivity CONNECT_STATE_NOTIFICATION ");
-							if(!flag){
-								V2Log.e("TRANSING_FILE_SIZE", "CrowdFilesActivity CONNECT_STATE_NOTIFICATION --> "
-										+ "update transing file size failed ... ");
-							}
-						}
-						
-						if(file.getState() == State.DOWNLOADING || 
-								file.getState() == State.DOWNLOAD_FAILED){
-							file.setState(VFile.State.DOWNLOAD_FAILED);
-							MessageLoader.updateFileItemStateToFailed(file.getId());
-							break;
-						}
-					}
 					adapter.notifyDataSetChanged();
 				}
 			}
@@ -1164,7 +1106,6 @@ public class CrowdFilesActivity extends Activity {
 				FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress.get(file.getId());
 				if(bean != null){
 					file.setProceedSize(bean.currentLoadSize);
-					V2Log.e(TAG, "lastUpdateTime : " +  bean.lastLoadTime);
 					long sec = (System.currentTimeMillis() -  bean.lastLoadTime);
 					long size = file.getProceedSize() - bean.lastLoadSize;
 					percent = (float) ((double) file.getProceedSize() / (double) file
@@ -1205,10 +1146,23 @@ public class CrowdFilesActivity extends Activity {
 							R.string.crowd_files_deleted_notification,
 							Toast.LENGTH_SHORT).show();
 				} else {
-					boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, true, 
-							crowd.getmGId(), "CrowdFilesActivity mFailIconListener");
-					if(!flag){
-						return ;
+					Integer trans = -1;
+					if(file.getState() == VFile.State.UPLOAD_FAILED){
+						trans = GlobalConfig.mTransingFiles.get(crowd.getmGId());
+						if(trans == null)
+							trans = 0;
+					}
+					else if(file.getState() == VFile.State.DOWNLOAD_FAILED){
+						trans = GlobalConfig.mDownLoadingFiles.get(crowd.getmGId());
+						if(trans == null)
+							trans = 0;
+					}
+					
+					if(trans != -1){
+						if(trans >= GlobalConfig.MAX_TRANS_FILE_SIZE){
+							Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
+							return ;
+						}
 					}
 					
 					if (file.getState() == VFile.State.DOWNLOAD_FAILED) {
@@ -1318,6 +1272,15 @@ public class CrowdFilesActivity extends Activity {
 				}
 				
 				Tag tag = (Tag) v.getTag();
+				int transType = -1;
+				if(tag.vf.getState() == State.DOWNLOADING ||
+						tag.vf.getState() == State.DOWNLOAD_PAUSE){
+					transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;
+				} else if(tag.vf.getState() == State.UPLOADING ||
+						tag.vf.getState() == State.UPLOAD_PAUSE){
+					transType = V2GlobalEnum.FILE_TRANS_SENDING;
+				}
+				GlobalHolder.getInstance().changeGlobleTransFileMember(transType , mContext, false, crowd.getmGId(), "CrowdFilesActivity mDeleteButtonListener");
 				List<VCrowdFile> list = new ArrayList<VCrowdFile>();
 				list.add(tag.vf);
 				handleFileRemovedEvent(tag.vf);
@@ -1355,14 +1318,9 @@ public class CrowdFilesActivity extends Activity {
 					return;
 				}
 				boolean isUpload = false;
-				if (file.getState() == VFile.State.UNKNOWN
-						|| file.getState() == VFile.State.DOWNLOAD_FAILED) {
-					
-					boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, true, 
-							crowd.getmGId(), "CrowdFilesActivity mFileButtonListener");
-					if(!flag){
-						return ;
-					}
+				if (file.getState() == VFile.State.UNKNOWN) {
+					GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_DOWNLOADING, 
+							mContext, true, crowd.getmGId(), "CrowdFilesActivity mButtonListener");
 					
 					file.setState(VFile.State.DOWNLOADING);
 					file.setStartTime(new Date(GlobalConfig
@@ -1414,8 +1372,7 @@ public class CrowdFilesActivity extends Activity {
 				}
 				adapter.notifyDataSetChanged();
 
-				VMessageFileItem fileItem = MessageLoader.queryFileItemByID(
-						V2GlobalEnum.GROUP_TYPE_CROWD, file.getId());
+				VMessageFileItem fileItem = MessageLoader.queryFileItemByID(file.getId());
 				// save state to database
 				if (fileItem != null) {
 					fileItem.setState(file.getState().intValue());

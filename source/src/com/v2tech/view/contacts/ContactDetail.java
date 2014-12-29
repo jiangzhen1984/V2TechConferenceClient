@@ -335,6 +335,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			Message m = Message.obtain(lh, UPDATE_USER_INFO);
 			lh.sendMessage(m);
 		}
+		
+		Intent intent = new Intent();
+		setResult(1000, intent);
 		super.onBackPressed();
 	}
 

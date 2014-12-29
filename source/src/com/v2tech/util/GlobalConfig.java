@@ -38,7 +38,7 @@ public class GlobalConfig {
 	
 	public static String LOGIN_USER_ID = "";
 	
-	public static final int MAX_TRANS_FILE_SIZE = 4;
+	public static final int MAX_TRANS_FILE_SIZE = 5;
 	
 	/**
 	 * Get from Server , For distinguish different server
@@ -48,6 +48,8 @@ public class GlobalConfig {
 	public static HashMap<String, String> allChinese = new HashMap<String, String>();
 	
 	public static Map<Long, Integer> mTransingFiles = new HashMap<Long, Integer>();
+	
+	public static Map<Long, Integer> mDownLoadingFiles = new HashMap<Long, Integer>();
 	
 	public static List<Long> NeedToUpdateUser = new ArrayList<Long>();
 	

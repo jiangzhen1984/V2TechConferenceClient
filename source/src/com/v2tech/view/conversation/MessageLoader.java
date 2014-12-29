@@ -27,6 +27,7 @@ import com.v2tech.util.CrashHandler;
 import com.v2tech.util.XmlParser;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VMessage;
@@ -262,7 +263,7 @@ public class MessageLoader {
 		List<VMessage> imageItems = new ArrayList<VMessage>();
 		try {
 			Uri uri = ContentDescriptor.HistoriesGraphic.CONTENT_URI;
-			String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_SAVEDATE
+			String sortOrder = ContentDescriptor.HistoriesGraphic.Cols.ID
 					+ " desc";
 			String[] projection = ContentDescriptor.HistoriesGraphic.Cols.ALL_CLOS;
 			String selection = "(("
@@ -783,7 +784,7 @@ public class MessageLoader {
 	 * @param uuid
 	 * @return
 	 */
-	public static VMessageFileItem queryFileItemByID(int groupType, String uuid) {
+	public static VMessageFileItem queryFileItemByID(String uuid) {
 
 		if (TextUtils.isEmpty(uuid))
 			throw new RuntimeException(
@@ -820,10 +821,20 @@ public class MessageLoader {
 				int fileState = cursor
 						.getInt(cursor
 								.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE));
-				// long fileSize =
-				// cursor.getLong(cursor.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
 
+				int groupType;
 				VMessage vm;
+				if(remoteUserID != - 1){
+					Group tempGroup = GlobalHolder.getInstance().getGroupById(remoteUserID);
+					if(tempGroup == null)
+						groupType = V2GlobalEnum.GROUP_TYPE_USER;
+					else
+						groupType = V2GlobalEnum.GROUP_TYPE_CROWD;
+				} else {
+					V2Log.e(TAG, "queryFileItemByID -- > Get remoteID is -1 , uuid is : " + uuid);
+					return null;
+				}
+				
 				if (groupType == V2GlobalEnum.GROUP_TYPE_USER)
 					vm = new VMessage(groupType, -1, GlobalHolder.getInstance()
 							.getUser(fromUserID), GlobalHolder.getInstance()
@@ -883,59 +894,6 @@ public class MessageLoader {
 		} finally {
 			if (cursor != null)
 				cursor.close();
-		}
-	}
-
-	/**
-	 * 根据传入VMessage消息对象，查询其数据库的ID值
-	 * 
-	 * @param context
-	 * @param vm
-	 * @return
-	 */
-	public static Long queryVMessageID(Context context, VMessage vm) {
-
-		if (vm == null)
-			return -1l;
-
-		if (!isTableExist(
-				context,
-				vm.getMsgCode(),
-				vm.getGroupId(),
-				vm.getFromUser().getmUserId(),
-				vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER ? MessageLoader.CONTACT_TYPE
-						: MessageLoader.CROWD_TYPE))
-			return null;
-
-		DataBaseContext mContext = new DataBaseContext(context);
-		Cursor cursor = null;
-		try {
-			String selection = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
-					+ "=?";
-			String[] args = new String[] { vm.getUUID() };
-			cursor = mContext.getContentResolver().query(
-					ContentDescriptor.HistoriesMessage.CONTENT_URI,
-					new String[] { "_id" }, selection, args, null);
-			if (cursor == null) {
-				return -1l;
-			}
-
-			if (cursor.getCount() < 0) {
-				return -1l;
-			}
-
-			if (cursor.moveToFirst()) {
-				return cursor.getLong(cursor.getColumnIndex("_id"));
-			}
-			return -1l;
-		} catch (Exception e) {
-			e.printStackTrace();
-			CrashHandler.getInstance().saveCrashInfo2File(e);
-			return -1l;
-		} finally {
-			if (cursor != null) {
-				cursor.close();
-			}
 		}
 	}
 
@@ -1372,8 +1330,7 @@ public class MessageLoader {
 		if (TextUtils.isEmpty(fileID))
 			return -1;
 
-		VMessageFileItem fileItem = MessageLoader.queryFileItemByID(
-				V2GlobalEnum.GROUP_TYPE_USER, fileID);
+		VMessageFileItem fileItem = MessageLoader.queryFileItemByID(fileID);
 		if (fileItem == null) {
 			V2Log.e(TAG,
 					"updateFileItemStateToFailed --> get VMessageFileItem Object failed...fileID is "

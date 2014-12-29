@@ -86,6 +86,7 @@ import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
+import com.v2tech.vo.VFile.State;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -109,7 +110,6 @@ import com.v2tech.vo.VideoBean;
  */
 public class JNIService extends Service implements
 		CommonUpdateConversationStateInterface {
-	private static final String TAG_FILE = "JNIService";
 	private static final String TAG = "JNIService";
 	public static final int BINARY_TYPE_AUDIO = 3;
 	public static final int BINARY_TYPE_IMAGE = 2;
@@ -118,6 +118,7 @@ public class JNIService extends Service implements
 	public static final String JNI_ACTIVITY_CATEGROY = "com.v2tech";
 	public static final String JNI_BROADCAST_CONNECT_STATE_NOTIFICATION = "com.v2tech.jni.broadcast.connect_state_notification";
 	public static final String JNI_BROADCAST_USER_STATUS_NOTIFICATION = "com.v2tech.jni.broadcast.user_stauts_notification";
+	public static final String JNI_BROADCAST_FILE_STATUS_ERROR_NOTIFICATION = "com.v2tech.jni.broadcast.file_stauts_error_notification";
 
 	/**
 	 * Notify user avatar changed, notice please do not listen this broadcast if
@@ -179,7 +180,7 @@ public class JNIService extends Service implements
 	private List<GroupUserInfoOrig> delayUserBroadcast = new ArrayList<GroupUserInfoOrig>();
 	private boolean noNeedBroadcast;
 	private boolean isAcceptApply;
-
+	
 	private JNICallbackHandler mCallbackHandler;
 
 	// ////////////////////////////////////////
@@ -306,10 +307,11 @@ public class JNIService extends Service implements
 
 		if (code != NetworkStateCode.CONNECTED) {
 			((MainApplication) getApplication()).netWordIsConnected = false;
+			updateFileState();
 		} else {
 			((MainApplication) getApplication()).netWordIsConnected = true;
 		}
-
+		
 		Intent i = new Intent();
 		i.setAction(JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		i.addCategory(JNI_BROADCAST_CATEGROY);
@@ -528,18 +530,12 @@ public class JNIService extends Service implements
 					MessageBuilder.saveBinaryVMessage(mContext, vm);
 					MessageBuilder.saveFileVMessage(mContext, vm);
 					MessageBuilder.saveMessage(mContext, vm);
-					Long id = MessageLoader.queryVMessageID(mContext, vm);
-					if (id == null) {
-						V2Log.e("the message :" + vm.getUUID()
-								+ " save in databases is failed ....");
-						return;
-					}
-					vm.setId(id);
+					
 					if (vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
-						sendNotification();
+//						sendNotification();
 					}
 
 					Intent ii = new Intent(action);
@@ -552,6 +548,8 @@ public class JNIService extends Service implements
 					// Send ordered broadcast, make sure conversationview
 					// receive message first
 					mContext.sendOrderedBroadcast(ii, null);
+				} else {
+					V2Log.e(TAG, "Receiver new message failed ... pleace check parse xml !");
 				}
 				break;
 			case JNI_RECEIVED_VIDEO_INVITION:
@@ -1550,7 +1548,7 @@ public class JNIService extends Service implements
 							ind.getSzSessionID(), ind.getFromUserId());
 					// mark voice state to connected
 					GlobalHolder.getInstance().setVoiceConnectedState(true);
-					V2Log.d(TAG_FILE, "自动接受了对方音频邀请因为在视频通话中并且是同一个人");
+					V2Log.d(TAG, "自动接受了对方音频邀请因为在视频通话中并且是同一个人");
 				} else {
 					V2Log.i("Ignore audio call for others: "
 							+ ind.getFromUserId());
@@ -2051,29 +2049,47 @@ public class JNIService extends Service implements
 		@Override
 		public void OnFileTransBegin(String szFileID, int nTransType,
 				long nFileSize) {
+			if(!szFileID.contains("AVATAR")){
+				VMessageFileItem fileItem = MessageLoader.queryFileItemByID(szFileID);
+				if(fileItem == null){
+					V2Log.e(TAG, "File Trans Begin Record Failed! ID is : " + szFileID);
+					return ;
+				}
+				
+				int transType = -1;
+				if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING){
+					transType = V2GlobalEnum.FILE_TRANS_SENDING;
+				}
+				else if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING){
+					transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;;
+				}
+				updateFileState(transType , fileItem, "JNIService OnFileTransBegin", true);
+			}
 		}
 		
 		@Override
 		public void OnFileTransProgress(String szFileID, long nBytesTransed,
 				int nTransType) {
-			super.OnFileTransProgress(szFileID, nBytesTransed, nTransType);
-			FileDownLoadBean lastBean = mark.get(szFileID);
-			if(lastBean == null){
-				lastBean = new FileDownLoadBean();
-				lastBean.lastLoadTime = System.currentTimeMillis();
-				lastBean.lastLoadSize = 0;
-				mark.put(szFileID, lastBean);
-			} else {
-				FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress.get(szFileID);
-				if(bean == null)
-					bean = new FileDownLoadBean();
-				
-				bean.lastLoadTime = lastBean.lastLoadTime;
-				bean.lastLoadSize = lastBean.lastLoadSize;
-				long time = System.currentTimeMillis();
-				bean.currentLoadTime = time;
-				bean.currentLoadSize = nBytesTransed;
-				GlobalHolder.getInstance().globleFileProgress.put(szFileID, bean);
+			if(!szFileID.contains("AVATAR")){
+				super.OnFileTransProgress(szFileID, nBytesTransed, nTransType);
+				FileDownLoadBean lastBean = mark.get(szFileID);
+				if(lastBean == null){
+					lastBean = new FileDownLoadBean();
+					lastBean.lastLoadTime = System.currentTimeMillis();
+					lastBean.lastLoadSize = 0;
+					mark.put(szFileID, lastBean);
+				} else {
+					FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress.get(szFileID);
+					if(bean == null)
+						bean = new FileDownLoadBean();
+					
+					bean.lastLoadTime = lastBean.lastLoadTime;
+					bean.lastLoadSize = lastBean.lastLoadSize;
+					long time = System.currentTimeMillis();
+					bean.currentLoadTime = time;
+					bean.currentLoadSize = nBytesTransed;
+					GlobalHolder.getInstance().globleFileProgress.put(szFileID, bean);
+				}
 			}
 		}
 
@@ -2100,54 +2116,84 @@ public class JNIService extends Service implements
 		@Override
 		public void OnFileTransEnd(String szFileID, String szFileName,
 				long nFileSize, int nTransType) {
-			mark.remove(szFileID);
-			GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
-			VMessage vm = new VMessage(0, 0, null, null);
-			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
-			item.setUuid(szFileID);
-			if (nTransType == FileDownLoadErrorIndication.TYPE_SEND)
-				item.setState(VMessageAbstractItem.STATE_FILE_SENT);
-			else
-				item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
-			int updates = MessageBuilder.updateVMessageItem(mContext, item);
-			V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
-			vm = null;
-			item = null;
+			if(!szFileID.contains("AVATAR")){
+				mark.remove(szFileID);
+				GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
+				VMessageFileItem fileItem = MessageLoader.queryFileItemByID(szFileID);
+				if(fileItem == null){
+					V2Log.e(TAG, "File Trans End Record Failed! ID is : " + szFileID);
+					return ;
+				}
+				
+				int transType;
+				if (nTransType == FileDownLoadErrorIndication.TYPE_SEND){
+					fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT);
+					transType = V2GlobalEnum.FILE_TRANS_SENDING;
+				}
+				else{
+					fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
+					transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;
+				}
+				updateFileState(transType , fileItem , "JNIService OnFileTransEnd" , false);
+				int updates = MessageBuilder.updateVMessageItem(mContext, fileItem);
+				V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+				fileItem = null;
+			}
 		}
 
 		@Override
 		public void OnFileTransError(String szFileID, int errorCode,
 				int nTransType) {
-			mark.remove(szFileID);
-			GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
-			VMessageFileItem fileItem = MessageLoader.queryFileItemByID(V2GlobalEnum.GROUP_TYPE_USER, szFileID);
-			if(fileItem != null){
-				if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING)
-					fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-				else if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING)
-					fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
-				int updates = MessageBuilder.updateVMessageItem(mContext, fileItem);
-				V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+			if(!szFileID.contains("AVATAR")){
+				mark.remove(szFileID);
+				GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
+				VMessageFileItem fileItem = MessageLoader.queryFileItemByID(szFileID);
+				if(fileItem != null){
+					int transType = -1;
+					
+					if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING ||
+							fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING){
+						transType = V2GlobalEnum.FILE_TRANS_SENDING;
+						fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+					}
+					else if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING ||
+							fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING){
+						fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+						transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;;
+					}
+					int updates = MessageBuilder.updateVMessageItem(mContext, fileItem);
+					V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+					updateFileState(transType , fileItem , "JNIService OnFileTransError" , false);
+					
+					Intent intent = new Intent();
+					intent.setAction(JNI_BROADCAST_FILE_STATUS_ERROR_NOTIFICATION);
+					intent.addCategory(JNI_BROADCAST_CATEGROY);
+					intent.putExtra("fileID", szFileID);
+					intent.putExtra("transType", transType);
+					sendBroadcast(intent);
+				}
+				else{
+					V2Log.e(TAG, "OnFileTransError updates failed , id : " + szFileID);
+				}
+				fileItem = null;
 			}
-			else{
-				V2Log.e(TAG, "OnFileTransEnd updates failed , id : " + szFileID);
-			}
-			fileItem = null;
 		}
 
-		@Override
-		public void OnFileTransCancel(String szFileID) {
-			mark.remove(szFileID);
-			GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
-			VMessage vm = new VMessage(0, 0, null, null);
-			VMessageFileItem item = new VMessageFileItem(vm, null, 0);
-			item.setUuid(szFileID);
-			item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-			int updates = MessageBuilder.updateVMessageItem(mContext, item);
-			V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
-			vm = null;
-			item = null;
-		}
+//		@Override
+//		public void OnFileTransCancel(String szFileID) {
+//			if(!szFileID.contains("AVATAR")){
+//				mark.remove(szFileID);
+//				GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
+//				VMessage vm = new VMessage(0, 0, null, null);
+//				VMessageFileItem item = new VMessageFileItem(vm, null, 0);
+//				item.setUuid(szFileID);
+//				item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+//				int updates = MessageBuilder.updateVMessageItem(mContext, item);
+//				V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+//				vm = null;
+//				item = null;
+//			}
+//		}
 	}
 
 	@Override
@@ -2213,5 +2259,45 @@ public class JNIService extends Service implements
 			sendBroadcast(intent);
 		}
 	}
+	
+	public void updateFileState(int transType , VMessageFileItem fileItem , String tag , boolean isAdd){
+		long remoteID;
+		VMessage vm = fileItem.getVm();
+		if(vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER)
+			remoteID = vm.getToUser().getmUserId();
+		else
+			remoteID = vm.getGroupId();
+		GlobalHolder.getInstance().changeGlobleTransFileMember(transType , mContext, isAdd, remoteID, tag);
+	}
 
+	
+	/**
+	 * Detecting all VMessageFileItem Object that state is sending or
+	 * downloading in the database , and change their status to failed..
+	 */
+	public void updateFileState() {
+		List<VMessageFileItem> loadFileMessages = MessageLoader
+				.loadFileMessages(-1, -1);
+		if (loadFileMessages != null) {
+			for (VMessageFileItem fileItem : loadFileMessages) {
+				int transType = -1;
+				V2Log.d(TAG, "Iterator VMessageFileItem -- name is : " + fileItem.getFileName() + " state : " + State.fromInt(fileItem.getState()));
+				if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
+						|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING){
+					fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+					transType = V2GlobalEnum.FILE_TRANS_SENDING;
+				}
+				else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING 
+						|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING){
+					fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+					transType = V2GlobalEnum.FILE_TRANS_SENDING;
+				}
+				GlobalHolder.getInstance().changeGlobleTransFileMember(transType , mContext, false, 
+						-1l, "JNIService CONNECT_STATE_NOTIFICATION ");
+				MessageLoader.updateFileItemState(
+						mContext, fileItem);
+			}
+		} else
+			V2Log.e(TAG, "load all files failed... get null");
+	}
 }
