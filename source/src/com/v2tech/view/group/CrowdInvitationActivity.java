@@ -227,7 +227,7 @@ public class CrowdInvitationActivity extends Activity {
 				Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_VERIFICATION_MESSAGE,
-							Conversation.SPECIFIC_VERIFICATION_ID  , false , true , -1);
+							Conversation.SPECIFIC_VERIFICATION_ID  , false);
 				i.putExtra("obj", obj);
 				mContext.sendBroadcast(i);
 			}

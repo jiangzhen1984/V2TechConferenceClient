@@ -131,7 +131,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private Date bir;
 	private String fromPlace;
 	private boolean mVideoCallButtonEnable = true;
-
+	
+	private String remoteNickName;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -149,6 +150,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		if ((fromActivity != null)
 				&& (fromActivity.equals("MessageAuthenticationActivity"))) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
+			remoteNickName = this.getIntent().getStringExtra("remoteNickName");
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 			tvTitle.setText("个人资料");
@@ -480,7 +482,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
 
-		mNameTitleIV.setText(u.getName());
+		if(TextUtils.isEmpty(u.getName()) && !TextUtils.isEmpty(remoteNickName)){
+			mNameTitleIV.setText(remoteNickName);
+		} else {
+			mNameTitleIV.setText(u.getName());
+		}
 
 		// for self
 		if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {

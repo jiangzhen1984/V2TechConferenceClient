@@ -150,8 +150,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		}
 
 		initView();
-		connectView();
-		bindViewEnvent();
 
 		mContext = this;
 		u = GlobalHolder.getInstance().getUser(mUid);
@@ -182,14 +180,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				mAvatarChangedListener);
 
 		initBroadcastReceiver();
-	}
-
-	private void connectView() {
-
-	}
-
-	private void bindViewEnvent() {
-
 	}
 
 	@Override
@@ -638,7 +628,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 						Intent intent = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 						ConversationNotificationObject obj = new ConversationNotificationObject(Conversation.TYPE_VERIFICATION_MESSAGE,
-									Conversation.SPECIFIC_VERIFICATION_ID , false , true , -1);
+									Conversation.SPECIFIC_VERIFICATION_ID , false);
 						intent.putExtra("obj", obj);
 						mContext.sendBroadcast(intent);
 					}

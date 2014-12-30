@@ -232,7 +232,7 @@ public class MessageAuthenticationActivity extends Activity {
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		i.putExtra("obj", new ConversationNotificationObject(0,
-				Conversation.SPECIFIC_VERIFICATION_ID, false, true, -1));
+				Conversation.SPECIFIC_VERIFICATION_ID, false));
 		mContext.sendBroadcast(i);
 	}
 
@@ -325,6 +325,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 							Intent intent = new Intent();
 							intent.putExtra("remoteUserID", data.remoteUserID);
+							intent.putExtra("remoteNickName", data.name);
 							intent.putExtra("authenticationMessage",
 									data.authenticationMessage);
 							intent.putExtra("state", data.state);
@@ -694,7 +695,7 @@ public class MessageAuthenticationActivity extends Activity {
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		ConversationNotificationObject obj = new ConversationNotificationObject(
 				Conversation.TYPE_VERIFICATION_MESSAGE,
-				Conversation.SPECIFIC_VERIFICATION_ID, true, true, -1);
+				Conversation.SPECIFIC_VERIFICATION_ID, true);
 		i.putExtra("obj", obj);
 		mContext.sendBroadcast(i);
 	}
@@ -732,7 +733,7 @@ public class MessageAuthenticationActivity extends Activity {
 					imsg.getCrowdGroup().getmGId()) != null) {
 				i.putExtra("obj", new ConversationNotificationObject(
 						Conversation.TYPE_GROUP,
-						imsg.getCrowdGroup().getmGId(), false, true, -1));
+						imsg.getCrowdGroup().getmGId(), false));
 				i.setAction(PublicIntent.START_CONVERSACTION_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				startActivity(i);
@@ -878,7 +879,7 @@ public class MessageAuthenticationActivity extends Activity {
 						"Get FriendMAData Object is null ... please check!");
 				return arg1;
 			}
-			//设置头像
+			// 设置头像
 			boolean isGetAvatar = false;
 			if (data.dheadImage != null) {
 				if (!data.dheadImage.isRecycled())
@@ -897,13 +898,14 @@ public class MessageAuthenticationActivity extends Activity {
 				else
 					viewTag.ivHeadImage.setImageResource(R.drawable.avatar);
 			}
-			//设置姓名
-			User remoteUser = GlobalHolder.getInstance().getUser(data.remoteUserID);
-			if(remoteUser == null || TextUtils.isEmpty(remoteUser.getName()))
+			// 设置姓名
+			User remoteUser = GlobalHolder.getInstance().getUser(
+					data.remoteUserID);
+			if (remoteUser == null || TextUtils.isEmpty(remoteUser.getName()))
 				viewTag.tvName.setText(data.name);
 			else
 				viewTag.tvName.setText(remoteUser.getName());
-				
+
 			// 设置验证状态
 			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
 			// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
@@ -993,9 +995,9 @@ public class MessageAuthenticationActivity extends Activity {
 						Toast.makeText(mContext,
 								R.string.error_discussion_no_network,
 								Toast.LENGTH_SHORT).show();
-						return ;
+						return;
 					}
-					
+
 					// 库中删除
 					String sql = "delete from " + tableName + " where _id="
 							+ list.get(position).dbRecordIndex;
@@ -1313,14 +1315,14 @@ public class MessageAuthenticationActivity extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				
+
 				if (!GlobalHolder.getInstance().isServerConnected()) {
 					Toast.makeText(mContext,
 							R.string.error_discussion_no_network,
 							Toast.LENGTH_SHORT).show();
-					return ;
+					return;
 				}
-				
+
 				ListItemWrapper wrapper = (ListItemWrapper) v.getTag();
 				if (wrapper == null) {
 					return;
@@ -1592,7 +1594,7 @@ public class MessageAuthenticationActivity extends Activity {
 				if (currentRadioType != PROMPT_TYPE_FRIEND)
 					updateTabPrompt(PROMPT_TYPE_FRIEND, true);
 				// Cancel next broadcast
-//				this.abortBroadcast();
+				// this.abortBroadcast();
 			} else if (arg1.getAction().equals(
 					JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 				GroupUserObject guo = (GroupUserObject) arg1.getExtras().get(

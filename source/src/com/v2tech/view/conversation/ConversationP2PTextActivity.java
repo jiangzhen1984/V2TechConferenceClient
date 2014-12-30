@@ -309,7 +309,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		else
 			conversationID = remoteGroupID;
 		i.putExtra("obj", new ConversationNotificationObject(
-				Conversation.TYPE_CONTACT, conversationID, false, true, -1));
+				Conversation.TYPE_CONTACT, conversationID, false));
 		mContext.sendBroadcast(i);
 	}
 

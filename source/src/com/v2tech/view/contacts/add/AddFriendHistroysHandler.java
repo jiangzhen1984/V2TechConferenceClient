@@ -53,7 +53,7 @@ public class AddFriendHistroysHandler {
 		AddFriendHistorieNode node = new AddFriendHistorieNode();
 		User currentUser = GlobalHolder.getInstance().getCurrentUser();
 		node.ownerUserID = currentUser.getmUserId();
-		node.ownerAuthType = currentUser.getAuthtype();
+		node.ownerAuthType = 1;
 		node.remoteUserID = remoteUser.getmUserId();
 		node.remoteUserNickname = remoteUser.getName();
 		node.fromUserID = node.remoteUserID;
@@ -62,7 +62,7 @@ public class AddFriendHistroysHandler {
 		node.refuseReason = null;
 		node.addState = 0;
 		node.readState = 0;
-		node.saveDate = GlobalConfig.getGlobalServerTime() / 1000;
+		node.saveDate = GlobalConfig.getGlobalServerTime();
 
 		sql = "insert into "
 				+ tableName
@@ -180,7 +180,7 @@ public class AddFriendHistroysHandler {
 			node.readState = 0;
 		else
 			node.readState = 1;
-		node.saveDate = GlobalConfig.getGlobalServerTime() / 1000;
+		node.saveDate = GlobalConfig.getGlobalServerTime();
 
 		sql = "insert into "
 				+ tableName
@@ -292,7 +292,7 @@ public class AddFriendHistroysHandler {
 			node.refuseReason = null;
 			node.addState = 1;
 			node.readState = 0;
-			node.saveDate = GlobalConfig.getGlobalServerTime() / 1000;
+			node.saveDate = GlobalConfig.getGlobalServerTime();
 			sql = "insert into "
 					+ tableName
 					+ " (OwnerUserID,OwnerAuthType,RemoteUserID,RemoteUserNickname,FromUserID,ToUserID,ApplyReason,RefuseReason,AddState,SaveDate,ReadState) values("
