@@ -2157,6 +2157,20 @@ public class ConversationP2PTextActivity extends Activity implements
 			for (int i = 0; i < items.size(); i++) {
 				VMessageAbstractItem item = items.get(i);
 				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
+					if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+						GlobalHolder
+								.getInstance()
+								.changeGlobleTransFileMember(
+										V2GlobalEnum.FILE_TRANS_SENDING,
+										mContext, true, remoteChatUserID,
+										"ConversationP2PText reSendMessageClicked");
+					else
+						GlobalHolder
+								.getInstance()
+								.changeGlobleTransFileMember(
+										V2GlobalEnum.FILE_TRANS_SENDING,
+										mContext, true, remoteGroupID,
+										"ConversationP2PText reSendMessageClicked");
 					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
 					MessageLoader.updateFileItemState(mContext,
 							(VMessageFileItem) item);
@@ -2488,10 +2502,10 @@ public class ConversationP2PTextActivity extends Activity implements
 			int progressType) {
 		for (int i = 0; i < messageArray.size(); i++) {
 			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
-			if (vm.getItems().size() > 0) {
-				VMessageAbstractItem item = vm.getItems().get(0);
-				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE
-						&& item.getUuid().equals(uuid)) {
+			if (vm.getFileItems().size() > 0) {
+				VMessageFileItem item = vm.getFileItems().get(0);
+				V2Log.e("test", "item uuid : " + item.getUuid());
+				if (item.getUuid().equals(uuid)) {
 					VMessageFileItem vfi = ((VMessageFileItem) item);
 					switch (progressType) {
 					case FileTransStatusIndication.IND_TYPE_PROGRESS_END:
@@ -2509,9 +2523,6 @@ public class ConversationP2PTextActivity extends Activity implements
 					if (mv != null) {
 						mv.updateView(vfi);
 					}
-					// else {
-					// notificateConversationUpdate(true, vm.getId());
-					// }
 				}
 			}
 		}
@@ -2901,11 +2912,11 @@ public class ConversationP2PTextActivity extends Activity implements
 						VMessageFileItem vfi = vm.getFileItems().get(0);
 						if (vfi.getUuid().equals(fileID)) {
 							switch (transType) {
-							case 0:
+							case V2GlobalEnum.FILE_TRANS_SENDING:
 								vfi.setDownloadedSize(0);
 								vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 								break;
-							case 1:
+							case V2GlobalEnum.FILE_TRANS_DOWNLOADING:
 								vfi.setDownloadedSize(0);
 								vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
 								break;
@@ -3005,12 +3016,22 @@ public class ConversationP2PTextActivity extends Activity implements
 					}
 					// 群文件处理,如果是远端用户上传的文件，则强制更改状态为已上传，因为群中远端文件只有一种状态
 					if (vm.getFileItems().size() > 0
-							&& vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD
-							&& vm.getFromUser().getmUserId() != GlobalHolder
-									.getInstance().getCurrentUserId()
-							&& vm.getFileItems().get(0).getState() != VMessageAbstractItem.STATE_FILE_SENT) {
-						vm.getFileItems().get(0)
-								.setState(VMessageAbstractItem.STATE_FILE_SENT);
+							&& vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD){
+						VMessageFileItem fileItem = vm.getFileItems().get(0);
+						//如果该文件时其他人上传的，则在下载的时候，强制将聊天界面的状态改成已上传
+						if(vm.getFromUser().getmUserId() != GlobalHolder
+								.getInstance().getCurrentUserId()){
+							if(fileItem.getState() != VMessageAbstractItem.STATE_FILE_SENT){
+								fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT);
+							}
+						} else { //如果该文件是自己上传的，则在下载的时候，强制将聊天界面的状态改成已上传
+							if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED ||
+									fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING || 
+									fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED || 
+									fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING){
+								fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT);
+							}
+						}
 					}
 					messageAllID.append((int) vm.getId(), vm);
 					VMessageAdater adater = new VMessageAdater(vm);

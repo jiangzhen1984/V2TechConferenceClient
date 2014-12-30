@@ -5,10 +5,7 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.Date;
 
-import com.V2.jni.V2GlobalEnum;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.vo.Group.GroupType;
 
 public class VFile {
 
@@ -23,15 +20,15 @@ public class VFile {
 	protected int flag;
 
 	public enum State {
-		UNKNOWN(-1), REMOVED(-2), DOWNLOADED(
-				VMessageAbstractItem.STATE_FILE_DOWNLOADED), DOWNLOADING(
-				VMessageAbstractItem.STATE_FILE_DOWNLOADING), DOWNLOAD_PAUSE(
-				VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING), UPLOADED(
-				VMessageAbstractItem.STATE_FILE_SENT), UPLOADING(
-				VMessageAbstractItem.STATE_FILE_SENDING), UPLOAD_PAUSE(
-				VMessageAbstractItem.STATE_FILE_PAUSED_SENDING), DOWNLOAD_FAILED(
-				VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED), UPLOAD_FAILED(
-				VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+		UNKNOWN(-1), REMOVED(-2), 
+		DOWNLOADED(VMessageAbstractItem.STATE_FILE_DOWNLOADED), 
+		DOWNLOADING(VMessageAbstractItem.STATE_FILE_DOWNLOADING), 
+		DOWNLOAD_PAUSE(VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING), 
+		UPLOADED(VMessageAbstractItem.STATE_FILE_SENT), 
+		UPLOADING(VMessageAbstractItem.STATE_FILE_SENDING), 
+		UPLOAD_PAUSE(VMessageAbstractItem.STATE_FILE_PAUSED_SENDING), 
+		DOWNLOAD_FAILED(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED), 
+		UPLOAD_FAILED(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 
 		private int state;
 

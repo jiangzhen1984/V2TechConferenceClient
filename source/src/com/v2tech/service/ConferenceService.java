@@ -614,15 +614,10 @@ public class ConferenceService extends DeviceService {
 		@Override
 		public void OnConfMemberExitCallback(long nConfID, long nTime,
 				long nUserID) {
-
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			// For quick logged in User.
-			if (u == null) {
-				u = new User(nUserID);
-			}
 			notifyListenerWithPending(KEY_ATTENDEE_ENTER_OR_EXIT_LISTNER, 0, 0,
 					u);
-
 		}
 
 		@Override

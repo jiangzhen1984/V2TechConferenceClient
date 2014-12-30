@@ -256,15 +256,4 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			return convertView;
 		}
 	};
-	
-//	@Override
-//	public boolean dispatchTouchEvent(MotionEvent ev) {
-//		    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);  
-//		    if (imm != null) {  
-//		        imm.hideSoftInputFromWindow(v.getWindowToken(), 0);  
-//		    }  
-//		  V2techSearchContentProvider.closedDataBase();  
-//		return super.dispatchTouchEvent(ev);
-//	}
-	
 }

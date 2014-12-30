@@ -10,7 +10,6 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.User;
-import com.v2tech.vo.VMessageQualification.ReadState;
 
 public class AddFriendHistroysHandler {
 	public static final String tableName = "AddFriendHistories";

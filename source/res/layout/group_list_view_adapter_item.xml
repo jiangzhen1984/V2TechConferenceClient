@@ -180,9 +180,11 @@
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/contacts_user_view_contact_user_sign_margin_left"
             android:layout_toRightOf="@+id/contact_user_img_container"
+            android:layout_toLeftOf="@+id/user_check_view"
             android:ellipsize="end"
             android:singleLine="true"
-            android:text="TextView"
+            android:layout_marginRight="10dp"
+            android:text="textView"
             android:textColor="@color/common_item_text_color"
             android:textSize="@dimen/common_item_text_size" />
         <CheckBox

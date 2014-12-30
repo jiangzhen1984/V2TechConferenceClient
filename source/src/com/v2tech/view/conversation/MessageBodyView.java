@@ -17,6 +17,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.text.style.UnderlineSpan;
@@ -168,15 +169,6 @@ public class MessageBodyView extends LinearLayout {
 		if (!mMsg.isLocal()) {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_left);
-			// if (mMsg.getToUser() != null && mMsg.getToUser().isDirty()) {
-			// User toUser =
-			// GlobalHolder.getInstance().getUser(mMsg.getToUser().getmUserId());
-			// mMsg.setToUser(toUser);
-			// }
-			// if (mMsg.getToUser() != null
-			// && mMsg.getToUser().getAvatarBitmap() != null) {
-			// mHeadIcon.setImageBitmap(mMsg.getToUser().getAvatarBitmap());
-			// }
 			mContentContainer = (LinearLayout) rootView
 					.findViewById(R.id.messag_body_content_ly_left);
 			mArrowIV = (ImageView) rootView
@@ -192,12 +184,17 @@ public class MessageBodyView extends LinearLayout {
 			mLocalMessageContainter.setVisibility(View.VISIBLE);
 			mRemoteMessageContainter.setVisibility(View.INVISIBLE);
 			User fromUser = mMsg.getFromUser();
-
 			if (bodyType == MessageBodyType.GROUP_TYPE) {
 				name = (TextView) rootView
 						.findViewById(R.id.message_body_person_name_left);
-				if (fromUser != null)
-					name.setText(fromUser.getName());
+				if (fromUser != null){
+					boolean friend = GlobalHolder.getInstance().isFriend(fromUser);
+					if(friend && !TextUtils.isEmpty(fromUser.getNickName())){
+						name.setText(fromUser.getNickName());
+					} else {
+						name.setText(fromUser.getName());
+					}
+				}
 			}
 		} else {
 			mHeadIcon = (ImageView) rootView

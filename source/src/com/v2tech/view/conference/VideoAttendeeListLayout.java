@@ -91,7 +91,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		public void requestAttendeeViewFixedLayout(View v);
 
 		public void requestAttendeeViewFloatLayout(View v);
-
+		
 	};
 
 	public VideoAttendeeListLayout(Conference conf, Context context) {
@@ -504,35 +504,43 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
 			mList.add(new Wrapper(at, dList.get(0), FIRST_DEVICE_FLAG));
 		} else {
-			
-			// boolean isNew = false;
+			// for fast enter conference user
 			int index = 0;
-			if (mList.size() > 0 && dList != null && dList.size() > 0) {
-				for (int i = 0; i < mList.size(); i++) {
-					Wrapper wr = mList.get(i);
-					if (wr.a.getAttId() == at.getAttId()) {
-						wr.udc = dList.get(0);
-						wr.sortFlag = FIRST_DEVICE_FLAG;
+			boolean isFound = false;
+			boolean isAdd = true;;
+			for (int i = 0; i < mList.size(); i++) {
+				Attendee attendee = mList.get(i).a;
+				if(attendee.getAttId() == at.getAttId()){
+					isFound = true;
+					if(dList != null && dList.size() > 0){
+						mList.get(i).udc = dList.get(0);
+						mList.get(i).sortFlag = FIRST_DEVICE_FLAG;
 						index = i;
-						break;
 					}
+					break;
 				}
 			}
-
+			
 			if (dList != null) {
 				for (int i = 1; i < dList.size(); i++) {
 					if (index + 1 == mList.size() - 1) {
 						mList.add(new Wrapper(at, dList.get(i), i));
+						isAdd = false;
 					} else {
 						mList.add(index + 1, new Wrapper(at, dList.get(i), i));
+						isAdd = false;
 					}
 					index++;
-					// isNew = true;
+				}
+			}
+			
+			if(!isFound){
+				mAttendeeCount++;
+				if(isAdd){
+					mList.add(new Wrapper(at, null, FIRST_DEVICE_FLAG));
 				}
 			}
 
-			// if (isNew)
-			// mAttendeeCount++;
 			if ((at.isJoined() || at.isSelf())) {
 				onLinePersons++;
 			}
@@ -654,7 +662,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			Wrapper wr = mList.get(i);
 			// Remove attendee devices, leave one device item
 			if (wr.a.getAttId() == at.getAttId()) {
-				if (found || wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+				if (found || wr.a.getType() == Attendee.TYPE_MIXED_VIDEO || wr.a.isRmovedFromList) {
 					mList.remove(i--);
 					continue;
 				} else {
@@ -662,7 +670,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			}
 		}
-
+		
+		if(at.isRmovedFromList){
+			mAttendeeCount--;
+		}
+		
 		// Update on line count
 		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
 			onLinePersons--;
@@ -1175,48 +1187,36 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public int compareTo(Wrapper wr) {
-			if (this.a == null) {
+			if (this.a == null) 
 				return 1;
-			}
-			if (this.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+			
+			if (wr.a == null) 
 				return -1;
-			}
+			
+			if (this.a.getType() == Attendee.TYPE_MIXED_VIDEO) 
+				return -1;
 
-			if (wr.a == null) {
-				return -1;
-			}
-			if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+			if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) 
 				return 1;
-			}
-
-			if (this.a.isSelf()) {
+			
+			if (this.a.isSelf()) 
 				return -1;
-			} else if (wr.a.isSelf()) {
+			
+			if (wr.a.isSelf()) 
 				return 1;
-			}
-			if (this.a == null) {
-				V2Log.e(" attendee  is null ");
-				return -1;
-			} else if (wr.a == null) {
-				V2Log.e(" wr attendee  is null ");
-				return 1;
+			
+			int ret = this.a.compareTo(wr.a);
+			if (ret == 0) {
+				return this.sortFlag;
 			} else {
-
-				int ret = this.a.compareTo(wr.a);
-				if (ret == 0) {
-					return this.sortFlag;
-				} else if (ret < 0 || ret > 0) {
-					if (this.a.isJoined()) {
-						return -1;
-					} else if (wr.a.isJoined()) {
-						return 1;
-					} else {
-						return 0;
-					}
+				if (this.a.isJoined()) {
+					return -1;
+				} else if (wr.a.isJoined()) {
+					return 1;
 				} else {
 					return ret;
 				}
-			}
+			} 
 		}
 	}
 

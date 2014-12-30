@@ -320,6 +320,15 @@ public class MessageAuthenticationActivity extends Activity {
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
 						if (isFriendAuthentication) {
+							
+							if (isFriendInDeleteMode) {
+								Toast.makeText(
+										mContext,
+										R.string.crowd_message_deletion_mode_quit_required,
+										Toast.LENGTH_SHORT).show();
+								return;
+							}
+							
 							FriendMAData data = friendMADataList.get(position);
 							// 点击后跳转
 
@@ -578,27 +587,29 @@ public class MessageAuthenticationActivity extends Activity {
 	void initReceiver() {
 		friendAuthenticationBroadcastReceiver = new FriendAuthenticationBroadcastReceiver();
 		IntentFilter intentFilter = new IntentFilter();
-		intentFilter
-				.addAction(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION);
-		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+		intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
-		intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+		intentFilter
+				.addAction(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION);
 		registerReceiver(friendAuthenticationBroadcastReceiver, intentFilter);
 
+		// crowd receiver
 		mCrowdAuthenticationBroadcastReceiver = new CrowdAuthenticationBroadcastReceiver();
 		intentFilter = new IntentFilter();
 		intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
+		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+		intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		intentFilter
 				.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-		intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
-		intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		intentFilter
 				.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		intentFilter
 				.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
-		intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
 		registerReceiver(mCrowdAuthenticationBroadcastReceiver, intentFilter);
 
 	}
@@ -1461,33 +1472,39 @@ public class MessageAuthenticationActivity extends Activity {
 		public void onReceive(Context arg0, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
 					.equals(intent.getAction())) {
-				long msgId = intent.getLongExtra("msgId", 0);
-				VMessageQualification msg = VerificationProvider
-						.queryCrowdQualMessageById(msgId);
-//				boolean isAdd = true;
-//				ListItemWrapper removedWrapper = null;
-				if (msg != null && mMessageList != null) {
-
-//					for (ListItemWrapper wrapper : mMessageList) {
-//						VMessageQualification message = (VMessageQualification) wrapper.obj;
-//						if (message.getId() == msg.getId()) {
-//							removedWrapper = wrapper;
-//							isAdd = false;
-//							break;
-//						}
-//					}
-
-//					if (!isAdd)
-//						mMessageList.remove(removedWrapper);
-//					mMessageList.add(0, new ListItemWrapper(msg));
-
-					groupAdapter.notifyDataSetChanged();
+				if(currentRadioType == PROMPT_TYPE_GROUP){
+					long msgId = intent.getLongExtra("msgId", 0);
+					if(msgId == 0)
+						return ;
+					
+					VMessageQualification msg = VerificationProvider
+							.queryCrowdQualMessageById(msgId);
+					
+					if(msg == null)
+						return ;
+					
+					boolean isFound = false;
+					for (int i = 0; i < mMessageList.size(); i++) {
+						VMessageQualification temp = (VMessageQualification) mMessageList.get(i).obj;
+						if(temp.getId() == msg.getId()){
+							isFound = true;
+							break;
+						}
+						
+					}
+					
+					if(!isFound)
+						mMessageList.add(0 , new ListItemWrapper(msg));
+					
+					if(groupAdapter != null){
+						groupAdapter.notifyDataSetChanged();
+					}
+					msg.setReadState(ReadState.READ);
+					VerificationProvider.updateCrowdQualicationMessage(null , msg , false);
+				} else {
 					// 当用户在当前界面时，就不显示红点了
 					if (currentRadioType != PROMPT_TYPE_GROUP)
 						updateTabPrompt(PROMPT_TYPE_GROUP, true);
-
-					msg.setReadState(ReadState.READ);
-					VerificationProvider.updateCrowdQualicationMessage(msg);
 				}
 				// Cancel next broadcast
 				// this.abortBroadcast();
@@ -1542,7 +1559,8 @@ public class MessageAuthenticationActivity extends Activity {
 
 				if (location != -1) {
 					mMessageList.remove(location);
-					groupAdapter.notifyDataSetChanged();
+					if(groupAdapter != null)
+						groupAdapter.notifyDataSetChanged();
 					V2Log.e(TAG,
 							"Remove the crowd qualification message successful! crowd id is : "
 									+ cid);
@@ -1561,6 +1579,28 @@ public class MessageAuthenticationActivity extends Activity {
 
 				if (groupAdapter != null)
 					groupAdapter.notifyDataSetChanged();
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
+					.equals(intent.getAction())) {
+				GroupUserObject obj = (GroupUserObject) intent.getExtras().get(
+						"obj");
+
+				if (obj == null) {
+					V2Log.e(TAG,
+							"JNI_BROADCAST_GROUP_USER_REMOVED --> Update Conversation failed that the user removed ... given GroupUserObject is null");
+					return;
+				}
+				for (int i = 0 ; i < mMessageList.size() ; i++) {
+					ListItemWrapper wrapper = mMessageList.get(i);
+					VMessageQualification message = (VMessageQualification) wrapper.obj;
+					if (message.getmCrowdGroup().getmGId() == obj.getmGroupId()) {
+						if(groupAdapter != null){
+							mMessageList.remove(i);
+							groupAdapter.notifyDataSetChanged();
+							break;
+						}
+						break;
+					}
+				}
 			}
 		}
 	}

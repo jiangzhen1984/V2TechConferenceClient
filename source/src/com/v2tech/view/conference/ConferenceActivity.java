@@ -3,6 +3,7 @@ package com.v2tech.view.conference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -212,6 +213,7 @@ public class ConferenceActivity extends Activity {
 	private ChatService cs = new ChatService();
 
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
+	private List<Attendee> mFastAttendeeList = new ArrayList<Attendee>();
 
 	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
 	private String mCurrentLecturerActivateDocId = null;
@@ -230,7 +232,7 @@ public class ConferenceActivity extends Activity {
 
 	private boolean mServiceBound = false;
 	private boolean mLocalHolderIsCreate = false;
-	private boolean isMoveTaskBack;
+	private boolean isMoveTaskBack = true;
 
 	private int mVideoMaxCols = 2;
 
@@ -456,6 +458,7 @@ public class ConferenceActivity extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		filter.addAction(PublicIntent.PREPARE_FINISH_APPLICATION);
+		filter.addAction(PublicIntent.NOTIFY_CONFERENCE_ACTIVITY);
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
@@ -1553,11 +1556,19 @@ public class ConferenceActivity extends Activity {
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
 					.equals(intent.getAction())) {
-
-				Object obj = intent.getExtras().get("obj");
+				
+				GroupUserObject obj = intent.getParcelableExtra("obj");
+				if (obj == null) {
+					V2Log.e(TAG,
+							"Received the broadcast to quit the conference group , but given GroupUserObject is null!");
+					return;
+				}
+				
+				if(obj.getmType() != V2GlobalEnum.GROUP_TYPE_CONFERENCE)
+					return ;
+				
 				Message.obtain(mVideoHandler, USER_DELETE_GROUP, obj)
 						.sendToTarget();
-
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
 					.getAction())) {
 
@@ -1599,7 +1610,11 @@ public class ConferenceActivity extends Activity {
 					.getAction())) {
 				// Listen quit request to make sure close all device
 				finish();
-			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+			} else if(PublicIntent.NOTIFY_CONFERENCE_ACTIVITY.equals(intent
+					.getAction())){
+				//from VideoMsgChattingLayout 聊天打开图片
+				isMoveTaskBack = false;
+			}else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
 
 			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
 
@@ -2167,21 +2182,13 @@ public class ConferenceActivity extends Activity {
 			mSettingWindow.dismiss();
 		}
 
-		if (isMoveTaskBack)
-			isMoveTaskBack = false;
-		else
+		if(!isMoveTaskBack){
+			isMoveTaskBack = true;
+		} else {
 			moveTaskToBack(true);
+		}
 	}
-
-	public void NotChangeTaskToBack() {
-		isMoveTaskBack = true;
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		super.onRestoreInstanceState(savedInstanceState);
-	}
-
+	
 	/**
 	 * Update speaker flag according headset state
 	 * 
@@ -3304,9 +3311,8 @@ public class ConferenceActivity extends Activity {
 
 		@Override
 		public void requestShareImageDoc(View v) {
+			isMoveTaskBack = false;
 			Intent intent = new Intent(mContext, ConversationSelectImage.class);
-			// Make sure current doesn't hide to back;
-			isMoveTaskBack = true;
 			startActivityForResult(intent, SUB_ACTIVITY_CODE_SHARE_DOC);
 		}
 
@@ -3437,13 +3443,25 @@ public class ConferenceActivity extends Activity {
 				// recordUserDevice((ConfUserDeviceInfo) msg.obj);
 				break;
 			case USER_DELETE_GROUP: {
-				GroupUserObject ro = (GroupUserObject) msg.obj;
-				Attendee a = new Attendee(GlobalHolder.getInstance().getUser(
-						ro.getmUserId()));
-				mAttendeeList.remove(a);
-				if (mAttendeeContainer != null) {
-					mAttendeeContainer.removeAttendee(a);
+				GroupUserObject obj = (GroupUserObject) msg.obj;
+				Attendee removed = null;
+				Iterator<Attendee> iterator = mAttendeeList.iterator();
+				while(iterator.hasNext()){
+					Attendee attendee = iterator.next();
+					if(attendee.getAttId() == obj.getmUserId()){
+						removed = attendee;
+						break;
+					}
 				}
+				
+				if(removed != null){
+					mAttendeeList.remove(removed);
+					if (mAttendeeContainer != null) {
+						mAttendeeContainer.removeAttendee(removed);
+					}
+				}
+//				Attendee a = new Attendee(GlobalHolder.getInstance().getUser(
+//						obj.getmUserId()));
 			}
 				break;
 			case GROUP_ADD_USER:
@@ -3491,7 +3509,6 @@ public class ConferenceActivity extends Activity {
 			}
 				break;
 			case ATTENDEE_ENTER_OR_EXIT_LISTNER:
-
 				User ut = (User) (((AsyncResult) msg.obj).getResult());
 				Attendee at = findAttendee(ut.getmUserId());
 				if (msg.arg1 == 1) {
@@ -3499,6 +3516,7 @@ public class ConferenceActivity extends Activity {
 					if (at == null) {
 						at = new Attendee(ut);
 						mAttendeeList.add(at);
+						mFastAttendeeList.add(at);
 					}
 
 					if (TextUtils.isEmpty(at.getAttName())) {
@@ -3515,6 +3533,11 @@ public class ConferenceActivity extends Activity {
 					doHandleNewUserEntered(at);
 				} else {
 					V2Log.d(TAG, "Successful receiver the 参会人退出的回调");
+					if(mFastAttendeeList.contains(at)){
+						at.isRmovedFromList = true;
+						mFastAttendeeList.remove(at);
+						mAttendeeList.remove(at);
+					}
 					doHandleUserExited(at);
 				}
 				break;

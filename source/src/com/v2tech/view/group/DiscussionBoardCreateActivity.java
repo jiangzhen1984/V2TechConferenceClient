@@ -332,7 +332,7 @@ public class DiscussionBoardCreateActivity extends Activity {
 	};
 
 	private ProgressDialog mCreateWaitingDialog;
-
+	private boolean isCreating;
 	private OnClickListener confirmButtonListener = new OnClickListener() {
 
 		@Override
@@ -343,6 +343,11 @@ public class DiscussionBoardCreateActivity extends Activity {
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
+			
+			if(isCreating){
+				return ;
+			}
+			isCreating = true;
 			if (isInInvitationMode) {
 				List<User> newMembers = new ArrayList<User>(mUserList);
 				cg.inviteMember(crowd, newMembers, new MessageListener(
@@ -417,48 +422,49 @@ public class DiscussionBoardCreateActivity extends Activity {
 				updateUserToAttendList((User) msg.obj);
 				break;
 			case CREATE_GROUP_MESSAGE: {
-				mCreateWaitingDialog.dismiss();
-				JNIResponse recr = (JNIResponse) msg.obj;
-				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
-					DiscussionGroup cg = (DiscussionGroup) recr.callerObject;
-					long id = ((CreateDiscussionBoardResponse) recr)
-							.getGroupId();
-					cg.setGId(id);
-					cg.setCreateDate(new Date());
-
-					// add group to global cache
-					GlobalHolder.getInstance().addGroupToList(
-							GroupType.DISCUSSION.intValue(), cg);
-					// Add self to list
-					cg.addUserToGroup(GlobalHolder.getInstance()
-							.getCurrentUser());
-					cg.addUserToGroup(mUserList);
-
-					
-					Intent i = new Intent();
-					i.setAction(JNIService.JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION);
-					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-					i.putExtra("gid", cg.getmGId());
-					sendBroadcast(i);
-					
-					
-					Intent crowdIntent = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
-					crowdIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-					crowdIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-					crowdIntent.putExtra("obj", new ConversationNotificationObject(Conversation.TYPE_DISCUSSION, id));
-					startActivity(crowdIntent);
-					
-
-					// finish current activity
-					finish();
-				} else if (recr.getResult() == JNIResponse.Result.TIME_OUT) {
-					cg.setmPendingCrowdId(0);
-					V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create discussion group failed.. time out!!");
-				} else {
-					V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create discussion group failed.. ERROR CODE IS : "
-							+ recr.getResult().name());
+					isCreating = false;
+					mCreateWaitingDialog.dismiss();
+					JNIResponse recr = (JNIResponse) msg.obj;
+					if (recr.getResult() == JNIResponse.Result.SUCCESS) {
+						DiscussionGroup cg = (DiscussionGroup) recr.callerObject;
+						long id = ((CreateDiscussionBoardResponse) recr)
+								.getGroupId();
+						cg.setGId(id);
+						cg.setCreateDate(new Date());
+	
+						// add group to global cache
+						GlobalHolder.getInstance().addGroupToList(
+								GroupType.DISCUSSION.intValue(), cg);
+						// Add self to list
+						cg.addUserToGroup(GlobalHolder.getInstance()
+								.getCurrentUser());
+						cg.addUserToGroup(mUserList);
+	
+						
+						Intent i = new Intent();
+						i.setAction(JNIService.JNI_BROADCAST_NEW_DISCUSSION_NOTIFICATION);
+						i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+						i.putExtra("gid", cg.getmGId());
+						sendBroadcast(i);
+						
+						
+						Intent crowdIntent = new Intent(PublicIntent.START_CONVERSACTION_ACTIVITY);
+						crowdIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+						crowdIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+						crowdIntent.putExtra("obj", new ConversationNotificationObject(Conversation.TYPE_DISCUSSION, id));
+						startActivity(crowdIntent);
+						
+	
+						// finish current activity
+						finish();
+					} else if (recr.getResult() == JNIResponse.Result.TIME_OUT) {
+						cg.setmPendingCrowdId(0);
+						V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create discussion group failed.. time out!!");
+					} else {
+						V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create discussion group failed.. ERROR CODE IS : "
+								+ recr.getResult().name());
+					}
 				}
-			}
 				break;
 			case UPDATE_CROWD_RESPONSE:
 				crowd.addUserToGroup(mUserList);

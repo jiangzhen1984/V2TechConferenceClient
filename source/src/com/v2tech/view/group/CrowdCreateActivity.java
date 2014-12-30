@@ -522,7 +522,6 @@ public class CrowdCreateActivity extends Activity {
 		
 		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(
 				crowd, user);
-		crowdQuion.setmTimestamp(new Date());
 		Uri uri = VerificationProvider.saveQualicationMessage(crowdQuion , true);
 		if (uri != null){
 			V2Log.d("CrowdCreateActivity  --> Save VMessageQualification Cache Object Successfully , "

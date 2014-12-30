@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.v2tech.R;
 import com.v2tech.service.ContactsService;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.contacts.ContactDetail;
 import com.v2tech.view.message.MessageAuthenticationActivity;
 import com.v2tech.vo.User;
 
@@ -114,6 +115,7 @@ public class AuthenticationActivity extends Activity {
 		tvLeft.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
+				setResult(ContactDetail.START_AUTHENTICATION_ACTIVITY);
 				onBackPressed();
 			}
 		});
@@ -132,8 +134,9 @@ public class AuthenticationActivity extends Activity {
 					// 实现越级跳
 					Intent i = new Intent(AuthenticationActivity.this,
 							MessageAuthenticationActivity.class);
+					i.putExtra("isReturnAuth", true);
 					i.putExtra("remoteUserID", mUid);
-					setResult(0, i);
+					setResult(ContactDetail.START_AUTHENTICATION_ACTIVITY, i);
 					onBackPressed();
 				}
 			});

@@ -26,7 +26,6 @@ public class PublicIntent {
 
 	public static final String START_VIDEO_IMAGE_GALLERY = "com.v2tech.image_gallery";
 
-
 	public static final String UPDATE_CONVERSATION = "com.v2tech.update_conversation";
 	
 	
@@ -48,6 +47,7 @@ public class PublicIntent {
 
 	public static final String START_GROUP_CREATE_ACTIVITY = "com.v2tech.start_group_create_activity";
 	
+	public static final String NOTIFY_CONFERENCE_ACTIVITY = "com.v2tech.notify_conference_activity";
 	
 	//======================================================================================
 	//                            for crowd

@@ -220,6 +220,8 @@ public class ConferenceCreateActivity extends Activity {
 		if (u == null) {
 			return;
 		}
+		
+		
 		if (op == OP_DEL_ALL_GROUP_USER) {
 			removeAttendee(u);
 		} else if (op == OP_ADD_ALL_GROUP_USER) {

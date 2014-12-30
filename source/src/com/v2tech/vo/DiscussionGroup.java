@@ -3,6 +3,10 @@ package com.v2tech.vo;
 import java.util.Date;
 import java.util.List;
 
+import javax.microedition.khronos.opengles.GL;
+
+import com.v2tech.service.GlobalHolder;
+
 import android.text.TextUtils;
 
 public class DiscussionGroup extends Group {
@@ -23,6 +27,8 @@ public class DiscussionGroup extends Group {
 		if (!TextUtils.isEmpty(mName)) {
 			return mName;
 		}
+		
+		boolean isAddOwner = true;
 		StringBuilder sb = new StringBuilder();
 		List<User> users = getUsers();
 		if(mOwnerUser != null && isCreatorExist){
@@ -30,15 +36,27 @@ public class DiscussionGroup extends Group {
 			for (User user : users) {
 				if (user.getmUserId() == this.mOwnerUser.getmUserId())
 					continue;
+				
+				if(user.getmUserId() == GlobalHolder.getInstance().getCurrentUserId())
+					isAddOwner = false;
 
 				sb.append(" ").append(user.getName());
 				if (sb.toString().length() >= 30)
 					break;
 			}
+			
+			if(isAddOwner){
+				this.addUserToGroup(GlobalHolder.getInstance().getCurrentUser());
+				sb.append(" ").append(GlobalHolder.getInstance().getCurrentUser().getName());
+			}
 		}
 		else{
 			if (users != null) {
 				for (int i = 0 ; i < users.size() ; i++) {
+					
+					if(users.get(i).getmUserId() == GlobalHolder.getInstance().getCurrentUserId())
+						isAddOwner = false;
+					
 					if(i == 0)
 						sb.append(users.get(i).getName());	
 					else
@@ -46,6 +64,11 @@ public class DiscussionGroup extends Group {
 					if (sb.toString().length() >= 30)
 						break;
 				}
+			}
+			
+			if(isAddOwner){
+				this.addUserToGroup(GlobalHolder.getInstance().getCurrentUser());
+				sb.append(" ").append(GlobalHolder.getInstance().getCurrentUser().getName());
 			}
 		}
 		return sb.toString();

@@ -30,6 +30,7 @@ public class Attendee implements Comparable<Attendee>{
 	protected boolean isJoined;
 	private boolean isSpeaking;
 	private int lectureState=LECTURE_STATE_NOT;
+	public boolean isRmovedFromList; //快速入会用户 ，退出直接从列表删除
 	
 	protected Attendee() {
 		
@@ -234,12 +235,9 @@ public class Attendee implements Comparable<Attendee>{
 		
 		if(this.user.getmUserId() == attendee.user.getmUserId())
 			return 0;
-		return 1;
-//		return this.user.getmUserId() == attendee.user.getmUserId() ? 0: 1;
+		else
+			return 1;
 	}
-	
-	
-	
 	
 
 }

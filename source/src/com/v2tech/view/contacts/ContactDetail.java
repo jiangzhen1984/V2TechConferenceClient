@@ -63,7 +63,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private static final int UPDATE_USER_INFO = 2;
 	private static final int UPDATE_USER_INFO_DONE = 3;
 	private static final int FILE_SELECT_CODE = 100;
-	protected static final int START_AUTHENTICATION_ACTIVITY = 0;
+	public static final int START_AUTHENTICATION_ACTIVITY = 0;
 
 	private TextView mReturnButtonTV;
 	private TextView mNameTitleIV;
@@ -414,10 +414,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			}
 			break;
 		case START_AUTHENTICATION_ACTIVITY:
-			Intent i = new Intent(mContext, MessageAuthenticationActivity.class);
-			i.putExtra("remoteUserID", mUid);
-			setResult(5, i);
-			finish();
+			if(data != null){
+				boolean isReturnAuth = data.getBooleanExtra("isReturnAuth", false);
+				if(isReturnAuth){
+					Intent i = new Intent(mContext, MessageAuthenticationActivity.class);
+					i.putExtra("remoteUserID", mUid);
+					setResult(5, i);
+					finish();
+				}
+			}
 			break;
 		}
 		super.onActivityResult(requestCode, resultCode, data);

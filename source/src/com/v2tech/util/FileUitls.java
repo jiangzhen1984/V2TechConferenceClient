@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.vo.VMessageFileItem.FileType;
 
@@ -28,7 +27,6 @@ public class FileUitls {
 			fileType = FileType.UNKNOW;
 		else{
 			String postfixName = fileName.substring(fileName.indexOf("."));
-			V2Log.e("FileUtils --> get postfix name is : " + postfixName);
 			fileType  = getFileType(postfixName);
 		}
 		return adapterFileIcon(fileType);
@@ -118,7 +116,7 @@ public class FileUitls {
 	public static void openFile(File file) {
 
 		// 4、通过调用OpenFileUitls类返回的Intent，打开相应的文件
-		if (file != null && file.isFile()) {
+		if (file != null) {
 			String filePath = file.getAbsolutePath();
 			int dot = filePath.lastIndexOf(".");
 			String postfixName = filePath.substring(dot);

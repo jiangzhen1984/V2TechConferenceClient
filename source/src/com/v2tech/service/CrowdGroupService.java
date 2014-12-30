@@ -10,6 +10,7 @@ import com.V2.jni.FileRequest;
 import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
+import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
@@ -803,6 +804,11 @@ public class CrowdGroupService extends AbstractHandler {
                 V2Log.e("CrowdGroupService OnAddGroupFile--> add a new group file failed , FileJNIObject List is null");
                 return ;
             }
+            
+            if(group.type == V2GlobalEnum.GROUP_TYPE_CONFERENCE){
+            	V2Log.e("CrowdGroupService OnAddGroupFile--> add a new group file failed , Group Type is Conference!");
+            	return ;
+            }
 
 			// Use fetch group file object as result
 			RequestFetchGroupFilesResponse jniRes = new RequestFetchGroupFilesResponse(
@@ -842,15 +848,6 @@ public class CrowdGroupService extends AbstractHandler {
 							FileTransStatusIndication.IND_TYPE_PROGRESS_END));
 
 		}
-
-//		@Override
-//		public void OnFileTransError(String szFileID, int errorCode,
-//				int nTransType) {
-//
-//			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-//					new FileTransErrorIndication(szFileID, errorCode,
-//							nTransType));
-//		}
 
 		@Override
 		public void OnFileDeleted(FileJNIObject file) {

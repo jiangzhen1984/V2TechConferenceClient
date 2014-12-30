@@ -10,6 +10,7 @@ import java.util.Set;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Rect;
 import android.support.v4.util.LongSparseArray;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
@@ -246,7 +247,22 @@ public class GroupListView extends ListView {
 		if (u == null) {
 			throw new NullPointerException("user is null");
 		}
+		
 		updateCheckItemWithoutNotification(u, flag);
+		adapter.notifyDataSetChanged();
+	}
+	
+	/**
+	 * Update all group's checked status of item
+	 * 
+	 * @param group
+	 * @param flag
+	 */
+	public void updateCheckItem(Group group, boolean flag) {
+		if (group == null) {
+			throw new NullPointerException("Group is null");
+		}
+		updateCheckItemWithoutNotification(group, flag);
 		adapter.notifyDataSetChanged();
 	}
 
@@ -296,20 +312,6 @@ public class GroupListView extends ListView {
 			else
 				item.setChecked(false);
 		}
-		adapter.notifyDataSetChanged();
-	}
-
-	/**
-	 * Update all group's checked status of item
-	 * 
-	 * @param group
-	 * @param flag
-	 */
-	public void updateCheckItem(Group group, boolean flag) {
-		if (group == null) {
-			throw new NullPointerException("Group is null");
-		}
-		updateCheckItemWithoutNotification(group, flag);
 		adapter.notifyDataSetChanged();
 	}
 
@@ -545,11 +547,20 @@ public class GroupListView extends ListView {
 	 * @param flag
 	 */
 	private void updateCheckItemWithoutNotification(User u, boolean flag) {
-		Set<ItemData> list = mUserItemListMap.get(u.getmUserId());
-		if (list == null || list.size() <= 0) {
+		Set<ItemData> itemDataSet = mUserItemListMap.get(u.getmUserId());
+		if (itemDataSet == null || itemDataSet.size() <= 0) {
+			if(itemDataSet == null)
+				itemDataSet = new HashSet<GroupListView.ItemData>();
+			Set<Group> belongsGroup = u.getBelongsGroup();
+			Iterator<Group> iterator = belongsGroup.iterator();
+			while (iterator.hasNext()) {
+				Group tempGroup = iterator.next();
+				ItemData item = getItem(tempGroup, u);
+				itemDataSet.add(item);
+			}
 			return;
 		}
-		for (ItemData item : list) {
+		for (ItemData item : itemDataSet) {
 			item.setChecked(flag);
 		}
 	}
@@ -592,9 +603,9 @@ public class GroupListView extends ListView {
 			int gend, User user, User.Status newSt) {
 		int pos = -1;
 		int start = gstart;
-		int end = gend - 1;
+		int end = gend;
 
-		while (start < end && mFilterList.size() > start) {
+		while (start < end && end < mFilterList.size() && mFilterList.size() > start) {
 			ItemData item = mFilterList.get(start);
 			ItemData endItem = mFilterList.get(end);
 
@@ -799,13 +810,10 @@ public class GroupListView extends ListView {
 			return start;
 		} else if (start == end) {
 			return end + 1;
-		} else if (end - start == 1) {
-			return end;
-		}
+		} 
 
 		while (start <= end) {
 			pos = start;
-			// if (start + 1 == mFilterList.size())
 			if (start == mFilterList.size())
 				break;
 			ItemData item = mFilterList.get(start++);
@@ -1560,16 +1568,12 @@ public class GroupListView extends ListView {
 
 		private void updateUserItem() {
 			User u = ((User) ((UserItemData) mItem).getObject());
-
-			User user = GlobalHolder.getInstance().getUser(u.getmUserId());
-			if (user != null) {
-				u = user;
-				if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
-					if (TextUtils.isEmpty(u.getName()))
-						throw new RuntimeException(
-								"所有用户信息已获取完毕，但该用户空名：id is --> "
-										+ u.getmUserId());
-				}
+			u = GlobalHolder.getInstance().getUser(u.getmUserId());
+			if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
+				if (TextUtils.isEmpty(u.getName()))
+					throw new RuntimeException(
+							"所有用户信息已获取完毕，但该用户空名：id is --> "
+									+ u.getmUserId());
 			}
 
 			ImageView mPhotoIV = (ImageView) mRoot.findViewById(R.id.user_img);
@@ -1578,54 +1582,38 @@ public class GroupListView extends ListView {
 			} else {
 				mPhotoIV.setImageResource(R.drawable.avatar);
 			}
+			
 			TextView mUserNameTV = (TextView) mRoot
 					.findViewById(R.id.user_name);
-			TextView mUserSignatureTV = (TextView) mRoot
-					.findViewById(R.id.user_signature);
-			mUserSignatureTV.setText(u.getSignature() == null ? "" : u
-					.getSignature());
-			int[] nameLo = new int[2];
-			mUserSignatureTV.getLocationInWindow(nameLo);
-			mUserSignatureTV.setSingleLine(true);
-			mUserSignatureTV.setEllipsize(TruncateAt.END);
-
 			boolean isFriend = GlobalHolder.getInstance().isFriend(u);
 			if (isFriend) {
 				if (!TextUtils.isEmpty(u.getNickName()))
 					mUserNameTV.setText(u.getNickName());
 				else {
-					// if(TextUtils.isEmpty(u.getName())){
-					// V2Log.e("GroupListView ---> Update User Name Failed... please check!");
-					// GlobalConfig.NeedToUpdateUser.add(u.getmUserId());
-					// }
 					mUserNameTV.setText(u.getName());
 				}
 			} else {
-				// if(TextUtils.isEmpty(u.getName())){
-				// V2Log.e("GroupListView ---> Update User Name Failed... please check!");
-				// GlobalConfig.NeedToUpdateUser.add(u.getmUserId());
-				// }
 				mUserNameTV.setText(u.getName());
 			}
 
+			TextView mUserSignatureTV = (TextView) mRoot
+					.findViewById(R.id.user_signature);
+			mUserSignatureTV.setText(u.getSignature() == null ? "" : u
+					.getSignature());
+//			mUserSignatureTV.setSingleLine(true);
+//			mUserSignatureTV.setEllipsize(TruncateAt.END);
+			
 			updateUserStatus(u.getDeviceType(), u.getmStatus());
+			
 			if (mCBFlag) {
 				mCb = (CheckBox) mRoot.findViewById(R.id.user_check_view);
 				mCb.setVisibility(View.VISIBLE);
 				mCb.setChecked(mItem.isChecked());
 				mCb.setOnClickListener(mCheckBoxListener);
-
-				int maxWidth = 0;
-				int[] cbL = new int[2];
-				mCb.getLocationInWindow(cbL);
-				maxWidth = cbL[0] - nameLo[0] - 35;
-				mUserSignatureTV.setMaxWidth(maxWidth);
-
+				
 			} else {
 				mRoot.findViewById(R.id.user_check_view).setVisibility(
 						View.GONE);
-				int maxWidth = this.getWidth() - nameLo[0] - 35;
-				mUserSignatureTV.setMaxWidth(maxWidth);
 			}
 
 		}

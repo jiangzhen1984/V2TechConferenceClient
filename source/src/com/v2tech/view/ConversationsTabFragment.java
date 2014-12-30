@@ -1880,14 +1880,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private void updateStatusBar(VMessage vm) {
-		if(!GlobalConfig.isApplicationBackground(mContext)){
-			return ;
+		if (checkSendingState()){
+			return;
 		}
 		
-		boolean state = checkSendingState();
-		if (state){
+		if(!GlobalConfig.isApplicationBackground(mContext)){
 			sendVoiceNotify();
-			return;
+			return ;
 		}
 		
 		String content;
@@ -1950,14 +1949,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private void updateConferenceNotification(Conference conf) {
-		if(!GlobalConfig.isApplicationBackground(mContext)){
-			return ;
+		if (checkSendingState()){
+			return;
 		}
 		
-		boolean state = checkSendingState();
-		if (state){
+		if(!GlobalConfig.isApplicationBackground(mContext)){
 			sendVoiceNotify();
-			return;
+			return ;
 		}
 		
 		Intent enterConference = new Intent(mContext, MainActivity.class);
@@ -1978,37 +1976,37 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private void updateVerificationStateBar(String msg,
 			VerificationMessageType type) {
 
+		if (checkSendingState()){
+			return;
+		}
+		
 		if(!GlobalConfig.isApplicationBackground(mContext)){
+			sendVoiceNotify();
 			return ;
 		}
 		
-		boolean state = checkSendingState();
-		if (state){
-			sendVoiceNotify();
-		} else {
-			// 发通知
-			Intent i = new Intent(getActivity(),
-					MessageAuthenticationActivity.class);
-			i = startAuthenticationActivity(i, type);
-			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-					| Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		// 发通知
+		Intent i = new Intent(getActivity(),
+				MessageAuthenticationActivity.class);
+		i = startAuthenticationActivity(i, type);
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+				| Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-			PendingIntent pendingIntent = PendingIntent.getActivity(
-					getActivity(), 0, i, 0);
+		PendingIntent pendingIntent = PendingIntent.getActivity(
+				getActivity(), 0, i, 0);
 
-			Notification notification = new Notification.Builder(getActivity())
-					.setSmallIcon(R.drawable.ic_launcher)
-					.setContentTitle(
-							getResources().getString(
-									R.string.status_bar_notification))
-					.setContentText(msg).setAutoCancel(true).setTicker(msg)
-					.setWhen(System.currentTimeMillis())
-					.setContentIntent(pendingIntent).getNotification();
-			NotificationManager manager = ((NotificationManager) getActivity()
-					.getSystemService(Activity.NOTIFICATION_SERVICE));
-			manager.cancelAll();
-			manager.notify(0, notification);
-		}
+		Notification notification = new Notification.Builder(getActivity())
+				.setSmallIcon(R.drawable.ic_launcher)
+				.setContentTitle(
+						getResources().getString(
+								R.string.status_bar_notification))
+				.setContentText(msg).setAutoCancel(true).setTicker(msg)
+				.setWhen(System.currentTimeMillis())
+				.setContentIntent(pendingIntent).getNotification();
+		NotificationManager manager = ((NotificationManager) getActivity()
+				.getSystemService(Activity.NOTIFICATION_SERVICE));
+		manager.cancelAll();
+		manager.notify(0, notification);
 		mItemList.remove(verificationItem);
 		addVerificationConversation(true);
 	}
@@ -2182,7 +2180,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	/**
 	 * 
-	 * @return false mean don't sending , true sending
+	 * @return true mean don't sending , false sending
 	 */
 	private boolean checkSendingState() {
 		if (GlobalHolder.getInstance().isInMeeting()
@@ -2345,7 +2343,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 		V2Log.d(TAG, "Group User Update Notify : groupType --> "
 				+ g.getGroupType().name() + " | groupID --> " + g.getmGId()
-				+ " | user name is --> " + u.getName());
+				+ " | user name is --> " + u.getName() + " | group name : " + g.getName());
 		g.setOwnerUser(u);
 		currentGroupLayout.updateGroupContent(g);
 		currentGroupLayout.updateGroupName(g.getName());

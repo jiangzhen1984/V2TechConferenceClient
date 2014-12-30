@@ -121,12 +121,12 @@ public class CrowdApplicationActivity extends Activity {
         if(g.getOwnerUser() != null) {
             User user = g.getOwnerUser();
             vq = VerificationProvider.queryCrowdQualMessageByCrowdId(user, g);
-            if(vq == null){
-    			Toast.makeText(getApplicationContext(), getResources().getString(R.string.crowd_Authentication_hit), 
-    					Toast.LENGTH_LONG).show();
-    			super.onBackPressed();
-    			return ;
-    		}
+//            if(vq == null){
+//    			Toast.makeText(getApplicationContext(), getResources().getString(R.string.crowd_Authentication_hit), 
+//    					Toast.LENGTH_LONG).show();
+//    			super.onBackPressed();
+//    			return ;
+//    		}
         }
 		updateView();
 	}

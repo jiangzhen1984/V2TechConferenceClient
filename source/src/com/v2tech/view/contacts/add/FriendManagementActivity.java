@@ -176,8 +176,6 @@ public class FriendManagementActivity extends Activity {
 							contactService.addContact(new FriendGroup(
 									selectGroupID, ""), detailUser, "",
 									commentNameET.getText().toString());
-							// Toast.makeText(FriendManagementActivity.this,
-							// "您的好友申请发送成功", Toast.LENGTH_SHORT).show();
 						} else if (detailUser.getAuthtype() == 1) {
 							AddFriendHistroysHandler
 									.addOtherNeedAuthentication(

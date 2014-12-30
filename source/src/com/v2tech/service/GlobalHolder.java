@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.os.Looper;
 import android.widget.Toast;
 
 import com.V2.jni.ImRequest;
@@ -172,29 +173,31 @@ public class GlobalHolder {
 	 * If id is negative, will return null.<br>
 	 * Otherwise user never return null. If application doesn't receive user information from server.<br>
 	 * User property is dirty {@link User#isDirty()}
-	 * @param id
+	 * @param userID
+	 * @param isGetUserInfo
+	 * 			if true , invoke getUserBaseInfo();
 	 * @return
 	 */
-	public User getUser(long id) {
-		if (id <= 0) {
+	public User getUser(long userID) {
+		if (userID <= 0) {
 			return null;
 		}
-		Long key = Long.valueOf(id);
+		Long key = Long.valueOf(userID);
 		synchronized (key) {
 			User tmp = mUserHolder.get(key);
 			if (tmp == null) {
-				tmp = new User(id);
+				tmp = new User(userID);
 				mUserHolder.put(key, tmp);
-				if (GlobalHolder.getInstance().getGlobalState()
-						.isGroupLoaded()) {
+				if(GlobalHolder.getInstance().getGlobalState()
+						.isGroupLoaded()){
 					//if receive this callback , the dirty change false;
-					ImRequest.getInstance().getUserBaseInfo(id);
+					ImRequest.getInstance().getUserBaseInfo(userID);
 				}
 			}
 			return tmp;
 		}
 	}
-
+	
 	/**
 	 * Update group information according server's side push data
 	 * 
@@ -733,7 +736,7 @@ public class GlobalHolder {
 		this.dataBaseTableCacheName = dataBaseTableCacheName;
 	}
 	
-	public boolean changeGlobleTransFileMember(int transType ,Context mContext , boolean isAdd , Long key , String tag){
+	public boolean changeGlobleTransFileMember(int transType ,final Context mContext , boolean isAdd , Long key , String tag){
 		Map<Long, Integer> transingCollection = getFileTypeColl(transType);
 		Integer transing = transingCollection.get(key);
 		String typeString = null;
@@ -752,7 +755,16 @@ public class GlobalHolder {
 		} else {
 			if(isAdd){
 				if(transing > GlobalConfig.MAX_TRANS_FILE_SIZE){
-					Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
+					new Thread(new Runnable() {
+						
+						@Override
+						public void run() {
+							Looper.prepare(); 
+							Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个",
+									Toast.LENGTH_LONG).show();
+							Looper.loop();
+						}
+					}).start();
 					return false;
 				} else {
 					transing = transing + 1;
