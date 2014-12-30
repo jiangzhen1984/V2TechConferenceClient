@@ -251,8 +251,8 @@ public class XmlParser {
 
 	}
 
-	public static V2Doc.PageArray parserDocPage(String docId, String xml) {
-		V2Doc.PageArray pr = new V2Doc.PageArray();
+	public static V2Doc.Doc parserDocPage(String docId, String xml) {
+		V2Doc.Doc pr = new V2Doc.Doc();
 		pr.setDocId(docId);
 		InputStream is = null;
 
@@ -265,7 +265,7 @@ public class XmlParser {
 			doc.getDocumentElement().normalize();
 
 			NodeList pageList = doc.getElementsByTagName("page");
-			Page[] p = new Page[pageList.getLength()];
+			Page[] pages = new Page[pageList.getLength()];
 			for (int i = 0; i < pageList.getLength(); i++) {
 				Element page = (Element) pageList.item(i);
 				String pid = page.getAttribute("id");
@@ -273,9 +273,9 @@ public class XmlParser {
 					continue;
 				}
 				int no = Integer.parseInt(pid);
-				p[no - 1] = new Page(no, docId, null);
+				pages[no - 1] = new Page(no, docId, null);
 			}
-			pr.addPages(p);
+			pr.addPages(pages);
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {

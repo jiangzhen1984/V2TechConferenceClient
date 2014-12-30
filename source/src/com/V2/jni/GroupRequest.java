@@ -398,8 +398,8 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.
-	 * g i f ' / > < / f i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f736180
+	 * 1 . g i f ' / > < / f i l e l i s t >
 	 * 
 	 * @param groupType
 	 * @param nGroupId
@@ -915,7 +915,7 @@ public class GroupRequest {
 		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
 				+ szWBoardID + " | nWhiteIndex: " + nWhiteIndex);
-		//20141225 wzl 暂时不要白板功能
+		// 20141225 wzl 暂时不要白板功能
 		// V2Document v2doc = new V2Document();
 		// v2doc.mId = szWBoardID;
 		// v2doc.mIndex = nWhiteIndex;
@@ -991,10 +991,20 @@ public class GroupRequest {
 	 */
 	private void OnGroupCreateDocShare(int eGroupType, long nGroupID,
 			String szWBoardID, String szFileName, int eWhiteShowType) {
-		V2Log.e("GroupRequest UI", "OnGroupCreateDocShare ---> eGroupType :"
-				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
-				+ szWBoardID + " | szFileName: " + szFileName
-				+ " | eWhiteShowType: " + eWhiteShowType);
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnGroupCreateDocShare()"
+						+ " eGroupType = " + eGroupType + " nGroupID = "
+						+ nGroupID + " szWBoardID = " + szWBoardID
+						+ " szFileName = " + szFileName + " eWhiteShowType = "
+						+ eWhiteShowType);
+
+		V2Log.i("20141229 1",
+				"ThreadID = "+Thread.currentThread().getId()+" CLASS = GroupRequest METHOD = OnGroupCreateDocShare()"
+						+ " eGroupType = " + eGroupType + " nGroupID = "
+						+ nGroupID + " szWBoardID = " + szWBoardID
+						+ " szFileName = " + szFileName + " eWhiteShowType = "
+						+ eWhiteShowType);
 
 		V2Document v2doc = new V2Document();
 		v2doc.mId = szWBoardID;

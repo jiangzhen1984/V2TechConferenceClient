@@ -28,11 +28,11 @@ public class DocumentService extends AbstractHandler {
 
 	private static final int KEY_NEW_DOC_LISTENER = 50;
 
-	private static final int KEY_DOC_PAGE_NOTIFY_LISTENER = 52;
+	private static final int KEY_PAGE_LIST_NOTIFY_LISTENER = 52;
 
-	private static final int KEY_PAGE_ACTIVE_NOTIFY_LISTENER = 53;
+	private static final int KEY_ACTIVE_PAGE_NOTIFY_LISTENER = 53;
 
-	private static final int KEY_DOC_PAGE_ADD_NOTIFY_LISTENER = 54;
+	private static final int KEY_DOC_ADD_ONE_PAGE_NOTIFY_LISTENER = 54;
 
 	private static final int KEY_DOC_DISPLAY_NOTIFY_LISTENER = 55;
 
@@ -79,8 +79,8 @@ public class DocumentService extends AbstractHandler {
 	 * @param what
 	 * @param obj
 	 */
-	public void registerDocPageNotification(Handler h, int what, Object obj) {
-		registerListener(KEY_DOC_PAGE_NOTIFY_LISTENER, h, what, obj);
+	public void registerDocPageListNotification(Handler h, int what, Object obj) {
+		registerListener(KEY_PAGE_LIST_NOTIFY_LISTENER, h, what, obj);
 	}
 
 	/**
@@ -90,8 +90,8 @@ public class DocumentService extends AbstractHandler {
 	 * @param what
 	 * @param obj
 	 */
-	public void unRegisterDocPageNotification(Handler h, int what, Object obj) {
-		unRegisterListener(KEY_DOC_PAGE_NOTIFY_LISTENER, h, what, obj);
+	public void unRegisterDocPageListNotification(Handler h, int what, Object obj) {
+		unRegisterListener(KEY_PAGE_LIST_NOTIFY_LISTENER, h, what, obj);
 	}
 
 	/**
@@ -103,7 +103,7 @@ public class DocumentService extends AbstractHandler {
 	 */
 	public void registerdocPageActiveNotification(Handler h, int what,
 			Object obj) {
-		registerListener(KEY_PAGE_ACTIVE_NOTIFY_LISTENER, h, what, obj);
+		registerListener(KEY_ACTIVE_PAGE_NOTIFY_LISTENER, h, what, obj);
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class DocumentService extends AbstractHandler {
 	 */
 	public void unRegisterdocPageActiveNotification(Handler h, int what,
 			Object obj) {
-		unRegisterListener(KEY_PAGE_ACTIVE_NOTIFY_LISTENER, h, what, obj);
+		unRegisterListener(KEY_ACTIVE_PAGE_NOTIFY_LISTENER, h, what, obj);
 	}
 
 	/**
@@ -148,7 +148,7 @@ public class DocumentService extends AbstractHandler {
 	 * @param obj
 	 */
 	public void registerDocPageAddedNotification(Handler h, int what, Object obj) {
-		registerListener(KEY_DOC_PAGE_ADD_NOTIFY_LISTENER, h, what, obj);
+		registerListener(KEY_DOC_ADD_ONE_PAGE_NOTIFY_LISTENER, h, what, obj);
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class DocumentService extends AbstractHandler {
 	 */
 	public void unRegisterDocPageAddedNotification(Handler h, int what,
 			Object obj) {
-		unRegisterListener(KEY_DOC_PAGE_ADD_NOTIFY_LISTENER, h, what, obj);
+		unRegisterListener(KEY_DOC_ADD_ONE_PAGE_NOTIFY_LISTENER, h, what, obj);
 	}
 
 	/**
@@ -188,17 +188,19 @@ public class DocumentService extends AbstractHandler {
 		unRegisterListener(KEY_PAGE_CANVAS_NOTIFY_LISTENER, h, what, obj);
 	}
 
-	public void switchDoc(long currentUserId,V2Doc doc,boolean isNotify, MessageListener listener) {
-		if (doc == null) {
+	public void switchDoc(long currentUserId, V2Doc doc, boolean isNotify,
+			MessageListener listener) {
+		if (doc == null || (doc != null && doc.getActivatePage() == null)) {
 			if (listener != null) {
 				super.sendResult(listener, new JNIResponse(
 						JNIResponse.Result.INCORRECT_PAR));
 			}
 			return;
 		}
-		
-		V2Log.e(doc.getId()+"   ====>"+ doc.getActivatePage().getNo());
-		WBRequest.getInstance().ActivePage(currentUserId , doc.getId(), doc.getActivatePage().getNo(), 0,isNotify);
+
+		V2Log.e(doc.getId() + "   ====>" + doc.getActivatePage().getNo());
+		WBRequest.getInstance().ActivePage(currentUserId, doc.getId(),
+				doc.getActivatePage().getNo(), 0, isNotify);
 	}
 
 	@Override
@@ -284,26 +286,29 @@ public class DocumentService extends AbstractHandler {
 
 		}
 
+		//收到白板页列表的回调
 		@Override
 		public void OnWBoardPageListCallback(String szWBoardID,
 				String szPageData, int nPageID) {
-			notifyListenerWithPending(KEY_DOC_PAGE_NOTIFY_LISTENER, 0, 0,
+			notifyListenerWithPending(KEY_PAGE_LIST_NOTIFY_LISTENER, 0, 0,
 					XmlParser.parserDocPage(szWBoardID, szPageData));
 		}
 
-		@Override
-		public void OnWBoardActivePageCallback(long nUserID, String szWBoardID,
-				int nPageID) {
-			notifyListenerWithPending(KEY_PAGE_ACTIVE_NOTIFY_LISTENER, 0, 0,
-					new V2Doc.Page(nPageID, szWBoardID, null));
-		}
-
+		//文档共享显示的回调
 		@Override
 		public void OnWBoardDocDisplayCallback(String szWBoardID, int nPageID,
 				String szFileName, int result) {
-
+		
 			notifyListenerWithPending(KEY_DOC_DISPLAY_NOTIFY_LISTENER, 0, 0,
 					new V2Doc.Page(nPageID, szWBoardID, szFileName));
+		}
+
+		//收到白板激活页的回调
+		@Override
+		public void OnWBoardActivePageCallback(long nUserID, String szWBoardID,
+				int nPageID) {
+			notifyListenerWithPending(KEY_ACTIVE_PAGE_NOTIFY_LISTENER, 0, 0,
+					new V2Doc.Page(nPageID, szWBoardID, null));
 		}
 
 		@Override
@@ -317,9 +322,10 @@ public class DocumentService extends AbstractHandler {
 					new V2Doc(szWBoardID, "", g, nBusinessType, u));
 		}
 
+		//收到白板添加页的回调
 		@Override
 		public void OnWBoardAddPageCallback(String szWBoardID, int nPageID) {
-			notifyListenerWithPending(KEY_DOC_PAGE_ADD_NOTIFY_LISTENER, 0, 0,
+			notifyListenerWithPending(KEY_DOC_ADD_ONE_PAGE_NOTIFY_LISTENER, 0, 0,
 					new V2Doc.Page(nPageID, szWBoardID, ""));
 		}
 

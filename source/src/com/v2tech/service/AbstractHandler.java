@@ -148,11 +148,11 @@ public abstract class AbstractHandler extends Handler {
 			V2Log.i(this.getClass().getName() + "  : Notify listener: " + key
 					+ " " + arg1 + "  " + arg2 + "  " + obj);
 			for (int i = 0; i < list.size(); i++) {
-				MessageListener re = list.get(i);
-				Handler h = re.getHandler();
+				MessageListener messageListener = list.get(i);
+				Handler h = messageListener.getHandler();
 				if (h != null) {
-					Message.obtain(h, re.getWhat(), arg1, arg2,
-							new AsyncResult(re.getObject(), obj)).sendToTarget();
+					Message.obtain(h, messageListener.getWhat(), arg1, arg2,
+							new AsyncResult(messageListener.getObject(), obj)).sendToTarget();
 				}
 			}
 		}

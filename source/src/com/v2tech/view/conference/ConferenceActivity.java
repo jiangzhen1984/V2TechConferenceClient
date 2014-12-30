@@ -132,12 +132,14 @@ public class ConferenceActivity extends Activity {
 	private static final int GROUP_ADD_USER = 25;
 
 	private static final int NEW_DOC_NOTIFICATION = 50;
-	private static final int DOC_PAGE_NOTIFICATION = 51;
-	private static final int DOC_PAGE_ACTIVITE_NOTIFICATION = 52;
-	private static final int DOC_PAGE_ADDED_NOTIFICATION = 53;
-	private static final int DOC_DOWNLOADED_NOTIFICATION = 54;
+	private static final int DOC_PAGE_LIST_NOTIFICATION = 51;
+	private static final int DOC_TURN_PAGE_NOTIFICATION = 52;
+	private static final int DOC_ADDED_ONE_PAGE_NOTIFICATION = 53;
+	private static final int DOC_DOWNLOADE_COMPLETE_ONE_PAGE_NOTIFICATION = 54;
 	private static final int DOC_CLOSED_NOTIFICATION = 55;
+
 	private static final int DOC_PAGE_CANVAS_NOTIFICATION = 56;
+
 	private static final int SYNC_STATE_NOTIFICATION = 57;
 	private static final int VOICEACTIVATION_NOTIFICATION = 58;
 	private static final int INVITATION_STATE_NOTIFICATION = 59;
@@ -253,7 +255,7 @@ public class ConferenceActivity extends Activity {
 	private Attendee currentAttendee;
 
 	private BroadcastReceiver mConfUserChangeReceiver = new ConfBroadcastReceiver();
-	
+
 	private boolean isFinish;
 
 	private boolean currentAttendeeTurnedpage = false;
@@ -262,7 +264,7 @@ public class ConferenceActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
-		if(!initConferenceDate()){
+		if (!initConferenceDate()) {
 			
 			isFinish = true;
 			Intent i = new Intent();
@@ -270,9 +272,9 @@ public class ConferenceActivity extends Activity {
 			setResult(ConversationsTabFragment.CONFERENCE_ENTER_CODE, i);
 			Toast.makeText(getApplicationContext(), R.string.confs_is_deleted_notification, Toast.LENGTH_LONG).show();
 			super.finish();
-			return ;
+			return;
 		}
-		
+
 		if (blueadapter != null
 				&& BluetoothProfile.STATE_CONNECTED == blueadapter
 						.getProfileConnectionState(BluetoothProfile.HEADSET)) {
@@ -397,6 +399,10 @@ public class ConferenceActivity extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
+
+		if (audioManager != null) {
+			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		}
 
 		if (mServiceBound) {
 			suspendOrResume(true);
@@ -749,6 +755,7 @@ public class ConferenceActivity extends Activity {
 			mDocContainer = new VideoDocLayout(this, mDocs,
 					mCurrentLecturerActivateDocId);
 			mDocContainer.setListener(subViewListener);
+
 			Group g = GlobalHolder.getInstance().findGroupById(conf.getId());
 			if (g != null && g instanceof ConferenceGroup) {
 				mDocContainer
@@ -2056,6 +2063,10 @@ public class ConferenceActivity extends Activity {
 			headsetAndBluetoothHeadsetHandle();
 			// updateAudioSpeaker(false);
 		}
+
+		if (audioManager != null) {
+			audioManager.setMode(AudioManager.MODE_NORMAL);
+		}
 	}
 
 	@Override
@@ -2073,11 +2084,11 @@ public class ConferenceActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		if(isFinish){
+		if (isFinish) {
 			super.onDestroy();
-			return ;
+			return;
 		}
-		
+
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
 		mAttendeeList.clear();
 		if (mCurrentShowedSV != null) {
@@ -2106,11 +2117,11 @@ public class ConferenceActivity extends Activity {
 			ds.unRegisterNewDocNotification(mVideoHandler,
 					NEW_DOC_NOTIFICATION, null);
 			ds.unRegisterDocDisplayNotification(mVideoHandler,
-					DOC_DOWNLOADED_NOTIFICATION, null);
+					DOC_DOWNLOADE_COMPLETE_ONE_PAGE_NOTIFICATION, null);
 			ds.unRegisterDocClosedNotification(mVideoHandler,
 					DOC_CLOSED_NOTIFICATION, null);
 			ds.unRegisterDocPageAddedNotification(mVideoHandler,
-					DOC_PAGE_ADDED_NOTIFICATION, null);
+					DOC_ADDED_ONE_PAGE_NOTIFICATION, null);
 			ds.unRegisterPageCanvasUpdateNotification(mVideoHandler,
 					DOC_PAGE_CANVAS_NOTIFICATION, null);
 			cb.removeSyncStateListener(mVideoHandler, SYNC_STATE_NOTIFICATION,
@@ -2139,7 +2150,7 @@ public class ConferenceActivity extends Activity {
 		// V2GlobalEnum.GROUP_TYPE_CONFERENCE , conf.getId());
 		mVideoHandler = null;
 		if (audioManager != null) {
-			audioManager.setSpeakerphoneOn(false);
+			// audioManager.setSpeakerphoneOn(false);
 			audioManager.setMode(AudioManager.MODE_NORMAL);
 		}
 		super.onDestroy();
@@ -2675,7 +2686,7 @@ public class ConferenceActivity extends Activity {
 		V2Log.d(TAG, "opt : " + opt);
 		V2Doc doc = null;
 		V2Doc.Page page = null;
-		V2Doc.PageArray pageArray = null;
+		V2Doc.Doc pageArray = null;
 		V2ShapeMeta shape = null;
 		if (opt == NEW_DOC_NOTIFICATION) {
 			doc = (V2Doc) res.getResult();
@@ -2683,7 +2694,7 @@ public class ConferenceActivity extends Activity {
 			if (cacheDoc == null) {
 				mDocs.put(doc.getId(), doc);
 			} else {
-				cacheDoc.updateDoc(doc);
+				cacheDoc.updateV2Doc(doc);
 				doc = cacheDoc;
 			}
 		} else if (opt == DOC_CLOSED_NOTIFICATION) {
@@ -2702,13 +2713,13 @@ public class ConferenceActivity extends Activity {
 		case DOC_CLOSED_NOTIFICATION:
 			docId = doc.getId();
 			break;
-		case DOC_PAGE_NOTIFICATION:
-			pageArray = (V2Doc.PageArray) res.getResult();
+		case DOC_PAGE_LIST_NOTIFICATION:
+			pageArray = (V2Doc.Doc) res.getResult();
 			docId = pageArray.getDocId();
 			break;
-		case DOC_PAGE_ADDED_NOTIFICATION:
-		case DOC_DOWNLOADED_NOTIFICATION:
-		case DOC_PAGE_ACTIVITE_NOTIFICATION:// 上下翻页
+		case DOC_ADDED_ONE_PAGE_NOTIFICATION:
+		case DOC_DOWNLOADE_COMPLETE_ONE_PAGE_NOTIFICATION:
+		case DOC_TURN_PAGE_NOTIFICATION:// 上下翻页
 			page = (V2Doc.Page) res.getResult();
 			docId = page.getDocId();
 			// Record current activate Id;
@@ -2731,7 +2742,7 @@ public class ConferenceActivity extends Activity {
 			if (doc == null) {
 				doc = new V2Doc(docId, null, null, 0, null);
 				mDocs.put(docId, doc);
-				if (opt == DOC_DOWNLOADED_NOTIFICATION)
+				if (opt == DOC_DOWNLOADE_COMPLETE_ONE_PAGE_NOTIFICATION)
 					V2Log.e(TAG, "Update Doc Page failed , 没有获取到文件路径");
 			}
 			// If doc is not null, means new doc event or doc close event. need
@@ -2741,12 +2752,12 @@ public class ConferenceActivity extends Activity {
 		} else if (NEW_DOC_NOTIFICATION == opt) {
 			V2Doc cache = mDocs.get(docId);
 			if (cache != doc) {
-				cache.updateDoc(doc);
+				cache.updateV2Doc(doc);
 			}
 		}
 
 		if (pageArray != null) {
-			doc.updatePageArray(pageArray);
+			doc.updateDoc(pageArray);
 		}
 		if (page != null) {
 			doc.addPage(page);
@@ -2761,7 +2772,7 @@ public class ConferenceActivity extends Activity {
 			// } else {
 			// page.addMeta(shape);
 			// }
-		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
+		} else if (opt == DOC_TURN_PAGE_NOTIFICATION) {
 			if (isSyn) {
 				doc.setActivatePageNo(page.getNo());
 			}
@@ -2776,19 +2787,19 @@ public class ConferenceActivity extends Activity {
 			case DOC_CLOSED_NOTIFICATION:
 				mDocContainer.closeDoc(doc);
 				break;
-			case DOC_PAGE_NOTIFICATION:
-			case DOC_PAGE_ADDED_NOTIFICATION:
+			case DOC_PAGE_LIST_NOTIFICATION:
+			case DOC_ADDED_ONE_PAGE_NOTIFICATION:
 				mDocContainer.updateLayoutPageInformation();
 				mDocContainer.updatePageButton();
 				break;
-			case DOC_PAGE_ACTIVITE_NOTIFICATION:
+			case DOC_TURN_PAGE_NOTIFICATION:
 				if (isSyn) {
 					Log.i("20141224 1", "翻页");
 					doc.setActivatePageNo(page.getNo());
 					mDocContainer.updateCurrentDoc();
 				}
 				break;
-			case DOC_DOWNLOADED_NOTIFICATION:
+			case DOC_DOWNLOADE_COMPLETE_ONE_PAGE_NOTIFICATION:
 				mDocContainer.updateCurrentDoc(doc);
 				break;
 			case DOC_PAGE_CANVAS_NOTIFICATION:
@@ -2801,151 +2812,194 @@ public class ConferenceActivity extends Activity {
 
 	public void handleDocNotification(AsyncResult res, int opt) {
 
-		V2Log.d(TAG, "opt : " + opt);
-		V2Doc doc = null;
-		V2Doc.Page page = null;
-		V2Doc.PageArray pageArray = null;
-		V2ShapeMeta shape = null;
-
+		V2Doc v2Doc = null;
 		String docId = null;
+		V2Doc.Doc doc = null;
+		V2Doc.Page page = null;
+
+		// V2ShapeMeta shape = null;
 		switch (opt) {
 		case NEW_DOC_NOTIFICATION:
-			doc = (V2Doc) res.getResult();
-			V2Doc cacheDoc = mDocs.get(doc.getId());
+			Log.i("20141229 1", "NEW_DOC_NOTIFICATION");
+			v2Doc = (V2Doc) res.getResult();
+			docId = v2Doc.getId();
+			V2Doc cacheDoc = mDocs.get(docId);
 			if (cacheDoc == null) {
-				mDocs.put(doc.getId(), doc);
+				mDocs.put(docId, v2Doc);
 			} else {
-				cacheDoc.updateDoc(doc);
-				doc = cacheDoc;
+				cacheDoc.updateV2Doc(v2Doc);
+				v2Doc = cacheDoc;
 			}
-			doc = (V2Doc) res.getResult();
-			docId = doc.getId();
 
-			V2Doc cache = mDocs.get(docId);
-			if (cache != doc) {
-				cache.updateDoc(doc);
+			if (mDocContainer != null) {
+				mDocContainer.addDoc(v2Doc);
 			}
 
 			break;
-		case DOC_CLOSED_NOTIFICATION:
-			doc = (V2Doc) res.getResult();
-
-			if (mDocs.get(doc.getId()) == null) {
+		case DOC_PAGE_LIST_NOTIFICATION:
+			Log.i("20141229 1", "DOC_PAGE_LIST_NOTIFICATION");
+			doc = (V2Doc.Doc) res.getResult();
+			if (doc == null) {
 				return;
 			}
 
-			// Notice need to use cache document
-			// because cache document object is different from JNI's callback
-			doc = mDocs.remove(doc.getId());
-			docId = doc.getId();
-			break;
-		case DOC_PAGE_NOTIFICATION:
-			pageArray = (V2Doc.PageArray) res.getResult();
-			docId = pageArray.getDocId();
-
-			if (mDocs.get(docId) == null) {
+			docId = doc.getDocId();
+			if (docId == null) {
 				return;
 			}
 
+			v2Doc = mDocs.get(docId);
+			if (v2Doc == null) {
+				v2Doc = mDocs.get(docId);
+				// Put fake doc, because page events before doc event;
+				if (v2Doc == null) {
+					v2Doc = new V2Doc(docId, null, null, 0, null);
+					mDocs.put(docId, v2Doc);
+				}
+			}
+
+			v2Doc.updateDoc(doc);
+
+			if (mDocContainer != null) {
+				mDocContainer.updateLayoutPageInformation();
+				mDocContainer.updatePageButton();
+			}
+
 			break;
-		case DOC_PAGE_ADDED_NOTIFICATION:
-		case DOC_DOWNLOADED_NOTIFICATION:
-		case DOC_PAGE_ACTIVITE_NOTIFICATION:// 上下翻页
+
+		case DOC_ADDED_ONE_PAGE_NOTIFICATION:
+			Log.i("20141229 1", "DOC_ADDED_ONE_PAGE_NOTIFICATION");
 			page = (V2Doc.Page) res.getResult();
+			if (page == null) {
+				return;
+			}
 			docId = page.getDocId();
 
-			if (mDocs.get(docId) == null) {
-				return;
+			v2Doc = mDocs.get(docId);
+			if (v2Doc == null) {
+				v2Doc = mDocs.get(docId);
+				if (v2Doc == null) {
+					v2Doc = new V2Doc(docId, null, null, 0, null);
+					mDocs.put(docId, v2Doc);
+				}
 			}
 			// Record current activate Id;
 			mCurrentLecturerActivateDocId = docId;
 
-			break;
-		case DOC_PAGE_CANVAS_NOTIFICATION:
-			shape = (V2ShapeMeta) res.getResult();
-			docId = shape.getDocId();
+			if (page != null) {
+				v2Doc.addPage(page);
+			}
 
-			if (mDocs.get(docId) == null) {
+			if (mDocContainer != null) {
+				mDocContainer.updateLayoutPageInformation();
+				mDocContainer.updatePageButton();
+			}
+
+			break;
+
+		case DOC_DOWNLOADE_COMPLETE_ONE_PAGE_NOTIFICATION:
+			Log.i("20141229 1", "DOC_DOWNLOADE_COMPLETE_ONE_PAGE_NOTIFICATION");
+			page = (V2Doc.Page) res.getResult();
+			if (page == null) {
 				return;
 			}
 
+			docId = page.getDocId();
+
+			v2Doc = mDocs.get(docId);
+			if (v2Doc == null) {
+				v2Doc = mDocs.get(docId);
+				if (v2Doc == null) {
+					v2Doc = new V2Doc(docId, null, null, 0, null);
+					mDocs.put(docId, v2Doc);
+				}
+		
+			}
+			// Record current activate Id;
+			mCurrentLecturerActivateDocId = docId;
+
+			if (page != null) {
+				v2Doc.addPage(page);
+			}
+
+//			if (mDocContainer != null) {
+//				mDocContainer.updateCurrentDoc(v2Doc);
+//				mDocContainer.updateCurrentDoc();
+//			}
+
 			break;
-		default:
-			V2Log.e("Unknow doc operation:" + opt);
-			return;
-		}
-
-		if (doc == null) {
-			doc = mDocs.get(docId);
-			// Put fake doc, because page events before doc event;
-			if (doc == null) {
-				doc = new V2Doc(docId, null, null, 0, null);
-				mDocs.put(docId, doc);
-				if (opt == DOC_DOWNLOADED_NOTIFICATION)
-					V2Log.e(TAG, "Update Doc Page failed , 没有获取到文件路径");
-			}
-			// If doc is not null, means new doc event or doc close event. need
-			// to update cache doc or not.
-			// If doc page event before new doc event, need to update cache
-			// update
-		}
-
-		if (pageArray != null) {
-			doc.updatePageArray(pageArray);
-		}
-
-		if (page != null) {
-			doc.addPage(page);
-		}
-
-		if (opt == DOC_PAGE_CANVAS_NOTIFICATION) {
-
-			page = doc.getPage(shape.getPageNo());
+		case DOC_TURN_PAGE_NOTIFICATION:// 上下翻页
+			Log.i("20141229 1", "DOC_TURN_PAGE_NOTIFICATION");
+			page = (V2Doc.Page) res.getResult();
 			if (page == null) {
-				page = new Page(shape.getPageNo(), docId, null);
-				page.addMeta(shape);
-				doc.addPage(page);
-			} else {
-				page.addMeta(shape);
+				return;
 			}
 
-		} else if (opt == DOC_PAGE_ACTIVITE_NOTIFICATION) {
-			if (isSyn || !isCurrentAttendeeTurnedpage()) {
-				doc.setActivatePageNo(page.getNo());
-			}
-		}
+			docId = page.getDocId();
 
-		// Update UI
-		if (mDocContainer != null) {
-			switch (opt) {
-			case NEW_DOC_NOTIFICATION:
-				mDocContainer.addDoc(doc);
-				break;
-			case DOC_CLOSED_NOTIFICATION:
-				mDocContainer.closeDoc(doc);
-				break;
-			case DOC_PAGE_NOTIFICATION:
-			case DOC_PAGE_ADDED_NOTIFICATION:
-				mDocContainer.updateLayoutPageInformation();
-				mDocContainer.updatePageButton();
-				break;
-			case DOC_PAGE_ACTIVITE_NOTIFICATION:
+			v2Doc = mDocs.get(docId);
+			if (v2Doc == null) {
+				v2Doc = mDocs.get(docId);
+				if (v2Doc == null) {
+					v2Doc = new V2Doc(docId, null, null, 0, null);
+					mDocs.put(docId, v2Doc);
+				}
+			}
+
+			mCurrentLecturerActivateDocId = docId;
+
+			if (page != null) {
+				v2Doc.addPage(page);
+			}
+
+			if (mDocContainer != null) {
 				if (isSyn || !isCurrentAttendeeTurnedpage()) {
-					Log.i("20141224 1", "翻页");
-					doc.setActivatePageNo(page.getNo());
-					mDocContainer.updateCurrentDoc(doc);
+					v2Doc.setActivatePageNo(page.getNo());
+					mDocContainer.updateCurrentDoc(v2Doc);
 					mDocContainer.updateCurrentDoc();
 				}
-				break;
-			case DOC_DOWNLOADED_NOTIFICATION:
-				mDocContainer.updateCurrentDoc(doc);
-				break;
-			case DOC_PAGE_CANVAS_NOTIFICATION:
-				mDocContainer.drawShape(page.getDocId(), page.getNo(), shape);
-				break;
 			}
-		}
 
+			break;
+		case DOC_CLOSED_NOTIFICATION:
+			Log.i("20141229 1", "DOC_CLOSED_NOTIFICATION");
+			v2Doc = (V2Doc) res.getResult();
+			if (v2Doc == null) {
+				return;
+			}
+
+			if (mDocs.get(v2Doc.getId()) == null) {
+				return;
+			}
+
+			v2Doc = mDocs.remove(v2Doc.getId());
+
+			if (mDocContainer != null) {
+				mDocContainer.closeDoc(v2Doc);
+			}
+
+			break;
+
+		case DOC_PAGE_CANVAS_NOTIFICATION:
+			// shape = (V2ShapeMeta) res.getResult();
+			// docId = shape.getDocId();
+			//
+			// v2Doc = mDocs.get(docId);
+			// if (v2Doc == null) {
+			// return;
+			// }
+			//
+			// page = v2Doc.getPage(shape.getPageNo());
+			// if (page == null) {
+			// page = new Page(shape.getPageNo(), docId, null);
+			// page.addMeta(shape);
+			// v2Doc.addPage(page);
+			// } else {
+			// page.addMeta(shape);
+			// }
+
+			break;
+		}
 	}
 
 	private ServiceConnection mLocalServiceConnection = new ServiceConnection() {
@@ -2985,16 +3039,18 @@ public class ConferenceActivity extends Activity {
 			// Register listen to document notification
 			ds.registerNewDocNotification(mVideoHandler, NEW_DOC_NOTIFICATION,
 					null);
+			ds.registerDocPageListNotification(mVideoHandler,
+					DOC_PAGE_LIST_NOTIFICATION, null);
 			ds.registerDocDisplayNotification(mVideoHandler,
-					DOC_DOWNLOADED_NOTIFICATION, null);
+					DOC_DOWNLOADE_COMPLETE_ONE_PAGE_NOTIFICATION, null);
+
 			ds.registerdocPageActiveNotification(mVideoHandler,
-					DOC_PAGE_ACTIVITE_NOTIFICATION, null);
-			ds.registerDocPageNotification(mVideoHandler,
-					DOC_PAGE_NOTIFICATION, null);
+					DOC_TURN_PAGE_NOTIFICATION, null);
 			ds.registerDocClosedNotification(mVideoHandler,
 					DOC_CLOSED_NOTIFICATION, null);
+
 			ds.registerDocPageAddedNotification(mVideoHandler,
-					DOC_PAGE_ADDED_NOTIFICATION, null);
+					DOC_ADDED_ONE_PAGE_NOTIFICATION, null);
 			ds.registerPageCanvasUpdateNotification(mVideoHandler,
 					DOC_PAGE_CANVAS_NOTIFICATION, null);
 
@@ -3241,11 +3297,9 @@ public class ConferenceActivity extends Activity {
 		@Override
 		public void updateDoc(V2Doc doc, Page p) {
 			// If current user is host
-			if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
-				ds.switchDoc(currentAttendee.getAttId(), doc, true, null);
-			} else {
-				ds.switchDoc(currentAttendee.getAttId(), doc, false, null);
-			}
+			boolean isLecturer = currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED;
+			ds.switchDoc(currentAttendee.getAttId(), doc, isLecturer, null);
+
 		}
 
 		@Override
@@ -3609,10 +3663,10 @@ public class ConferenceActivity extends Activity {
 
 				break;
 			case NEW_DOC_NOTIFICATION:
-			case DOC_PAGE_NOTIFICATION:
-			case DOC_PAGE_ADDED_NOTIFICATION:
-			case DOC_PAGE_ACTIVITE_NOTIFICATION:
-			case DOC_DOWNLOADED_NOTIFICATION:
+			case DOC_PAGE_LIST_NOTIFICATION:
+			case DOC_ADDED_ONE_PAGE_NOTIFICATION:
+			case DOC_TURN_PAGE_NOTIFICATION:
+			case DOC_DOWNLOADE_COMPLETE_ONE_PAGE_NOTIFICATION:
 			case DOC_CLOSED_NOTIFICATION:
 			case DOC_PAGE_CANVAS_NOTIFICATION:
 				handleDocNotification((AsyncResult) (msg.obj), msg.what);

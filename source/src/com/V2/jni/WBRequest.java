@@ -73,6 +73,7 @@ public class WBRequest {
 
 	/**
 	 * 白板激活一页
+	 * 
 	 * @param nUserId
 	 * @param szWBoardID
 	 *            白板ID
@@ -82,7 +83,8 @@ public class WBRequest {
 	 * @param bNotify
 	 *            激活页是否通知其它成员
 	 */
-	public native void ActivePage(long nUserId , String szWBoardID, int nPageId, int nIndex , boolean bNotify);
+	public native void ActivePage(long nUserId, String szWBoardID, int nPageId,
+			int nIndex, boolean bNotify);
 
 	private long lastgoupid = 0L;
 
@@ -101,17 +103,27 @@ public class WBRequest {
 
 	}
 
-	
 	/**
-	 * 3d4805676-0f02-4fd6-bf98-b8166832e51a : <pagelist><pageid='1'/></pagelist> : 1
+	 * 3d4805676-0f02-4fd6-bf98-b8166832e51a :
+	 * <pagelist><pageid='1'/></pagelist> : 1
+	 * 
 	 * @param szWBoardID
 	 * @param szPageData
 	 * @param nPageID
 	 */
 	private void OnWBoardPageList(String szWBoardID, String szPageData,
 			int nPageID) {
-		Log.e("WBRequest UI", "OnWBoardPageList " + szWBoardID + " "
-				+ szPageData + " " + nPageID);
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = WBRequest METHOD = OnWBoardPageList()"
+						+ " szWBoardID = " + szWBoardID + " szPageData = "
+						+ szPageData + " nPageID = " + nPageID);
+
+		Log.i("20141229 1", "ThreadID = " + Thread.currentThread().getId()
+				+ " CLASS = WBRequest METHOD = OnWBoardPageList()"
+				+ " szWBoardID = " + szWBoardID + " szPageData = " + szPageData
+				+ " nPageID = " + nPageID);
+
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
 				wr.get().OnWBoardPageListCallback(szWBoardID, szPageData,
@@ -127,10 +139,20 @@ public class WBRequest {
 	 * @param nPageID
 	 * @param index
 	 */
-	private void OnWBoardActivePage(long nUserID, String szWBoardID, int nPageID , int index) {
-		V2Log.e("WBRequest UI", "OnWBoardActivePage ---> nUserID :"
-				+ nUserID + " | szWBoardID: " + szWBoardID + " | nPageID: "
-				+ nPageID + " | index: " + index);
+	private void OnWBoardActivePage(long nUserID, String szWBoardID,
+			int nPageID, int index) {
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = WBRequest METHOD = OnWBoardActivePage()"
+						+ " nUserID = " + nUserID + " szWBoardID = "
+						+ szWBoardID + " nPageID = " + nPageID + " index = "
+						+ index);
+
+		Log.i("20141229 1", "ThreadID = " + Thread.currentThread().getId()
+				+ " CLASS = WBRequest METHOD = OnWBoardActivePage()"
+				+ " nUserID = " + nUserID + " szWBoardID = " + szWBoardID
+				+ " nPageID = " + nPageID + " index = " + index);
+
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
 				wr.get().OnWBoardActivePageCallback(nUserID, szWBoardID,
@@ -140,7 +162,15 @@ public class WBRequest {
 	}
 
 	private void OnWBoardAddPage(String szWBoardID, int nPageID) {
-		Log.e("WBRequest UI", "OnWBoardAddPage " + szWBoardID + " " + nPageID);
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = WBRequest METHOD = OnWBoardAddPage()"
+						+ " szWBoardID = " + szWBoardID + " nPageID = "
+						+ nPageID);
+
+		Log.i("20141229 1", "CLASS = WBRequest METHOD = OnWBoardAddPage()"
+				+ " szWBoardID = " + szWBoardID + " nPageID = " + nPageID);
+
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
 				wr.get().OnWBoardAddPageCallback(szWBoardID, nPageID);
@@ -158,11 +188,19 @@ public class WBRequest {
 	 */
 	private void OnWBoardDocDisplay(String szWBoardID, int nPageID,
 			String szFileName, int result) {
-		// return ;
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = WBRequest METHOD = OnWBoardDocDisplay()"
+						+ " szWBoardID = " + szWBoardID + " nPageID = "
+						+ nPageID + " szFileName = " + szFileName
+						+ " result = " + result);
+
+		Log.i("20141229 1", "ThreadID = " + Thread.currentThread().getId()
+				+ " CLASS = WBRequest METHOD = OnWBoardDocDisplay()"
+				+ " szWBoardID = " + szWBoardID + " nPageID = " + nPageID
+				+ " szFileName = " + szFileName + " result = " + result);
+
 		szFileName = szFileName.replace("//", "/");
-		V2Log.e("WBRequest UI", "OnWBoardDocDisplay ---> szWBoardID :"
-				+ szWBoardID + " | nPageID: " + nPageID + " | szFileName: "
-				+ szFileName + " | result: " + result);
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
 				wr.get().OnWBoardDocDisplayCallback(szWBoardID, nPageID,
@@ -217,8 +255,17 @@ public class WBRequest {
 
 	private void OnWBoardClosed(long nGroupID, int nBusinessType, long nUserID,
 			String szWBoardID) {
-		Log.e("WBRequest UI", "OnWBoardClosed " + nGroupID + " "
-				+ nBusinessType + " " + szWBoardID);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = WBRequest METHOD = OnWBoardClosed()" + " nGroupID = "
+						+ nGroupID + " nBusinessType = " + nBusinessType
+						+ " nUserID = " + nUserID + " szWBoardID = "
+						+ szWBoardID);
+
+		Log.i("20141219 1", "CLASS = WBRequest METHOD = OnWBoardClosed()"
+				+ " nGroupID = " + nGroupID + " nBusinessType = "
+				+ nBusinessType + " nUserID = " + nUserID + " szWBoardID = "
+				+ szWBoardID);
+
 		for (WeakReference<WBRequestCallback> wr : mCallbacks) {
 			if (wr != null && wr.get() != null) {
 				wr.get().OnWBoardClosedCallback(nGroupID, nBusinessType,

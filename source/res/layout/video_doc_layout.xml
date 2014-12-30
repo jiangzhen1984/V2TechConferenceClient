@@ -5,67 +5,65 @@
     android:animateLayoutChanges="true"
     android:background="#ffffff"
     android:orientation="vertical" >
-    <RelativeLayout
-        android:id="@+id/relativelayout"
+
+    <TextView
+        android:id="@+id/video_doc_title"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-        <TextView
-            android:id="@+id/video_doc_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
-            android:layout_toLeftOf="@+id/video_doc_share_button"
-            android:gravity="center"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
-            android:singleLine="true"
-            android:text="@string/confs_doc"
-            android:textColor="#000000"
-            android:textSize="18sp" />
-        <ImageView
-            android:id="@+id/video_doc_share_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/video_doc_title"
-            android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@+id/video_doc_screen_button"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
-            android:src="@drawable/video_doc_up_file_button" />
-        <ImageView
-            android:id="@+id/video_doc_screen_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/video_doc_title"
-            android:layout_alignParentRight="true"
-            android:layout_marginRight="10dp"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
-            android:src="@drawable/video_doc_full_screen_button_selector"
-            android:tag="restorescreen" />
-        <ImageView
-            android:id="@+id/video_doc_pin_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/video_doc_title"
-            android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@+id/video_doc_screen_button"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
-            android:src="@drawable/pin_button_selector"
-            android:tag="float"
-            android:visibility="invisible" />
-    </RelativeLayout>
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_toLeftOf="@+id/video_doc_share_button"
+        android:gravity="center"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:singleLine="true"
+        android:text="@string/confs_doc"
+        android:textColor="#000000"
+        android:textSize="18sp" />
+
+    <ImageView
+        android:id="@+id/video_doc_pin_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="5dp"
+        android:layout_toLeftOf="@+id/video_doc_screen_button"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:src="@drawable/pin_button_selector"
+        android:tag="float"
+        android:visibility="invisible" />
+
+    <ImageView
+        android:id="@+id/video_doc_share_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="5dp"
+        android:layout_toLeftOf="@+id/video_doc_screen_button"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:src="@drawable/video_doc_up_file_button" />
+
+    <ImageView
+        android:id="@+id/video_doc_screen_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="10dp"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp"
+        android:src="@drawable/video_doc_full_screen_button_selector"
+        android:tag="restorescreen" />
+
     <LinearLayout
         android:id="@+id/LinearLayout1"
         android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/relativelayout"
+        android:layout_below="@+id/video_doc_title"
         android:background="#cdcdcf"
         android:orientation="vertical" >
     </LinearLayout>
+
     <FrameLayout
         android:id="@+id/video_doc_container"
         android:layout_width="match_parent"
@@ -74,11 +72,13 @@
         android:layout_below="@+id/LinearLayout1"
         android:orientation="vertical" >
     </FrameLayout>
+
     <RelativeLayout
         android:id="@+id/video_doc_bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true" >
+
         <ImageView
             android:id="@+id/video_doc_list_button"
             android:layout_width="wrap_content"
@@ -86,17 +86,20 @@
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="15dp"
             android:src="@drawable/video_show_doc_button_selector" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:orientation="horizontal" >
+
             <ImageView
                 android:id="@+id/video_doc_pre_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="@dimen/video_doc_bottom_button_padding"
                 android:src="@drawable/video_doc_left_arrow_gray" />
+
             <TextView
                 android:id="@+id/video_doc_navgator"
                 android:layout_width="wrap_content"
@@ -109,6 +112,7 @@
                 android:paddingRight="@dimen/video_doc_bottom_button_padding"
                 android:text=" "
                 android:textSize="@dimen/common_item_text_size" />
+
             <ImageView
                 android:id="@+id/video_doc_next_button"
                 android:layout_width="wrap_content"
@@ -117,6 +121,7 @@
                 android:src="@drawable/video_doc_right_arrow_gray" />
         </LinearLayout>
     </RelativeLayout>
+
     <LinearLayout
         android:layout_width="1dp"
         android:layout_height="fill_parent"
@@ -124,4 +129,5 @@
         android:background="#cdcdcf"
         android:orientation="vertical" >
     </LinearLayout>
+
 </RelativeLayout>

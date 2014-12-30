@@ -343,6 +343,9 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
+		if (audioManager != null) {
+			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		}
 		isStoped = false;
 		if (uad.isIncoming() && !uad.isConnected()) {
 			playRingToneIncoming();
@@ -359,6 +362,10 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
+		if (audioManager != null) {
+			audioManager.setMode(AudioManager.MODE_NORMAL);
+		}
+
 		// stopRingTone();
 		if (uad.isConnected()) {
 			// // Resume audio
