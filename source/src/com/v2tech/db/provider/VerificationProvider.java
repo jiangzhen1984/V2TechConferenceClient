@@ -499,8 +499,13 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @return
 	 */
 	public static int updateCrowdQualicationMessage(VMessageQualification msg) {
-		return updateCrowdQualicationMessage(null, msg);
+		return updateCrowdQualicationMessage(null, msg , true);
 	}
+	
+	public static int updateCrowdQualicationMessage(CrowdGroup oldCrowd , VMessageQualification msg) {
+		return updateCrowdQualicationMessage(oldCrowd, msg , true);
+	}
+
 
 	/**
 	 * Update a qualification message to database
@@ -510,7 +515,7 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @return
 	 */
 	public static int updateCrowdQualicationMessage(CrowdGroup oldCrowd,
-			VMessageQualification msg) {
+			VMessageQualification msg , boolean isUpdateTime) {
 		if (msg == null) {
 			V2Log.e("To store failed...please check the given VMessageQualification Object in the databases");
 			return -1;
@@ -606,9 +611,12 @@ public class VerificationProvider extends DatabaseProvider {
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ? and "
 				+ HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
-		values.put(
-				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
-				GlobalConfig.getGlobalServerTime());
+		
+		if(isUpdateTime){
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+					GlobalConfig.getGlobalServerTime());
+		}
 		int updates = mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 				selectionArgs);
@@ -707,8 +715,11 @@ public class VerificationProvider extends DatabaseProvider {
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
 				obj.readState.intValue());
-		values.put(HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
-				GlobalConfig.getGlobalServerTime());
+		if(obj.isUpdateTime){
+			values.put(HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+					GlobalConfig.getGlobalServerTime());
+		}
+		
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ? and "
 				+ HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
@@ -845,9 +856,11 @@ public class VerificationProvider extends DatabaseProvider {
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
 				obj.readState.intValue());
 		String where = ContentDescriptor.HistoriesCrowd.Cols.ID + " = ?";
-		values.put(
-				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
-				GlobalConfig.getGlobalServerTime());
+		if(obj.isUpdateTime){
+			values.put(
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
+					GlobalConfig.getGlobalServerTime());
+		}
 		int updates = MessageBuilder.mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
 				new String[] { String.valueOf(colsID) });
@@ -1066,7 +1079,7 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @param userID
 	 * @return
 	 */
-	public static VMessageQualification queryCrowdApplyQualMessageByUserId(
+	public static VMessageQualification queryCrowdApplyQualMessageByUserId(long crowdID , 
 			long userID) {
 
 		Cursor cursor = null;
@@ -1074,10 +1087,12 @@ public class VerificationProvider extends DatabaseProvider {
 
 			String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
 					+ "= ? and "
+					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + " = ? and "
 					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
 					+ "= ?";
 			String[] selectionArgs = new String[] {
-					String.valueOf(userID),
+					String.valueOf(userID) ,
+					String.valueOf(crowdID),
 					String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE
 							.intValue()) };
 			String sortOrder = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE

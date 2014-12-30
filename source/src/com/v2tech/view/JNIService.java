@@ -918,14 +918,8 @@ public class JNIService extends Service implements
 			// boolean sendBroadcast = true;
 			VMessageQualification crowdMsg = null;
 			if (type == Type.CROWD_APPLICATION) {
-				crowdMsg = VerificationProvider.queryCrowdApplyQualMessageByUserId(user
+				crowdMsg = VerificationProvider.queryCrowdApplyQualMessageByUserId( g.getmGId() , user
 						.getmUserId());
-				if (crowdMsg != null
-						&& !(crowdMsg instanceof VMessageQualificationApplicationCrowd)) {
-					VerificationProvider
-							.deleteCrowdQualMessage(crowdMsg.getId());
-					crowdMsg = null;
-				}
 			} else {
 				crowdMsg = VerificationProvider.queryCrowdQualMessageByCrowdId(user, g);
 			}
@@ -1206,11 +1200,14 @@ public class JNIService extends Service implements
 						if(!isTrue){
 							V2Log.e(TAG, "delete local invite waitting qualication message failed... cols id is :" + waitMessageExist);
 						}
+						
+						GroupQualicationState state = new GroupQualicationState(
+								Type.CROWD_APPLICATION,
+								QualificationState.BE_ACCEPTED, null,
+								ReadState.UNREAD, false);
+						state.isUpdateTime = false;
 						msgID = VerificationProvider.updateCrowdQualicationMessageState(
-								nGroupID, user.uid, new GroupQualicationState(
-										Type.CROWD_APPLICATION,
-										QualificationState.BE_ACCEPTED, null,
-										ReadState.UNREAD, true));
+								nGroupID, user.uid, state);
 					} else {
 						V2Log.e("CrowdCreateActivity  -->Not found  VMessageQualification Cache Object ! user id is : "
 								+ user.uid);
@@ -1224,12 +1221,13 @@ public class JNIService extends Service implements
 
 						if (group.getOwnerUser().getmUserId() == GlobalHolder
 								.getInstance().getCurrentUserId()) {
+							GroupQualicationState state = new GroupQualicationState(
+									Type.CROWD_APPLICATION,
+									QualificationState.ACCEPTED, null,
+									ReadState.UNREAD, false);
+							state.isUpdateTime = false;
 							msgID = VerificationProvider.updateCrowdQualicationMessageState(
-									nGroupID, user.uid,
-									new GroupQualicationState(
-											Type.CROWD_APPLICATION,
-											QualificationState.ACCEPTED, null,
-											ReadState.UNREAD, false));
+									nGroupID, user.uid, state);
 						}
 					}
 				}

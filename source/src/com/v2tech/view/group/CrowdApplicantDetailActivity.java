@@ -211,8 +211,10 @@ public class CrowdApplicantDetailActivity extends Activity {
 		
 		msg.setQualState(QualificationState.REJECT);
 		msg.setReadState(ReadState.READ);
-		VerificationProvider.updateCrowdQualicationMessageState(msg.getId() , new GroupQualicationState(Type.CROWD_APPLICATION,
-				QualificationState.REJECT, null , ReadState.READ  , true));
+		GroupQualicationState state = new GroupQualicationState(Type.CROWD_APPLICATION,
+				QualificationState.REJECT, null , ReadState.READ  , true);
+		state.isUpdateTime = false;
+		VerificationProvider.updateCrowdQualicationMessageState(msg.getId() , state);
 	}
 	
 	private OnClickListener mAcceptButtonListener = new OnClickListener() {

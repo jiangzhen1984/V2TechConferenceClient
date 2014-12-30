@@ -13,6 +13,8 @@ public class GroupQualicationState {
 	public String refuseReason;
 	public ReadState readState;
 	public boolean isOwnerGroup;
+	//手动处理了验证消息状态，不更新存储时间；比如手动点同意或拒绝
+	public boolean isUpdateTime = true; 
 
 	public GroupQualicationState(Type qualicationType,
 			QualificationState state, String reason , ReadState readState , boolean isOwnerGroup) {

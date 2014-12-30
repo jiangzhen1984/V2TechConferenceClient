@@ -190,17 +190,21 @@ public class CrowdInvitationActivity extends Activity {
 		VMessageQualification message = VerificationProvider.queryCrowdQualMessageById(vq.getId());
 		vq.setQualState(message.getQualState());
 		vq.setReadState(message.getReadState());
+		GroupQualicationState state = new GroupQualicationState(Type.CROWD_INVITATION , 
+				QualificationState.ACCEPTED , null , ReadState.READ , false);
+		state.isUpdateTime = false;
+		VerificationProvider.updateCrowdQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),state);
 		updateView(false);
-		VerificationProvider.updateCrowdQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
-				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.ACCEPTED , null , ReadState.READ , false));
 	}
 
 	private void handleDeclineDone() {
 		vq.setReadState(VMessageQualification.ReadState.READ);
 		vq.setQualState(VMessageQualification.QualificationState.REJECT);
+		GroupQualicationState state = new GroupQualicationState(Type.CROWD_INVITATION , 
+				QualificationState.REJECT , null , ReadState.READ , false);
+		state.isUpdateTime = false;
+		VerificationProvider.updateCrowdQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(), state);
 		updateView(false);
-		VerificationProvider.updateCrowdQualicationMessageState(crowd.getId(), crowd.getCreator().getmUserId(),
-				new GroupQualicationState(Type.CROWD_INVITATION , QualificationState.REJECT , null , ReadState.READ , false));
 	}
 
 	private void updateView(boolean isInReject) {

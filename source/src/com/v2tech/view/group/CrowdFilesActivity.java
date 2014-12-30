@@ -514,13 +514,6 @@ public class CrowdFilesActivity extends Activity {
 					+ file.getName()
 					+ " error code is : " + ind.errorCode);
 			
-//			boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(mContext, false, 
-//					crowd.getmGId(), "CrowdFilesActivity IND_TYPE_TRANS_ERR ");
-//			if(!flag){
-//				V2Log.e("TRANSING_FILE_SIZE", "CrowdFilesActivity handleFileRemovedEvent --> "
-//						+ "update transing file size failed ... ");
-//			}
-			
 			Intent i = new Intent();
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.setAction(PublicIntent.BROADCAST_CROWD_FILE_ACTIVITY_SEND_NOTIFICATION);
@@ -599,6 +592,11 @@ public class CrowdFilesActivity extends Activity {
 	 */
 	private void handleNewFileEvent(List<VCrowdFile> files) {
 		for (VCrowdFile vCrowdFile : files) {
+			VMessage vm = mUploadingVMFiles.get(vCrowdFile.getId());
+			if(vm != null){
+				vCrowdFile.setState(State.DOWNLOADED);
+				vCrowdFile.setPath(vm.getFileItems().get(0).getFilePath());
+			}
 			mServerExistFiles.add(0, vCrowdFile);
 		}
 		adapter.notifyDataSetChanged();

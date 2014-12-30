@@ -160,21 +160,6 @@ public class CrowdApplicationActivity extends Activity {
         registerReceiver(applyReceiver, filter);
     }
 
-	private void handleApplyDone() {
-		Intent i = new Intent();
-		i.setAction(JNIService.JNI_BROADCAST_CROWD_INVATITION);
-		i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
-		i.putExtra("crowd", crowd);
-		i.putExtra("isFromApplication", true);
-		startActivity(i);
-		super.onBackPressed();
-//		mButtonLy.setVisibility(View.GONE);
-//		mNotesLy.setVisibility(View.VISIBLE);
-//		mNotes.setText(R.string.crowd_applicant_done);
-//		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-//		imm.hideSoftInputFromWindow(mApplicationMessage.getWindowToken(), 0);
-	}
-	
 	private void updateView() {
 		if (isInApplicationMode) {
 			mSendButton.setVisibility(View.VISIBLE);
@@ -226,6 +211,16 @@ public class CrowdApplicationActivity extends Activity {
 		}
 	}
 	
+	private void handleApplyDone() {
+		Intent i = new Intent();
+		i.setAction(JNIService.JNI_BROADCAST_CROWD_INVATITION);
+		i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);
+		i.putExtra("crowd", crowd);
+		i.putExtra("isFromApplication", true);
+		startActivity(i);
+		super.onBackPressed();
+	}
+	
 	private void handleNeverApply(){
 		 Toast.makeText(
                  mContext,
@@ -243,7 +238,7 @@ public class CrowdApplicationActivity extends Activity {
          if (vq != null) {
              vq.setReadState(VMessageQualification.ReadState.READ);
              vq.setQualState(VMessageQualification.QualificationState.BE_REJECT);
-             VerificationProvider.updateCrowdQualicationMessage(vq);
+             VerificationProvider.updateCrowdQualicationMessage(null , vq , false);
          }
          else{
              VMessageQualification quaion = VerificationProvider.queryCrowdQualMessageByCrowdId(

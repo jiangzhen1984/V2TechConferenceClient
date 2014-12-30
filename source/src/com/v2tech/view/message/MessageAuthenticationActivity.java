@@ -1353,13 +1353,12 @@ public class MessageAuthenticationActivity extends Activity {
 							Toast.LENGTH_SHORT).show();
 					return;
 				}
+				
 				AcceptedButtonTag tag = (AcceptedButtonTag) v.getTag();
 				VMessageQualification msg = (VMessageQualification) tag.wrapper.obj;
 				waitingQualification = tag.wrapper;
-				// msg.setQualState(VMessageQualification.QualificationState.ACCEPTED);
 				VMessageQualification message = VerificationProvider
 						.queryCrowdQualMessageById(msg.getId());
-
 				if (msg.getType() == VMessageQualification.Type.CROWD_INVITATION) {
 					CrowdGroup cg = ((VMessageQualificationInvitationCrowd) msg)
 							.getCrowdGroup();
@@ -1377,14 +1376,9 @@ public class MessageAuthenticationActivity extends Activity {
 
 						updateViewItem(tag.wrapper, tag.item);
 						msg.setReadState(ReadState.READ);
-						VerificationProvider.updateCrowdQualicationMessage(msg);
+						VerificationProvider.updateCrowdQualicationMessage(null , msg , false);
 						// startCrowdInvitationDetail(msg);
 					} else {
-						// Add crowd group to cache, we can't handle this after
-						// done
-						// because group information come before done event.
-						// GlobalHolder.getInstance().addGroupToList(
-						// GroupType.CHATING.intValue(), cg);
 
 						Crowd crowd = new Crowd(cg.getmGId(),
 								cg.getOwnerUser(), cg.getName(), cg.getBrief());
@@ -1394,7 +1388,6 @@ public class MessageAuthenticationActivity extends Activity {
 						ProgressUtils
 								.showNormalWithHintProgress(mContext, true);
 					}
-
 				} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
 					VMessageQualificationApplicationCrowd vqac = ((VMessageQualificationApplicationCrowd) msg);
 					Group group = GlobalHolder.getInstance().getGroupById(
@@ -1407,7 +1400,7 @@ public class MessageAuthenticationActivity extends Activity {
 							msg.setReadState(ReadState.READ);
 							updateViewItem(tag.wrapper, tag.item);
 							VerificationProvider
-									.updateCrowdQualicationMessage(msg);
+									.updateCrowdQualicationMessage(null , msg , false);
 						} else {
 							crowdService.acceptApplication(
 									vqac.getCrowdGroup(), vqac.getApplicant(),
@@ -1432,29 +1425,17 @@ public class MessageAuthenticationActivity extends Activity {
 			return;
 		}
 
-		VMessageQualification currentMessage = null;
 		VMessageQualification vq = VerificationProvider
 				.queryCrowdQualMessageByCrowdId(userID, groupID);
 		for (ListItemWrapper wrapper : mMessageList) {
 			VMessageQualification message = (VMessageQualification) wrapper.obj;
 			if (vq.getId() == message.getId()) {
-				currentMessage = message;
 				message.setQualState(QualificationState.ACCEPTED);
 				message.setReadState(ReadState.READ);
 				groupAdapter.notifyDataSetChanged();
 				break;
 			}
 		}
-
-		// if (type == Type.CROWD_INVITATION) {
-		// Intent i = new Intent();
-		// i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-		// i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-		// i.putExtra("crowd", groupID);
-		// sendBroadcast(i);
-		// startCrowdInvitationDetail(currentMessage);
-		// }
-
 	}
 
 	private void handleFailedDone() {
@@ -1483,22 +1464,22 @@ public class MessageAuthenticationActivity extends Activity {
 				long msgId = intent.getLongExtra("msgId", 0);
 				VMessageQualification msg = VerificationProvider
 						.queryCrowdQualMessageById(msgId);
-				boolean isAdd = true;
-				ListItemWrapper removedWrapper = null;
+//				boolean isAdd = true;
+//				ListItemWrapper removedWrapper = null;
 				if (msg != null && mMessageList != null) {
 
-					for (ListItemWrapper wrapper : mMessageList) {
-						VMessageQualification message = (VMessageQualification) wrapper.obj;
-						if (message.getId() == msg.getId()) {
-							removedWrapper = wrapper;
-							isAdd = false;
-							break;
-						}
-					}
+//					for (ListItemWrapper wrapper : mMessageList) {
+//						VMessageQualification message = (VMessageQualification) wrapper.obj;
+//						if (message.getId() == msg.getId()) {
+//							removedWrapper = wrapper;
+//							isAdd = false;
+//							break;
+//						}
+//					}
 
-					if (!isAdd)
-						mMessageList.remove(removedWrapper);
-					mMessageList.add(0, new ListItemWrapper(msg));
+//					if (!isAdd)
+//						mMessageList.remove(removedWrapper);
+//					mMessageList.add(0, new ListItemWrapper(msg));
 
 					groupAdapter.notifyDataSetChanged();
 					// 当用户在当前界面时，就不显示红点了
