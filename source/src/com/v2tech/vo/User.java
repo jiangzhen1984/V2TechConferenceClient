@@ -632,7 +632,7 @@ public class User implements Comparable<User> {
 	private static String getAttribute(Element el, String name) {
 		Attr atr = el.getAttributeNode(name);
 		if (atr != null) {
-			return atr.getValue();
+			return EscapedcharactersProcessing.reverse(atr.getValue());
 		}
 		return null;
 	}

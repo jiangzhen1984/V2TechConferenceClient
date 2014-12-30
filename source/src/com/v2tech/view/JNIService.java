@@ -53,6 +53,7 @@ import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.ind.VideoJNIObjectInd;
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
@@ -737,6 +738,7 @@ public class JNIService extends Service implements
 			if (isDebug) {
 				V2Log.d("group type:" + groupType + " " + nGroupID + " " + sXml);
 			}
+			
 			Message.obtain(mCallbackHandler, JNI_GROUP_USER_INFO_NOTIFICATION,
 					new GroupUserInfoOrig(groupType, nGroupID, sXml))
 					.sendToTarget();
@@ -915,15 +917,15 @@ public class JNIService extends Service implements
 		private VMessageQualification checkMessageAndSendBroadcast(
 				VMessageQualification.Type type, CrowdGroup g, User user,
 				String reason) {
-			// boolean sendBroadcast = true;
 			VMessageQualification crowdMsg = null;
+			//群申请
 			if (type == Type.CROWD_APPLICATION) {
 				crowdMsg = VerificationProvider.queryCrowdApplyQualMessageByUserId( g.getmGId() , user
 						.getmUserId());
-			} else {
+			} else { //群邀请
 				crowdMsg = VerificationProvider.queryCrowdQualMessageByCrowdId(user, g);
 			}
-
+			//如果从数据库查出该条记录，则只需要更新时间和状态
 			if (crowdMsg != null) {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
 					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
