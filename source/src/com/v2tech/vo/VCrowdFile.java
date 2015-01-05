@@ -2,6 +2,8 @@ package com.v2tech.vo;
 
 import java.util.Date;
 
+import com.V2.jni.util.EscapedcharactersProcessing;
+
 public class VCrowdFile extends VFile {
 
 	private CrowdGroup crowd;
@@ -33,7 +35,7 @@ public class VCrowdFile extends VFile {
 	 */
 	public String toXml() {
 		String str = "<file encrypttype='1' id='"+this.getId()+"' "
-				+ " name='"+this.getPath()+"' size='"+this.size+"' "
+				+ " name='"+EscapedcharactersProcessing.convert(this.getPath())+"' size='"+this.size+"' "
 				+ " time='"+new Date().getTime()/1000+"' uploader='"+this.uploader.getmUserId()+"' />";
 		return str;
 	}

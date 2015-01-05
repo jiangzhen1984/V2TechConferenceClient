@@ -98,6 +98,7 @@ import com.v2tech.view.group.CrowdFilesActivity.CrowdFileActivityType;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.Conversation;
+import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.Group;
@@ -704,6 +705,9 @@ public class ConversationP2PTextActivity extends Activity implements
 			remoteGroupID = cov.getExtId();
 			Group group = GlobalHolder.getInstance()
 					.getGroupById(remoteGroupID);
+			if(group == null){
+				group = new CrowdGroup(remoteGroupID, "", null);
+			}
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
 			mShowContactDetailButton.setVisibility(View.GONE);

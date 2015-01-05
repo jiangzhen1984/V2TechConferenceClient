@@ -12,6 +12,7 @@ import android.os.Parcelable;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.DateUtil;
 
 public class Conference implements Parcelable {
 
@@ -249,6 +250,7 @@ public class Conference implements Parcelable {
 		long createor = 0;
 		long chairman = 0;
 		String subject = "";
+		String startTime = "";
 		int start = str.indexOf("chairuserid='");
 		if (start != -1) {
 			int end = str.indexOf("'", start + 13);
@@ -273,11 +275,11 @@ public class Conference implements Parcelable {
 			}
 		}
 
-		start = str.indexOf(" id='");
+		start = str.indexOf(" starttime='");
 		if (start != -1) {
-			int end = str.indexOf("'", start + 5);
+			int end = str.indexOf("'", start + 12);
 			if (end != -1) {
-				id = Long.valueOf(str.substring(start + 5, end));
+				startTime = str.substring(start + 12, end);
 			}
 		}
 
@@ -293,8 +295,7 @@ public class Conference implements Parcelable {
 		conf.setChairman(chairman);
 		conf.setCreator(createor);
 		conf.setName(subject);
+		conf.setStartTime(DateUtil.getStandardDate(new Date(Long.valueOf(startTime) * 1000)));
 		return conf;
-
 	}
-
 }

@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
-import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -28,8 +27,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
-import android.widget.Filter;
-import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -39,8 +36,8 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.util.SearchUtils;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.SearchUtils;
 import com.v2tech.vo.Attendee;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.User;
@@ -63,7 +60,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	private List<Wrapper> mList;
 	private List<Wrapper> mFilterList;
+	private List<Wrapper> mSearchFilterList;
 
+	private boolean mIsStartedSearch;
 	private EditText mSearchET;
 
 	private View mPinButton;
@@ -91,7 +90,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		public void requestAttendeeViewFixedLayout(View v);
 
 		public void requestAttendeeViewFloatLayout(View v);
-		
+
 	};
 
 	public VideoAttendeeListLayout(Conference conf, Context context) {
@@ -507,12 +506,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			// for fast enter conference user
 			int index = 0;
 			boolean isFound = false;
-			boolean isAdd = true;;
+			boolean isAdd = true;
+			;
 			for (int i = 0; i < mList.size(); i++) {
 				Attendee attendee = mList.get(i).a;
-				if(attendee.getAttId() == at.getAttId()){
+				if (attendee.getAttId() == at.getAttId()) {
 					isFound = true;
-					if(dList != null && dList.size() > 0){
+					if (dList != null && dList.size() > 0) {
 						mList.get(i).udc = dList.get(0);
 						mList.get(i).sortFlag = FIRST_DEVICE_FLAG;
 						index = i;
@@ -520,7 +520,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					break;
 				}
 			}
-			
+
 			if (dList != null) {
 				for (int i = 1; i < dList.size(); i++) {
 					if (index + 1 == mList.size() - 1) {
@@ -533,10 +533,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					index++;
 				}
 			}
-			
-			if(!isFound){
+
+			if (!isFound) {
 				mAttendeeCount++;
-				if(isAdd){
+				if (isAdd) {
 					mList.add(new Wrapper(at, null, FIRST_DEVICE_FLAG));
 				}
 			}
@@ -545,44 +545,40 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				onLinePersons++;
 			}
 			updateStatist();
-			
-			
-			
-			
 
-//			// boolean isNew = false;
-//			int index = 0;
-//			if (mList.size() > 0 && dList != null && dList.size() > 0) {
-//
-//				for (int i = 0; i < mList.size(); i++) {
-//					Wrapper wr = mList.get(i);
-//					if (wr.a.getAttId() == at.getAttId()) {
-//						index = i;
-//						break;
-//					}
-//				}
-//
-//			}
-//
-//			int deviceIndex = 1;
-//			for (int i = 0; i < dList.size(); i++) {
-//				UserDeviceConfig udc = dList.get(i);
-//				if (i == 0) {
-//					
-//					
-//					mList.add(index, new Wrapper(at, udc, FIRST_DEVICE_FLAG));
-//				} else {
-//					if (index + 1 == mList.size() - 1) {
-//						mList.add(new Wrapper(at, udc, deviceIndex++));
-//					} else {
-//						mList.add(index + 1,
-//								new Wrapper(at, udc, deviceIndex++));
-//					}
-//					index++;
-//					// isNew = true;
-//				}
-//
-//			}
+			// // boolean isNew = false;
+			// int index = 0;
+			// if (mList.size() > 0 && dList != null && dList.size() > 0) {
+			//
+			// for (int i = 0; i < mList.size(); i++) {
+			// Wrapper wr = mList.get(i);
+			// if (wr.a.getAttId() == at.getAttId()) {
+			// index = i;
+			// break;
+			// }
+			// }
+			//
+			// }
+			//
+			// int deviceIndex = 1;
+			// for (int i = 0; i < dList.size(); i++) {
+			// UserDeviceConfig udc = dList.get(i);
+			// if (i == 0) {
+			//
+			//
+			// mList.add(index, new Wrapper(at, udc, FIRST_DEVICE_FLAG));
+			// } else {
+			// if (index + 1 == mList.size() - 1) {
+			// mList.add(new Wrapper(at, udc, deviceIndex++));
+			// } else {
+			// mList.add(index + 1,
+			// new Wrapper(at, udc, deviceIndex++));
+			// }
+			// index++;
+			// // isNew = true;
+			// }
+			//
+			// }
 
 			// 设备显示不出问题时删除这段注释
 			// if (dList != null) {
@@ -636,10 +632,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 			// if (isNew)
 			// mAttendeeCount++;
-//			if ((at.isJoined() || at.isSelf())) {
-//				onLinePersons++;
-//			}
-//			updateStatist();
+			// if ((at.isJoined() || at.isSelf())) {
+			// onLinePersons++;
+			// }
+			// updateStatist();
 
 		}
 
@@ -662,7 +658,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			Wrapper wr = mList.get(i);
 			// Remove attendee devices, leave one device item
 			if (wr.a.getAttId() == at.getAttId()) {
-				if (found || wr.a.getType() == Attendee.TYPE_MIXED_VIDEO || wr.a.isRmovedFromList) {
+				if (found || wr.a.getType() == Attendee.TYPE_MIXED_VIDEO
+						|| wr.a.isRmovedFromList) {
 					mList.remove(i--);
 					continue;
 				} else {
@@ -670,11 +667,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			}
 		}
-		
-		if(at.isRmovedFromList){
+
+		if (at.isRmovedFromList) {
 			mAttendeeCount--;
 		}
-		
+
 		// Update on line count
 		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
 			onLinePersons--;
@@ -1037,14 +1034,30 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		}
 	}
 
+	private boolean isFrist;
 	private TextWatcher mSearchListener = new TextWatcher() {
 
 		@Override
 		public void afterTextChanged(Editable et) {
 			if (TextUtils.isEmpty(et)) {
-				mAttendeeContainer.clearTextFilter();
+				SearchUtils.clearAll();
+				mIsStartedSearch = SearchUtils.mIsStartedSearch;
+				isFrist = true;
+				mSearchFilterList.clear();
+				adapter.notifyDataSetChanged();
 			} else {
-				mAttendeeContainer.setFilterText(et.toString());
+				if (isFrist) {
+					SearchUtils.clearAll();
+					List<Object> wrappers = new ArrayList<Object>();
+					wrappers.addAll(mList);
+					SearchUtils.receiveList = wrappers;
+					isFrist = false;
+				}
+
+				mSearchFilterList = SearchUtils.startVideoAttendeeSearch(et
+						.toString());
+				mIsStartedSearch = SearchUtils.mIsStartedSearch;
+				adapter.notifyDataSetChanged();
 			}
 		}
 
@@ -1062,23 +1075,22 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	};
 
-	class AttendeesAdapter extends BaseAdapter implements Filterable {
-
-		private LocalFilter filter;
-
-		public AttendeesAdapter() {
-			super();
-			filter = new LocalFilter();
-		}
+	class AttendeesAdapter extends BaseAdapter {
 
 		@Override
 		public int getCount() {
-			return mFilterList.size();
+			if(mIsStartedSearch)
+				return mSearchFilterList.size();
+			else
+				return mFilterList.size();
 		}
 
 		@Override
 		public Object getItem(int position) {
-			return mFilterList.get(position);
+			if(mIsStartedSearch)
+				return mSearchFilterList.get(position);
+			else
+				return mFilterList.get(position);
 		}
 
 		@Override
@@ -1088,87 +1100,19 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			Wrapper wrapper;
+			if(mIsStartedSearch) 
+				wrapper = mSearchFilterList.get(position);
+			else
+				wrapper = mFilterList.get(position);
+				
 			if (convertView == null) {
-				convertView = buildAttendeeView(mFilterList.get(position));
+				convertView = buildAttendeeView(wrapper);
 			} else {
-				updateView(mFilterList.get(position), convertView);
+				updateView(wrapper, convertView);
 			}
 			return convertView;
 		}
-
-		public Filter getFilter() {
-			return filter;
-		}
-
-	}
-
-	class LocalDataObserver extends DataSetObserver {
-
-		@Override
-		public void onChanged() {
-			super.onChanged();
-			if (TextUtils.isEmpty(mAttendeeContainer.getTextFilter())) {
-				mFilterList = mList;
-			}
-		}
-
-		@Override
-		public void onInvalidated() {
-			super.onInvalidated();
-		}
-
-	}
-
-	class LocalFilter extends Filter {
-
-		private boolean isFirstSearch = true;
-
-		@Override
-		protected FilterResults performFiltering(CharSequence constraint) {
-			FilterResults fr = new FilterResults();
-			List<Wrapper> list = null;
-			if (constraint == null || constraint.toString().isEmpty()) {
-				list = mList;
-				SearchUtils.clearAll();
-				isFirstSearch = true;
-			} else {
-				if (isFirstSearch) {
-					SearchUtils.clearAll();
-					List<Object> wrappers = new ArrayList<Object>();
-					wrappers.addAll(mList);
-					SearchUtils.receiveList = wrappers;
-					isFirstSearch = false;
-				}
-
-				list = SearchUtils.startVideoAttendeeSearch(constraint
-						.toString());
-			}
-
-			fr.values = list;
-			fr.count = list.size();
-			list = null;
-			return fr;
-		}
-
-		@Override
-		protected void publishResults(CharSequence constraint,
-				FilterResults results) {
-			if (results.values != null) {
-				if (TextUtils.isEmpty(constraint)) {
-
-				}
-				mFilterList = (List<Wrapper>) results.values;
-				adapter.notifyDataSetChanged();
-			} else {
-				// TODO toast search error
-			}
-		}
-
-		@Override
-		public CharSequence convertResultToString(Object resultValue) {
-			return super.convertResultToString(resultValue);
-		}
-
 	}
 
 	public class Wrapper implements Comparable<Wrapper> {
@@ -1187,24 +1131,24 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public int compareTo(Wrapper wr) {
-			if (this.a == null) 
+			if (this.a == null)
 				return 1;
-			
-			if (wr.a == null) 
-				return -1;
-			
-			if (this.a.getType() == Attendee.TYPE_MIXED_VIDEO) 
+
+			if (wr.a == null)
 				return -1;
 
-			if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) 
-				return 1;
-			
-			if (this.a.isSelf()) 
+			if (this.a.getType() == Attendee.TYPE_MIXED_VIDEO)
 				return -1;
-			
-			if (wr.a.isSelf()) 
+
+			if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO)
 				return 1;
-			
+
+			if (this.a.isSelf())
+				return -1;
+
+			if (wr.a.isSelf())
+				return 1;
+
 			int ret = this.a.compareTo(wr.a);
 			if (ret == 0) {
 				return this.sortFlag;
@@ -1216,7 +1160,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else {
 					return ret;
 				}
-			} 
+			}
 		}
 	}
 

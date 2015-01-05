@@ -14,6 +14,7 @@ import android.os.Message;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.TextUtils.TruncateAt;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -107,6 +108,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		mConfStartTimeET = (EditText) view
 				.findViewById(R.id.conference_create_conf_start_time);
 		mConfStartTimeET.setEnabled(false);
+		mConfStartTimeET.setEllipsize(TruncateAt.END);
 
 		searchedTextET = (EditText) view.findViewById(R.id.contacts_search);
 		searchedTextET.addTextChangedListener(textChangedListener);

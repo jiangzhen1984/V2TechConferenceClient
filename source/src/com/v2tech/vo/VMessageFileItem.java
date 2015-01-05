@@ -8,6 +8,7 @@ import java.util.UUID;
 
 import android.text.TextUtils;
 
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
 
@@ -148,7 +149,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		// + GlobalConfig.getGlobalServerTime() + "\" uploader=\"" +
 		// GlobalHolder.getInstance().getCurrentUserId()
 		// + "\" url=\"" + url + "\" /></filelist>").append("\n");
-		sb.append("<file id=\"" + uuid + "\" name=\"" + filePath + "\" />")
+		sb.append("<file id=\"" + uuid + "\" name=\"" + EscapedcharactersProcessing.convert(filePath) + "\" />")
 				.append("\n");
 		return sb.toString();
 	}

@@ -2297,15 +2297,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	private ProgressDialog mWaitingDialog;
-
 	private void requestJoinConf(long gid) {
 		if (currentEntered != null) {
 			V2Log.e("Already in meeting " + currentEntered.getId());
 			return;
 		}
 		synchronized (mLock) {
-			// When request join conference response, mWaitingDialog will be
-			// null
+			// When request join conference response, mWaitingDialog will be null
 			if (mWaitingDialog != null) {
 				return;
 			}
@@ -2318,7 +2316,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			Message.obtain(this.mHandler, REQUEST_ENTER_CONF, gid)
 					.sendToTarget();
 		}
-
 	}
 
 	private void startConferenceActivity(Conference conf) {
@@ -3427,7 +3424,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				RequestEnterConfResponse recr = (RequestEnterConfResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
 					Conference c = recr.getConf();
-					c.setStartTime(currentClickConversation.getDate());
 					startConferenceActivity(c);
 				} else {
 					V2Log.d(TAG, "Request enter conf response , code is : "

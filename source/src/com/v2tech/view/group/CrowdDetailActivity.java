@@ -109,6 +109,10 @@ public class CrowdDetailActivity extends Activity {
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 				GroupType.CHATING.intValue(), getIntent().getLongExtra("cid", 0));
 
+		if(crowd == null){
+			super.onDestroy();
+			return ;
+		}
 		String cid  = String.valueOf(crowd.getmGId());
 //		mNoTV.setText(cid.length() > 4 ? cid.substring(5) : cid.substring(1));
 		mNoTV.setText(cid);
@@ -156,10 +160,6 @@ public class CrowdDetailActivity extends Activity {
 			mMembersCountsTV.setText(crowd.getUsers().size()+"");
 		}
 	}
-
-
-	
-
 
 
 	@Override

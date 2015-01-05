@@ -95,6 +95,7 @@ public class CrowdFilesActivity extends Activity {
 
 	private Map<String, VCrowdFile> mShowProgressFileMap;
 	private HashMap<String, VMessageFileItem> mLocalSaveFile;
+	private HashMap<String, VCrowdFile> mPauseFiles;
 	private List<VCrowdFile> mServerExistFiles;
 	private List<VCrowdFile> mUploadedFiles;
 	private Map<String, VMessage> mUploadingVMFiles;
@@ -112,7 +113,6 @@ public class CrowdFilesActivity extends Activity {
 	private boolean showUploaded;
 	private boolean isInDeleteMode;
 	private boolean isFromChatActivity; // 如果从聊天界面点击正在上传的文件，进入正在上传界面，就直接返回聊天界面
-	private String currentUpdateProgress;
 	private boolean isFromStartState = true;
 
 	private CrowdGroupService service;
@@ -149,6 +149,7 @@ public class CrowdFilesActivity extends Activity {
 		mServerExistFiles = new ArrayList<VCrowdFile>();
 		mUploadedFiles = new ArrayList<VCrowdFile>();
 		mShowProgressFileMap = new HashMap<String, VCrowdFile>();
+		mPauseFiles = new HashMap<String, VCrowdFile>();
 		mUploadingVMFiles = new HashMap<String, VMessage>();
 
 		initReceiver();
@@ -356,6 +357,8 @@ public class CrowdFilesActivity extends Activity {
 					}
 
 					if (temp.getState() == VMessageAbstractItem.STATE_FILE_SENDING
+							|| temp.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING
+							|| temp.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING
 							|| temp.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
 						mShowProgressFileMap.put(crowdFile.getId(), crowdFile);
 					}
@@ -521,7 +524,6 @@ public class CrowdFilesActivity extends Activity {
 				file.setProceedSize(file.getSize());
 			} else {
 				isFromStartState = false;
-				currentUpdateProgress = ind.uuid;
 				file.setProceedSize(progress.nTranedSize);
 			}
 			if (file.getProceedSize() == file.getSize()
@@ -1174,47 +1176,52 @@ public class CrowdFilesActivity extends Activity {
 			} else {
 				item.mFileDeleteButton.setVisibility(View.INVISIBLE);
 			}
-
-			if (isFromStartState) {
-				updateProgress(item, file);
-			} else {
-				if ((fs == VFile.State.DOWNLOADING
-						|| fs == VFile.State.UPLOADING
-						|| fs == VFile.State.UPLOAD_PAUSE || fs == VFile.State.DOWNLOAD_PAUSE)
-						&& file.getId().equals(currentUpdateProgress)) {
-					updateProgress(item, file);
-				}
-			}
+			
+			item.mProgressParent.measure(MeasureSpec.UNSPECIFIED,
+					MeasureSpec.UNSPECIFIED);
+			updateProgress(item, file);
 		}
 
 		private void updateProgress(ViewItem item, VCrowdFile file) {
+
 			item.mFileProgress.setVisibility(View.VISIBLE);
-			FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress
-					.get(file.getId());
-			double percent = 0;
-			float speed = 0;
-			if (bean != null) {
-				file.setProceedSize(bean.currentLoadSize);
+			if (!isFromStartState && (file.getState() == VFile.State.UPLOAD_PAUSE || 
+					file.getState() == VFile.State.DOWNLOAD_PAUSE)) {
 				item.mFileProgress.setText(file.getProceedSizeStr() + "/"
 						+ file.getFileSizeStr());
-				file.setProceedSize(bean.currentLoadSize);
-				long sec = (System.currentTimeMillis() - bean.lastLoadTime);
-				long size = file.getProceedSize() - bean.lastLoadSize;
-				percent = ((double) file.getProceedSize() / (double) file
+				item.mVelocity.setText("0kb/S");
+				
+				double percent = ((double) file.getProceedSize() / (double) file
 						.getSize());
-				speed = (size / sec) * 1000;
-				item.mVelocity.setText(file.getFileSize(speed) + "/S");
+				int width = item.mProgressLayout.getMeasuredWidth();
+				ViewGroup.LayoutParams vl = item.mProgress.getLayoutParams();
+				vl.width = (int) (width * percent);
+				item.mProgress.setLayoutParams(vl);
 			} else {
-				percent = 0;
-				speed = 0;
-			}
+				FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress
+						.get(file.getId());
+				double percent = 0;
+				float speed = 0;
+				if (bean != null) {
+					file.setProceedSize(bean.currentLoadSize);
+					long sec = (System.currentTimeMillis() - bean.lastLoadTime);
+					long size = file.getProceedSize() - bean.lastLoadSize;
+					percent = ((double) file.getProceedSize() / (double) file
+							.getSize());
+					speed = (size / sec) * 1000;
+					item.mVelocity.setText(file.getFileSize(speed) + "/S");
+				} else {
+					item.mVelocity.setText("0kb/S");
+				}
+				
+				item.mFileProgress.setText(file.getProceedSizeStr() + "/"
+						+ file.getFileSizeStr());
 
-			item.mProgressParent.measure(MeasureSpec.UNSPECIFIED,
-					MeasureSpec.UNSPECIFIED);
-			int width = item.mProgressParent.getMeasuredWidth();
-			ViewGroup.LayoutParams vl = item.mProgress.getLayoutParams();
-			vl.width = (int) (width * percent);
-			item.mProgress.setLayoutParams(vl);
+				int width = item.mProgressLayout.getMeasuredWidth();
+				ViewGroup.LayoutParams vl = item.mProgress.getLayoutParams();
+				vl.width = (int) (width * percent);
+				item.mProgress.setLayoutParams(vl);
+			}
 		}
 
 		private OnClickListener mFailIconListener = new OnClickListener() {
@@ -1264,6 +1271,7 @@ public class CrowdFilesActivity extends Activity {
 								true, crowd.getmGId(),
 								"CrowdFilesActivity mFailIconListener");
 						file.setState(VFile.State.DOWNLOADING);
+						file.setProceedSize(0);
 						mShowProgressFileMap.put(file.getId(), file);
 						file.setStartTime(new Date(GlobalConfig
 								.getGlobalServerTime()));
@@ -1276,6 +1284,8 @@ public class CrowdFilesActivity extends Activity {
 								true, crowd.getmGId(),
 								"CrowdFilesActivity mFailIconListener");
 						file.setState(VFile.State.UPLOADING);
+						mShowProgressFileMap.put(file.getId(), file);
+						file.setProceedSize(0);
 						file.setStartTime(new Date(GlobalConfig
 								.getGlobalServerTime()));
 						service.handleCrowdFile(file,
@@ -1446,10 +1456,13 @@ public class CrowdFilesActivity extends Activity {
 
 				boolean isUpload = false;
 				if (file.getState() == VFile.State.UNKNOWN) {
-					GlobalHolder.getInstance().changeGlobleTransFileMember(
+					boolean isAdd = GlobalHolder.getInstance().changeGlobleTransFileMember(
 							V2GlobalEnum.FILE_TRANS_DOWNLOADING, mContext,
 							true, crowd.getmGId(),
 							"CrowdFilesActivity mButtonListener");
+					if(!isAdd){
+						return ;
+					}
 
 					file.setState(VFile.State.DOWNLOADING);
 					file.setStartTime(new Date(GlobalConfig
@@ -1461,20 +1474,21 @@ public class CrowdFilesActivity extends Activity {
 							FileOperationEnum.OPERATION_START_DOWNLOAD, null);
 				} else if (file.getState() == VFile.State.DOWNLOADING) {
 					file.setState(VFile.State.DOWNLOAD_PAUSE);
+					mPauseFiles.put(file.getId(), file);
 					((TextView) v)
 							.setText(R.string.crowd_files_button_name_resume);
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_PAUSE_DOWNLOADING, null);
 				} else if (file.getState() == VFile.State.DOWNLOAD_PAUSE) {
-
 					file.setState(VFile.State.DOWNLOADING);
+					mPauseFiles.remove(file.getId());
 					((TextView) v)
 							.setText(R.string.crowd_files_button_name_pause);
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_RESUME_DOWNLOAD, null);
 				} else if (file.getState() == VFile.State.UPLOADING) {
-
 					file.setState(VFile.State.UPLOAD_PAUSE);
+					mPauseFiles.put(file.getId(), file);
 					((TextView) v)
 							.setText(R.string.crowd_files_button_name_pause);
 					service.handleCrowdFile(file,
@@ -1489,6 +1503,7 @@ public class CrowdFilesActivity extends Activity {
 					}
 
 					file.setState(VFile.State.UPLOADING);
+					mPauseFiles.remove(file.getId());
 					((TextView) v)
 							.setText(R.string.crowd_files_button_name_resume);
 					v.invalidate();

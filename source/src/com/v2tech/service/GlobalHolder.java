@@ -754,7 +754,7 @@ public class GlobalHolder {
 			return true;
 		} else {
 			if(isAdd){
-				if(transing > GlobalConfig.MAX_TRANS_FILE_SIZE){
+				if(transing >= GlobalConfig.MAX_TRANS_FILE_SIZE){
 					new Thread(new Runnable() {
 						
 						@Override
