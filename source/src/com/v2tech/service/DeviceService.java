@@ -208,6 +208,22 @@ public class DeviceService extends AbstractHandler {
 		VideoRequest.getInstance().setCapParam(cc.getDeviceId(),
 				cc.getCameraIndex(), cc.getFrameRate(), cc.getBitRate());
 	}
+	
+	public void requestPausePlayout(UserDeviceConfig userDevice) {
+		if (userDevice == null) {
+			return;
+		}
+
+		VideoRequest.getInstance().pausePlayout(userDevice.getDeviceID());
+	}
+	
+	public void requestResumePlayout(UserDeviceConfig userDevice) {
+		if (userDevice == null) {
+			return;
+		}
+
+		VideoRequest.getInstance().resumePlayout(userDevice.getDeviceID());
+	}
 
 	@Override
 	public void clearCalledBack() {

@@ -1148,6 +1148,11 @@ public class ConversationP2PAVActivity extends Activity implements
 	private void exchangeRemoteVideoAndLocalVideo() {
 		if (testFlag) {
 			testFlag = false;
+			
+			Log.e("????????", "pause playout start");
+			chatService.requestPausePlayout(uad.getUdc());
+			Log.e("????????", "pause playout end");
+			
 			bigWindowVideoLayout.removeViewInLayout(mRemoteSurface);
 			smallWindowVideoLayout.removeViewInLayout(mLocalSurface);
 
@@ -1177,6 +1182,11 @@ public class ConversationP2PAVActivity extends Activity implements
 			mReverseCameraButton1.setVisibility(View.VISIBLE);
 		} else {
 			testFlag = true;
+			
+			Log.e("????????", "pause playout start");
+			chatService.requestPausePlayout(uad.getUdc());
+			Log.e("????????", "pause playout end");
+			
 			bigWindowVideoLayout.removeViewInLayout(mLocalSurface);
 			smallWindowVideoLayout.removeViewInLayout(mRemoteSurface);
 			smallWindowVideoLayout.removeViewInLayout(mReverseCameraButton);

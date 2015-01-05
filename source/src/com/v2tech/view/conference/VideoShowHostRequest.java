@@ -63,6 +63,20 @@ public class VideoShowHostRequest extends PopupWindow {
 		mAdapter.notifyDataSetChanged();
 	}
 
+	
+	@Override
+	public void dismiss() {
+
+		
+		
+		
+		
+		
+		
+		super.dismiss();
+	}
+	
+	
 	private BaseAdapter mAdapter = new BaseAdapter() {
 
 		@Override

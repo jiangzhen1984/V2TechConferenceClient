@@ -865,7 +865,7 @@ public class VideoDocLayout extends LinearLayout {
 
 		mergeBitmapToImage(mBackgroundBitMap, mShapeBitmap);
 
-		mDocDisplayContainer.postInvalidate();
+		//mDocDisplayContainer.postInvalidate();
 	}
 
 	/**

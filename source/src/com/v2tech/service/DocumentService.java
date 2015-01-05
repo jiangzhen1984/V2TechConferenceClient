@@ -90,7 +90,8 @@ public class DocumentService extends AbstractHandler {
 	 * @param what
 	 * @param obj
 	 */
-	public void unRegisterDocPageListNotification(Handler h, int what, Object obj) {
+	public void unRegisterDocPageListNotification(Handler h, int what,
+			Object obj) {
 		unRegisterListener(KEY_PAGE_LIST_NOTIFY_LISTENER, h, what, obj);
 	}
 
@@ -234,6 +235,8 @@ public class DocumentService extends AbstractHandler {
 						if (pos != -1) {
 							name = doc.mFileName.substring(pos + 1);
 						}
+					} else {
+						name = doc.mFileName.substring(pos + 1);
 					}
 					v2doc = new V2ImageDoc(doc.mId, name, g, 0, null);
 				}
@@ -286,7 +289,7 @@ public class DocumentService extends AbstractHandler {
 
 		}
 
-		//收到白板页列表的回调
+		// 收到白板页列表的回调
 		@Override
 		public void OnWBoardPageListCallback(String szWBoardID,
 				String szPageData, int nPageID) {
@@ -294,16 +297,16 @@ public class DocumentService extends AbstractHandler {
 					XmlParser.parserDocPage(szWBoardID, szPageData));
 		}
 
-		//文档共享显示的回调
+		// 文档共享显示的回调
 		@Override
 		public void OnWBoardDocDisplayCallback(String szWBoardID, int nPageID,
 				String szFileName, int result) {
-		
+
 			notifyListenerWithPending(KEY_DOC_DISPLAY_NOTIFY_LISTENER, 0, 0,
 					new V2Doc.Page(nPageID, szWBoardID, szFileName));
 		}
 
-		//收到白板激活页的回调
+		// 收到白板激活页的回调
 		@Override
 		public void OnWBoardActivePageCallback(long nUserID, String szWBoardID,
 				int nPageID) {
@@ -322,11 +325,11 @@ public class DocumentService extends AbstractHandler {
 					new V2Doc(szWBoardID, "", g, nBusinessType, u));
 		}
 
-		//收到白板添加页的回调
+		// 收到白板添加页的回调
 		@Override
 		public void OnWBoardAddPageCallback(String szWBoardID, int nPageID) {
-			notifyListenerWithPending(KEY_DOC_ADD_ONE_PAGE_NOTIFY_LISTENER, 0, 0,
-					new V2Doc.Page(nPageID, szWBoardID, ""));
+			notifyListenerWithPending(KEY_DOC_ADD_ONE_PAGE_NOTIFY_LISTENER, 0,
+					0, new V2Doc.Page(nPageID, szWBoardID, ""));
 		}
 
 		@Override

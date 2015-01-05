@@ -404,4 +404,7 @@ public class VideoRequest {
 	private void OnGetVideoDevice(long l, String xml) {
 		Log.e("VideoRequest UI", "OnGetVideoDevice " + xml);
 	}
+	
+	public native void pausePlayout(String szDeviceID);
+	public native void resumePlayout(String szDeviceID);
 }

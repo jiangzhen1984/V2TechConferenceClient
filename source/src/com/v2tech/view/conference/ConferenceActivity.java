@@ -267,12 +267,14 @@ public class ConferenceActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
 		if (!initConferenceDate()) {
-			
+
 			isFinish = true;
 			Intent i = new Intent();
 			i.putExtra("gid", conf.getId());
 			setResult(ConversationsTabFragment.CONFERENCE_ENTER_CODE, i);
-			Toast.makeText(getApplicationContext(), R.string.confs_is_deleted_notification, Toast.LENGTH_LONG).show();
+			Toast.makeText(getApplicationContext(),
+					R.string.confs_is_deleted_notification, Toast.LENGTH_LONG)
+					.show();
 			super.finish();
 			return;
 		}
@@ -473,11 +475,12 @@ public class ConferenceActivity extends Activity {
 
 		Intent i = mContext.registerReceiver(mConfUserChangeReceiver, filter);
 		// means exist close broadcast, need to finish this activity
-//		if (i != null) {
-//			removeStickyBroadcast(i);
-//			Toast.makeText(mContext, R.string.confs_is_deleted_notification, Toast.LENGTH_LONG).show();
-//			finish();
-//		}
+		// if (i != null) {
+		// removeStickyBroadcast(i);
+		// Toast.makeText(mContext, R.string.confs_is_deleted_notification,
+		// Toast.LENGTH_LONG).show();
+		// finish();
+		// }
 	}
 
 	private boolean initConferenceDate() {
@@ -2920,7 +2923,7 @@ public class ConferenceActivity extends Activity {
 					v2Doc = new V2Doc(docId, null, null, 0, null);
 					mDocs.put(docId, v2Doc);
 				}
-		
+
 			}
 			// Record current activate Id;
 			mCurrentLecturerActivateDocId = docId;
@@ -2929,10 +2932,10 @@ public class ConferenceActivity extends Activity {
 				v2Doc.addPage(page);
 			}
 
-//			if (mDocContainer != null) {
-//				mDocContainer.updateCurrentDoc(v2Doc);
-//				mDocContainer.updateCurrentDoc();
-//			}
+			// if (mDocContainer != null) {
+			// mDocContainer.updateCurrentDoc(v2Doc);
+			// mDocContainer.updateCurrentDoc();
+			// }
 
 			break;
 		case DOC_TURN_PAGE_NOTIFICATION:// 上下翻页
@@ -3578,9 +3581,9 @@ public class ConferenceActivity extends Activity {
 						if (mConfMsgRedDot != null) {
 							mConfMsgRedDot.setVisibility(View.VISIBLE);
 						}
-					}
 
-					hasUnreadChiremanControllMsg = true;
+						hasUnreadChiremanControllMsg = true;
+					}
 
 					PermissionUpdateIndication pui = new PermissionUpdateIndication(
 							rri.getUid(), rri.getType(), rri.getState());

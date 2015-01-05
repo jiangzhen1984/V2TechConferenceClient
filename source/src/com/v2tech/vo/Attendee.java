@@ -14,14 +14,14 @@ import com.V2.jni.util.V2Log;
  * @author 28851274
  * 
  */
-public class Attendee implements Comparable<Attendee>{
-	
+public class Attendee implements Comparable<Attendee> {
+
 	public static final int LECTURE_STATE_NOT = 0;
 	public static final int LECTURE_STATE_APPLYING = 1;
 	public static final int LECTURE_STATE_GRANTED = 2;
-	
-	public final static int  TYPE_ATTENDEE = 1;
-	public final static int  TYPE_MIXED_VIDEO = 2;
+
+	public final static int TYPE_ATTENDEE = 1;
+	public final static int TYPE_MIXED_VIDEO = 2;
 
 	private User user;
 	protected List<UserDeviceConfig> mDevices;
@@ -33,11 +33,8 @@ public class Attendee implements Comparable<Attendee>{
 	public boolean isRmovedFromList; //快速入会用户 ，退出直接从列表删除
 	
 	protected Attendee() {
-		
+
 	}
-	
-	
-	
 
 	public Attendee(User user) {
 		this(user, null, false, false);
@@ -103,15 +100,14 @@ public class Attendee implements Comparable<Attendee>{
 		}
 		for (int i = 0; i < mDevices.size(); i++) {
 			if (mDevices.get(i).equals(udc)) {
-				V2Log.w("device "+udc.getDeviceID() +"  exist");
+				V2Log.w("device " + udc.getDeviceID() + "  exist");
 				return;
 			}
 		}
 		mDevices.add(udc);
 		udc.setBelongsAttendee(this);
 	}
-	
-	
+
 	public void addDevice(List<UserDeviceConfig> udcs) {
 		if (udcs == null) {
 			V2Log.w(" null device");
@@ -122,28 +118,28 @@ public class Attendee implements Comparable<Attendee>{
 		}
 	}
 
-//	public User getUser() {
-//		return user;
-//	}
-	
+	// public User getUser() {
+	// return user;
+	// }
+
 	public long getAttId() {
 		if (user != null) {
 			return user.getmUserId();
 		}
 		return 0;
 	}
-	
+
 	public String getAttName() {
 		if (user != null) {
-			if(!TextUtils.isEmpty(user.getNickName()))
+			if (!TextUtils.isEmpty(user.getNickName()))
 				return user.getNickName();
 			else
 				return user.getName();
-				
+
 		}
 		return null;
 	}
-	
+
 	public String getAbbraName() {
 		if (user != null) {
 			return user.getArra();
@@ -164,7 +160,7 @@ public class Attendee implements Comparable<Attendee>{
 		if (this.mDevices == null) {
 			return;
 		}
-		for (UserDeviceConfig udc: mDevices) {
+		for (UserDeviceConfig udc : mDevices) {
 			udc.setBelongsAttendee(this);
 		}
 	}
@@ -193,8 +189,7 @@ public class Attendee implements Comparable<Attendee>{
 	public void setJoined(boolean isJoined) {
 		this.isJoined = isJoined;
 	}
-	
-	
+
 	public Bitmap getAvatar() {
 		if (user == null) {
 			return null;
@@ -202,8 +197,7 @@ public class Attendee implements Comparable<Attendee>{
 		Bitmap map = this.user.getAvatarBitmap();
 		return map;
 	}
-	
-	
+
 	public int getType() {
 		return TYPE_ATTENDEE;
 	}
@@ -211,17 +205,17 @@ public class Attendee implements Comparable<Attendee>{
 	public boolean isSpeaking() {
 		return isSpeaking;
 	}
-	
+
 	public void setSpeakingState(boolean isSpeaking) {
-		this.isSpeaking=isSpeaking;
+		this.isSpeaking = isSpeaking;
 	}
-	
+
 	public int getLectureState() {
 		return lectureState;
 	}
-	
+
 	public void setLectureState(int lectureState) {
-		this.lectureState=lectureState;
+		this.lectureState = lectureState;
 	}
 
 	@Override
@@ -232,8 +226,8 @@ public class Attendee implements Comparable<Attendee>{
 		if (attendee.user == null) {
 			return -1;
 		}
-		
-		if(this.user.getmUserId() == attendee.user.getmUserId())
+
+		if (this.user.getmUserId() == attendee.user.getmUserId()) {
 			return 0;
 		else
 			return 1;

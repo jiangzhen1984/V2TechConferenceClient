@@ -84,8 +84,8 @@ public class User implements Comparable<User> {
 	private Set<Group> mBelongsGroup;
 	private String mAvatarPath;
 	private String abbra;
-	
-	//For Discussion Member Activity , onItemLongClick
+
+	// For Discussion Member Activity , onItemLongClick
 	public boolean isShowDelete;
 
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
@@ -243,8 +243,9 @@ public class User implements Comparable<User> {
 		if (g.getParent() != null) {
 			return loadCompany(g.getParent());
 		} else {
-			List<Group> contacts = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_CONTACT);
-			if(contacts.contains(g))
+			List<Group> contacts = GlobalHolder.getInstance().getGroup(
+					V2GlobalEnum.GROUP_TYPE_CONTACT);
+			if (contacts.contains(g))
 				return "";
 			else
 				return g.getName();
@@ -606,8 +607,9 @@ public class User implements Comparable<User> {
 					u.setAuthtype(Integer.parseInt(authType));
 				}
 
-				//如果此时是服务器第一次传来的数据，则构造User的时候，需要把dirty属性置为false
-				if(!GlobalHolder.getInstance().getGlobalState().isGroupLoaded())
+				// 如果此时是服务器第一次传来的数据，则构造User的时候，需要把dirty属性置为false
+				if (!GlobalHolder.getInstance().getGlobalState()
+						.isGroupLoaded())
 					u.updateUser(false);
 				l.add(u);
 			}
