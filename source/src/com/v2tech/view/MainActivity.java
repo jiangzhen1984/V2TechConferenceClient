@@ -1,6 +1,5 @@
 package com.v2tech.view;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -32,19 +31,14 @@ import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.provider.SearchContentProvider;
-import com.v2tech.service.ChatService;
-import com.v2tech.service.FileOperationEnum;
 import com.v2tech.util.Notificator;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.receiver.HeadSetPlugReceiver;
-import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.VFile.State;
-import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFileItem;
 
@@ -62,13 +56,9 @@ public class MainActivity extends FragmentActivity implements
 
 	private ConferenceListener mConfListener;
 
-	private List<CommonAdapterItemWrapper> messageArray;
 	private List<Fragment> fragments;
 
 	private HeadSetPlugReceiver localReceiver = new HeadSetPlugReceiver();
-
-	private static final int SUB_ACTIVITY_CODE_CREATE_CONF = 100;
-	private static final int REQUEST_UPDATE_VERIFICATION_CONVERSATION = 0x0001;
 
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
@@ -159,7 +149,6 @@ public class MainActivity extends FragmentActivity implements
 		initReceiver();
 		// Start animation
 		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
-		messageArray = new ArrayList<CommonAdapterItemWrapper>();
 		updateFileState();
 	}
 
@@ -436,7 +425,7 @@ public class MainActivity extends FragmentActivity implements
 			this.fragments = fragments;
 		}
 
-		/*
+		/**
 		 * (non-Javadoc)
 		 * 
 		 * @see android.support.v4.app.FragmentPagerAdapter#getItem(int)
@@ -447,7 +436,7 @@ public class MainActivity extends FragmentActivity implements
 			return frag;
 		}
 
-		/*
+		/**
 		 * (non-Javadoc)
 		 * 
 		 * @see android.support.v4.view.PagerAdapter#getCount()
@@ -464,8 +453,6 @@ public class MainActivity extends FragmentActivity implements
 			String action = intent.getAction();
 			if (PublicIntent.FINISH_APPLICATION.equals(action)) {
 				exitedFlag = true;
-				// 把会话中所有发送或下载的文件，状态更新到数据库
-				// executeUpdateFileState();
 				requestQuit();
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(action)) {
@@ -531,7 +518,8 @@ public class MainActivity extends FragmentActivity implements
 					for (VMessageFileItem fileItem : loadFileMessages) {
 						V2Log.d(TAG, "Iterator VMessageFileItem -- name is : " + fileItem.getFileName() + " state : " + State.fromInt(fileItem.getState()));
 						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
-								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING)
+								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING
+								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD)
 							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
 						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING 
 								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
@@ -548,52 +536,5 @@ public class MainActivity extends FragmentActivity implements
 					V2Log.e(TAG, "load all files failed... get null");
 			}
 		}).start();
-	}
-
-	/**
-	 * now it's not used..
-	 * 
-	 * @deprecated
-	 */
-	public void executeUpdateFileState() {
-
-		if (messageArray == null) {
-			V2Log.e(TAG,
-					"executeUpdateFileState is failed ... because messageArray is null");
-			return;
-		}
-
-		ChatService mChat = new ChatService();
-		for (int i = 0; i < messageArray.size(); i++) {
-			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
-			if (vm.getFileItems().size() > 0) {
-				List<VMessageFileItem> fileItems = vm.getFileItems();
-				for (int j = 0; j < fileItems.size(); j++) {
-					VMessageFileItem item = fileItems.get(j);
-					switch (item.getState()) {
-					case VMessageAbstractItem.STATE_FILE_DOWNLOADING:
-					case VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING:
-						item.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
-						MessageBuilder.updateVMessageItemToSentFalied(mContext,
-								vm);
-						mChat.updateFileOperation(item,
-								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
-								null);
-						break;
-					case VMessageAbstractItem.STATE_FILE_SENDING:
-					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
-						item.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
-						MessageBuilder.updateVMessageItemToSentFalied(mContext,
-								vm);
-						mChat.updateFileOperation(item,
-								FileOperationEnum.OPERATION_CANCEL_SENDING,
-								null);
-						break;
-					default:
-						break;
-					}
-				}
-			}
-		}
 	}
 }

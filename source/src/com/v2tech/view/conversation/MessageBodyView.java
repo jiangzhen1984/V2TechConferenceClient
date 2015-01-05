@@ -954,6 +954,15 @@ public class MessageBodyView extends LinearLayout {
 						FileUitls.openFile(item.getFilePath());
 					} else {
 						if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
+							long key;
+							if(mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER)
+								key = mMsg.getToUser().getmUserId();
+							else
+								key = mMsg.getGroupId();
+							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_DOWNLOADING, 
+									getContext(), true, key, "MessageBodyView fileMessageItemClickListener");
+							if(!flag)
+								return ;
 							callback.requestDownloadFile(view, item.getVm(),
 									item);
 							item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
@@ -1060,11 +1069,10 @@ public class MessageBodyView extends LinearLayout {
 								key = mMsg.getToUser().getmUserId();
 							else
 								key = mMsg.getGroupId();
-							Integer trans = GlobalConfig.mTransingFiles.get(key);
-							if(trans != null && trans >= GlobalConfig.MAX_TRANS_FILE_SIZE){
-								Toast.makeText(getContext(), "发送文件个数已达上限，当前正在传输的文件数量已达5个", Toast.LENGTH_LONG).show();
+							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_SENDING, 
+									getContext(), true, key, "MessageBodyView mResendButtonListener");
+							if(!flag)
 								return ;
-							}
 						}
 						
 						failedIcon.setVisibility(View.INVISIBLE);

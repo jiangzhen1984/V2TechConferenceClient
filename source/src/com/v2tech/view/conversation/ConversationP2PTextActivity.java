@@ -1773,6 +1773,9 @@ public class ConversationP2PTextActivity extends Activity implements
 						MessageBuilder.saveFileVMessage(this, vm);
 
 						addMessageToContainer(vm);
+						
+						GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_SENDING, 
+								mContext, true, remoteGroupID, "ConversationP2PTextActivity onActivity crowd");
 					}
 
 					Intent intent = new Intent(this, FileService.class);
@@ -2040,6 +2043,8 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	private void startSendMoreFile() {
 		for (int i = 0; i < mCheckedList.size(); i++) {
+			GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_SENDING, 
+					mContext, true, remoteChatUserID, "ConversationP2PTextActivity onActivity");
 			sendSelectedFile(mCheckedList.get(i));
 		}
 	}
@@ -2161,20 +2166,6 @@ public class ConversationP2PTextActivity extends Activity implements
 			for (int i = 0; i < items.size(); i++) {
 				VMessageAbstractItem item = items.get(i);
 				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
-					if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-						GlobalHolder
-								.getInstance()
-								.changeGlobleTransFileMember(
-										V2GlobalEnum.FILE_TRANS_SENDING,
-										mContext, true, remoteChatUserID,
-										"ConversationP2PText reSendMessageClicked");
-					else
-						GlobalHolder
-								.getInstance()
-								.changeGlobleTransFileMember(
-										V2GlobalEnum.FILE_TRANS_SENDING,
-										mContext, true, remoteGroupID,
-										"ConversationP2PText reSendMessageClicked");
 					item.setState(VMessageAbstractItem.STATE_FILE_SENDING);
 					MessageLoader.updateFileItemState(mContext,
 							(VMessageFileItem) item);

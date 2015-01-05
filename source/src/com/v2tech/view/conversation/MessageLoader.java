@@ -618,9 +618,12 @@ public class MessageLoader {
 						+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE
 						+ " = ? or "
 						+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE
+						+ " = ? or "
+						+ ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE
 						+ " = ?";
 				args = new String[] {
 						String.valueOf(VMessageAbstractItem.STATE_FILE_DOWNLOADING),
+						String.valueOf(VMessageAbstractItem.STATE_FILE_UNDOWNLOAD),
 						String.valueOf(VMessageAbstractItem.STATE_FILE_SENDING),
 						String.valueOf(VMessageAbstractItem.STATE_FILE_PAUSED_SENDING),
 						String.valueOf(VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING) };
