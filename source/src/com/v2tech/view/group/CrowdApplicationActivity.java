@@ -212,6 +212,10 @@ public class CrowdApplicationActivity extends Activity {
 	}
 	
 	private void handleApplyDone() {
+		Intent intent = new Intent(mContext,
+				MessageAuthenticationActivity.class);
+		setResult(MessageAuthenticationActivity.AUTHENTICATION_RESULT , intent);
+		
 		Intent i = new Intent();
 		i.setAction(JNIService.JNI_BROADCAST_CROWD_INVATITION);
 		i.addCategory(JNIService.JNI_ACTIVITY_CATEGROY);

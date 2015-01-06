@@ -178,6 +178,9 @@ public class ContactsGroupManagerActivity extends Activity {
 					group.setName(mGroupNameET.getText().toString());
 					updateGroup(group, OPT.UPDATE);
 				}
+				
+				if(mDialog != null)
+					mDialog.dismiss();
 			}
 
 		});

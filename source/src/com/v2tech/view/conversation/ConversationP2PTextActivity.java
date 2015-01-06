@@ -332,6 +332,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
 		filter.addAction(JNIService.JNI_BROADCAST_FILE_STATUS_ERROR_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		registerReceiver(receiver, filter);
@@ -717,6 +718,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		} else if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT
 				|| cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 			if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+				mShowContactDetailButton.setVisibility(View.GONE);
 				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
 				OrgGroup departmentGroup = (OrgGroup) GlobalHolder
 						.getInstance().getGroupById(
@@ -2121,7 +2123,7 @@ public class ConversationP2PTextActivity extends Activity implements
 				linkItem = linkItems.get(0);
 				Intent intent = new Intent();
 				intent.setAction("android.intent.action.VIEW");
-				Uri content_url = Uri.parse(linkItem.getUrl());
+				Uri content_url = Uri.parse("http://" + linkItem.getUrl());
 				intent.setData(content_url);
 				startActivity(intent);
 				return;
@@ -2748,6 +2750,7 @@ public class ConversationP2PTextActivity extends Activity implements
 					if (result) {
 						offset += 1;
 						if (!isAppBack) {
+							CommonCallBack.getInstance().executeNotifyCrowdDetailActivity();
 							// abort send down broadcast
 							this.abortBroadcast();
 						}
@@ -2955,6 +2958,27 @@ public class ConversationP2PTextActivity extends Activity implements
 							}
 						}
 					}
+				}
+			} else if(intent.getAction().equals(
+					JNIService.JNI_BROADCAST_GROUP_UPDATED)){
+				if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+					OrgGroup departmentGroup = (OrgGroup) GlobalHolder
+							.getInstance().getGroupById(
+									V2GlobalEnum.GROUP_TYPE_DEPARTMENT,
+									cov.getExtId());
+					mUserTitleTV.setText(departmentGroup.getName());
+				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+					DiscussionGroup discussionGroup = (DiscussionGroup) GlobalHolder
+							.getInstance().getGroupById(
+									V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+									cov.getExtId());
+					mUserTitleTV.setText(discussionGroup.getName());
+				} else if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD){
+					CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder
+							.getInstance().getGroupById(
+									V2GlobalEnum.GROUP_TYPE_CROWD,
+									cov.getExtId());
+					mUserTitleTV.setText(crowdGroup.getName());
 				}
 			}
 		}

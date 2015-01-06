@@ -53,7 +53,6 @@ import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.ind.VideoJNIObjectInd;
-import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.ContentDescriptor;
@@ -79,16 +78,15 @@ import com.v2tech.vo.AddFriendHistorieNode;
 import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.CrowdGroup;
+import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.FileDownLoadBean;
 import com.v2tech.vo.Group;
-import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
-import com.v2tech.vo.VFile.State;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -131,6 +129,7 @@ public class JNIService extends Service implements
 	 */
 	public static final String JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION = "com.v2tech.jni.broadcast.user_avatar_notification";
 	public static final String JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
+	public static final String JNI_BROADCAST_USER_UPDATE_BASE_INFO = "com.v2tech.jni.broadcast.user_update_base_info";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
 	public static final String JNI_BROADCAST_GROUP_UPDATED = "com.v2tech.jni.broadcast.group_updated";
@@ -352,6 +351,7 @@ public class JNIService extends Service implements
 
 	private static final int JNI_CONNECT_RESPONSE = 23;
 	private static final int JNI_UPDATE_USER_INFO = 24;
+	private static final int JNI_UPDATE_USER_STATE = 25;
 	private static final int JNI_LOG_OUT = 26;
 	private static final int JNI_GROUP_NOTIFY = 35;
 	private static final int JNI_GROUP_USER_INFO_NOTIFICATION = 60;
@@ -379,6 +379,21 @@ public class JNIService extends Service implements
 				broadcastNetworkState(NetworkStateCode.fromInt(msg.arg1));
 				break;
 			case JNI_UPDATE_USER_INFO:
+				V2User user = (V2User) msg.obj;
+				User u = convertUser(user);
+				GlobalHolder.getInstance().putUser(u.getmUserId(), u);
+				Intent userInfos = new Intent(
+						JNI_BROADCAST_USER_UPDATE_BASE_INFO);
+				userInfos.addCategory(JNI_BROADCAST_CATEGROY);
+				userInfos.putExtra("uid",user.uid);
+				mContext.sendBroadcast(userInfos);
+				break;
+			case JNI_UPDATE_USER_STATE:
+				UserStatusObject uso = (UserStatusObject) msg.obj;
+				Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+				iun.addCategory(JNI_BROADCAST_CATEGROY);
+				iun.putExtra("status", uso);
+				mContext.sendBroadcast(iun);
 				break;
 			case JNI_LOG_OUT:
 				Toast.makeText(mContext,
@@ -390,8 +405,7 @@ public class JNIService extends Service implements
 
 				if (gl != null && gl.size() > 0) {
 					GlobalHolder.getInstance().updateGroupList(msg.arg1, gl);
-					if (((msg.arg1 == V2GlobalEnum.GROUP_TYPE_CROWD) ||
-						(msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT))
+					if (msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT
 							&& !noNeedBroadcast) {
 						V2Log.d(TAG,
 								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
@@ -536,7 +550,6 @@ public class JNIService extends Service implements
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
-//						sendNotification();
 					}
 
 					Intent ii = new Intent(action);
@@ -569,20 +582,6 @@ public class JNIService extends Service implements
 			}
 
 		}
-
-		private void sendNotification() {
-			if ((System.currentTimeMillis() / 1000) - lastNotificatorTime > 2) {
-				Uri notification = RingtoneManager
-						.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-				Ringtone r = RingtoneManager.getRingtone(
-						getApplicationContext(), notification);
-				if (r != null) {
-					r.play();
-				}
-				lastNotificatorTime = System.currentTimeMillis() / 1000;
-			}
-		}
-
 	}
 
 	private LongSparseArray<UserStatusObject> onLineUsers = new LongSparseArray<UserStatusObject>();
@@ -643,16 +642,8 @@ public class JNIService extends Service implements
 			if (user == null || user.uid <= 0) {
 				return;
 			}
-			User u = convertUser(user);
-			GlobalHolder.getInstance().putUser(u.getmUserId(), u);
-//			Intent i = new Intent(
-//					JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-//			i.addCategory(JNI_BROADCAST_CATEGROY);
-//			i.putExtra("gid",go.gId);
-//			i.putExtra("gtype", go.gType);
-//			mContext.sendBroadcast(i);
-			// Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO, u)
-			// .sendToTarget();
+			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_INFO, user)
+				.sendToTarget();
 		}
 
 		@Override
@@ -660,22 +651,14 @@ public class JNIService extends Service implements
 				int nStatus, String szStatusDesc) {
 			UserStatusObject uso = new UserStatusObject(nUserID, type, nStatus);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
-			if (u == null) {
-				V2Log.e("Can't update user status, user " + nUserID
-						+ "  isn't exist");
-				onLineUsers.put(nUserID, uso);
-			} else {
-				V2Log.e(TAG, "the " + u.getArra()
-						+ " user is updating state...." + nStatus);
-				u.updateStatus(User.Status.fromInt(nStatus));
-				u.setDeviceType(User.DeviceType.fromInt(type));
-			}
-
-			Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);
-			iun.addCategory(JNI_BROADCAST_CATEGROY);
-			iun.putExtra("status", uso);
-			mContext.sendBroadcast(iun);
-
+			V2Log.e(TAG, nUserID + " : the '" + u.getName()
+					+ "' user is updating state...." + User.Status.fromInt(nStatus).name());
+			u.updateStatus(User.Status.fromInt(nStatus));
+			u.setDeviceType(User.DeviceType.fromInt(type));
+			onLineUsers.put(nUserID, uso);
+			
+			Message.obtain(mCallbackHandler, JNI_UPDATE_USER_STATE, uso)
+				.sendToTarget();
 		}
 
 		@Override
@@ -842,15 +825,8 @@ public class JNIService extends Service implements
 			if (gType == GroupType.CONFERENCE) {
 				User owner = GlobalHolder.getInstance()
 						.getUser(group.owner.uid);
-				if (owner == null)
-					V2Log.e("get create conference man is null , owner id is :"
-							+ group.owner.uid);
 				User chairMan = GlobalHolder.getInstance().getUser(
 						group.chairMan.uid);
-				if (owner == null)
-					V2Log.e("get create conference man is null , chairMan id is :"
-							+ group.owner.uid);
-
 				ConferenceGroup g = new ConferenceGroup(group.id, group.name,
 						owner, group.createTime, chairMan);
 				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
@@ -1033,7 +1009,6 @@ public class JNIService extends Service implements
 		@Override
 		public void OnDelGroupCallback(int groupType, long nGroupID,
 				boolean bMovetoRoot) {
-			// TODO just support conference
 			if (groupType == Group.GroupType.CONFERENCE.intValue()) {
 				String gName = "";
 				Group rG = GlobalHolder.getInstance().getGroupById(
@@ -1055,8 +1030,7 @@ public class JNIService extends Service implements
 					i.putExtra("gid", nGroupID);
 					sendBroadcast(i);
 
-					if (GlobalConfig.isApplicationBackground(mContext)
-							|| GlobalHolder.getInstance().isInMeeting()
+					if (GlobalHolder.getInstance().isInMeeting()
 							|| GlobalHolder.getInstance().isInAudioCall()
 							|| GlobalHolder.getInstance().isInVideoCall()) {
 						Intent intent = new Intent(mContext, MainActivity.class);
@@ -1106,6 +1080,11 @@ public class JNIService extends Service implements
 		public void OnDelGroupUserCallback(int groupType, long nGroupID,
 				long nUserID) {
 
+			if(groupType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT && 
+					nUserID == GlobalHolder.getInstance().getCurrentUserId()){
+				//TODO 说明已被管理系统删除，需要给用户提示并退出程序
+			}
+			
 			if (groupType == GroupType.CONTACT.intValue()) {
 				// 如果是好友组，好友关系被别人移除，传来的groupId为0
 				Set<Group> groupSet = GlobalHolder.getInstance()
@@ -1443,7 +1422,8 @@ public class JNIService extends Service implements
 				i.putExtra("group", new GroupUserObject(
 						V2GlobalEnum.GROUP_TYPE_CROWD, crowd.id, -1));
 				sendBroadcast(i);
-			} else if (crowd.type == V2Group.TYPE_DISCUSSION_BOARD) {
+			} else if (crowd.type == V2Group.TYPE_DISCUSSION_BOARD && 
+					GlobalHolder.getInstance().getCurrentUserId() != crowd.owner.uid) {
 				if(GlobalHolder.getInstance().getCurrentUserId()== crowd.creator.uid){
 					Group existGroup = GlobalHolder.getInstance().
 							getGroupById(V2GlobalEnum.GROUP_TYPE_DISCUSSION, crowd.id);
@@ -1481,12 +1461,16 @@ public class JNIService extends Service implements
 				V2Log.e("OnAddGroupFile : May receive new group files failed.. get empty collection");
 				return;
 			}
+			
 			if (group.type == V2GlobalEnum.GROUP_TYPE_CROWD) {
 				CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
 						.getGroupById(group.id);
 				if (cg != null) {
 					cg.addNewFileNum(list.size());
 				}
+			} else if(group.type == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
+				//TODO 会议共享文件
+				return ;
 			}
 
 			for (FileJNIObject fileJNIObject : list) {
@@ -1596,6 +1580,15 @@ public class JNIService extends Service implements
 		}
 
 		private void updateAudioRecord(AudioJNIObjectInd ind) {
+			if ((System.currentTimeMillis() / 1000) - lastNotificatorTime > 2) {
+				Uri notification = RingtoneManager
+						.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+				Ringtone r = RingtoneManager.getRingtone(mContext, notification);
+				if (r != null) {
+					r.play();
+				}
+				lastNotificatorTime = System.currentTimeMillis() / 1000;
+			}
 			// record in database
 			VideoBean currentVideoBean = new VideoBean();
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_UNREAD;
@@ -1698,6 +1691,15 @@ public class JNIService extends Service implements
 		}
 
 		private void updateVideoRecord(VideoJNIObjectInd ind) {
+			if ((System.currentTimeMillis() / 1000) - lastNotificatorTime > 2) {
+				Uri notification = RingtoneManager
+						.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+				Ringtone r = RingtoneManager.getRingtone(mContext, notification);
+				if (r != null) {
+					r.play();
+				}
+				lastNotificatorTime = System.currentTimeMillis() / 1000;
+			}
 			// record in database
 			VideoBean currentVideoBean = new VideoBean();
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_UNREAD;
@@ -2000,9 +2002,9 @@ public class JNIService extends Service implements
 				return;
 			}
 
+			vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
-
 		}
 
 		private void handlerChatAudioCallback(int eGroupType, long nGroupID,

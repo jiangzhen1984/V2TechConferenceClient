@@ -378,18 +378,10 @@ public class CrowdGroupService extends AbstractHandler {
             return;
         }
         
-//        StringBuffer sb = new StringBuffer();
-//		sb.append("<userlist>");
-//		for (User u : newMembers) {
-//			sb.append(" <user id=\"" + u.getmUserId() + "\" />");
-//		}
-//		sb.append("</userlist>");
         String sXml = XmlAttributeExtractor.buildAttendeeUsersXml(newMembers);
-        
 		GroupRequest.getInstance().inviteJoinGroup(
 				crowd.getGroupType().intValue(), crowd.toXml(),
 				sXml , "");
-
 		if (caller != null) {
 			JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
 			sendResult(caller, jniRes);

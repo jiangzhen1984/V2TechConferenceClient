@@ -32,22 +32,16 @@ public class DiscussionGroup extends Group {
 		StringBuilder sb = new StringBuilder();
 		List<User> users = getUsers();
 		if(mOwnerUser != null && isCreatorExist){
+			if(TextUtils.isEmpty(mOwnerUser.getName()))
+				mOwnerUser = GlobalHolder.getInstance().getUser(mOwnerUser.getmUserId());
 			sb.append(mOwnerUser.getName());
 			for (User user : users) {
 				if (user.getmUserId() == this.mOwnerUser.getmUserId())
 					continue;
 				
-				if(user.getmUserId() == GlobalHolder.getInstance().getCurrentUserId())
-					isAddOwner = false;
-
 				sb.append(" ").append(user.getName());
 				if (sb.toString().length() >= 30)
 					break;
-			}
-			
-			if(isAddOwner){
-				this.addUserToGroup(GlobalHolder.getInstance().getCurrentUser());
-				sb.append(" ").append(GlobalHolder.getInstance().getCurrentUser().getName());
 			}
 		}
 		else{

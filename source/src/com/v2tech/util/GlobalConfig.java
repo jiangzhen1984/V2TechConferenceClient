@@ -49,7 +49,7 @@ public class GlobalConfig {
 	
 	public static Map<Long, Integer> mTransingFiles = new HashMap<Long, Integer>();
 	
-	public static Map<Long, Integer> mDownLoadingFiles = new HashMap<Long, Integer>();
+//	public static Map<Long, Integer> mDownLoadingFiles = new HashMap<Long, Integer>();
 	
 	public static List<Long> NeedToUpdateUser = new ArrayList<Long>();
 	

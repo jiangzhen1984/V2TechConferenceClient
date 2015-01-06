@@ -10,10 +10,8 @@ import java.util.Set;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.graphics.Rect;
 import android.support.v4.util.LongSparseArray;
 import android.text.TextUtils;
-import android.text.TextUtils.TruncateAt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -218,7 +216,7 @@ public class GroupListView extends ListView {
 	 * @param us
 	 */
 	public void updateUserStatus(User user, User.Status us) {
-		boolean sort = false;
+//		boolean sort = false;
 		for (int i = 0; i < mFilterList.size(); i++) {
 			ItemData item = mFilterList.get(i);
 			if (item instanceof GroupItemData
@@ -226,8 +224,10 @@ public class GroupListView extends ListView {
 				Group temp = ((GroupItemData) item).mGroup;
 				int start = calculateGroupStartIndex(temp);
 				int end = calculateGroupEnd(temp, i);
-				sort = updateUserPosition(((GroupItemData) item), start, end,
+				int pos = updateUserPosition(((GroupItemData) item), start, end,
 						user, us);
+				V2Log.d("GroupListView", user.getmUserId() + " the user "+ user.getName() +" add pos is : " + pos +
+						" state is : " + us.name() + " start : " + start + " - end : " + end);
 			}
 		}
 		// Should always update status, because group need update statist
@@ -263,6 +263,10 @@ public class GroupListView extends ListView {
 			throw new NullPointerException("Group is null");
 		}
 		updateCheckItemWithoutNotification(group, flag);
+		
+		for (Group temp : mGroupList) {
+			checkBelongGroupAllChecked(temp, temp.getUsers());
+		}
 		adapter.notifyDataSetChanged();
 	}
 
@@ -375,7 +379,8 @@ public class GroupListView extends ListView {
 
 					int pos = calculateIndex(startPos, endPos - 1, user,
 							user.getmStatus());
-
+					//计算出的位置需要+1，因为pos指的是被添加的item与该pos的item对比之后break的结果，需要排在其后面
+					pos++;
 					Log.i("20141223 1", "组名 = " + group.getName() + " 组开始位置 = "
 							+ startPos + " ，组结束位置  = " + endPos + " ,插入位置 = "
 							+ pos);
@@ -601,12 +606,15 @@ public class GroupListView extends ListView {
 	 * @param newSt
 	 * @return
 	 */
-	private boolean updateUserPosition(GroupItemData gitem, int gstart,
+	private int updateUserPosition(GroupItemData gitem, int gstart,
 			int gend, User user, User.Status newSt) {
 		int pos = -1;
 		int start = gstart;
 		int end = gend;
 
+		if(gend > mFilterList.size())
+			end = mFilterList.size();
+			
 		while (start < end && end < mFilterList.size() && mFilterList.size() > start) {
 			ItemData item = mFilterList.get(start);
 			ItemData endItem = mFilterList.get(end);
@@ -615,9 +623,6 @@ public class GroupListView extends ListView {
 				if (((User) ((UserItemData) item).getObject()).getmUserId() == user
 						.getmUserId()) {
 					pos = start;
-					// ((User) ((UserItem)
-					// item).getObject()).updateStatus(newSt);
-					// user.updateStatus(newSt);
 				}
 			} else {
 				// If sub group is expended, we should update end position
@@ -638,9 +643,6 @@ public class GroupListView extends ListView {
 				if (((User) ((UserItemData) endItem).getObject()).getmUserId() == user
 						.getmUserId()) {
 					pos = end;
-					// ((User) ((UserItem)
-					// item).getObject()).updateStatus(newSt);
-					// user.updateStatus(newSt);
 				}
 			} else {
 				// If sub group is expended, we should update end position
@@ -669,9 +671,10 @@ public class GroupListView extends ListView {
 			// Reset start and end position
 			Group currentGroup = (Group) gitem.getObject();
 			int startPos = calculateGroupStartIndex(currentGroup);
-			int endPos = end;
-			// start = gstart;
-			// end = gend - 1;
+			int endPos = gend;
+//			int startPos = gstart;
+//			 end = gend - 1;
+//			int endPos = gend;
 
 			// remove current status
 			ItemData origin = mFilterList.remove(pos);
@@ -684,10 +687,9 @@ public class GroupListView extends ListView {
 					mFilterList.add(pos, origin);
 				}
 			}
-
-			return true;
+			return pos;
 		}
-		return false;
+		return pos;
 	}
 	
 	/**
@@ -733,8 +735,8 @@ public class GroupListView extends ListView {
 	// 好友有问题 开始位置为0是为什么要++
 	public int calculateGroupStartIndex(GroupItemData item, Group group) {
 		int itemStartPos = getGroupItemPos(item);
-		if (itemStartPos == 0)
-			itemStartPos++;
+//		if (itemStartPos == 0)
+//			itemStartPos++;
 		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
 		// return startPos;
 		return startPos + 1;
@@ -743,7 +745,7 @@ public class GroupListView extends ListView {
 	public int calculateAddGroupStartIndex(Group group) {
 		GroupItemData item = (GroupItemData) getItem(group);
 		int itemStartPos = getGroupItemPos(item);
-		int startPos = itemStartPos + group.getChildGroup().size();
+		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
 		return startPos;
 	}
 
@@ -813,7 +815,7 @@ public class GroupListView extends ListView {
 		} else if (start == end) {
 			return end + 1;
 		} 
-
+		
 		while (start <= end) {
 			pos = start;
 			if (start == mFilterList.size())
@@ -1540,9 +1542,7 @@ public class GroupListView extends ListView {
 			for (User u : sets) {
 				User.Status status = u.getmStatus();
 				User user = GlobalHolder.getInstance().getUser(u.getmUserId());
-				if (user != null) {
-					status = user.getmStatus();
-				}
+				status = user.getmStatus();
 				if ((status == User.Status.ONLINE || status == User.Status.BUSY
 						|| status == User.Status.DO_NOT_DISTURB || status == User.Status.LEAVE)
 						&& ((!mIgnoreCurrentUser || (mIgnoreCurrentUser && u

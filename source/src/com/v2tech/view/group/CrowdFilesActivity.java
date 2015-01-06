@@ -226,7 +226,15 @@ public class CrowdFilesActivity extends Activity {
 								V2GlobalEnum.FILE_TRANS_SENDING, mContext,
 								true, crowd.getmGId(),
 								"CrowdFilesActivity onActivityResult");
-
+						File file = new File(fb.filePath);
+						if(file.exists() && file.isFile()){
+							file.setReadable(false, true);
+							file.setExecutable(false, true);
+//							File dir = new File(file.getParent());
+//							dir.setReadOnly();
+//							dir.setExecutable(false , false);
+							GlobalHolder.getInstance().mTransingLockFiles.put(vf.getId(), fb.filePath);
+						}
 						// 发送文件
 						service.handleCrowdFile(vf,
 								FileOperationEnum.OPERATION_START_SEND, null);
@@ -334,9 +342,6 @@ public class CrowdFilesActivity extends Activity {
 		if (fileItems != null && fileItems.size() > 0) {
 			for (int i = 0; i < fileItems.size(); i++) {
 				VMessageFileItem temp = fileItems.get(i);
-				V2Log.e("test",
-						"VMessageFileItem name : " + temp.getFileName() + " -- state:: "
-								+ State.fromInt(temp.getState()).name());
 				VCrowdFile crowdFile = MessageLoader.convertToVCrowdFile(
 						temp, crowd);
 				mLocalSaveFile.put(temp.getUuid(), temp);
@@ -393,8 +398,6 @@ public class CrowdFilesActivity extends Activity {
 				VMessageFileItem temp = mLocalSaveFile.get(serverFile.getId());
 				if (temp != null) {
 					File ownerFile = new File(temp.getFilePath());
-					V2Log.e("test", "VCrowdFile path :: " + temp.getFilePath());
-					V2Log.e("test", "VCrowdFile getState :: " + temp.getState());
 					if (!ownerFile.exists()) {
 						if(State.fromInt(temp.getState()) == VCrowdFile.State.DOWNLOADED)
 							serverFile.setState(VCrowdFile.State.UNKNOWN);
@@ -1243,27 +1246,17 @@ public class CrowdFilesActivity extends Activity {
 							R.string.crowd_files_deleted_notification,
 							Toast.LENGTH_SHORT).show();
 				} else {
-					Integer trans = -1;
+					int transType;
 					if (file.getState() == VFile.State.UPLOAD_FAILED) {
-						trans = GlobalConfig.mTransingFiles
-								.get(crowd.getmGId());
-						if (trans == null)
-							trans = 0;
-					} else if (file.getState() == VFile.State.DOWNLOAD_FAILED) {
-						trans = GlobalConfig.mDownLoadingFiles.get(crowd
-								.getmGId());
-						if (trans == null)
-							trans = 0;
+						transType = V2GlobalEnum.FILE_TRANS_SENDING;
+					} else {
+						transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;
 					}
-
-					if (trans != -1) {
-						if (trans >= GlobalConfig.MAX_TRANS_FILE_SIZE) {
-							Toast.makeText(mContext,
-									"发送文件个数已达上限，当前正在传输的文件数量已达5个",
-									Toast.LENGTH_LONG).show();
-							return;
-						}
-					}
+						
+					boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(transType, mContext, true,
+							crowd.getmGId(), "CrowdFilesActivity mFailIconListener");
+					if(!flag)
+						return ;
 
 					if (file.getState() == VFile.State.DOWNLOAD_FAILED) {
 						GlobalHolder.getInstance().changeGlobleTransFileMember(

@@ -529,7 +529,6 @@ public class ConversationSelectFile extends Activity {
 
 			final ViewHolder holder;
 			if (convertView == null) {
-
 				holder = new ViewHolder();
 				convertView = View.inflate(ConversationSelectFile.this,
 						R.layout.activity_selectfile_adapter, null);
@@ -548,8 +547,10 @@ public class ConversationSelectFile extends Activity {
 			}
 
 			if (position >= mFolderLists.size()) {
-
-				if (mFileLists.get(position - mFolderLists.size()).isCheck == ITEM_CHECKED) {
+				int check = position - mFolderLists.size();
+				if(check > mFileLists.size())
+					return convertView;
+				if (mFileLists.get(check).isCheck == ITEM_CHECKED) {
 					holder.fileCheck.setChecked(true);
 				} else {
 					holder.fileCheck.setChecked(false);
@@ -924,7 +925,7 @@ public class ConversationSelectFile extends Activity {
 				changeSendUnable();
 			}
 		} else {
-			Integer transing = GlobalConfig.mTransingFiles.get(uid);
+			Integer transing = GlobalConfig.mTransingFiles.get(GlobalHolder.getInstance().getCurrentUserId());
 			if(transing == null){
 				transing = 0;
 				GlobalConfig.mTransingFiles.put(uid, transing);

@@ -1,5 +1,8 @@
 package com.v2tech.vo;
 
+import android.text.TextUtils;
+
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.DateUtil;
 import com.v2tech.vo.Group.GroupType;
 
@@ -36,8 +39,17 @@ public class CrowdConversation extends Conversation {
 		else{
 			if (group != null) {
 				User u = group.getOwnerUser();
-				// TODO need use localization
-				return u == null ? "" : "创建人:" + u.getName();
+				if(u != null){
+					if(TextUtils.isEmpty(u.getName())){
+						u = GlobalHolder.getInstance().getUser(u.getmUserId());
+						group.setOwnerUser(u);
+					}
+					boolean isFriend = GlobalHolder.getInstance().isFriend(u);
+					if(isFriend)
+						return "创建人:" + u.getNickName();
+					else
+						return "创建人:" + u.getName();
+				}
 			}
 			return msg;
 		}

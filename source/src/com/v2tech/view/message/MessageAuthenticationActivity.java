@@ -88,7 +88,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private final static int ACCEPT_APPLY_DONE = 5;
 	public final static int PROMPT_TYPE_FRIEND = 2;
 	public final static int PROMPT_TYPE_GROUP = 3;
-	private final static int AUTHENTICATION_RESULT = 4;
+	public final static int AUTHENTICATION_RESULT = 4;
 	private final static int FRIEND_AUTHENTICATION_RESULT = 5;
 
 	public static final String tableName = "AddFriendHistories";
@@ -649,13 +649,17 @@ public class MessageAuthenticationActivity extends Activity {
 						}
 					}
 
-					if (!isFresh)
+					if (!isFresh){
+						changeMessageAuthenticationListView();
 						V2Log.e(TAG,
 								"Update QualificationState failed ... because no search it in mMessageList "
 										+ "id is : " + id);
-				} else
+					}
+				} else{
+					changeMessageAuthenticationListView();
 					V2Log.e(TAG,
 							"Update QualificationState failed ... because id is -1");
+				}
 			}
 			break;
 		case FRIEND_AUTHENTICATION_RESULT:
@@ -1483,19 +1487,16 @@ public class MessageAuthenticationActivity extends Activity {
 					if(msg == null)
 						return ;
 					
-					boolean isFound = false;
 					for (int i = 0; i < mMessageList.size(); i++) {
 						VMessageQualification temp = (VMessageQualification) mMessageList.get(i).obj;
 						if(temp.getId() == msg.getId()){
-							isFound = true;
+							mMessageList.remove(i);
 							break;
 						}
 						
 					}
 					
-					if(!isFound)
-						mMessageList.add(0 , new ListItemWrapper(msg));
-					
+					mMessageList.add(0 , new ListItemWrapper(msg));
 					if(groupAdapter != null){
 						groupAdapter.notifyDataSetChanged();
 					}
@@ -1592,13 +1593,13 @@ public class MessageAuthenticationActivity extends Activity {
 				for (int i = 0 ; i < mMessageList.size() ; i++) {
 					ListItemWrapper wrapper = mMessageList.get(i);
 					VMessageQualification message = (VMessageQualification) wrapper.obj;
-					if (message.getmCrowdGroup().getmGId() == obj.getmGroupId()) {
+					if (message.getmCrowdGroup().getmGId() == obj.getmGroupId() &&
+							(message.getType() == Type.CROWD_APPLICATION && ((VMessageQualificationApplicationCrowd)message).getApplicant().getmUserId() == obj.getmUserId() ||
+							message.getType() == Type.CROWD_INVITATION && ((VMessageQualificationInvitationCrowd)message).getInvitationUser().getmUserId() == obj.getmUserId())) {
+						mMessageList.remove(i);
 						if(groupAdapter != null){
-							mMessageList.remove(i);
 							groupAdapter.notifyDataSetChanged();
-							break;
 						}
-						break;
 					}
 				}
 			}

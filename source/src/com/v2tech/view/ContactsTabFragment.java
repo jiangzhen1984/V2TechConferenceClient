@@ -245,7 +245,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 							"JNI_BROADCAST_GROUP_USER_REMOVED --> Update Conversation failed that the user removed ... given GroupUserObject is null");
 					return;
 				}
-				V2Log.e(TAG, "JNI GROUP USER REMOVED COMMING! GroupType : " + obj.getmType() + " GroupID : " + 
+				V2Log.d(TAG, "JNI GROUP USER REMOVED COMMING! GroupType : " + obj.getmType() + " GroupID : " + 
 						obj.getmGroupId() + " UserID : " + obj.getmUserId());
 				// FIXME now just support contacts remove do not support
 				if (flag == TAG_CONTACT

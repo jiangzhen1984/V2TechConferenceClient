@@ -2227,7 +2227,7 @@ public class ConferenceActivity extends Activity {
 				public void onClick(View v) {
 					d.dismiss();
 					VerificationProvider.deleteCrowdVerificationMessage(conf
-							.getId());
+							.getId() , -1);
 					finish();
 				}
 

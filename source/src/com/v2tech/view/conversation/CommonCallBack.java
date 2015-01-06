@@ -23,6 +23,12 @@ public class CommonCallBack {
 	private CommonUpdateConversationStateInterface conversationStateInterface;
 	private CommonUpdateMessageBodyPopupWindowInterface messageBodyPopup;
 	private CommonUpdateCrowdFileStateInterface crowdFileState;
+	private CommonNotifyCrowdDetailNewMessage notifyCrowdDetailActivity;
+
+	public void setNotifyCrowdDetailActivity(
+			CommonNotifyCrowdDetailNewMessage notifyCrowdDetailActivity) {
+		this.notifyCrowdDetailActivity = notifyCrowdDetailActivity;
+	}
 
 	public void setCrowdFileState(CommonUpdateCrowdFileStateInterface crowdFileState) {
 		this.crowdFileState = crowdFileState;
@@ -62,6 +68,11 @@ public class CommonCallBack {
 		if (crowdFileState != null)
 			crowdFileState.updateCrowdFileState(fileID , vm , type);
 	}
+	
+	public void executeNotifyCrowdDetailActivity() {
+		if (notifyCrowdDetailActivity != null)
+			notifyCrowdDetailActivity.notifyCrowdDetailNewMessage();
+	}
 
 	/**
 	 * 由 ContactDetail 回调， 通知界面创建会话
@@ -97,13 +108,23 @@ public class CommonCallBack {
 	}
 	
 	/**
-	 * 
+	 * 该回调用于，当群文件界面有文件操作时，通知聊天界面做相应更新
 	 * @author Administrator
 	 *
 	 */
 	public static interface CommonUpdateCrowdFileStateInterface {
 
 		public void updateCrowdFileState(String fileID , VMessage vm , CrowdFileExeType type);
+	}
+	
+	/**
+	 * 该回调用于，当群文件界面有文件操作时，通知聊天界面做相应更新
+	 * @author Administrator
+	 *
+	 */
+	public static interface CommonNotifyCrowdDetailNewMessage {
+
+		public void notifyCrowdDetailNewMessage();
 	}
 	
 	public enum CrowdFileExeType{

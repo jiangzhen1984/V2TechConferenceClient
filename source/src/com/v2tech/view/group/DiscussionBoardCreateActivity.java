@@ -3,6 +3,7 @@ package com.v2tech.view.group;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -332,7 +333,6 @@ public class DiscussionBoardCreateActivity extends Activity {
 	};
 
 	private ProgressDialog mCreateWaitingDialog;
-	private boolean isCreating;
 	private OnClickListener confirmButtonListener = new OnClickListener() {
 
 		@Override
@@ -344,14 +344,30 @@ public class DiscussionBoardCreateActivity extends Activity {
 				return;
 			}
 			
-			if(isCreating){
-				return ;
-			}
-			isCreating = true;
+			mGroupConfirmButton.setClickable(false);
 			if (isInInvitationMode) {
-				List<User> newMembers = new ArrayList<User>(mUserList);
-				cg.inviteMember(crowd, newMembers, new MessageListener(
-						mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
+				synchronized (DiscussionBoardCreateActivity.class) {
+					List<User> removeUsers = new ArrayList<User>();
+					List<User> users = crowd.getUsers();
+					Iterator<User> iterator = mUserList.iterator();
+					while (iterator.hasNext()) {
+						User checkUser = iterator.next();
+						for (User user : users) {
+							if(user.getmUserId() == checkUser.getmUserId()){
+								removeUsers.add(checkUser);
+								break;
+							}
+						}
+					}
+					
+					for (int i = 0; i < removeUsers.size(); i++) {
+						mUserList.remove(removeUsers.get(i));
+					}
+					
+					List<User> newMembers = new ArrayList<User>(mUserList);
+					cg.inviteMember(crowd, newMembers, new MessageListener(
+							mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
+				}
 			} else {
 				if (mUserList.size() <= 0) {
 					Toast.makeText(mContext, R.string.error_discussion_require_members, Toast.LENGTH_SHORT).show();
@@ -422,7 +438,6 @@ public class DiscussionBoardCreateActivity extends Activity {
 				updateUserToAttendList((User) msg.obj);
 				break;
 			case CREATE_GROUP_MESSAGE: {
-					isCreating = false;
 					mCreateWaitingDialog.dismiss();
 					JNIResponse recr = (JNIResponse) msg.obj;
 					if (recr.getResult() == JNIResponse.Result.SUCCESS) {
@@ -458,9 +473,11 @@ public class DiscussionBoardCreateActivity extends Activity {
 						// finish current activity
 						finish();
 					} else if (recr.getResult() == JNIResponse.Result.TIME_OUT) {
+						mGroupConfirmButton.setClickable(true);
 						cg.setmPendingCrowdId(0);
 						V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create discussion group failed.. time out!!");
 					} else {
+						mGroupConfirmButton.setClickable(true);
 						V2Log.e("CrowdCreateActivity CREATE_GROUP_MESSAGE --> create discussion group failed.. ERROR CODE IS : "
 								+ recr.getResult().name());
 					}

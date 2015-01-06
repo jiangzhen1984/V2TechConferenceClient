@@ -12,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.V2.jni.ImRequest;
@@ -64,6 +65,8 @@ public class GlobalHolder {
 	private List<String> dataBaseTableCacheName = new ArrayList<String>();
 	
 	public Map<String , FileDownLoadBean> globleFileProgress = new HashMap<String, FileDownLoadBean>();
+	
+	public Map<String , String> mTransingLockFiles = new HashMap<String , String>();
 	
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -185,7 +188,7 @@ public class GlobalHolder {
 		Long key = Long.valueOf(userID);
 		synchronized (key) {
 			User tmp = mUserHolder.get(key);
-			if (tmp == null) {
+			if (tmp == null || TextUtils.isEmpty(tmp.getName())) {
 				tmp = new User(userID);
 				mUserHolder.put(key, tmp);
 				if(GlobalHolder.getInstance().getGlobalState()
@@ -736,7 +739,8 @@ public class GlobalHolder {
 		this.dataBaseTableCacheName = dataBaseTableCacheName;
 	}
 	
-	public boolean changeGlobleTransFileMember(int transType ,final Context mContext , boolean isAdd , Long key , String tag){
+	public boolean changeGlobleTransFileMember(final int transType ,final Context mContext , boolean isAdd , Long key , String tag){
+		key = GlobalHolder.getInstance().getCurrentUserId();
 		Map<Long, Integer> transingCollection = getFileTypeColl(transType);
 		Integer transing = transingCollection.get(key);
 		String typeString = null;
@@ -760,8 +764,12 @@ public class GlobalHolder {
 						@Override
 						public void run() {
 							Looper.prepare(); 
-							Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个",
-									Toast.LENGTH_LONG).show();
+							if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
+								Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个",
+										Toast.LENGTH_LONG).show();
+							else
+								Toast.makeText(mContext, "下载文件个数已达上限，当前正在下载的文件数量已达5个",
+										Toast.LENGTH_LONG).show();
 							Looper.loop();
 						}
 					}).start();
@@ -788,10 +796,11 @@ public class GlobalHolder {
 	}
 	
 	private Map<Long, Integer> getFileTypeColl(int transType){
-		if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
-			return GlobalConfig.mTransingFiles;
-		else
-			return GlobalConfig.mDownLoadingFiles;
+		return GlobalConfig.mTransingFiles;
+//		if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
+//			return GlobalConfig.mTransingFiles;
+//		else
+//			return GlobalConfig.mDownLoadingFiles;
 	}
 
 	/**

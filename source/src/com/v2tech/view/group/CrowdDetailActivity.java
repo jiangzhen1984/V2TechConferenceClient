@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,11 +32,13 @@ import com.v2tech.service.MessageListener;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.GroupUserObject;
+import com.v2tech.view.conversation.CommonCallBack;
+import com.v2tech.view.conversation.CommonCallBack.CommonNotifyCrowdDetailNewMessage;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
 
-public class CrowdDetailActivity extends Activity {
+public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDetailNewMessage{
 
 	private final static String RULE_ALLOW_ALL = "0";
 	private final static String RULE_QUALIFICATION = "1";
@@ -74,6 +79,7 @@ public class CrowdDetailActivity extends Activity {
 	private Context mContext;
 	
 	private int defaultRule;
+	private long lastNotificatorTime;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +125,7 @@ public class CrowdDetailActivity extends Activity {
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
 		mCreatorTV.setText(crowd.getOwnerUser().getName());
+		mCreatorTV.setSingleLine();
 		mAnouncementTV.setText(crowd.getAnnouncement());
 		if (crowd.getOwnerUser().getmUserId() == GlobalHolder.getInstance()
 				.getCurrentUserId()) {
@@ -131,7 +138,7 @@ public class CrowdDetailActivity extends Activity {
 		}
 		
 		mMembersCountsTV.setText(String.valueOf(crowd.getUsers().size()));
-		
+		CommonCallBack.getInstance().setNotifyCrowdDetailActivity(this);
 		initRules();
 		mRulesRD.setOnCheckedChangeListener(mRulesChangedListener);
 		mRulesLayout.setOnTouchListener(new OnTouchListener() {
@@ -160,7 +167,6 @@ public class CrowdDetailActivity extends Activity {
 			mMembersCountsTV.setText(crowd.getUsers().size()+"");
 		}
 	}
-
 
 	@Override
 	protected void onDestroy() {
@@ -462,5 +468,19 @@ public class CrowdDetailActivity extends Activity {
 			}
 		}
 		
+	}
+
+
+	@Override
+	public void notifyCrowdDetailNewMessage() {
+		if ((System.currentTimeMillis() / 1000) - lastNotificatorTime > 2) {
+			Uri notification = RingtoneManager
+					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+			Ringtone r = RingtoneManager.getRingtone(mContext, notification);
+			if (r != null) {
+				r.play();
+			}
+			lastNotificatorTime = System.currentTimeMillis() / 1000;
+		}
 	}
 }

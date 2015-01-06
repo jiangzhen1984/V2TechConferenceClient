@@ -14,6 +14,7 @@ import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
+import com.v2tech.util.GlobalConfig;
 
 public class ConfRequest {
 
@@ -254,7 +255,7 @@ public class ConfRequest {
 			conf.startTime = new Date(Long.parseLong(startTime) / 1000);
 		else {
 			V2Log.e("OnConfNotify : get startTime is null...");
-			conf.startTime = new Date(System.currentTimeMillis());
+			conf.startTime = new Date(GlobalConfig.getGlobalServerTime());
 		}
 
 		V2User user = new V2User();

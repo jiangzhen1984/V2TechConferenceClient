@@ -251,6 +251,10 @@ public class ConversationP2PAVActivity extends Activity implements
 			}
 			// start time out monitor
 			mLocalHandler.postDelayed(timeOutMonitor, 1000 * 60);
+			
+//			if (uad.isIncoming() && !uad.isConnected()) {
+				playRingToneIncoming();
+//			}
 		} else {
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 			currentVideoBean.formUserID = GlobalHolder.getInstance()
@@ -345,13 +349,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	protected void onStart() {
 		super.onStart();
-//		if (audioManager != null) {
-//			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-//		}
 		isStoped = false;
-		if (uad.isIncoming() && !uad.isConnected()) {
-			playRingToneIncoming();
-		}
 		if (uad.isConnected()) {
 			// // Resume audio
 			// chatService.suspendOrResumeAudio(true);
@@ -364,10 +362,6 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	protected void onStop() {
 		super.onStop();
-//		if (audioManager != null) {
-//			audioManager.setMode(AudioManager.MODE_NORMAL);
-//		}
-
 		// stopRingTone();
 		if (uad.isConnected()) {
 			// // Resume audio
@@ -499,9 +493,11 @@ public class ConversationP2PAVActivity extends Activity implements
 	}
 
 	private void playRingToneOuting() {
-		mPlayer = MediaPlayer.create(mContext, R.raw.outing_ring_tone_1);
+		if (mPlayer == null)
+			mPlayer = MediaPlayer.create(mContext, R.raw.outing_ring_tone_1);
 		mPlayer.setLooping(true);
-		mPlayer.start();
+		if (!mPlayer.isPlaying())
+			mPlayer.start();
 	}
 
 	private void stopRingToneOuting() {
@@ -514,6 +510,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		if (mPlayer == null)
 			mPlayer = MediaPlayer.create(mContext, RingtoneManager
 					.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+		mPlayer.setLooping(true);
 		if (!mPlayer.isPlaying())
 			mPlayer.start();
 	}

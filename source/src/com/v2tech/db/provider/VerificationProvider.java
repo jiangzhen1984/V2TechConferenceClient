@@ -475,16 +475,22 @@ public class VerificationProvider extends DatabaseProvider {
 	 * 
 	 * @param groupID
 	 */
-	public static int deleteCrowdVerificationMessage(long groupID) {
+	public static int deleteCrowdVerificationMessage(long groupID , long userID) {
 		int ret;
 		if (groupID == -1)
 			ret = mContext.getContentResolver().delete(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI, null, null);
+		else if (userID == -1)
+			ret = mContext.getContentResolver().delete(
+					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + "= ?",
+							new String[] { String.valueOf(groupID)});
 		else
 			ret = mContext.getContentResolver().delete(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
-							+ "=?", new String[] { String.valueOf(groupID) });
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + "= ? and " +
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ? ",
+							new String[] { String.valueOf(groupID) , String.valueOf(userID)});
 		if (ret <= 0)
 			V2Log.d(MessageLoader.TAG,
 					"May delete CrowdVerificationMessage failed...groupID : "

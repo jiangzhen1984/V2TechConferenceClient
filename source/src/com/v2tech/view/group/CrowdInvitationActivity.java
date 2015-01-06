@@ -433,7 +433,7 @@ public class CrowdInvitationActivity extends Activity {
 					MessageAuthenticationActivity.class);
 			intent.putExtra("qualificationID", vq.getId());
 			intent.putExtra("qualState", vq.getQualState());
-			setResult(4 , intent);
+			setResult(MessageAuthenticationActivity.AUTHENTICATION_RESULT , intent);
 		}
     	super.onBackPressed();
     }
