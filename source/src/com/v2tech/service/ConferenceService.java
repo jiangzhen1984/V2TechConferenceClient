@@ -389,6 +389,16 @@ public class ConferenceService extends DeviceService {
 		sendResult(caller, jniRes);
 	}
 
+	public void modifyGroupLayout(Conference conf) {
+		if (conf == null) {
+			return;
+		}
+		GroupRequest.getInstance().modifyGroupInfo(
+				GroupType.CONFERENCE.intValue(), conf.getId(),
+				"<conf layout='67174414'/>");
+
+	}
+
 	/**
 	 * Pause or resume audio.
 	 * 
@@ -604,8 +614,10 @@ public class ConferenceService extends DeviceService {
 			if (v2user.type == V2GlobalEnum.USER_ACCOUT_TYPE_NON_REGISTERED) {
 				user = new User(v2user.uid, v2user.name);
 				user.setDeviceType(User.DeviceType.fromInt(v2user.deviceType));
+				user.setRapidInitiation(true);
 			} else {
 				user = GlobalHolder.getInstance().getUser(v2user.uid);
+				user.setDeviceType(User.DeviceType.fromInt(v2user.deviceType));
 			}
 			notifyListenerWithPending(KEY_ATTENDEE_ENTER_OR_EXIT_LISTNER, 1, 0,
 					user);

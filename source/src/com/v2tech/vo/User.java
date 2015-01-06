@@ -92,6 +92,9 @@ public class User implements Comparable<User> {
 	// This value indicate this object is dirty, construct locally without any
 	// user information
 	private boolean isDirty;
+	
+	//会议中的快速入会用户
+	private boolean isRapidInitiation=false;
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
@@ -637,6 +640,14 @@ public class User implements Comparable<User> {
 			return EscapedcharactersProcessing.reverse(atr.getValue());
 		}
 		return null;
+	}
+
+	public boolean isRapidInitiation() {
+		return isRapidInitiation;
+	}
+
+	public void setRapidInitiation(boolean isRapidInitiation) {
+		this.isRapidInitiation = isRapidInitiation;
 	}
 
 	public enum DeviceType {

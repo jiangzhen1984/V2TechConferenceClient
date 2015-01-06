@@ -140,6 +140,13 @@ public class Attendee implements Comparable<Attendee> {
 		return null;
 	}
 
+	public boolean isRapidInitiation(){
+		if (user != null) {
+			return user.isRapidInitiation();
+		}
+		return false;
+	}
+	
 	public String getAbbraName() {
 		if (user != null) {
 			return user.getArra();

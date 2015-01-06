@@ -53,6 +53,7 @@ public class V2Doc {
 
 		/**
 		 * Update cache page
+		 * 
 		 * @param p
 		 */
 		public void addPage(Page p) {
@@ -61,10 +62,10 @@ public class V2Doc {
 				existP.update(p);
 			} else {
 				pages.put(p.getNo(), p);
-				
+
 			}
 		}
-		
+
 		public void updatePage(Page p) {
 			pages.put(p.getNo(), p);
 		}
@@ -72,23 +73,21 @@ public class V2Doc {
 		public Page getPage(int no) {
 			return pages.get(no);
 		}
-		
-		
+
 		public int getPageSize() {
 			return this.pages.size();
 		}
-		
-		public Page getPageByIndex(int index){
+
+		public Page getPageByIndex(int index) {
 			return this.pages.valueAt(index);
 		}
-		
-		
+
 		public void update(Doc doc) {
-			
+
 			if (doc == null) {
 				return;
 			}
-			
+
 			for (int i = 0; i < doc.getPageSize(); i++) {
 				Page newP = doc.getPageByIndex(i);
 				Page oldP = getPage(newP.no);
@@ -98,7 +97,7 @@ public class V2Doc {
 					oldP.update(newP);
 				}
 			}
-			
+
 		}
 
 	}
@@ -108,9 +107,9 @@ public class V2Doc {
 		String docId;
 		String filePath;
 		List<V2ShapeMeta> vsMeta;
-		
+
 		protected Page() {
-			
+
 		}
 
 		public Page(int no, String docId, String filePath) {
@@ -166,13 +165,12 @@ public class V2Doc {
 		public void addMeta(V2ShapeMeta meta) {
 			this.vsMeta.add(meta);
 		}
-		
-		
+
 		public void update(Page p) {
 			if (p == null) {
 				return;
 			}
-			
+
 			if (p.no > 0) {
 				this.no = p.no;
 			}
@@ -186,16 +184,27 @@ public class V2Doc {
 				this.vsMeta = new ArrayList<V2ShapeMeta>();
 			}
 			this.vsMeta.addAll(p.vsMeta);
-			
+
 		}
 
+		@Override
+		public boolean equals(Object page) {
+			if (!(page instanceof Page)) {
+				return false;
+			}
+
+			if (this.docId.equals(((Page) page).docId)
+					&& this.no == ((Page) page).no) {
+				return true;
+			} else {
+				return false;
+			}
+		}
 	}
-	
-	
+
 	public static class BlankBorad extends Page {
-		public BlankBorad(int no, String docId,
-				List<V2ShapeMeta> vsMeta) {
-			
+		public BlankBorad(int no, String docId, List<V2ShapeMeta> vsMeta) {
+
 			this.no = no;
 			this.docId = docId;
 			this.vsMeta = vsMeta;
@@ -293,18 +302,22 @@ public class V2Doc {
 
 	/**
 	 * Get page according page number.
-	 * @param no from 1 start
+	 * 
+	 * @param no
+	 *            from 1 start
 	 * @return
 	 */
 	public Page getPage(int no) {
 		if (no <= 0 || no > doc.getPageSize()) {
-//			throw new IndexOutOfBoundsException("Page no is incorrect ");
+			// throw new IndexOutOfBoundsException("Page no is incorrect ");
 			return null;
 		}
 		return doc.getPage(no);
 	}
+
 	/**
 	 * Update existed page array. Will ignore if parameter is null
+	 * 
 	 * @param doc
 	 */
 	public void updateDoc(Doc doc) {
@@ -313,11 +326,10 @@ public class V2Doc {
 		}
 		this.doc.update(doc);
 	}
-	
-	
-	
+
 	/**
-	 *  Update current doc. Will ignore if parameter is null
+	 * Update current doc. Will ignore if parameter is null
+	 * 
 	 * @param v2doc
 	 */
 	public void updateV2Doc(V2Doc v2doc) {
@@ -333,4 +345,5 @@ public class V2Doc {
 		this.mBType = v2doc.getBType();
 		this.doc.update(v2doc.doc);
 	}
+
 }
