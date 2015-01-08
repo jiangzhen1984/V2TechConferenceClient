@@ -1048,9 +1048,6 @@ public class MessageBodyView extends LinearLayout {
 
 			clipboard.setPrimaryClip(clip);
 			pw.dismiss();
-
-			Toast.makeText(getContext(), R.string.contact_message_copy_message,
-					Toast.LENGTH_SHORT).show();
 		}
 
 	};

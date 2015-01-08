@@ -608,12 +608,12 @@ public class GroupListView extends ListView {
 	 */
 	private int updateUserPosition(GroupItemData gitem, int gstart,
 			int gend, User user, User.Status newSt) {
+		if(gend >= mFilterList.size())
+			gend = mFilterList.size() - 1;
 		int pos = -1;
 		int start = gstart;
 		int end = gend;
 
-		if(gend > mFilterList.size())
-			end = mFilterList.size();
 			
 		while (start < end && end < mFilterList.size() && mFilterList.size() > start) {
 			ItemData item = mFilterList.get(start);

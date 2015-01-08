@@ -38,6 +38,8 @@
     </style>
     <style name="GraySquareCheckbox" parent="@android:style/Widget.CompoundButton.CheckBox">
         <item name="android:button">@drawable/selector_check_box</item>
+        <item name="android:layout_width">@dimen/common_item_checkbox_icon_width_size</item>
+        <item name="android:layout_height">@dimen/common_item_checkbox_icon_height_size</item>
     </style>
     <style name="InMeetingCameraSettingAnim">
         <item name="@android:windowEnterAnimation">@animator/nonam_scale_0_100</item>
@@ -81,5 +83,19 @@
         <item name="android:text">@string/activiy_contact_group_item_button_delete</item>
         <item name="android:textColor">@color/common_white_color</item>
         <item name="android:textSize">@dimen/common_item_text_size</item>
+    </style>
+    <style name="Common_user_icon_style">
+         <item name="android:layout_width">@dimen/common_user_head_icon_size</item>
+         <item name="android:layout_height">@dimen/common_user_head_icon_size</item>
+         <item name="android:src">@drawable/avatar</item>
+         <item name="android:layout_centerInParent">true</item>
+    </style>
+    <style name="Common_dialog_button_style">
+         <item name="android:paddingBottom">@dimen/button_padding_vertical</item>
+         <item name="android:paddingTop">@dimen/button_padding_vertical</item>
+         <item name="android:paddingLeft">@dimen/button_padding_horizontal</item>
+         <item name="android:paddingRight">@dimen/button_padding_horizontal</item>
+         <item name="android:textColor">@color/button_text_color</item>
+         <item name="android:textSize">@dimen/common_item_text_size_14</item>
     </style>
 </resources>

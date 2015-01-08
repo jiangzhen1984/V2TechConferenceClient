@@ -106,14 +106,6 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 		mContactsContainer.setTextFilterEnabled(true);
 
 		mContactsContainer.setDivider(null);
-
-		// TextView tv = (TextView) rootView.findViewById(R.id.fragment_title);
-		// if (flag == TAG_ORG) {
-		// tv.setText(R.string.tab_org_name);
-		// } else if (flag == TAG_CONTACT) {
-		// tv.setText(R.string.tab_contact_name);
-		// }
-
 		return rootView;
 	}
 

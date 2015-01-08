@@ -99,7 +99,7 @@ public class FriendManagementActivity extends Activity {
 		}
 
 		detailUser = GlobalHolder.getInstance().getUser(mUid);
-		commentNameET.setText(detailUser.getName());
+		commentNameET.setHint(detailUser.getName());
 		tvGroupName.setText(selectGroupName);
 
 	}

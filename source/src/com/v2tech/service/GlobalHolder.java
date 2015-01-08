@@ -764,12 +764,14 @@ public class GlobalHolder {
 						@Override
 						public void run() {
 							Looper.prepare(); 
-							if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
-								Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个",
-										Toast.LENGTH_LONG).show();
-							else
-								Toast.makeText(mContext, "下载文件个数已达上限，当前正在下载的文件数量已达5个",
-										Toast.LENGTH_LONG).show();
+//							if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
+//								Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个",
+//										Toast.LENGTH_LONG).show();
+//							else
+//								Toast.makeText(mContext, "下载文件个数已达上限，当前正在下载的文件数量已达5个",
+//										Toast.LENGTH_LONG).show();
+							Toast.makeText(mContext, "上传和下载的文件最多不能超过5个",
+									Toast.LENGTH_LONG).show();
 							Looper.loop();
 						}
 					}).start();

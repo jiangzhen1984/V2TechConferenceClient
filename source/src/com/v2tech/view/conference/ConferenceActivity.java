@@ -25,6 +25,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
@@ -55,7 +56,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -86,6 +86,7 @@ import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.PermissionRequestIndication;
 import com.v2tech.service.jni.PermissionUpdateIndication;
 import com.v2tech.util.DensityUtils;
+import com.v2tech.util.DialogManager;
 import com.v2tech.view.ConversationsTabFragment;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
@@ -263,12 +264,17 @@ public class ConferenceActivity extends Activity {
 
 	private boolean currentAttendeeTurnedpage = false;
 
+	/**
+	 * 当Activity从后台切回前台，有可能子布局测量的宽度有问题，导致展开的菜单布局宽度有问题。
+	 * 在进入Stop状态时，把子布局的宽度记录下来
+	 */
+	private int mSaveWidth;
+	private boolean activityFromStop;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_in_metting);
 		if (!initConferenceDate()) {
-
 			isFinish = true;
 			Intent i = new Intent();
 			i.putExtra("gid", conf.getId());
@@ -794,7 +800,6 @@ public class ConferenceActivity extends Activity {
 		}
 
 		if (mSubWindowLayout.getVisibility() == View.VISIBLE) {
-
 			FrameLayout.LayoutParams fl = (FrameLayout.LayoutParams) mSubWindowLayout
 					.getLayoutParams();
 			if (mContentLayoutMain.getMeasuredWidth() == 0
@@ -808,6 +813,13 @@ public class ConferenceActivity extends Activity {
 			}
 			if (mContentHeight == -1) {
 				mContentHeight = mContentLayoutMain.getHeight();
+			}
+			
+			if (activityFromStop) {
+				mContentWidth = mSaveWidth;
+				activityFromStop = false;
+			} else {
+				mSaveWidth = mContentWidth;
 			}
 
 			int flag = getSubViewWindowState();
@@ -1053,16 +1065,20 @@ public class ConferenceActivity extends Activity {
 			}
 
 			// Update button background
+			int selectedColor = mContext.getResources().getColor(R.color.confs_common_bg);
+			int unSelectedColor = Color.rgb(255, 255, 255);
 			for (View button : mMenuButtonGroup) {
-				int c = 0;
+				int backGroundColor = 0;
 				if (button == v) {
-					c = mContext.getResources().getColor(
-							R.color.confs_common_bg);
+					ColorDrawable drawable = (ColorDrawable) v.getBackground();
+					if(drawable == null || drawable.getColor() == unSelectedColor)
+						backGroundColor = selectedColor;
+					else
+						backGroundColor = unSelectedColor;
 				} else {
-					c = Color.rgb(255, 255, 255);
+					backGroundColor = unSelectedColor;
 				}
-
-				button.setBackgroundColor(c);
+				button.setBackgroundColor(backGroundColor);
 			}
 
 			if (content != null) {
@@ -1072,7 +1088,6 @@ public class ConferenceActivity extends Activity {
 			// Make sure local camera is first front of all
 			localSurfaceViewLy.bringToFront();
 		}
-
 	};
 
 	private OnClickListener mApplySpeakerListener = new OnClickListener() {
@@ -2077,10 +2092,7 @@ public class ConferenceActivity extends Activity {
 			headsetAndBluetoothHeadsetHandle();
 			// updateAudioSpeaker(false);
 		}
-
-//		if (audioManager != null) {
-//			audioManager.setMode(AudioManager.MODE_NORMAL);
-//		}
+		activityFromStop = true;
 	}
 
 	@Override
@@ -2207,80 +2219,53 @@ public class ConferenceActivity extends Activity {
 	// }
 
 	private void showQuitDialog(String content) {
-		if (mQuitDialog == null) {
-
-			final Dialog d = new Dialog(mContext, R.style.InMeetingQuitDialog);
-
-			d.setContentView(R.layout.in_meeting_quit_window);
-			final Button cancelB = (Button) d
-					.findViewById(R.id.IMWCancelButton);
-			cancelB.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					d.dismiss();
-				}
-
-			});
-			final Button quitB = (Button) d.findViewById(R.id.IMWQuitButton);
-			quitB.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					d.dismiss();
-					VerificationProvider.deleteCrowdVerificationMessage(conf
-							.getId() , -1);
-					finish();
-				}
-
-			});
-			mQuitDialog = d;
-		}
-
-		TextView v = (TextView) mQuitDialog
-				.findViewById(R.id.in_meeting_quit_window_content);
-		v.setText(content);
-
+		Resources res = getResources();
+		mQuitDialog = DialogManager.getInstance().showQuitModeDialog(DialogManager.getInstance().
+				new DialogInterface(mContext,
+				res.getString(R.string.in_meeting_quit_notification) ,
+				content ,
+				res.getString(R.string.in_meeting_quit_quit_button) ,
+				res.getString(R.string.in_meeting_quit_cancel_button)) {
+			
+			@Override
+			public void confirmCallBack() {
+				mQuitDialog.dismiss();
+				VerificationProvider.deleteCrowdVerificationMessage(conf
+						.getId() , -1);
+				finish();
+			}
+			
+			@Override
+			public void cannelCallBack() {
+				mQuitDialog.dismiss();
+			}
+		});
 		mQuitDialog.show();
 	}
 
 	private void showMuteCameraDialog() {
-		if (mMuteCameraDialog == null) {
-
-			final Dialog d = new Dialog(mContext, R.style.DialogStyle1);
-
-			d.setContentView(R.layout.dialog_mode1);
-			final Button cancelB = (Button) d
-					.findViewById(R.id.IMWCancelButton);
-			cancelB.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					d.dismiss();
-				}
-
-			});
-			final Button quitB = (Button) d.findViewById(R.id.IMWOKButton);
-			quitB.setOnClickListener(new OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					d.dismiss();
-					isMuteCamera = true;
-					cb.enableVideoDev("", false);
-					updateMCameraIVState(false);
-				}
-
-			});
-			mMuteCameraDialog = d;
-		}
-
-		TextView muteContent = (TextView) mMuteCameraDialog
-				.findViewById(R.id.content);
-		TextView muteConfirm = (TextView) mMuteCameraDialog
-				.findViewById(R.id.IMWOKButton);
-		TextView muteCancel = (TextView) mMuteCameraDialog
-				.findViewById(R.id.IMWCancelButton);
-		muteContent.setText(R.string.in_meeting_mute_hit_content);
-		muteConfirm.setText(R.string.in_meeting_mute_button);
-		muteCancel.setText(R.string.in_meeting_mute_cancel_button);
-		mMuteCameraDialog.show();
+		Resources res = getResources();
+		mQuitDialog = DialogManager.getInstance().showQuitModeDialog(DialogManager.getInstance().
+				new DialogInterface(mContext,
+				res.getString(R.string.in_meeting_quit_notification) ,
+				res.getString(R.string.in_meeting_mute_hit_content) ,
+				res.getString(R.string.in_meeting_mute_button) ,
+				res.getString(R.string.in_meeting_mute_cancel_button)) {
+			
+			@Override
+			public void confirmCallBack() {
+				mQuitDialog.dismiss();
+				isMuteCamera = true;
+				cb.enableVideoDev("", false);
+				updateMCameraIVState(false);
+			}
+			
+			@Override
+			public void cannelCallBack() {
+				mQuitDialog.dismiss();
+			}
+		});
+		mQuitDialog.show();
 	}
 
 	/**
@@ -3200,10 +3185,6 @@ public class ConferenceActivity extends Activity {
 
 		@Override
 		public void requestSendMsg(VMessage vm) {
-			// vm.setGroupId(conf.getId());
-			// vm.setToUser(new User(0));
-			// vm.setFromUser(GlobalHolder.getInstance().getCurrentUser());
-			// vm.setMsgCode(V2GlobalEnum.GROUP_TYPE_CONFERENCE);
 			cs.sendVMessage(vm, null);
 
 		}
@@ -3366,7 +3347,6 @@ public class ConferenceActivity extends Activity {
 			// Hide invitation layout
 			showOrHideSubWindow(initInvitionContainer());
 		}
-
 	}
 
 	class SurfaceViewW {

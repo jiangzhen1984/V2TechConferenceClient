@@ -93,6 +93,8 @@ public class GroupLayout extends LinearLayout {
 					.getmUserId() != GlobalHolder.getInstance()
 					.getCurrentUserId())
 				mGroupIV.setImageResource(R.drawable.conference_icon);
+			else
+				mGroupIV.setImageResource(R.drawable.conference_icon_self);
 			mGroupNameTV.setText(mConv.getName());
 			break;
 		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:

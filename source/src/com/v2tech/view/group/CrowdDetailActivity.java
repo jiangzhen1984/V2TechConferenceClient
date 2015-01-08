@@ -193,6 +193,7 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_UPDATED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		filter.addAction(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -442,6 +443,13 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 				GroupUserObject guo = (GroupUserObject)intent.getExtras().get("obj");
 				if (guo.getmGroupId() == crowd.getmGId()) {
 					mMembersCountsTV.setText(crowd.getUsers().size()+"");
+				}
+			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
+				CrowdGroup newGroup = (CrowdGroup) GlobalHolder.getInstance().
+						getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getmGId());
+				if(newGroup != null){
+					crowd = newGroup;
+					mMembersCountsTV.setText(String.valueOf(crowd.getUsers().size()));
 				}
 			} else if (intent.getAction().equals(JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION)) {
 				long crowdId = intent.getLongExtra("groupID", 0);

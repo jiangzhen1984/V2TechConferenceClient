@@ -25,6 +25,7 @@ public class V2GlobalEnum {
 	
 	public static final int FILE_TRANS_SENDING = 10;
 	public static final int FILE_TRANS_DOWNLOADING = 11;
+	public static final int FILE_TRANS_ERROR = 13;
 	
 	/**
 	 * User state for on line

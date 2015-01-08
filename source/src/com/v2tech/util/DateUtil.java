@@ -64,4 +64,21 @@ public class DateUtil {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return format.format(date.getTime());
 	}
+	
+	/**
+	 * get the time format , like HH:mm:ss
+	 * 
+	 * @param mTimeLine
+	 * @return
+	 */
+	public static String calculateTime(long mTimeLine) {
+
+		mTimeLine = mTimeLine / 1000;
+		int hour = (int) mTimeLine / 3600;
+		int minute = (int) (mTimeLine - (hour * 3600)) / 60;
+		int second = (int) mTimeLine - (hour * 3600 + minute * 60);
+		return (hour < 10 ? "0" + hour : hour) + ":"
+				+ (minute < 10 ? "0" + minute : minute) + ":"
+				+ (second < 10 ? "0" + second : second);
+	}
 }

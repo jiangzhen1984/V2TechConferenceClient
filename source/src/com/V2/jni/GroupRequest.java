@@ -551,6 +551,7 @@ public class GroupRequest {
 	 */
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
+		sXml = EscapedcharactersProcessing.reverse(sXml);
 		V2Log.e(TAG, "OnAddGroupInfo ---> groupType :" + groupType
 				+ " | nParentID: " + nParentID + " | nGroupID: " + nGroupID
 				+ " | sXml: " + sXml);

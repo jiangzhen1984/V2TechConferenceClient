@@ -1102,6 +1102,11 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
                 }
             }
         }
+        
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+        	return onSingleTapConfirmed(e);
+        }
     };
 
     @Override

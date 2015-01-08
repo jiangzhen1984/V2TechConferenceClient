@@ -12,11 +12,11 @@ import android.widget.Toast;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.v2tech.R;
-import com.v2tech.util.SPUtil;
-import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.service.CrowdGroupService;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
+import com.v2tech.view.PublicIntent;
+import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group.GroupType;
 
 /**
@@ -110,7 +110,7 @@ public class DiscussionBoardTopicUpdateActivity extends Activity {
 				}
 				mState = State.PENDING;
 			}
-			crowd.setName(EscapedcharactersProcessing.convertAmp(mContentET.getText().toString()));
+			crowd.setName(EscapedcharactersProcessing.convert(mContentET.getText().toString()));
 			service.updateDiscussion(crowd, new MessageListener(mLocalHandler,
 					REQUEST_UPDATE_CROWD_DONE, null));
 		}

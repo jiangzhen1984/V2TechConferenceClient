@@ -221,13 +221,11 @@ public class ConferenceCreateActivity extends Activity {
 			return;
 		}
 		
-		
 		if (op == OP_DEL_ALL_GROUP_USER) {
 			removeAttendee(u);
 		} else if (op == OP_ADD_ALL_GROUP_USER) {
 			addAttendee(u);
 		}
-
 	}
 
 	private void removeAttendee(User u) {
@@ -295,6 +293,11 @@ public class ConferenceCreateActivity extends Activity {
 				long id) {
 			User user = mUserListArray.get(position);
 			mGroupListView.updateCheckItem(user, false);
+			Set<Group> belongsGroup = user.getBelongsGroup();
+			for (Group group : belongsGroup) {
+				List<User> users = group.getUsers();
+				mGroupListView.checkBelongGroupAllChecked(group, users);
+			}
 			Message.obtain(mLocalHandler, UPDATE_ATTENDEES, user)
 					.sendToTarget();
 		}

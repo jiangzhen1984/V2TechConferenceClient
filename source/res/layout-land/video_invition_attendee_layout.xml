@@ -115,7 +115,7 @@
                         android:paddingRight="10dp"
                         android:text="@string/conference_create_conf_name"
                         android:textColor="@color/invitation_attendee_layout_item_color"
-                        android:textSize="15sp" />
+                        android:textSize="@dimen/common_item_text_size_16" />
                     <EditText
                         android:id="@+id/conference_create_conf_name"
                         android:layout_width="wrap_content"
@@ -124,6 +124,7 @@
                         android:background="@null"
                         android:ems="10"
                         android:imeOptions="actionDone"
+                        android:textSize="@dimen/common_item_text_size_16"
                         android:inputType="text"
                         android:maxLength="50" >
                     </EditText>
@@ -149,7 +150,7 @@
                         android:paddingRight="10dp"
                         android:text="@string/conference_create_conf_start_time"
                         android:textColor="@color/invitation_attendee_layout_item_color"
-                        android:textSize="15sp" />
+                        android:textSize="@dimen/common_item_text_size_16" />
                     <EditText
                         android:id="@+id/conference_create_conf_start_time"
                         android:layout_width="wrap_content"
@@ -157,6 +158,7 @@
                         android:layout_gravity="center"
                         android:background="@null"
                         android:ems="10"
+                        android:textSize="@dimen/common_item_text_size_16"
                         android:inputType="datetime" >
                     </EditText>
                 </LinearLayout>
@@ -191,7 +193,7 @@
                     android:paddingTop="10dp"
                     android:text="@string/conference_invition_button_text"
                     android:textColor="@color/conf_create_button_color"
-                    android:textSize="15sp" >
+                    android:textSize="@dimen/common_item_text_size_16" >
                 </TextView>
             </LinearLayout>
         </RelativeLayout>

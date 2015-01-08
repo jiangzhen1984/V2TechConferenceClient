@@ -113,7 +113,6 @@
                     android:ems="10"
                     android:inputType="text"
                     android:maxLength="30"
-                    android:text="华春雨"
                     android:textColor="@color/activiy_contact_detail_item_color"
                     android:textSize="@dimen/common_item_text_size" >
                 </EditText>

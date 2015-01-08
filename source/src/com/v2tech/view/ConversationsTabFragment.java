@@ -370,11 +370,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		((ViewGroup) rootView.getParent()).removeView(rootView);
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-	}
-
 	/**
 	 * According to mCurrentTabFlag, initialize different intent filter
 	 */
@@ -459,11 +454,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_USER && !isCreate)
 			sortAndUpdate();
 		isCreate = false;
-	}
-
-	private void sortAndUpdate() {
-		Collections.sort(mItemList);
-		adapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -599,6 +589,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 			}
 		} else if (resultCode == CONFERENCE_ENTER_CODE) {
+			if(currentEntered == null)
+				return ;
 			V2Log.d(TAG, "The Conf was exit ! current enter conf is : "
 					+ currentEntered.getName());
 			cb.requestExitConference(currentEntered, null);
@@ -606,6 +598,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			mContext.stopService(new Intent(mContext,
 					ConferencMessageSyncService.class));
 		}
+	}
+	
+	private void sortAndUpdate() {
+		Collections.sort(mItemList);
+		adapter.notifyDataSetChanged();
 	}
 
 	public boolean updateVerificationConversation() {
@@ -1036,8 +1033,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		searchList.clear();
 		adapter.notifyDataSetChanged();
 	}
-
-	private long lastNotificatorTime;
 
 	private ScrollItem makeNewGroupItem(int groupType, long groupID) {
 

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,10 +19,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.v2tech.R;
-import com.v2tech.service.GlobalHolder;
+import com.v2tech.util.MessageUtil;
 import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.conference.ConferenceMessageBodyView.ActionListener;
-import com.v2tech.view.conversation.MessageBuilder;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.ConferenceGroup;
@@ -42,7 +43,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 	
 	public interface ChattingListener {
 		public void requestSendMsg(VMessage vm);
-
+		
 		public void requestChattingViewFixedLayout(View v);
 
 		public void requestChattingViewFloatLayout(View v);
@@ -52,6 +53,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		super(context);
 		initLayout();
 		initData();
+		setListeners();
 		this.conf = conf;
 		mContext = context;
 	}
@@ -73,6 +75,23 @@ public class VideoMsgChattingLayout extends LinearLayout {
 
 		this.mMsgContainer = (ListView) view
 				.findViewById(R.id.video_msg_container);
+		this.mContentTV = (EditText) view
+				.findViewById(R.id.video_msg_chatting_layout_msg_content);
+		this.mSendButton = view
+				.findViewById(R.id.video_msg_chatting_layout_send_button);
+		mContentTV.setOnKeyListener(keyListener);
+		
+
+		rootView = this;
+	}
+	
+	private void initData() {
+		messageArray = new ArrayList<CommonAdapterItemWrapper>();
+		adapter = new CommonAdapter(messageArray, mConvertListener);
+		mMsgContainer.setAdapter(adapter);
+	}
+	
+	private void setListeners() {
 		this.mMsgContainer.setOnTouchListener(new OnTouchListener() {
 			
 			@Override
@@ -88,10 +107,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 				return false;
 			}
 		});
-		this.mContentTV = (EditText) view
-				.findViewById(R.id.video_msg_chatting_layout_msg_content);
-		this.mSendButton = view
-				.findViewById(R.id.video_msg_chatting_layout_send_button);
+
 		mSendButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -101,50 +117,35 @@ public class VideoMsgChattingLayout extends LinearLayout {
 							|| mContentTV.getText().toString().trim().isEmpty()) {
 						return;
 					}
-					String text = removeEmoji( mContentTV.getText().toString());
-					VMessage vm  = MessageBuilder.buildGroupTextMessage(conf.getGroupType().intValue() , conf.getmGId(), GlobalHolder.getInstance()
-							.getCurrentUser(), text);
+					VMessage vm = MessageUtil.buildChatMessage(mContext, mContentTV, conf.getGroupType().intValue(),
+							conf.getmGId(), null);
 					addNewMessage(vm);
 					listener.requestSendMsg(vm);
-					mContentTV.setText("");
 				}
+			}
+		});
+		
+		this.mContentTV.addTextChangedListener(new TextWatcher() {
+
+			@Override
+			public void afterTextChanged(Editable edit) {
+				mContentTV.removeTextChangedListener(this);
+				MessageUtil.buildChatPasteMessageContent(mContext , mContentTV);
+				mContentTV.addTextChangedListener(this);
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence ch, int arg1, int arg2,
+					int arg3) {
+			}
+			
+			@Override
+			public void onTextChanged(CharSequence arg0, int arg1, int arg2,
+					int arg3) {
 			}
 
 		});
-		
-		mContentTV.setOnKeyListener(keyListener);
-		
-
-		rootView = this;
 	}
-	
-	// FIXME optimize code
-	private String removeEmoji(String content) {
-		if (content == null || content.isEmpty()) {
-			return "";
-		}
-		byte[] bys = new byte[] { -16, -97 };
-		byte[] bc = content.getBytes();
-		byte[] copy = new byte[bc.length];
-		int j = 0;
-		for (int i = 0; i < bc.length; i++) {
-			if (i < bc.length - 2 && bys[0] == bc[i] && bys[1] == bc[i + 1]) {
-				i += 3;
-				continue;
-			}
-			copy[j] = bc[i];
-			j++;
-		}
-		return new String(copy, 0, j);
-	}
-
-	
-	private void initData() {
-		messageArray = new ArrayList<CommonAdapterItemWrapper>();
-		adapter = new CommonAdapter(messageArray, mConvertListener);
-		mMsgContainer.setAdapter(adapter);
-	}
-	
 	
 	public void setListener(ChattingListener listener) {
 		this.listener = listener;

@@ -2050,22 +2050,6 @@ public class JNIService extends Service implements
 		@Override
 		public void OnFileTransBegin(String szFileID, int nTransType,
 				long nFileSize) {
-//			if(!szFileID.contains("AVATAR")){
-//				VMessageFileItem fileItem = MessageLoader.queryFileItemByID(szFileID);
-//				if(fileItem == null){
-//					V2Log.e(TAG, "File Trans Begin Record Failed! ID is : " + szFileID);
-//					return ;
-//				}
-//				
-//				int transType = -1;
-//				if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING){
-//					transType = V2GlobalEnum.FILE_TRANS_SENDING;
-//				}
-//				else if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING){
-//					transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;;
-//				}
-//				updateFileState(transType , fileItem, "JNIService OnFileTransBegin", true);
-//			}
 		}
 		
 		@Override
@@ -2146,6 +2130,19 @@ public class JNIService extends Service implements
 		public void OnFileTransError(String szFileID, int errorCode,
 				int nTransType) {
 			if(!szFileID.contains("AVATAR")){
+//				for (int i = 0; i < cacheImageMeta.size(); i++) {
+//					VMessage vm = cacheImageMeta.get(i);
+//					List<VMessageImageItem> imageItems = vm.getImageItems();
+//					for (int j = 0; j < imageItems.size(); j++) {
+//						VMessageImageItem vMessageImageItem = imageItems.get(j);
+//						if(vMessageImageItem.getUuid().equals(szFileID)){
+//							vMessageImageItem.setTransState(V2GlobalEnum.FILE_TRANS_ERROR);
+//							cacheImageMeta.remove(i);
+//							Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm).sendToTarget();
+//						}
+//					}
+//				}
+				
 				mark.remove(szFileID);
 				GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
 				VMessageFileItem fileItem = MessageLoader.queryFileItemByID(szFileID);

@@ -176,7 +176,11 @@ public class Conversation implements Comparable<Conversation>{
 		else if(localDate && !remoteDate)
 			return 1;
 		
-		if(Long.valueOf(dateLong) < Long.valueOf(another.getDateLong()))
+		Long localTime = Long.valueOf(dateLong);
+		Long remoteTime = Long.valueOf(another.getDateLong());
+		if(localTime == remoteTime)
+			return 0;
+		else if(localTime < remoteTime)
 			return 1;
 		else
 			return -1;

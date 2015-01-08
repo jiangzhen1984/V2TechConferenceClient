@@ -10,7 +10,6 @@ import java.util.UUID;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.os.Parcelable;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.BitmapUtil;
@@ -23,6 +22,7 @@ public class VMessageImageItem extends VMessageAbstractItem{
 	private Bitmap mFullQualityBitmap = null;
 	private Bitmap mCompressedBitmap = null;
 	private boolean isReceived;
+	private int transState;
 
 	public VMessageImageItem(VMessage vm, String filePath) {
 		super(vm);
@@ -71,6 +71,14 @@ public class VMessageImageItem extends VMessageAbstractItem{
 
 	public void setReceived(boolean isReceived) {
 		this.isReceived = isReceived;
+	}
+	
+	public int getTransState() {
+		return transState;
+	}
+
+	public void setTransState(int transState) {
+		this.transState = transState;
 	}
 
 	public String toXmlItem() {

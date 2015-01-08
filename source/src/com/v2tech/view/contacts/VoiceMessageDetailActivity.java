@@ -169,7 +169,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 
 			childBean = mListItem.get(position);
 			long time = childBean.childHoldingTime;
-			String holdTime = time <= 0 ? "" : DateUtil.getShortDate(time);
+			String holdTime = time <= 0 ? "" : DateUtil.calculateTime(time);
 			holder.holdTime.setText(holdTime);
 			holder.saveTime.setText(DateUtil
 					.getStringDate(childBean.childSaveDate));

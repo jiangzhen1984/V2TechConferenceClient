@@ -43,9 +43,9 @@
                 android:layout_marginRight="30dp"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/input_bg"
+                android:imeOptions="actionDone"
                 android:inputType="text"
                 android:paddingLeft="100dp"
-                android:imeOptions="actionDone"
                 android:textColor="#000000"
                 android:textSize="18sp" >
             </EditText>
@@ -126,7 +126,7 @@
                         android:paddingRight="10dp"
                         android:text="@string/conference_create_conf_name"
                         android:textColor="@color/invitation_attendee_layout_item_color"
-                        android:textSize="15sp" />
+                        android:textSize="@dimen/common_item_text_size_16" />
                     <EditText
                         android:id="@+id/conference_create_conf_name"
                         android:layout_width="wrap_content"
@@ -134,12 +134,13 @@
                         android:layout_gravity="center"
                         android:background="@null"
                         android:ems="10"
+                        android:imeOptions="actionDone"
                         android:inputType="text"
                         android:maxLength="50"
-                        android:imeOptions="actionDone"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp"
-                        android:textColor="@color/invitation_attendee_layout_item_color" >
+                        android:textColor="@color/invitation_attendee_layout_item_color"
+                        android:textSize="@dimen/common_item_text_size_16" >
                     </EditText>
                 </LinearLayout>
                 <LinearLayout
@@ -163,7 +164,7 @@
                         android:paddingRight="10dp"
                         android:text="@string/conference_create_conf_start_time"
                         android:textColor="@color/invitation_attendee_layout_item_color"
-                        android:textSize="15sp" />
+                        android:textSize="@dimen/common_item_text_size_16" />
                     <EditText
                         android:id="@+id/conference_create_conf_start_time"
                         android:layout_width="wrap_content"
@@ -174,7 +175,8 @@
                         android:inputType="datetime"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp"
-                        android:textColor="@color/invitation_attendee_layout_item_color" >
+                        android:textColor="@color/invitation_attendee_layout_item_color"
+                        android:textSize="@dimen/common_item_text_size_16" >
                     </EditText>
                 </LinearLayout>
             </LinearLayout>
@@ -209,7 +211,7 @@
                     android:paddingTop="10dp"
                     android:text="@string/conference_invition_button_text"
                     android:textColor="@color/conf_create_button_color"
-                    android:textSize="20sp" >
+                    android:textSize="@dimen/common_item_text_size_16" >
                 </TextView>
             </LinearLayout>
         </RelativeLayout>

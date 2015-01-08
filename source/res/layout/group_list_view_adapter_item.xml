@@ -10,8 +10,8 @@
         android:layout_gravity="center_vertical">
         <ImageView
             android:id="@+id/group_arrow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/common_item_triangle_icon_size"
+            android:layout_height="@dimen/common_item_triangle_icon_size"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:paddingLeft="@dimen/contacts_group_view_arrow_padding_left"
@@ -22,6 +22,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/contacts_group_view_group_name_margin_right"
+            android:layout_marginLeft="@dimen/contacts_group_view_group_name_margin_right"
             android:layout_toRightOf="@+id/group_arrow"
             android:ellipsize="end"
             android:gravity="center_vertical"
@@ -29,7 +30,7 @@
             android:singleLine="true"
             android:text="contact_group_name"
             android:textColor="@color/contacts_group_item_color"
-            android:textSize="@dimen/common_item_text_size" />
+            android:textSize="@dimen/common_item_text_size_16" />
         <TextView
             android:id="@+id/group_online_statist"
             android:layout_width="wrap_content"
@@ -44,18 +45,15 @@
             android:singleLine="true"
             android:text="contact_group_online_statist"
             android:textColor="@color/contacts_group_item_color"
-            android:textSize="@dimen/common_item_text_size" />
+            android:textSize="@dimen/common_item_text_size_16" />
         <CheckBox
             android:id="@+id/group_view_ck"
             style="@style/GraySquareCheckbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/conf_create_contacts_use_layout_name_margin_right"
             android:clickable="false"
-            android:focusable="false"
-            android:text="" />
+            android:focusable="false"/>
         <!-- For holder the layout's height  -->
         <ImageView
                 android:layout_width="wrap_content"
@@ -115,10 +113,8 @@
             android:layout_marginLeft="@dimen/contacts_user_view_contact_user_name_margin_left" >
             <ImageView
                 android:id="@+id/user_img"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:src="@drawable/avatar" />
+                android:src="@drawable/avatar"
+                style="@style/Common_user_icon_style" />
             <ImageView
                 android:id="@+id/user_status_iv"
                 android:layout_width="18dp"
@@ -172,7 +168,7 @@
             android:singleLine="true"
             android:text="TextView"
             android:textColor="@color/contacts_user_view_item_color_offline"
-            android:textSize="@dimen/common_item_text_size" />
+            android:textSize="@dimen/common_item_text_size_16" />
         <TextView
             android:id="@+id/user_signature"
             android:layout_width="wrap_content"
@@ -186,18 +182,15 @@
             android:layout_marginRight="10dp"
             android:text="textView"
             android:textColor="@color/common_item_text_color"
-            android:textSize="@dimen/common_item_text_size" />
+            android:textSize="@dimen/common_item_text_size_16" />
         <CheckBox
             android:id="@+id/user_check_view"
             style="@style/GraySquareCheckbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/conf_create_contacts_use_layout_name_margin_right"
             android:clickable="false"
-            android:focusable="false"
-            android:text="" />
+            android:focusable="false"/>
     </RelativeLayout>
     <LinearLayout
         android:layout_width="match_parent"

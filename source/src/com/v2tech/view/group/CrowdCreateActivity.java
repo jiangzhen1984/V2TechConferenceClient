@@ -77,6 +77,7 @@ public class CrowdCreateActivity extends Activity {
 	private static final int START_GROUP_SELECT = 6;
 	private static final int DOING_SELECT_GROUP = 7;
 	private static final int END_GROUP_SELECT = 8;
+	private static final int END_CREATE_OPERATOR = 9;
 	
 	
 	private static final int OP_ADD_ALL_GROUP_USER = 1;
@@ -480,22 +481,25 @@ public class CrowdCreateActivity extends Activity {
 					crowd.setAuthType(CrowdGroup.AuthType.NEVER);
 				}
 
-				List<User> userList = new ArrayList<User>(mUserList);
-				for (User user : userList) {
-					saveQualication(user);
-				}
-				if (mCreateWaitingDialog != null && mCreateWaitingDialog.isShowing()) {
-					mCreateWaitingDialog.dismiss();
-				}
 				mCreateWaitingDialog = ProgressDialog.show(
 						mContext,
 						"",
 						mContext.getResources().getString(
 								R.string.notification_watiing_process), true);
-				//Do not add userList to crowd, because this just invitation.
-				cg.createCrowdGroup(crowd, userList, new MessageListener(mLocalHandler,
-						CREATE_GROUP_MESSAGE, crowd));
-//				view.setEnabled(false);
+				
+				new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						List<User> userList = new ArrayList<User>(mUserList);
+//						for (User user : userList) {
+//							saveQualication(user);
+//						}
+						Message.obtain(
+								mLocalHandler,
+								END_CREATE_OPERATOR,userList).sendToTarget();
+					}
+				}).start();
 			}
 		}
 
@@ -641,6 +645,16 @@ public class CrowdCreateActivity extends Activity {
 			case END_GROUP_SELECT:
 				mWaitingDialog.dismiss();
 				mWaitingDialog = null;
+				break;
+			case END_CREATE_OPERATOR:
+				if (mCreateWaitingDialog != null && mCreateWaitingDialog.isShowing()) {
+					mCreateWaitingDialog.dismiss();
+				}
+				
+				List<User> userList = (List<User>) msg.obj;
+				//Do not add userList to crowd, because this just invitation.
+				cg.createCrowdGroup(crowd, userList, new MessageListener(mLocalHandler,
+						CREATE_GROUP_MESSAGE, crowd));
 				break;
 			}
 		}

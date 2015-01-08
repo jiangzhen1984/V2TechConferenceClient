@@ -253,15 +253,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 							R.string.confs_user_video_device_item)
 					+ wr.sortFlag);
 		} else {
-			if (wr.a.isRapidInitiation()) {
-				// nameTV.setText(new StringBuffer().append("<")
-				// .append(wr.a.getAttName()).append(">"));
-
-				nameTV.setText("<" + wr.a.getAttName() + ">");
-
-			} else {
-				nameTV.setText(wr.a.getAttName());
-			}
+			nameTV.setText(wr.a.getAttName());
 		}
 
 		if (wr.udc != null) {
@@ -399,36 +391,31 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 
-		if (at.isJoined()) {
-			if (wr.sortFlag == FIRST_DEVICE_FLAG) {
-				// Update lecture state display
-				switch (at.getLectureState()) {
-				case Attendee.LECTURE_STATE_NOT:
-					lectureStateIV.setVisibility(View.INVISIBLE);
-					break;
-				case Attendee.LECTURE_STATE_APPLYING:
-					lectureStateIV.setVisibility(View.VISIBLE);
-					lectureStateIV
-							.setImageResource(R.drawable.lecture_state_applaying);
-					break;
-				case Attendee.LECTURE_STATE_GRANTED:
-					lectureStateIV.setVisibility(View.VISIBLE);
-					lectureStateIV
-							.setImageResource(R.drawable.lecture_state_granted);
-					break;
-				}
-
-				// Update speaking display
-				if (!at.isSpeaking()) {
-					speakingIV.setVisibility(View.INVISIBLE);
-				} else {
-					speakingIV.setVisibility(View.VISIBLE);
-					speakingIV.setImageResource(R.drawable.conf_speaking);
-					((AnimationDrawable) speakingIV.getDrawable()).start();
-				}
-			} else {
+		if (wr.sortFlag == FIRST_DEVICE_FLAG) {
+			// Update lecture state display
+			switch (at.getLectureState()) {
+			case Attendee.LECTURE_STATE_NOT:
 				lectureStateIV.setVisibility(View.INVISIBLE);
+				break;
+			case Attendee.LECTURE_STATE_APPLYING:
+				lectureStateIV.setVisibility(View.VISIBLE);
+				lectureStateIV
+						.setImageResource(R.drawable.lecture_state_applaying);
+				break;
+			case Attendee.LECTURE_STATE_GRANTED:
+				lectureStateIV.setVisibility(View.VISIBLE);
+				lectureStateIV
+						.setImageResource(R.drawable.lecture_state_granted);
+				break;
+			}
+
+			// Update speaking display
+			if (!at.isSpeaking()) {
 				speakingIV.setVisibility(View.INVISIBLE);
+			} else {
+				speakingIV.setVisibility(View.VISIBLE);
+				speakingIV.setImageResource(R.drawable.conf_speaking);
+				((AnimationDrawable) speakingIV.getDrawable()).start();
 			}
 		} else {
 			lectureStateIV.setVisibility(View.INVISIBLE);
@@ -1092,7 +1079,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public int getCount() {
-			if (mIsStartedSearch)
+			if(mIsStartedSearch)
 				return mSearchFilterList.size();
 			else
 				return mFilterList.size();
@@ -1100,7 +1087,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public Object getItem(int position) {
-			if (mIsStartedSearch)
+			if(mIsStartedSearch)
 				return mSearchFilterList.get(position);
 			else
 				return mFilterList.get(position);
@@ -1114,11 +1101,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			Wrapper wrapper;
-			if (mIsStartedSearch)
+			if(mIsStartedSearch) 
 				wrapper = mSearchFilterList.get(position);
 			else
 				wrapper = mFilterList.get(position);
-
+				
 			if (convertView == null) {
 				convertView = buildAttendeeView(wrapper);
 			} else {
@@ -1155,7 +1142,16 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				if (wr.a == null) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
-					return calledByCompareTo(wr);
+					return compareToCall(wr);
+				} else {
+					return -1;
+				}
+
+			} else if (this.a.isSelf()) {
+				if (wr.a == null) {
+					return -1;
+				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+					return 1;
 				} else {
 					return -1;
 				}
@@ -1165,6 +1161,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
+				} else if (wr.a.isSelf()) {
+					return 1;
 				} else {
 					return -1;
 				}
@@ -1172,6 +1170,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				if (wr.a == null) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+					return 1;
+				} else if (wr.a.isSelf()) {
 					return 1;
 				} else if (wr.a.isChairMan()) {
 					return 1;
@@ -1183,13 +1183,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
+				} else if (wr.a.isSelf()) {
+					return 1;
 				} else if (wr.a.isChairMan()) {
 					return 1;
 				} else if (wr.a.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
 					return 1;
 				} else if (wr.a.getLectureState() == Attendee.LECTURE_STATE_APPLYING) {
 					// return 0;
-					return calledByCompareTo(wr);
+					return compareToCall(wr);
 				} else {
 					return -1;
 				}
@@ -1198,6 +1200,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
+				} else if (wr.a.isSelf()) {
+					return 1;
 				} else if (wr.a.isChairMan()) {
 					return 1;
 				} else if (wr.a.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
@@ -1205,7 +1209,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else if (wr.a.getLectureState() == Attendee.LECTURE_STATE_APPLYING) {
 					return 1;
 				} else if (this.a.isSpeaking()) {
-					return calledByCompareTo(wr);
+					return compareToCall(wr);
 
 				} else {
 					return -1;
@@ -1215,6 +1219,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
+				} else if (wr.a.isSelf()) {
+					return 1;
 				} else if (wr.a.isChairMan()) {
 					return 1;
 				} else if (wr.a.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
@@ -1224,13 +1230,14 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else if (this.a.isSpeaking()) {
 					return 1;
 				} else {
-					return calledByCompareTo(wr);
+					return compareToCall(wr);
+
 				}
 			}
 
 		}
 
-		private int calledByCompareTo(Wrapper wr) {
+		private int compareToCall(Wrapper wr) {
 			int ret = this.a.compareTo(wr.a);
 			if (ret == 0) {
 				return this.sortFlag;

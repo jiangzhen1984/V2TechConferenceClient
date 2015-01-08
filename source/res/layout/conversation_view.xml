@@ -18,9 +18,7 @@
             android:layout_gravity="center_vertical" >
             <ImageView
                 android:id="@+id/group_list_conference_image_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/conference_icon_self" />
+                style="@style/Common_user_icon_style"/>
             <ImageView
                 android:id="@+id/group_list_conference_notificator"
                 android:layout_width="wrap_content"
@@ -52,7 +50,7 @@
             android:singleLine="true"
             android:text="TextView"
             android:textColor="@color/conversation_view_name_color"
-            android:textSize="@dimen/conversation_view_name_text_size" />
+            android:textSize="@dimen/common_item_text_size_16" />
         <TextView
             android:id="@+id/group_list_conference_owner_tv"
             android:layout_width="wrap_content"

@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -34,7 +32,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.text.Editable;
-import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -110,12 +107,10 @@ import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
-import com.v2tech.vo.VMessageFaceItem;
 import com.v2tech.vo.VMessageFileItem;
 import com.v2tech.vo.VMessageFileItem.FileType;
 import com.v2tech.vo.VMessageImageItem;
 import com.v2tech.vo.VMessageLinkTextItem;
-import com.v2tech.vo.VMessageTextItem;
 
 public class ConversationP2PTextActivity extends Activity implements
 		CommonUpdateMessageBodyPopupWindowInterface,
@@ -636,7 +631,7 @@ public class ConversationP2PTextActivity extends Activity implements
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		V2Log.e(TAG, "entry onNewIntent....");
+		V2Log.d(TAG, "entry onNewIntent....");
 		ConversationNotificationObject tempCov = intent
 				.getParcelableExtra("obj");
 		if (tempCov != null)
@@ -645,15 +640,17 @@ public class ConversationP2PTextActivity extends Activity implements
 			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
 					1);
 		if (!isReLoading) {
-			V2Log.e(TAG, "entry onNewIntent , reloading chating datas...");
+			V2Log.d(TAG, "entry onNewIntent , reloading chating datas...");
 			remoteChatUserID = 0;
 			remoteGroupID = 0;
 			remoteChatUser = null;
-			initConversationInfos();
 			mIsInited = false;
 			mLoadedAllMessages = false;
 			currentItemPos = 0;
 			offset = 0;
+			messageArray.clear();
+			messageAllID.clear();
+			initConversationInfos();
 		}
 	}
 
@@ -1617,85 +1614,12 @@ public class ConversationP2PTextActivity extends Activity implements
 		}
 	};
 
-	private int flagCount = 0;
 	private TextWatcher mPasteWatcher = new TextWatcher() {
 
 		@Override
 		public void afterTextChanged(Editable edit) {
-			String[] split = edit.toString().split("/:");
-			for (String string : split) {
-				if (string.contains(":")) {
-					num++;
-				}
-			}
-			if (num > 10 && split.length > 10) {
-				Toast.makeText(mContext,
-						R.string.error_contact_message_face_too_much,
-						Toast.LENGTH_SHORT).show();
-				StringBuilder sb = new StringBuilder();
-				for (int i = 0; i < split.length; i++) {
-
-					if (flagCount == 10) {
-						flagCount = 0;
-						break;
-					}
-
-					if (split[i].contains(":")) {
-						flagCount++;
-						sb.append("/:");
-						if (flagCount == 10 && split[i].split(" ").length > 1) {
-							sb.append(split[i].split(" ")[0]);
-						} else
-							sb.append(split[i]);
-					} else {
-						sb.append(split[i]);
-					}
-
-				}
-				V2Log.e(TAG, "stringbuilder : " + sb.toString().trim());
-				edit.clear();
-				edit.append(sb.toString().trim());
-				mMessageET.setSelection(sb.toString().trim().length());
-				sb.delete(0, sb.length());
-			}
-			num = 0;
-
 			mMessageET.removeTextChangedListener(this);
-			int start = -1, end;
-			int index = 0;
-			V2Log.e(TAG, "输入的字符串：" + edit.toString());
-			while (index < edit.length()) {
-				if (edit.charAt(index) == '/' && index < edit.length() - 1
-						&& edit.charAt(index + 1) == ':') {
-					start = index;
-					index += 2;
-					continue;
-				} else if (start != -1) {
-					if (edit.charAt(index) == ':' && index < edit.length() - 1
-							&& edit.charAt(index + 1) == '/') {
-						end = index + 2;
-						SpannableStringBuilder builder = new SpannableStringBuilder();
-
-						int ind = GlobalConfig.getDrawableIndexByEmoji(edit
-								.subSequence(start, end).toString());
-						// replay emoji and clean
-						if (ind > 0) {
-							MessageUtil
-									.appendSpan(
-											builder,
-											mContext.getResources()
-													.getDrawable(
-															GlobalConfig.GLOBAL_FACE_ARRAY[ind]),
-											ind);
-							edit.replace(start, end, builder);
-						}
-						index = start;
-						start = -1;
-					}
-				}
-				index++;
-			}
-
+			MessageUtil.buildChatPasteMessageContent(mContext , mMessageET);
 			mMessageET.addTextChangedListener(this);
 		}
 
@@ -1703,29 +1627,10 @@ public class ConversationP2PTextActivity extends Activity implements
 		public void beforeTextChanged(CharSequence ch, int arg1, int arg2,
 				int arg3) {
 		}
-
-		private int num;
-
+		
 		@Override
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
-			// Editable edit = mMessageET.getText();
-			// String str = edit.toString() + " ";
-			// String str = arg0.toString() + " ";
-			// String[] len = str.split("((/:){1}(.){1}(:/){1})");
-			// String[] len = str.split("/:");
-			// if (len.length > 10) {
-			// Toast.makeText(mContext,
-			// R.string.error_contact_message_face_too_much,
-			// Toast.LENGTH_SHORT).show();
-			// StringBuilder sb = new StringBuilder();
-			// for (int i = 0; i < 10; i++) {
-			// sb.append(len[i]);
-			// }
-			// mMessageET.setText(sb.toString().trim());
-			// mMessageET.setSelection(sb.toString().trim().length());
-			// return;
-			// }
 		}
 
 	};
@@ -1821,155 +1726,16 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	}
 
-	// public void startVideoCall() {
-	// Intent iv = new Intent();
-	// iv.addCategory(PublicIntent.DEFAULT_CATEGORY);
-	// iv.setAction(PublicIntent.START_P2P_CONVERSACTION_ACTIVITY);
-	// iv.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-	// iv.putExtra("uid", user2Id);
-	// iv.putExtra("is_coming_call", false);
-	// iv.putExtra("voice", false);
-	// List<UserDeviceConfig> list = GlobalHolder.getInstance()
-	// .getAttendeeDevice(user2Id);
-	// if (list != null && list.size() > 0) {
-	// iv.putExtra("device", list.get(0).getDeviceID());
-	// } else {
-	// iv.putExtra("device", "");
-	// }
-	// mContext.startActivity(iv);
-	//
-	// }
-
 	private void doSendMessage() {
-		String content = mMessageET.getEditableText().toString();
-		if (content == null || content.equals("")) {
-			Toast.makeText(mContext, "聊天信息不能为空", Toast.LENGTH_SHORT).show();
-			return;
-		}
-		content = removeEmoji(content);
-		if (remoteChatUser == null) {
-			remoteChatUser = new User(remoteChatUserID);
-		}
-		// 如果user2Id为0，则说明为群组聊天
-		VMessage vm = new VMessage(cov.getConversationType(),
-				this.remoteGroupID, currentLoginUser, remoteChatUser, new Date(
-						GlobalConfig.getGlobalServerTime()));
-		String[] array = content.split("\n");
-		for (int i = 0; i < array.length; i++) {
-			String str = array[i];
-			int len = str.length();
-			if (str.length() <= 4) {
-				VMessageAbstractItem vai = new VMessageTextItem(vm, str);
-				vai.setNewLine(true);
-				continue;
-			}
-
-			int emojiStart = -1, end, strStart = 0;
-			int index = 0;
-			Pattern pattern = Pattern
-					.compile("(http://|https://|www\\.){1}[^\u4e00-\u9fa5\\s]*?\\.(com|net|cn|me|tw|fr|html){1}(/[^\u4e00-\u9fa5\\s]*){0,1}");
-			while (index < str.length()) {
-				if (str.charAt(index) == '/' && index < len - 1
-						&& str.charAt(index + 1) == ':') {
-					emojiStart = index;
-					index += 2;
-					continue;
-				} else if (emojiStart != -1) {
-					// Found end flag of emoji
-					if (str.charAt(index) == ':' && index < len - 1
-							&& str.charAt(index + 1) == '/') {
-						end = index + 2;
-
-						// If emojiStart lesser than strStart,
-						// mean there exist string before emoji
-						if (strStart < emojiStart) {
-							String strTextContent = str.substring(strStart,
-									emojiStart);
-							VMessageTextItem vti = new VMessageTextItem(vm,
-									strTextContent);
-							// If strStart is 0 means string at new line
-							if (strStart == 0) {
-								vti.setNewLine(true);
-							}
-
-						}
-
-						int ind = GlobalConfig.getDrawableIndexByEmoji(str
-								.subSequence(emojiStart, end).toString());
-						if (ind > 0) {
-							// new face item and add list
-							VMessageFaceItem vfi = new VMessageFaceItem(vm, ind);
-							// If emojiStart is 0 means emoji at new line
-							if (emojiStart == 0) {
-								vfi.setNewLine(true);
-							}
-
-						}
-						// Assign end to index -1, do not assign end because
-						// index will be ++
-						index = end - 1;
-						strStart = end;
-						emojiStart = -1;
-					}
-				}
-
-				int lastStart = 0;
-				int lastEnd = 0;
-				boolean firstMather = true;
-				// check if exist last string
-				if (index == len - 1 && strStart <= index) {
-					String strTextContent = str.substring(strStart, len);
-					Matcher matcher = pattern.matcher(strTextContent);
-					while (matcher.find()) {
-						String url = matcher.group(0);
-						V2Log.e(TAG, "从文本内容检测到网址：" + url);
-						// 检测网址前面是否有文本内容
-						if (firstMather == true) {
-							firstMather = false;
-							if (matcher.start(0) != strStart) {
-
-								VMessageTextItem vti = new VMessageTextItem(vm,
-										strTextContent.substring(strStart,
-												matcher.start(0)));
-								// If strStart is 0 means string at new line
-								if (strStart == 0) {
-									vti.setNewLine(true);
-								}
-							}
-							new VMessageLinkTextItem(vm, url, url);
-						} else {
-							if (matcher.start(0) != lastEnd) {
-								VMessageTextItem vti = new VMessageTextItem(vm,
-										strTextContent.substring(
-												matcher.end(0) + 1, lastStart));
-								// If strStart is 0 means string at new line
-								if (matcher.end(0) + 1 == 0) {
-									vti.setNewLine(true);
-								}
-							}
-						}
-						lastStart = matcher.start(0);
-						lastEnd = matcher.end(0);
-					}
-
-					if (strTextContent.length() != lastEnd) {
-						String lastText = strTextContent.substring(lastEnd,
-								strTextContent.length());
-						VMessageTextItem vti = new VMessageTextItem(vm,
-								lastText);
-						vti.setNewLine(true);
-						// If strStart is 0 means string at new line
-						// if (lastEnd == 0) {
-						// }
-					}
-					strStart = index;
-				}
-				index++;
-			}
-		}
-		mMessageET.setText("");
-		// Send message to server
-		sendMessageToRemote(vm);
+		VMessage vm = null;
+		if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+			vm = MessageUtil.buildChatMessage(mContext, mMessageET, currentConversationViewType,
+					remoteGroupID, remoteChatUser);
+		else
+			vm = MessageUtil.buildChatMessage(mContext, mMessageET, currentConversationViewType,
+					remoteGroupID, null);
+		if(vm != null)
+			sendMessageToRemote(vm);
 	}
 
 	private void sendMessageToRemote(VMessage vm) {
@@ -2005,28 +1771,6 @@ public class ConversationP2PTextActivity extends Activity implements
 					currentConversationViewType, remoteGroupID,
 					remoteChatUserID);
 		}
-	}
-
-	/**
-	 * FIXME optimize code 去除IOS自带表情
-	 * 
-	 * @param content
-	 * @return
-	 */
-	private String removeEmoji(String content) {
-		byte[] bys = new byte[] { -16, -97 };
-		byte[] bc = content.getBytes();
-		byte[] copy = new byte[bc.length];
-		int j = 0;
-		for (int i = 0; i < bc.length; i++) {
-			if (i < bc.length - 2 && bys[0] == bc[i] && bys[1] == bc[i + 1]) {
-				i += 3;
-				continue;
-			}
-			copy[j] = bc[i];
-			j++;
-		}
-		return new String(copy, 0, j);
 	}
 
 	private void addMessageToContainer(final VMessage msg) {
@@ -2463,13 +2207,13 @@ public class ConversationP2PTextActivity extends Activity implements
 	private void deleteMessage(VMessage vm, int location) {
 		messageArray.remove(location);
 		boolean isDeleteOther = true;
-		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD
-				&& vm.getFileItems().size() > 0
-				&& vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
-						.getCurrentUserId()
-				&& vm.getFileItems().get(0).getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
-			isDeleteOther = false;
-		}
+//		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD
+//				&& vm.getFileItems().size() > 0
+//				&& vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
+//						.getCurrentUserId()
+//				&& vm.getFileItems().get(0).getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+//			isDeleteOther = false;
+//		}
 		MessageLoader.deleteMessage(mContext, vm, isDeleteOther);
 		List<VMessage> messagePages = MessageLoader.loadGroupMessageByPage(
 				mContext, Conversation.TYPE_GROUP, remoteGroupID, 1,

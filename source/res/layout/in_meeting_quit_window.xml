@@ -7,16 +7,14 @@
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:padding="20dp" >
-
     <TextView
-        android:id="@+id/textView1"
+        android:id="@+id/dialog_title_content"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:gravity="center"
         android:text="@string/in_meeting_quit_notification"
         android:textColor="#000000"
         android:textSize="30sp" />
-
     <TextView
         android:id="@+id/in_meeting_quit_window_content"
         android:layout_width="wrap_content"
@@ -27,41 +25,27 @@
         android:text="@string/in_meeting_quit_text"
         android:textColor="#000000"
         android:textSize="20sp" />
-
     <LinearLayout
         android:id="@+id/imq_l5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="25dp" >
-
         <Button
             android:id="@+id/IMWQuitButton"
+            style="@style/Common_dialog_button_style"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight=".5"
             android:background="@drawable/button_bg"
-            android:paddingBottom="10dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingTop="10dp"
-            android:text="@string/in_meeting_quit_quit_button"
-            android:textColor="@color/button_text_color"
-            android:textSize="18sp" />
-
+            android:text="@string/in_meeting_quit_quit_button" />
         <Button
             android:id="@+id/IMWCancelButton"
+            style="@style/Common_dialog_button_style"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="60dp"
             android:layout_weight=".5"
             android:background="@drawable/button_bg"
-            android:paddingBottom="10dp"
-            android:paddingLeft="20dp"
-            android:paddingRight="20dp"
-            android:paddingTop="10dp"
-            android:text="@string/in_meeting_quit_cancel_button"
-            android:textColor="@color/button_text_color"
-            android:textSize="18sp" />
+            android:text="@string/in_meeting_quit_cancel_button" />
     </LinearLayout>
-
 </LinearLayout>
