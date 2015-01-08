@@ -15,6 +15,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -90,6 +91,8 @@ public class P2PConversation extends Activity implements
 
 	private MediaPlayer mPlayer;
 
+	private int displayRotation = 0;
+
 	private boolean isOpenedRemote;
 	private boolean isStoped;
 	private boolean isOpenedLocal;
@@ -97,6 +100,7 @@ public class P2PConversation extends Activity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		displayRotation = getDisplayRotation();
 		mContext = this;
 		uad = buildObject();
 		initReceiver();
@@ -166,6 +170,24 @@ public class P2PConversation extends Activity implements
 		// Update global state
 		setGlobalState(true);
 
+	}
+
+	private int getDisplayRotation() {
+		if (Build.VERSION.SDK_INT > 7) {
+			int rotation = getWindowManager().getDefaultDisplay().getRotation();
+			switch (rotation) {
+			case Surface.ROTATION_0:
+				return 0;
+			case Surface.ROTATION_90:
+				return 90;
+			case Surface.ROTATION_180:
+				return 180;
+			case Surface.ROTATION_270:
+				return 270;
+			}
+		}
+
+		return 0;
 	}
 
 	@Override
@@ -241,9 +263,11 @@ public class P2PConversation extends Activity implements
 		V2Log.e("    open local holder"
 				+ getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL));
 		VideoRecorder.VideoPreviewSurfaceHolder = getSurfaceHolder(SURFACE_HOLDER_TAG_LOCAL);
-		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-		.updateCameraOrientation(Surface.ROTATION_270);
+		VideoRecorder.DisplayRotation = displayRotation;
 		
+		 VideoCaptureDevInfo.CreateVideoCaptureDevInfo();
+//		 .updateCameraOrientation(displayRotation);
+
 		UserChattingObject selfUCD = new UserChattingObject(GlobalHolder
 				.getInstance().getCurrentUser(), 0, "");
 		chatService.openVideoDevice(selfUCD, null);
@@ -254,7 +278,8 @@ public class P2PConversation extends Activity implements
 		boolean flag = VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
 				.reverseCamera();
 		if (flag) {
-			chatService.updateCameraParameters(new CameraConfiguration(""), null);
+			chatService.updateCameraParameters(new CameraConfiguration(""),
+					null);
 		}
 	}
 
@@ -765,19 +790,19 @@ public class P2PConversation extends Activity implements
 			return;
 		}
 		if (!isOpenedLocal) {
-			mLocalHandler.postDelayed(new Runnable()  {
+			mLocalHandler.postDelayed(new Runnable() {
 
 				@Override
 				public void run() {
 					openRemoteVideo();
 				}
-				
+
 			}, 1000);
 		}
+		VideoPlayer.DisplayRotation = displayRotation;
 		VideoPlayer vp = uad.getVp();
 		if (vp == null) {
 			vp = new VideoPlayer();
-			vp.SetRotation(270);
 			uad.setVp(vp);
 		}
 		if (uad.getDeviceId() == null || uad.getDeviceId().isEmpty()) {
@@ -1287,7 +1312,8 @@ public class P2PConversation extends Activity implements
 					} else if (rcsr.getCode() == RequestChatServiceResponse.ACCEPTED) {
 						uad.setConnected(true);
 						// Send audio invitation
-						// Do not need to modify any values. because this API will handler this case
+						// Do not need to modify any values. because this API
+						// will handler this case
 						chatService.inviteUserChat(uad, null);
 						// Notice do not open remote video at here
 						// because we must open remote video after get video

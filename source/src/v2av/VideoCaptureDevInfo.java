@@ -14,7 +14,7 @@ public class VideoCaptureDevInfo {
 	private final static String TAG = "VideoCaptureDevInfo";
 
 	private final static String CAMERA_FACE_FRONT = "Camera Facing front";
-	private final static String CAMERA_FACE_BACK = "Camera Facing back";
+	public final static String CAMERA_FACE_BACK = "Camera Facing back";
 
 	private String mDefaultDevName = "";
 
@@ -44,9 +44,21 @@ public class VideoCaptureDevInfo {
 		mCapParams.fps = fps;
 		mCapParams.format = format;
 	}
+	
+	public void SetCapParams(int width, int height) {
+		mCapParams.width = width;
+		mCapParams.height = height;
+	}
 
 	public CapParams GetCapParams() {
 		return mCapParams;
+	}
+
+	public void updateCameraOrientation(int orientation) {
+		for (VideoCaptureDevice dev : deviceList) {
+			dev.orientation = orientation;
+
+		}
 	}
 
 	// Private class with info about all available cameras and the capabilities
@@ -70,6 +82,34 @@ public class VideoCaptureDevInfo {
 		public int index;
 
 		public List<Integer> previewformats;
+
+		public VideoSize GetSrcSizeByEncSize(int width, int height) {
+			VideoSize size = new VideoSize();
+
+			int length = capabilites.size();
+			if (length <= 0) {
+				return null;
+			}
+
+			int tempWidth = capabilites.get(0).width;
+			int tempHeight = capabilites.get(0).height;
+			size.width = tempWidth;
+			size.height = tempHeight;
+			int lastValue = tempWidth * tempHeight;
+			int setArea = width * height;
+			for (int i = 1; i < length; i++) {
+				tempWidth = capabilites.get(i).width;
+				tempHeight = capabilites.get(i).height;
+				int value = tempWidth * tempHeight;
+				if (Math.pow(value - setArea, 2) < Math.pow(
+						lastValue - setArea, 2)) {
+					size.width = tempWidth;
+					size.height = tempHeight;
+					lastValue = value;
+				}
+			}
+			return size;
+		}
 	}
 
 	public enum FrontFacingCameraType {
@@ -137,21 +177,13 @@ public class VideoCaptureDevInfo {
 		}
 	}
 
-	public void updateCameraOrientation(int orientation) {
-		for (VideoCaptureDevice dev : deviceList) {
-			dev.orientation = orientation;
-
-		}
-	}
-
 	private int Init() {
 		// Populate the deviceList with available cameras and their
 		// capabilities.
 		Camera camera = null;
-
-		// From Android 2.3 and onwards
-		for (int i = 0; i < Camera.getNumberOfCameras(); ++i) {
-			try {
+		try {
+			// From Android 2.3 and onwards
+			for (int i = 0; i < Camera.getNumberOfCameras(); ++i) {
 				VideoCaptureDevice newDevice = new VideoCaptureDevice();
 				// Set first camera
 				if (this.mDefaultDevName == null
@@ -186,19 +218,15 @@ public class VideoCaptureDevInfo {
 				camera.release();
 				camera = null;
 				deviceList.add(newDevice);
-			} catch (Exception ex) {
-				Log.e(TAG,
-						"Failed to init VideoCaptureDeviceInfo ex"
-								+ ex.getLocalizedMessage());
-				return -1;
 			}
-		}
-		
-		if ((this.mDefaultDevName == null || this.mDefaultDevName.equals("")) && deviceList.size() > 0) {
-			this.mDefaultDevName = deviceList.get(0).deviceUniqueName;
-		}
 
-		// VerifyCapabilities();
+			// VerifyCapabilities();
+		} catch (Exception ex) {
+			Log.e(TAG,
+					"Failed to init VideoCaptureDeviceInfo ex"
+							+ ex.getLocalizedMessage());
+			return -1;
+		}
 
 		return 0;
 	}
@@ -213,6 +241,16 @@ public class VideoCaptureDevInfo {
 			Log.v(TAG, "VideoCaptureDeviceInfo " + "CaptureCapability:"
 					+ s.width + " " + s.height);
 			newDevice.capabilites.add(new CaptureCapability(s.width, s.height));
+		}
+
+		List<int[]> fps_ranges = parameters.getSupportedPreviewFpsRange();
+		for (int[] range : fps_ranges) {
+			String strRange = "range is : ";
+			for (int val : range) {
+				strRange += val + " ";
+			}
+
+			Log.e("getSupportedPreviewFpsRange", strRange);
 		}
 
 		List<Integer> frameRates = parameters.getSupportedPreviewFrameRates();

@@ -27,6 +27,7 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1069,8 +1070,9 @@ public class VideoActivityV2 extends Activity {
 		VideoRecorder.VideoPreviewSurfaceHolder = udc.getSVHolder().getHolder();
 		VideoRecorder.VideoPreviewSurfaceHolder
 				.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-				.updateCameraOrientation(Surface.ROTATION_0);
+//		VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
+//				.updateCameraOrientation(Surface.ROTATION_0);
+		VideoRecorder.DisplayRotation = getDisplayRotation();
 
 		Message m = Message.obtain(mVideoHandler, REQUEST_OPEN_OR_CLOSE_DEVICE,
 				1, 0, udc);
@@ -1078,6 +1080,23 @@ public class VideoActivityV2 extends Activity {
 		udc.setShowing(true);
 	}
 
+	private int getDisplayRotation() {
+		if (Build.VERSION.SDK_INT > 7) {
+			int rotation = getWindowManager().getDefaultDisplay().getRotation();
+			switch (rotation) {
+			case Surface.ROTATION_0:
+				return 0;
+			case Surface.ROTATION_90:
+				return 90;
+			case Surface.ROTATION_180:
+				return 180;
+			case Surface.ROTATION_270:
+				return 270;
+			}
+		}
+
+		return 0;
+	}
 	private void closeLocalCamera() {
 		Message.obtain(
 				mVideoHandler,
