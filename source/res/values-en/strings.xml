@@ -23,6 +23,7 @@
     <string name="title_bar_item_about">About</string>
     <string name="error_connect_to_server">Unable to connect to server, please check your network connection</string>
     <string name="status_bar_title">is running...</string>
+    <string name="select_file_loading">Loading...</string>
     
 
 </resources>

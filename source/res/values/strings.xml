@@ -24,5 +24,7 @@
     <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
     <string name="status_bar_title">正在运行..</string>
     
+    <string name="select_file_loading">正在拼命加载中...</string>
+    
 
 </resources>
