@@ -239,6 +239,7 @@ public class MainApplication extends Application {
 		GlobalConfig.Resource.ConferenceInvitation = this.getResources().getText(R.string.confs_invitation).toString();
 		
 		GlobalConfig.Resource.ConferenceVideo = this.getResources().getText(R.string.confs_video).toString();
+		GlobalConfig.Resource.MixedVideoName = this.getResources().getText(R.string.mixed_video_name).toString();
 		
 	}
 
