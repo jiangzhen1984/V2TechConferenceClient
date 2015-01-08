@@ -32,5 +32,6 @@
    <string name="warning_downloading_doc">正在下载文档&#8230;&#8230;&#8230;</string>
    <string name="confs_invitation">会议邀请</string>
    <string name="confs_video">视频</string>
+   <string name="mixed_video_name">混合视频</string>
    
 </resources>

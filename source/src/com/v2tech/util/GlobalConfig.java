@@ -152,5 +152,7 @@ public class GlobalConfig {
 		public static String ConferenceInvitation="";
 		
 		public static String ConferenceVideo="";
+		
+		public static String MixedVideoName="";
 	}
 }

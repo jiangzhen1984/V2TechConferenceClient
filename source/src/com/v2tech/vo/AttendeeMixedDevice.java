@@ -2,6 +2,8 @@ package com.v2tech.vo;
 
 import java.util.Random;
 
+import com.v2tech.util.GlobalConfig;
+
 public class AttendeeMixedDevice extends Attendee {
 
 	private MixVideo mv;
@@ -47,7 +49,7 @@ public class AttendeeMixedDevice extends Attendee {
 
 	@Override
 	public String getAttName() {
-		return "混合视频  (" + mv.getWidth() + "  x " + mv.getHeight() + ")";
+		return GlobalConfig.Resource.MixedVideoName + "  (" + mv.getWidth() + "  x " + mv.getHeight() + ")";
 	}
 	
 	@Override
