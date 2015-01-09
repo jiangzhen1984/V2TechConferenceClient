@@ -1079,7 +1079,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public int getCount() {
-			if(mIsStartedSearch)
+			if (mIsStartedSearch)
 				return mSearchFilterList.size();
 			else
 				return mFilterList.size();
@@ -1087,7 +1087,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 		@Override
 		public Object getItem(int position) {
-			if(mIsStartedSearch)
+			if (mIsStartedSearch)
 				return mSearchFilterList.get(position);
 			else
 				return mFilterList.get(position);
@@ -1101,11 +1101,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			Wrapper wrapper;
-			if(mIsStartedSearch) 
+			if (mIsStartedSearch)
 				wrapper = mSearchFilterList.get(position);
 			else
 				wrapper = mFilterList.get(position);
-				
+
 			if (convertView == null) {
 				convertView = buildAttendeeView(wrapper);
 			} else {
@@ -1152,16 +1152,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
-					return compareToCall(wr);
-				} else {
-					return -1;
-				}
-
-			} else if (this.a.isSelf()) {
-				if (wr.a == null) {
-					return -1;
-				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
-					return 1;
+					return calledByCompareTo(wr);
 				} else {
 					return -1;
 				}
@@ -1169,7 +1160,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.isChairMan()) {
 				if (wr.a == null) {
 					return -1;
-				}  else if (!wr.a.isJoined()) {
+				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
@@ -1182,11 +1173,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
 				if (wr.a == null) {
 					return -1;
-				}  else if (!wr.a.isJoined()) {
+				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
-					return 1;
-				} else if (wr.a.isSelf()) {
 					return 1;
 				} else if (wr.a.isChairMan()) {
 					return 1;
@@ -1199,11 +1188,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.getLectureState() == Attendee.LECTURE_STATE_APPLYING) {
 				if (wr.a == null) {
 					return -1;
-				}  else if (!wr.a.isJoined()) {
+				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
-					return 1;
-				} else if (wr.a.isSelf()) {
 					return 1;
 				} else if (wr.a.isChairMan()) {
 					return 1;
@@ -1211,18 +1198,16 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					return 1;
 				} else if (wr.a.getLectureState() == Attendee.LECTURE_STATE_APPLYING) {
 					// return 0;
-					return compareToCall(wr);
+					return calledByCompareTo(wr);
 				} else {
 					return -1;
 				}
 			} else if (this.a.isSpeaking()) {
 				if (wr.a == null) {
 					return -1;
-				}  else if (!wr.a.isJoined()) {
+				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
-					return 1;
-				} else if (wr.a.isSelf()) {
 					return 1;
 				} else if (wr.a.isChairMan()) {
 					return 1;
@@ -1231,7 +1216,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else if (wr.a.getLectureState() == Attendee.LECTURE_STATE_APPLYING) {
 					return 1;
 				} else if (this.a.isSpeaking()) {
-					return compareToCall(wr);
+					return calledByCompareTo(wr);
 				} else {
 					return -1;
 				}
@@ -1240,9 +1225,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					return -1;
 				} else if (!wr.a.isJoined()) {
 					return -1;
-				}  else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
-					return 1;
-				} else if (wr.a.isSelf()) {
+				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
 				} else if (wr.a.isChairMan()) {
 					return 1;
@@ -1259,7 +1242,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 
-		private int compareToCall(Wrapper wr) {
+		private int calledByCompareTo(Wrapper wr) {
 			int ret = this.a.compareTo(wr.a);
 			if (ret == 0) {
 				return this.sortFlag;

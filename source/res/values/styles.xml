@@ -118,7 +118,7 @@
         <item name="android:paddingTop">@dimen/button_padding_vertical</item>
         <item name="android:paddingLeft">@dimen/button_padding_horizontal</item>
         <item name="android:paddingRight">@dimen/button_padding_horizontal</item>
-        <item name="android:textColor">@color/button_text_color</item>
+        <item name="android:textColor">@color/button_text_color_blue</item>
         <item name="android:textSize">@dimen/common_item_text_size_14</item>
     </style>
 
