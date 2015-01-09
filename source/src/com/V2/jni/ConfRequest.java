@@ -156,7 +156,7 @@ public class ConfRequest {
 		if (act != null) {
 			v2user.type = Integer.parseInt(act);
 		}
-		v2user.name = nickName;
+		v2user.setName(nickName);
 		v2user.deviceType=Integer.parseInt(strDeviceType);
 
 		for (int i = 0; i < this.mCallbacks.size(); i++) {

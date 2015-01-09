@@ -216,7 +216,7 @@ public class GlobalHolder {
 				continue;
 			}
 			
-			if(vg.name == null)
+			if(vg.getName() == null)
 				V2Log.e("parse the group name is wroing...the group is :" + vg.id);
 				
 			Group g = null;
@@ -230,9 +230,9 @@ public class GlobalHolder {
 				
 				if(flag){
 					User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
-					g = new CrowdGroup(vg.id, vg.name, owner);
-					((CrowdGroup) g).setBrief(vg.brief);
-					((CrowdGroup) g).setAnnouncement(vg.announce);
+					g = new CrowdGroup(vg.id, vg.getName(), owner);
+					((CrowdGroup) g).setBrief(vg.getBrief());
+					((CrowdGroup) g).setAnnouncement(vg.getAnnounce());
 					((CrowdGroup) g).setAuthType(AuthType.fromInt(vg.authType));
 					mCrowdGroup.add(g);
 				}
@@ -240,14 +240,14 @@ public class GlobalHolder {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
 				User chairMan = GlobalHolder.getInstance().getUser(
 						vg.chairMan.uid);
-				g = new ConferenceGroup(vg.id, vg.name, owner, vg.createTime,
+				g = new ConferenceGroup(vg.id, vg.getName(), owner, vg.createTime,
 						chairMan);
 				mConfGroup.add(g);
 			} else if (gType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
-				g = new OrgGroup(vg.id, vg.name);
+				g = new OrgGroup(vg.id, vg.getName());
 				mOrgGroup.add(g);
 			} else if (gType == V2GlobalEnum.GROUP_TYPE_CONTACT) {
-				g = new ContactGroup(vg.id, vg.name);
+				g = new ContactGroup(vg.id, vg.getName());
 				if (vg.isDefault) {
 					((ContactGroup) g).setDefault(true);
 					g.setName(GlobalConfig.Resource.CONTACT_DEFAULT_GROUP_NAME);
@@ -256,7 +256,7 @@ public class GlobalHolder {
 				mContactsGroup.add(g);
 			}  else if (gType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
-				g = new DiscussionGroup(vg.id, vg.name, owner, null);
+				g = new DiscussionGroup(vg.id, vg.getName(), owner, null);
 				mDiscussionBoardGroup.add(g);
 			} else {
 				throw new RuntimeException(" Can not support this type");
@@ -314,23 +314,23 @@ public class GlobalHolder {
 			if (cache != null) {
 				g = cache;
 				// Update new name
-				cache.setName(vg.name);
+				cache.setName(vg.getName());
 			} else {
 				if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 					User owner = GlobalHolder.getInstance().getUser(
 							vg.owner.uid);
-					g = new CrowdGroup(vg.id, vg.name, owner);
+					g = new CrowdGroup(vg.id, vg.getName(), owner);
 				} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
 					User owner = GlobalHolder.getInstance().getUser(
 							vg.owner.uid);
 					User chairMan = GlobalHolder.getInstance().getUser(
 							vg.chairMan.uid);
-					g = new ConferenceGroup(vg.id, vg.name, owner,
+					g = new ConferenceGroup(vg.id, vg.getName(), owner,
 							vg.createTime, chairMan);
 				} else if (groupType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
-					g = new OrgGroup(vg.id, vg.name);
+					g = new OrgGroup(vg.id, vg.getName());
 				} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONTACT) {
-					g = new ContactGroup(vg.id, vg.name);
+					g = new ContactGroup(vg.id, vg.getName());
 				} else {
 					throw new RuntimeException(" Can not support this type");
 				}
@@ -770,7 +770,7 @@ public class GlobalHolder {
 //							else
 //								Toast.makeText(mContext, "下载文件个数已达上限，当前正在下载的文件数量已达5个",
 //										Toast.LENGTH_LONG).show();
-							Toast.makeText(mContext, "上传和下载的文件最多不能超过5个",
+							Toast.makeText(mContext, "上传或下载的文件最多不能超过5个",
 									Toast.LENGTH_LONG).show();
 							Looper.loop();
 						}

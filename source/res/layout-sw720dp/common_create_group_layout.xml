@@ -5,87 +5,32 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".view.conference.ConferenceCreateActivity" >
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
-
         <include layout="@layout/common_activity_title_layout" />
-
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="1dp"
             android:background="#cdcdcf"
             android:orientation="vertical" >
         </LinearLayout>
-
         <LinearLayout
             android:id="@+id/conference_create_error_notification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFDEAD"
             android:visibility="gone" >
-
-            <TextView
-                android:id="@+id/conference_create_error_notification_tv"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal|center"
-                android:layout_marginBottom="4dp"
-                android:layout_marginTop="4dp"
-                android:gravity="center_horizontal"
-                android:text="@string/error_create_conference_failed_from_server_side"
-                android:textColor="@color/common_item_text_color_red"
-                android:textSize="12sp" />
+            <include layout="@layout/common_create_error_connect_layout" />
         </LinearLayout>
-
-        <RelativeLayout
-            android:id="@+id/RelativeLayout2"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/confs_search_bar_bg"
-            android:orientation="horizontal" >
-
-            <EditText
-                android:id="@+id/contacts_search"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:layout_centerInParent="true"
-                android:layout_marginLeft="30dp"
-                android:layout_marginRight="30dp"
-                android:background="@drawable/input_bg"
-                android:imeOptions="actionDone"
-                android:inputType="text"
-                android:paddingLeft="100dp"
-                android:textColor="#000000"
-                android:textSize="18sp" >
-            </EditText>
-
-            <ImageView
-                android:id="@+id/imageView8"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/contacts_search"
-                android:layout_centerVertical="true"
-                android:padding="15dp"
-                android:src="@drawable/group_list_search_button" />
-        </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="1dp"
-            android:background="#cdcdcf"
-            android:orientation="vertical" >
-        </LinearLayout>
+        <include layout="@layout/common_create_search_layout" />
     </LinearLayout>
-
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="#ffffff"
         android:orientation="horizontal" >
-
         <com.v2tech.view.widget.GroupListView
             android:id="@+id/ws_common_create_group_list_view"
             android:layout_width="0dp"
@@ -97,21 +42,18 @@
             android:focusable="false"
             android:scrollingCache="false" >
         </com.v2tech.view.widget.GroupListView>
-
         <LinearLayout
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:background="#cdcdcf"
             android:orientation="vertical" >
         </LinearLayout>
-
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight=".5"
             android:background="@color/confs_search_bar_bg"
             android:orientation="vertical" >
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -119,7 +61,6 @@
                 android:background="@drawable/rounded_corners_create_conf_box_bg"
                 android:orientation="vertical"
                 android:padding="1dp" >
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -127,7 +68,6 @@
                     android:orientation="horizontal"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp" >
-
                     <TextView
                         android:id="@+id/ws_common_create_edit_name_hint"
                         android:layout_width="0dp"
@@ -138,7 +78,6 @@
                         android:paddingRight="5dp"
                         android:textColor="@color/activiy_group_create_edit_title"
                         android:textSize="@dimen/common_item_text_size_16" />
-
                     <EditText
                         android:id="@+id/ws_common_create_edit_name_et"
                         android:layout_width="0dp"
@@ -155,18 +94,15 @@
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp"
                         android:textSize="@dimen/common_item_text_size_16" >
-
                         <requestFocus />
                     </EditText>
                 </LinearLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#cdcdcf"
                     android:orientation="vertical" >
                 </LinearLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -174,7 +110,6 @@
                     android:orientation="horizontal"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp" >
-
                     <TextView
                         android:id="@+id/ws_common_create_edit_content_hint"
                         android:layout_width="0dp"
@@ -185,7 +120,6 @@
                         android:paddingRight="5dp"
                         android:textColor="@color/activiy_group_create_edit_title"
                         android:textSize="@dimen/common_item_text_size_16" />
-
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="30dp"
@@ -194,7 +128,6 @@
                         android:orientation="vertical"
                         android:paddingBottom="5dp"
                         android:paddingTop="5dp" >
-
                         <EditText
                             android:id="@+id/conference_create_conf_start_time"
                             android:layout_width="match_parent"
@@ -204,7 +137,6 @@
                             android:gravity="left|center_vertical"
                             android:inputType="datetime"
                             android:textSize="@dimen/common_item_text_size_16" />
-
                         <Spinner
                             android:id="@+id/group_create_group_rule"
                             android:layout_width="match_parent"
@@ -217,7 +149,6 @@
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
-
             <ListView
                 android:id="@+id/ws_common_create_select_layout"
                 android:layout_width="match_parent"
@@ -229,5 +160,4 @@
             </ListView>
         </LinearLayout>
     </LinearLayout>
-
 </LinearLayout>

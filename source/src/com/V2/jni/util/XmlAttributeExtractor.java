@@ -44,7 +44,8 @@ public class XmlAttributeExtractor {
 		if (end == -1) {
 			return null;
 		}
-		return str.substring(start + len, end);
+		
+		return EscapedcharactersProcessing.reverse(str.substring(start + len, end));
 	}
 	
 	/**
@@ -74,7 +75,7 @@ public class XmlAttributeExtractor {
 		}
 		
 		String check = str.substring(start + len, end);
-		return check;
+		return EscapedcharactersProcessing.reverse(check);
 	}
 
 	/**
@@ -96,7 +97,7 @@ public class XmlAttributeExtractor {
 			if (uid != null && !uid.isEmpty()) {
 				user = new V2User(Long.parseLong(uid));
 				String name = userElement.getAttribute("nickname");
-				user.name = name;
+				user.setName(name);
 				listUser.add(user);
 			}
 		}
@@ -191,8 +192,8 @@ public class XmlAttributeExtractor {
 						String announcement = pull.getAttributeValue(null, "announcement");
 						String authtype = pull.getAttributeValue(null, "authtype");
 						String creatoruserid = pull.getAttributeValue(null, "creatoruserid");
-						v2Group.announce = announcement;
-						v2Group.brief = summary;
+						v2Group.setAnnounce(announcement);
+						v2Group.setBrief(summary);
 						if (authtype != null) {
 							v2Group.authType = Integer.parseInt(authtype);
 						}
@@ -246,7 +247,6 @@ public class XmlAttributeExtractor {
 	}
 
 	public static List<V2Group> parseCrowd(String xml) {
-		xml = EscapedcharactersProcessing.convertAmp(xml);
 		Document doc = buildDocument(xml);
 		if(doc == null){
 			V2Log.e("XmlAttributeExtractor parseCrowd --> parse xml failed...get Document is null...xml is : " + xml);
@@ -282,8 +282,9 @@ public class XmlAttributeExtractor {
 			
 			V2Group crowd = new V2Group(gid, crowdName,
 					V2Group.TYPE_CROWD, creator);
-			crowd.brief = crowdElement.getAttribute("summary");
-			crowd.announce = crowdElement.getAttribute("announcement");
+			
+			crowd.setAnnounce(crowdElement.getAttribute("announcement"));
+			crowd.setBrief(crowdElement.getAttribute("summary"));
 			crowd.creator = creator;
 			String authType = crowdElement.getAttribute("authtype");
 			crowd.authType = authType == null ? 0 : Integer.parseInt(authType);
@@ -350,7 +351,7 @@ public class XmlAttributeExtractor {
 			// If type is contact and is first item, means this group is default
 			if (type == V2Group.TYPE_CONTACTS_GROUP && j == 0) {
 				group.isDefault = true;
-				group.name = "";
+				group.setName("");
 			}
 			
 			if (type == V2Group.TYPE_DISCUSSION_BOARD) {
@@ -522,7 +523,7 @@ public class XmlAttributeExtractor {
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
 		V2User u = new V2User(userID, nickName);
-		u.mSignature = signature;
+		u.setmSignature(signature);
 		u.mJob=job;
 		u.mTelephone = telephone;
 		u.mMobile = mobile;
@@ -530,7 +531,7 @@ public class XmlAttributeExtractor {
 		u.mSex = gender;
 		u.mEmail = email;
 		u.mFax = fax;
-		u.mCommentname = commentname;
+		u.setmCommentname(commentname);
 		u.mAccount = account;
 		if (authtype != null && authtype != "") {
 			u.mAuthtype = Integer.parseInt(authtype);

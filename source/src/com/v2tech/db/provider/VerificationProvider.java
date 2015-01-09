@@ -817,9 +817,9 @@ public class VerificationProvider extends DatabaseProvider {
 						+ "from GlobalHolder is null!");
 				return -1;
 			}
-			crowdGroup = new CrowdGroup(crowd.id, crowd.name, user, null);
-			crowdGroup.setBrief(crowd.brief);
-			crowdGroup.setAnnouncement(crowd.announce);
+			crowdGroup = new CrowdGroup(crowd.id, crowd.getName(), user, null);
+			crowdGroup.setBrief(crowd.getBrief());
+			crowdGroup.setAnnouncement(crowd.getAnnounce());
 		}
 
 		return updateCrowdQualicationMessageState(crowdGroup, userID, obj);
@@ -1368,10 +1368,10 @@ public class VerificationProvider extends DatabaseProvider {
 		group = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 				crowdGroupID);
 		if (group == null) {
-			group = new CrowdGroup(crowdGroupID, v2Group.name, GlobalHolder
+			group = new CrowdGroup(crowdGroupID, v2Group.getName(), GlobalHolder
 					.getInstance().getUser(v2Group.owner.uid), new Date());
-			group.setBrief(v2Group.brief);
-			group.setAnnouncement(v2Group.announce);
+			group.setBrief(v2Group.getBrief());
+			group.setAnnouncement(v2Group.getAnnounce());
 			group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
 		}
 

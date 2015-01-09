@@ -89,7 +89,7 @@ public class SearchService extends AbstractHandler {
 				User temp = GlobalHolder.getInstance().getUser(u.uid);
 				if(temp.isDirty())
 					ImRequest.getInstance().getUserBaseInfo(u.uid);
-				result.addItem(SearchedResult.Type.USER, u.uid, u.name);
+				result.addItem(SearchedResult.Type.USER, u.uid, u.getName());
 			}
 			JNIResponse jniRES = new JNIResponse(JNIResponse.Result.SUCCESS);
 			jniRES.resObj = result;
@@ -109,8 +109,8 @@ public class SearchService extends AbstractHandler {
 		public void OnSearchCrowdCallback(List<V2Group> list) {
 			SearchedResult result = new SearchedResult();
 			for (V2Group g : list) {
-				User creator = new User(g.creator.uid, g.creator.name);
-				result.addCrowdItem(g.id, g.name, creator, g.brief, g.authType);
+				User creator = new User(g.creator.uid, g.creator.getName());
+				result.addCrowdItem(g.id, g.getName(), creator, g.getBrief(), g.authType);
 			}
 			JNIResponse jniRES = new JNIResponse(JNIResponse.Result.SUCCESS);
 			jniRES.resObj = result;

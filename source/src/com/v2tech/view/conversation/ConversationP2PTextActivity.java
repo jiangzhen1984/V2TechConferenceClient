@@ -24,6 +24,7 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -716,6 +717,7 @@ public class ConversationP2PTextActivity extends Activity implements
 				|| cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 			if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 				mShowContactDetailButton.setVisibility(View.GONE);
+				mShowCrowdDetailButton.setVisibility(View.GONE);
 				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
 				OrgGroup departmentGroup = (OrgGroup) GlobalHolder
 						.getInstance().getGroupById(

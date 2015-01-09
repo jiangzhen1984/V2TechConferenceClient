@@ -18,6 +18,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -57,6 +58,7 @@ public abstract class BaseCreateActivity extends Activity {
 	protected TextView rightButtonTV;
 	protected SearchEditText searchedTextET;
 	protected TextView mErrorNotification;
+	protected RelativeLayout customLayout;
 	
 	protected AdapterView<ListAdapter> mAttendeeContainer;
 	protected GroupListView mGroupListView;
@@ -107,6 +109,7 @@ public abstract class BaseCreateActivity extends Activity {
 		searchedTextET = (SearchEditText) findViewById(R.id.ws_common_create_search);
 		searchedTextET.addTextListener(mGroupListView);
 
+		customLayout = (RelativeLayout) findViewById(R.id.ws_common_create_custom_content_ly);
 		TextView editNameHint = (TextView) findViewById(R.id.ws_common_create_edit_name_hint);
 		TextView editContentHint = (TextView) findViewById(R.id.ws_common_create_edit_content_hint);
 		View confStartTime = findViewById(R.id.conference_create_conf_start_time);
@@ -118,6 +121,7 @@ public abstract class BaseCreateActivity extends Activity {
 					R.string.conference_create_confirm);
 			editNameHint.setText(R.string.conference_create_conf_name);
 			editContentHint.setText(R.string.conference_create_conf_start_time);
+			customLayout.setVisibility(View.VISIBLE);
 			confStartTime.setVisibility(View.VISIBLE);
 			crowdSpiner.setVisibility(View.GONE);
 			break;
@@ -127,11 +131,15 @@ public abstract class BaseCreateActivity extends Activity {
 					R.string.common_confirm_name);
 			editNameHint.setText(R.string.group_create_group_name);
 			editContentHint.setText(R.string.group_create_group_qualification);
+			customLayout.setVisibility(View.VISIBLE);
 			confStartTime.setVisibility(View.GONE);
 			crowdSpiner.setVisibility(View.VISIBLE);
 			break;
 		case CREATE_LAYOUT_TYPE_DISCUSSION:
-
+			initTitle(R.string.discussion_create_activity_title,
+					R.string.common_return_name,
+					R.string.common_confirm_name);
+			customLayout.setVisibility(View.GONE);
 			break;
 		default:
 			break;

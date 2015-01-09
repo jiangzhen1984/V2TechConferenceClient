@@ -339,7 +339,7 @@ public class ContactsService extends AbstractHandler {
 		@Override
 		public void onAddGroupInfo(V2Group group) {
 			if (group.type == V2Group.TYPE_CONTACTS_GROUP) {
-				Group g = new ContactGroup(group.id, group.name);
+				Group g = new ContactGroup(group.id, group.getName());
 				GlobalHolder.getInstance().addGroupToList(
 						g.getGroupType().intValue(), g);
 				JNIResponse jniRes = new GroupServiceJNIResponse(

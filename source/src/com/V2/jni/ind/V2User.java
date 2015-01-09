@@ -2,16 +2,18 @@ package com.V2.jni.ind;
 
 import java.util.Date;
 
+import com.V2.jni.util.EscapedcharactersProcessing;
+
 import android.os.Parcel;
 import android.os.Parcelable;
 
 public class V2User implements Parcelable {
 
 	public long uid;
-	public String name;
+	private String name;
 	// 2 means non-registered user
 	public int type;
-	
+
 	public int deviceType;
 
 	// Server transfer fields
@@ -29,12 +31,12 @@ public class V2User implements Parcelable {
 	public String mJob;
 	public String mMobile;
 	// 登录后显示的昵称
-	public String mNickName;
+	private String mNickName;
 	// privacy='0'
 	public String mSex;
-	public String mSignature;
+	private String mSignature;
 	public String mTelephone;
-	public String mCommentname;
+	private String mCommentname;
 
 	// group
 	public String mCompany;
@@ -47,14 +49,13 @@ public class V2User implements Parcelable {
 	}
 
 	public V2User(long uid) {
-		super();
-		this.uid = uid;
+		this(uid, null);
 	}
 
 	public V2User(long uid, String name) {
 		super();
 		this.uid = uid;
-		this.name = name;
+		this.name = EscapedcharactersProcessing.reverse(name);
 	}
 
 	@Override
@@ -83,9 +84,39 @@ public class V2User implements Parcelable {
 
 	@Override
 	public String toString() {
-		return " [ID:"+this.uid+" name:"+this.name+"] ";
+		return " [ID:" + this.uid + " name:" + this.name + "] ";
 	}
-	
-	
-	
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = EscapedcharactersProcessing.reverse(name);
+	}
+
+	public String getmNickName() {
+		return mNickName;
+	}
+
+	public void setmNickName(String mNickName) {
+		this.mNickName = EscapedcharactersProcessing.reverse(mNickName);;
+	}
+
+	public String getmSignature() {
+		return mSignature;
+	}
+
+	public void setmSignature(String mSignature) {
+		this.mSignature = EscapedcharactersProcessing.reverse(mSignature);
+	}
+
+	public String getmCommentname() {
+		return mCommentname;
+	}
+
+	public void setmCommentname(String mCommentname) {
+		this.mCommentname = EscapedcharactersProcessing.reverse(mCommentname);
+	}
+
 }

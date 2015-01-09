@@ -11,7 +11,6 @@ import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
-import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 
@@ -398,8 +397,8 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f736180
-	 * 1 . g i f ' / > < / f i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f73618
+	 * 0 1 . g i f ' / > < / f i l e l i s t >
 	 * 
 	 * @param groupType
 	 * @param nGroupId
@@ -551,7 +550,6 @@ public class GroupRequest {
 	 */
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
-		sXml = EscapedcharactersProcessing.reverse(sXml);
 		V2Log.e(TAG, "OnAddGroupInfo ---> groupType :" + groupType
 				+ " | nParentID: " + nParentID + " | nGroupID: " + nGroupID
 				+ " | sXml: " + sXml);
@@ -571,8 +569,8 @@ public class GroupRequest {
 			vg.owner = new V2User(Long.valueOf(createUesrID));
 			vg.creator = vg.owner;
 			if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
-				vg.announce = announcement;
-				vg.brief = brief;
+				vg.setAnnounce(announcement);
+				vg.setBrief(brief);
 				vg.authType = Integer.valueOf(authType);
 				vg.groupSize = Integer.valueOf(groupSize);
 			}
@@ -608,7 +606,6 @@ public class GroupRequest {
 						+ groupType + " nGroupID = " + nGroupID + " sXml = "
 						+ sXml);
 
-		sXml = EscapedcharactersProcessing.reverse(sXml);
 		V2Group group = new V2Group(nGroupID, groupType);
 		if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
@@ -618,9 +615,9 @@ public class GroupRequest {
 					"summary");
 			String authtype = XmlAttributeExtractor.extractAttribute(sXml,
 					"authtype");
-			group.name = name;
-			group.announce = announcement;
-			group.brief = summary;
+			group.setName(name);
+			group.setAnnounce(announcement);
+			group.setBrief(summary);
 			if (authtype != null) {
 				group.authType = Integer.parseInt(authtype);
 			} else {
@@ -632,7 +629,7 @@ public class GroupRequest {
 			group.xml = sXml;
 		} else if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
 			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
-			group.name = name;
+			group.setName(name);
 		}
 
 		// 以次回调上层
@@ -692,12 +689,11 @@ public class GroupRequest {
 			group = new V2Group(Long.parseLong(id), groupType);
 			String name = XmlAttributeExtractor.extract(groupInfo, "subject='",
 					"'");
-			name = EscapedcharactersProcessing.reverse(name);
 			String starttime = XmlAttributeExtractor.extract(groupInfo,
 					"starttime='", "'");
 			String createuserid = XmlAttributeExtractor.extract(groupInfo,
 					"createuserid='", "'");
-			group.name = name;
+			group.setName(name);
 			group.createTime = new Date(Long.parseLong(starttime) * 1000);
 			group.chairMan = new V2User(Long.valueOf(createuserid));
 			group.owner = new V2User(Long.valueOf(createuserid));
@@ -713,8 +709,7 @@ public class GroupRequest {
 			user = new V2User(Long.parseLong(id));
 			String name = XmlAttributeExtractor.extract(userInfo,
 					" nickname='", "'");
-			name = EscapedcharactersProcessing.reverse(name);
-			user.name = name;
+			user.setName(name);
 		} else if (groupType == V2Group.TYPE_DISCUSSION_BOARD) {
 			String id = XmlAttributeExtractor.extractAttribute(groupInfo, "id");
 			if (id == null || id.isEmpty()) {
@@ -723,9 +718,8 @@ public class GroupRequest {
 			}
 			String name = XmlAttributeExtractor.extractAttribute(groupInfo,
 					"name");
-			name = EscapedcharactersProcessing.reverse(name);
 			group = new V2Group(Long.parseLong(id), groupType);
-			group.name = name;
+			group.setName(name);
 		}
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
@@ -1000,12 +994,11 @@ public class GroupRequest {
 						+ " szFileName = " + szFileName + " eWhiteShowType = "
 						+ eWhiteShowType);
 
-		V2Log.i("20141229 1",
-				"ThreadID = "+Thread.currentThread().getId()+" CLASS = GroupRequest METHOD = OnGroupCreateDocShare()"
-						+ " eGroupType = " + eGroupType + " nGroupID = "
-						+ nGroupID + " szWBoardID = " + szWBoardID
-						+ " szFileName = " + szFileName + " eWhiteShowType = "
-						+ eWhiteShowType);
+		V2Log.i("20141229 1", "ThreadID = " + Thread.currentThread().getId()
+				+ " CLASS = GroupRequest METHOD = OnGroupCreateDocShare()"
+				+ " eGroupType = " + eGroupType + " nGroupID = " + nGroupID
+				+ " szWBoardID = " + szWBoardID + " szFileName = " + szFileName
+				+ " eWhiteShowType = " + eWhiteShowType);
 
 		V2Document v2doc = new V2Document();
 		v2doc.mId = szWBoardID;

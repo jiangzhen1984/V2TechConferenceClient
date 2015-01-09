@@ -2,6 +2,7 @@ package com.v2tech.view.conference;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -24,12 +25,14 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 
+import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.ItemData;
 import com.v2tech.vo.Conference;
+import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
@@ -255,7 +258,27 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 		@Override
 		public void onClick(View view) {
+			List<User> removeUsers = new ArrayList<User>();
+			ConferenceGroup confGroup = (ConferenceGroup) GlobalHolder.getInstance().
+					getGroupById(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId());
+			List<User> users = confGroup.getUsers();
+			Iterator<User> iterator = mAttendeeList.iterator();
+			while (iterator.hasNext()) {
+				User checkUser = iterator.next();
+				for (User user : users) {
+					if (user.getmUserId() == checkUser.getmUserId()) {
+						removeUsers.add(checkUser);
+						break;
+					}
+				}
+			}
+
+			for (int i = 0; i < removeUsers.size(); i++) {
+				mAttendeeList.remove(removeUsers.get(i));
+			}
+			
 			List<User> l = new ArrayList<User>(mAttendeeList);
+			
 			if (listener != null) {
 				listener.requestInvitation(conf, l);
 			}

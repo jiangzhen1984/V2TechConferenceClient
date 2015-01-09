@@ -16,7 +16,6 @@ import com.v2tech.view.PublicIntent;
 public class Notificator {
 
 	static long lastNotificatorTime = 0;
-
 	public static void updateSystemNotification(Context context, String title,
 			String content, int tone, Intent trigger, int notificationID) {
 		if (tone > 0
@@ -26,6 +25,9 @@ public class Notificator {
 			Ringtone r = RingtoneManager.getRingtone(context, notification);
 			r.play();
 			lastNotificatorTime = System.currentTimeMillis() / 1000;
+//			MediaPlayer mPlayer = MediaPlayer.create(context, R.raw.chat_audio);
+//			if (!mPlayer.isPlaying())
+//				mPlayer.start();
 		}
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(
@@ -56,6 +58,9 @@ public class Notificator {
 			Ringtone r = RingtoneManager.getRingtone(context, notification);
 			r.play();
 			lastNotificatorTime = System.currentTimeMillis() / 1000;
+//			MediaPlayer mPlayer = MediaPlayer.create(context, R.raw.chat_audio);
+//			if (!mPlayer.isPlaying())
+//				mPlayer.start();
 		}
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(

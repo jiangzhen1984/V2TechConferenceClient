@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.content.Context;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -13,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -22,6 +19,7 @@ import com.v2tech.R;
 import com.v2tech.util.MessageUtil;
 import com.v2tech.view.adapter.VMessageAdater;
 import com.v2tech.view.conference.ConferenceMessageBodyView.ActionListener;
+import com.v2tech.view.cus.PasteEditText;
 import com.v2tech.view.widget.CommonAdapter;
 import com.v2tech.view.widget.CommonAdapter.CommonAdapterItemWrapper;
 import com.v2tech.vo.ConferenceGroup;
@@ -34,7 +32,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 	private ListView mMsgContainer;
 	private ChattingListener listener;
 	private View mSendButton;
-	private EditText mContentTV;
+	private PasteEditText mContentTV;
 	private View mPinButton;
 	private List<CommonAdapterItemWrapper> messageArray;
 	private CommonAdapter adapter;
@@ -75,13 +73,11 @@ public class VideoMsgChattingLayout extends LinearLayout {
 
 		this.mMsgContainer = (ListView) view
 				.findViewById(R.id.video_msg_container);
-		this.mContentTV = (EditText) view
+		this.mContentTV = (PasteEditText) view
 				.findViewById(R.id.video_msg_chatting_layout_msg_content);
 		this.mSendButton = view
 				.findViewById(R.id.video_msg_chatting_layout_send_button);
 		mContentTV.setOnKeyListener(keyListener);
-		
-
 		rootView = this;
 	}
 	
@@ -123,27 +119,6 @@ public class VideoMsgChattingLayout extends LinearLayout {
 					listener.requestSendMsg(vm);
 				}
 			}
-		});
-		
-		this.mContentTV.addTextChangedListener(new TextWatcher() {
-
-			@Override
-			public void afterTextChanged(Editable edit) {
-				mContentTV.removeTextChangedListener(this);
-				MessageUtil.buildChatPasteMessageContent(mContext , mContentTV);
-				mContentTV.addTextChangedListener(this);
-			}
-
-			@Override
-			public void beforeTextChanged(CharSequence ch, int arg1, int arg2,
-					int arg3) {
-			}
-			
-			@Override
-			public void onTextChanged(CharSequence arg0, int arg1, int arg2,
-					int arg3) {
-			}
-
 		});
 	}
 	

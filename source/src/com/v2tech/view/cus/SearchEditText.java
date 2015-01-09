@@ -1,5 +1,6 @@
 package com.v2tech.view.cus;
 
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -31,6 +32,15 @@ public class SearchEditText extends EditText {
 
 	public void removeTextListener() {
 		removeTextChangedListener(textChangedListener);
+	}
+	
+	@Override
+	public boolean onTextContextMenuItem(int id) {
+		if(id == android.R.id.paste){
+            ClipboardManager clip = (ClipboardManager)getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+            setText(getText().toString() + clip.getPrimaryClip().toString());
+          }
+		return super.onTextContextMenuItem(id);
 	}
 
 	private TextWatcher textChangedListener = new TextWatcher() {

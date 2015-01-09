@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
+import com.v2tech.view.cus.PasteEditText;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
@@ -44,26 +45,27 @@ public class MessageUtil {
 					R.string.conversation_display_item_audio));
 			return builder;
 		}
-		
+
 		if (vm.getFileItems().size() > 0) {
 			builder.append(context.getResources().getText(
 					R.string.conversation_display_item_file));
 			return builder;
 		}
-		
+
 		// If no text and face item, now means send picture
 		if (vm.getImageItems().size() > 0) {
 			builder.append(context.getResources().getText(
 					R.string.conversation_display_item_pic));
 			return builder;
 		}
-		
+
 		for (int i = 0; i < vm.getItems().size(); i++) {
 			VMessageAbstractItem item = vm.getItems().get(i);
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
 				builder.append(((VMessageTextItem) item).getText()).append(" ");
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
-				builder.append(((VMessageLinkTextItem) item).getText()).append(" ");
+				builder.append(((VMessageLinkTextItem) item).getText()).append(
+						" ");
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
 				Drawable dr = context
 						.getResources()
@@ -102,7 +104,7 @@ public class MessageUtil {
 				builder.append(GlobalConfig
 						.getEmojiStrByIndex(((VMessageFaceItem) item)
 								.getIndex()));
-			} else if(item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT){
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
 				builder.append(((VMessageLinkTextItem) item).getText());
 			}
 		}
@@ -121,11 +123,12 @@ public class MessageUtil {
 		builder.append(emoji);
 
 		ImageSpan is = new ImageSpan(drw, index + "");
-		builder.setSpan(is, builder.length() - emoji.length(), builder.length(),
-				Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+		builder.setSpan(is, builder.length() - emoji.length(),
+				builder.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 	}
-	
-	public static void buildChatPasteMessageContent(Context mContext , EditText mMessageET){
+
+	public static void buildChatPasteMessageContent(Context mContext,
+			EditText mMessageET) {
 		Editable edit = mMessageET.getEditableText();
 		int num = 0;
 		int flagCount = 0;
@@ -184,13 +187,11 @@ public class MessageUtil {
 							.subSequence(start, end).toString());
 					// replay emoji and clean
 					if (ind > 0) {
-						MessageUtil
-								.appendSpan(
-										builder,
-										mContext.getResources()
-												.getDrawable(
-														GlobalConfig.GLOBAL_FACE_ARRAY[ind]),
-										ind);
+						MessageUtil.appendSpan(
+								builder,
+								mContext.getResources().getDrawable(
+										GlobalConfig.GLOBAL_FACE_ARRAY[ind]),
+								ind);
 						edit.replace(start, end, builder);
 					}
 					index = start;
@@ -200,20 +201,21 @@ public class MessageUtil {
 			index++;
 		}
 	}
-	
-	public static VMessage buildChatMessage(Context mContext , EditText mMessageET , int groupType , 
-			long remoteGroupID , User remoteUser){
+
+	public static VMessage buildChatMessage(Context mContext,
+			EditText mMessageET, int groupType, long remoteGroupID,
+			User remoteUser) {
 		String content = mMessageET.getEditableText().toString();
 		if (content == null || content.equals("")) {
 			Toast.makeText(mContext, "聊天信息不能为空", Toast.LENGTH_SHORT).show();
 			return null;
 		}
-		
+
 		content = removeEmoji(content);
-		
-		VMessage vm = new VMessage(groupType,
-				remoteGroupID, GlobalHolder.getInstance().getCurrentUser() , remoteUser, new Date(
-						GlobalConfig.getGlobalServerTime()));
+
+		VMessage vm = new VMessage(groupType, remoteGroupID, GlobalHolder
+				.getInstance().getCurrentUser(), remoteUser, new Date(
+				GlobalConfig.getGlobalServerTime()));
 		String[] array = content.split("\n");
 		for (int i = 0; i < array.length; i++) {
 			String str = array[i];
@@ -282,7 +284,8 @@ public class MessageUtil {
 					Matcher matcher = pattern.matcher(strTextContent);
 					while (matcher.find()) {
 						String url = matcher.group(0);
-						V2Log.e("ConversationP2PTextActivity", "从文本内容检测到网址：" + url);
+						V2Log.e("ConversationP2PTextActivity", "从文本内容检测到网址："
+								+ url);
 						// 检测网址前面是否有文本内容
 						if (firstMather == true) {
 							firstMather = false;
@@ -317,7 +320,7 @@ public class MessageUtil {
 								strTextContent.length());
 						VMessageTextItem vti = new VMessageTextItem(vm,
 								lastText);
-//						vti.setNewLine(true);
+						// vti.setNewLine(true);
 					}
 					strStart = index;
 				}
@@ -327,7 +330,7 @@ public class MessageUtil {
 		mMessageET.setText("");
 		return vm;
 	}
-	
+
 	/**
 	 * FIXME optimize code 去除IOS自带表情
 	 * 

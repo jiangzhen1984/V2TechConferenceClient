@@ -612,7 +612,7 @@ public class ConferenceService extends DeviceService {
 				V2User v2user) {
 			User user = null;
 			if (v2user.type == V2GlobalEnum.USER_ACCOUT_TYPE_NON_REGISTERED) {
-				user = new User(v2user.uid, v2user.name);
+				user = new User(v2user.uid, v2user.getName());
 				user.setDeviceType(User.DeviceType.fromInt(v2user.deviceType));
 				user.setRapidInitiation(true);
 			} else {

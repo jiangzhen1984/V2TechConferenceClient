@@ -442,7 +442,12 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_USER_ADDED)) {
 				GroupUserObject guo = (GroupUserObject)intent.getExtras().get("obj");
 				if (guo.getmGroupId() == crowd.getmGId()) {
-					mMembersCountsTV.setText(crowd.getUsers().size()+"");
+					CrowdGroup newGroup = (CrowdGroup) GlobalHolder.getInstance().
+							getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getmGId());
+					if(newGroup != null){
+						crowd = newGroup;
+						mMembersCountsTV.setText(String.valueOf(crowd.getUsers().size()));
+					}
 				}
 			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 				CrowdGroup newGroup = (CrowdGroup) GlobalHolder.getInstance().

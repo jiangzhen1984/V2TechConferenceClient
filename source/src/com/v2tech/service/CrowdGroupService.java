@@ -665,7 +665,7 @@ public class CrowdGroupService extends AbstractHandler {
 					} else {
 						V2Log.e("CrowdGroupService onAddGroupInfo--> mPendingCrowdId isn't equals groupID , MayBe this callback"
 								+ "already time out , group id is : "
-								+ group.id + " group name is : " + group.name);
+								+ group.id + " group name is : " + group.getName());
 					}
 				}
 			} else if (group.type == V2Group.TYPE_DISCUSSION_BOARD) {
