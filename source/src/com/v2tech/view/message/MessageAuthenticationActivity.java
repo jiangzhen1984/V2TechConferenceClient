@@ -280,7 +280,7 @@ public class MessageAuthenticationActivity extends Activity {
 							rbFriendAuthentication.setTextColor(Color.rgb(255,
 									255, 255));
 							rbGroupAuthentication.setTextColor(getResources()
-									.getColor(R.color.button_text_color));
+									.getColor(R.color.button_text_color_blue));
 							isFriendAuthentication = true;
 							changeMessageAuthenticationListView();
 							VerificationProvider
@@ -302,7 +302,7 @@ public class MessageAuthenticationActivity extends Activity {
 							rbGroupAuthentication.setTextColor(Color.rgb(255,
 									255, 255));
 							rbFriendAuthentication.setTextColor(getResources()
-									.getColor(R.color.button_text_color));
+									.getColor(R.color.button_text_color_blue));
 							isFriendAuthentication = false;
 							changeMessageAuthenticationListView();
 							updateTabPrompt(PROMPT_TYPE_GROUP, false);

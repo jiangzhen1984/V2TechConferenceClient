@@ -45,7 +45,7 @@
             android:paddingRight="15dp"
             android:paddingTop="10dp"
             android:text="@string/search_title_return_button"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size" />
     </RelativeLayout>
 
@@ -108,14 +108,14 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="5dp"
-                android:background="@drawable/button_bg"
+                android:background="@drawable/button_bg_blue_bound"
                 android:gravity="center"
                 android:paddingBottom="5dp"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
                 android:paddingTop="5dp"
                 android:text="@string/search_search_button"
-                android:textColor="@color/button_text_color"
+                android:textColor="@color/button_text_color_blue"
                 android:textSize="@dimen/common_item_text_size" />
         </LinearLayout>
 

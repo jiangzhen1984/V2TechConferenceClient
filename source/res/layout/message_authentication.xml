@@ -18,7 +18,7 @@
             android:paddingRight="8dp"
             android:paddingTop="10dp"
             android:text="消息"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size" />
         <TextView
             android:layout_width="wrap_content"
@@ -44,7 +44,7 @@
             android:paddingRight="8dp"
             android:paddingTop="10dp"
             android:text="完成"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size"
             android:visibility="gone" />
     </RelativeLayout>
@@ -93,7 +93,7 @@
                 android:button="@null"
                 android:gravity="center"
                 android:text="群验证"
-                android:textColor="@color/button_text_color" />
+                android:textColor="@color/button_text_color_blue" />
         </RadioGroup>
         <LinearLayout
             android:layout_width="fill_parent"

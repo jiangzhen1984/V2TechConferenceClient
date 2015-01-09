@@ -1,10 +1,12 @@
 package com.v2tech.util;
 
 import java.io.File;
+import java.io.IOException;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
@@ -146,6 +148,40 @@ public class BitmapUtil {
 		options.outWidth = DensityUtils.dip2px(context, 100);
 		Bitmap bp = BitmapFactory.decodeFile(file, options);
 		return bp;
+	}
+	
+	public static int getBitmapRotation(String imgpath) {
+		int digree = 0;
+		ExifInterface exif = null;
+		try {
+			exif = new ExifInterface(imgpath);
+		} catch (IOException e) {
+			e.printStackTrace();
+			exif = null;
+		}
+		if (exif != null) {
+			// 读取图片中相机方向信息
+			int ori = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION,
+					ExifInterface.ORIENTATION_UNDEFINED);
+			// 计算旋转角度
+			switch (ori) {
+			case ExifInterface.ORIENTATION_ROTATE_90:
+				digree = 90;
+				break;
+			case ExifInterface.ORIENTATION_ROTATE_180:
+				digree = 180;
+				break;
+			case ExifInterface.ORIENTATION_ROTATE_270:
+				digree = 270;
+				break;
+			default:
+				digree = 0;
+				break;
+			}
+		}
+
+		return digree;
+
 	}
 
 }

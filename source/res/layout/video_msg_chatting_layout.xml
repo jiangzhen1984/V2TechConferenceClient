@@ -86,7 +86,7 @@
             android:layout_gravity="center"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="5dp"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_bg_blue_bound"
             android:gravity="center"
             android:minWidth="75dp"
             android:paddingBottom="10dp"

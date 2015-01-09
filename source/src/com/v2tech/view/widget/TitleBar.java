@@ -86,9 +86,16 @@ public class TitleBar {
 
 	private int marginRight;
 
+	private PopupWindow plusWindow;
+	private PopupWindow moreWindow;
+
 	public TitleBar(Context context, View rootContainer) {
 		this.context = context;
 		this.rootContainer = rootContainer;
+		initTitleBarLayout();
+	}
+
+	private void initTitleBarLayout() {
 		normalList = new ArrayList<Wrapper>();
 		additionList = new ArrayList<Wrapper>();
 
@@ -98,7 +105,12 @@ public class TitleBar {
 		plusButton = this.rootContainer
 				.findViewById(R.id.ws_common_mainActivity_title_plus);
 		plusButton.setVisibility(View.VISIBLE);
-		plusButton.setOnClickListener(mPlusButtonListener);
+		plusButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				onPlusButtonClick(v);
+			}
+		});
 
 		this.rootContainer.findViewById(
 				R.id.ws_common_activity_title_left_button).setVisibility(
@@ -110,7 +122,12 @@ public class TitleBar {
 		moreButton = this.rootContainer
 				.findViewById(R.id.ws_common_mainActivity_title_feature_more_button);
 		moreButton.setVisibility(View.VISIBLE);
-		moreButton.setOnClickListener(mMoreButtonListener);
+		moreButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				onMoreWindowClick(v);
+			}
+		});
 		searchEdit = (EditText) this.rootContainer
 				.findViewById(R.id.search_edit);
 
@@ -152,7 +169,7 @@ public class TitleBar {
 		this.listener = listener;
 	}
 
-	public void initMoreitem(ViewGroup vg) {
+	private void initMoreitemLayout(ViewGroup vg) {
 		for (int i = 0; i < imgs.length; i++) {
 			LinearLayout ll = new LinearLayout(context);
 			ll.setOrientation(LinearLayout.HORIZONTAL);
@@ -191,7 +208,7 @@ public class TitleBar {
 
 			if (i != imgs.length - 1) {
 				LinearLayout line = new LinearLayout(context);
-				line.setBackgroundResource(R.color.line_color);
+				line.setBackgroundResource(R.color.common_line_color);
 				LinearLayout.LayoutParams lineLL = new LinearLayout.LayoutParams(
 						LinearLayout.LayoutParams.MATCH_PARENT, 1);
 				vg.addView(line, lineLL);
@@ -199,7 +216,7 @@ public class TitleBar {
 		}
 	}
 
-	public void initPlusItem() {
+	private void initPlusItemLayout() {
 		for (int i = 0; i < plusImgs.length; i++) {
 			LinearLayout ll = new LinearLayout(context);
 			ll.setOrientation(LinearLayout.HORIZONTAL);
@@ -219,7 +236,7 @@ public class TitleBar {
 			tv.setPadding(5, padding, 5, padding);
 			// DEPRECATE gray disable button
 			// if (i > 4) {
-//			   tv.setTextColor(Color.rgb(198, 198, 198));
+			// tv.setTextColor(Color.rgb(198, 198, 198));
 			// } else {
 			tv.setTextColor(Color.rgb(123, 123, 123));
 			// }
@@ -234,6 +251,7 @@ public class TitleBar {
 			ll.setId(plusImgs[i]);
 			addAdditionalPopupMenuItem(ll, null);
 		}
+
 	}
 
 	public void regsiterSearchedTextListener(TextWatcher tw) {
@@ -363,139 +381,133 @@ public class TitleBar {
 
 	};
 
-	private PopupWindow plusWindow;
-	private OnClickListener mPlusButtonListener = new OnClickListener() {
+	private void onPlusButtonClick(View anchor) {
+		showPopPlusWindow(anchor);
+	}
 
-		@Override
-		public void onClick(View anchor) {
-			DisplayMetrics dm = new DisplayMetrics();
-			((Activity) context).getWindowManager().getDefaultDisplay()
-					.getMetrics(dm);
-			if (plusWindow == null) {
-				LayoutInflater inflater = (LayoutInflater) context
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View layout = inflater.inflate(
-						R.layout.title_bar_pop_up_window, null);
-				LinearLayout itemContainer = (LinearLayout) layout
-						.findViewById(R.id.common_pop_window_container);
+	private void showPopPlusWindow(View anchor) {
+		DisplayMetrics dm = new DisplayMetrics();
+		((Activity) context).getWindowManager().getDefaultDisplay()
+				.getMetrics(dm);
+		if (plusWindow == null) {
+			LayoutInflater inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View layout = inflater.inflate(R.layout.title_bar_pop_up_window,
+					null);
+			LinearLayout itemContainer = (LinearLayout) layout
+					.findViewById(R.id.common_pop_window_container);
 
-				LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-						LinearLayout.LayoutParams.WRAP_CONTENT,
-						LinearLayout.LayoutParams.WRAP_CONTENT);
-				lp.rightMargin = 20;
+			LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.WRAP_CONTENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			lp.rightMargin = 20;
 
-				initPlusItem();
-				if (additionList.size() <= 0) {
-					return;
-				}
-
-				for (int i = 0; i < additionList.size(); i++) {
-					additionList.get(i).v.setPadding(0, padding, 15, padding);
-					itemContainer.addView(additionList.get(i).v, lp);
-
-					if (i != additionList.size() - 1) {
-						LinearLayout line = new LinearLayout(context);
-						line.setBackgroundResource(R.color.line_color);
-						LinearLayout.LayoutParams lineLL = new LinearLayout.LayoutParams(
-								LinearLayout.LayoutParams.MATCH_PARENT, 1);
-						itemContainer.addView(line, lineLL);
-					}
-				}
-
-				int height = 300;
-
-				plusWindow = buildPopupWindow(layout,
-						ViewGroup.LayoutParams.WRAP_CONTENT, height);
-
-				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
-						View.MeasureSpec.UNSPECIFIED);
-				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
-				arrow.measure(View.MeasureSpec.UNSPECIFIED,
-						View.MeasureSpec.UNSPECIFIED);
-
-				if (height < itemContainer.getMeasuredHeight()
-						+ arrow.getMeasuredHeight()) {
-					height = itemContainer.getMeasuredHeight()
-							+ arrow.getMeasuredHeight();
-				}
-				plusWindow.setHeight(height);
+			initPlusItemLayout();
+			if (additionList.size() <= 0) {
+				return;
 			}
 
-			int[] pos = new int[2];
-			anchor.getLocationInWindow(pos);
-			pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
-			// calculate arrow offset
-			View arrow = plusWindow.getContentView().findViewById(
-					R.id.common_pop_up_arrow_up);
-			arrow.bringToFront();
+			for (int i = 0; i < additionList.size(); i++) {
+				additionList.get(i).v.setPadding(0, padding, 15, padding);
+				itemContainer.addView(additionList.get(i).v, lp);
 
-			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
-					.getLayoutParams();
-			arrowRL.rightMargin = dm.widthPixels - pos[0]
-					- (anchor.getMeasuredWidth() / 2)
-					- arrow.getMeasuredWidth();
-			arrow.setLayoutParams(arrowRL);
+				if (i != additionList.size() - 1) {
+					LinearLayout line = new LinearLayout(context);
+					line.setBackgroundResource(R.color.common_line_color);
+					LinearLayout.LayoutParams lineLL = new LinearLayout.LayoutParams(
+							LinearLayout.LayoutParams.MATCH_PARENT, 1);
+					itemContainer.addView(line, lineLL);
+				}
+			}
 
-			plusWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			plusWindow.showAtLocation(anchor, Gravity.TOP | Gravity.RIGHT,
-					marginRight, pos[1]);
-		}
+			int height = 300;
 
-	};
+			plusWindow = buildPopupWindow(layout,
+					ViewGroup.LayoutParams.WRAP_CONTENT, height);
 
-	private PopupWindow moreWindow;
-	private OnClickListener mMoreButtonListener = new OnClickListener() {
+			itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
+					View.MeasureSpec.UNSPECIFIED);
+			View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
+			arrow.measure(View.MeasureSpec.UNSPECIFIED,
+					View.MeasureSpec.UNSPECIFIED);
 
-		@Override
-		public void onClick(View anchor) {
-			DisplayMetrics dm = new DisplayMetrics();
-			((Activity) context).getWindowManager().getDefaultDisplay()
-					.getMetrics(dm);
-			if (moreWindow == null) {
-				LayoutInflater inflater = (LayoutInflater) context
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View layout = inflater.inflate(
-						R.layout.title_bar_pop_up_window, null);
-				LinearLayout itemContainer = (LinearLayout) layout
-						.findViewById(R.id.common_pop_window_container);
-
-				initMoreitem(itemContainer);
-
-				itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
-						View.MeasureSpec.UNSPECIFIED);
-				View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
-				arrow.measure(View.MeasureSpec.UNSPECIFIED,
-						View.MeasureSpec.UNSPECIFIED);
-
-				int height = itemContainer.getMeasuredHeight()
+			if (height < itemContainer.getMeasuredHeight()
+					+ arrow.getMeasuredHeight()) {
+				height = itemContainer.getMeasuredHeight()
 						+ arrow.getMeasuredHeight();
-
-				moreWindow = buildPopupWindow(layout,
-						ViewGroup.LayoutParams.WRAP_CONTENT, height);
-
 			}
-
-			int[] pos = new int[2];
-			anchor.getLocationInWindow(pos);
-			pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
-			// calculate arrow offset
-			View arrow = moreWindow.getContentView().findViewById(
-					R.id.common_pop_up_arrow_up);
-			arrow.bringToFront();
-
-			RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
-					.getLayoutParams();
-			arrowRL.rightMargin = dm.widthPixels - pos[0]
-					- (anchor.getMeasuredWidth() / 2)
-					- arrow.getMeasuredWidth();
-			arrow.setLayoutParams(arrowRL);
-
-			moreWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
-			moreWindow.showAtLocation(anchor, Gravity.RIGHT | Gravity.TOP,
-					marginRight, pos[1]);
+			plusWindow.setHeight(height);
 		}
 
-	};
+		int[] pos = new int[2];
+		anchor.getLocationInWindow(pos);
+		pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
+		// calculate arrow offset
+		View arrow = plusWindow.getContentView().findViewById(
+				R.id.common_pop_up_arrow_up);
+		arrow.bringToFront();
+
+		RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
+				.getLayoutParams();
+		arrowRL.rightMargin = dm.widthPixels - pos[0]
+				- (anchor.getMeasuredWidth() / 2) - arrow.getMeasuredWidth();
+		arrow.setLayoutParams(arrowRL);
+
+		plusWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
+		plusWindow.showAtLocation(anchor, Gravity.TOP | Gravity.RIGHT,
+				marginRight, pos[1]);
+	}
+
+	private void onMoreWindowClick(View anchor) {
+		showPopMoreWindow(anchor);
+	}
+
+	private void showPopMoreWindow(View anchor) {
+		DisplayMetrics dm = new DisplayMetrics();
+		((Activity) context).getWindowManager().getDefaultDisplay()
+				.getMetrics(dm);
+		if (moreWindow == null) {
+			LayoutInflater inflater = (LayoutInflater) context
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View layout = inflater.inflate(R.layout.title_bar_pop_up_window,
+					null);
+			LinearLayout itemContainer = (LinearLayout) layout
+					.findViewById(R.id.common_pop_window_container);
+
+			initMoreitemLayout(itemContainer);
+
+			itemContainer.measure(View.MeasureSpec.UNSPECIFIED,
+					View.MeasureSpec.UNSPECIFIED);
+			View arrow = layout.findViewById(R.id.common_pop_up_arrow_up);
+			arrow.measure(View.MeasureSpec.UNSPECIFIED,
+					View.MeasureSpec.UNSPECIFIED);
+
+			int height = itemContainer.getMeasuredHeight()
+					+ arrow.getMeasuredHeight();
+
+			moreWindow = buildPopupWindow(layout,
+					ViewGroup.LayoutParams.WRAP_CONTENT, height);
+
+		}
+
+		int[] pos = new int[2];
+		anchor.getLocationInWindow(pos);
+		pos[1] += anchor.getMeasuredHeight() - anchor.getPaddingBottom();
+		// calculate arrow offset
+		View arrow = moreWindow.getContentView().findViewById(
+				R.id.common_pop_up_arrow_up);
+		arrow.bringToFront();
+
+		RelativeLayout.LayoutParams arrowRL = (RelativeLayout.LayoutParams) arrow
+				.getLayoutParams();
+		arrowRL.rightMargin = dm.widthPixels - pos[0]
+				- (anchor.getMeasuredWidth() / 2) - arrow.getMeasuredWidth();
+		arrow.setLayoutParams(arrowRL);
+
+		moreWindow.setAnimationStyle(R.style.TitleBarPopupWindowAnim);
+		moreWindow.showAtLocation(anchor, Gravity.RIGHT | Gravity.TOP,
+				marginRight, pos[1]);
+	}
 
 	private PopupWindow buildPopupWindow(View view, int width, int height) {
 

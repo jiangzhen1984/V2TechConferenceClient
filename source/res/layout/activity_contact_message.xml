@@ -36,7 +36,7 @@
             android:paddingRight="10dp"
             android:paddingTop="5dp"
             android:text="@string/contacts_user_detail_return_button"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size" />
         <ImageView
             android:id="@+id/contact_detail_button"
@@ -169,7 +169,7 @@
                         android:layout_alignParentRight="true"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="5dp"
-                        android:background="@drawable/button_bg"
+                        android:background="@drawable/button_bg_blue_bound"
                         android:gravity="center"
                         android:minWidth="70dp"
                         android:paddingBottom="10dp"
@@ -178,7 +178,7 @@
                         android:paddingTop="10dp"
                         android:singleLine="true"
                         android:text="@string/contact_message_send_button"
-                        android:textColor="@color/button_text_color"
+                        android:textColor="@color/button_text_color_blue"
                         android:textSize="14sp" />
                 </RelativeLayout>
                 <Button

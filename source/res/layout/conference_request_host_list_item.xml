@@ -6,7 +6,6 @@
     android:paddingBottom="10dp"
     android:orientation="horizontal" >
 
-    
     <TextView
         android:id="@+id/conference_request_host_user_name"
         android:layout_width="0dp"
@@ -17,7 +16,9 @@
         android:ellipsize="end"
         android:singleLine="true"
         android:text="按时到岗是"
-        android:textSize="@dimen/common_item_text_size_16" >
+        android:textColor="@color/conference_message_list_view_item_text1_color"
+        android:textSize="@dimen/conference_message_list_view_item_text1_font_size" >
+
     </TextView>
 
     <TextView
@@ -29,7 +30,7 @@
         android:layout_weight=".3"
         android:gravity="center_horizontal"
         android:text="@string/conference_request_host_list_item_content"
-        android:textSize="@dimen/common_item_text_size_16" >
+        android:textSize="@dimen/conference_message_list_view_item_text2_font_size" >
     </TextView>
 
     <LinearLayout
@@ -47,30 +48,30 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginRight="10dp"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_bg_blue_bound"
             android:gravity="center"
             android:paddingBottom="@dimen/button_padding_vertical"
             android:paddingLeft="@dimen/button_padding_horizontal"
             android:paddingRight="@dimen/button_padding_horizontal"
             android:paddingTop="@dimen/button_padding_vertical"
             android:text="@string/conference_request_host_list_item_button_name_accept"
-            android:textColor="@color/button_text_color"
-            android:textSize="@dimen/common_item_text_size_16" />
+            android:textColor="@color/button_text_color_blue"
+            android:textSize="@dimen/conference_message_list_view_item_text2_font_size" />
 
         <TextView
             android:id="@+id/conference_request_host_button_reject"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_bg_blue_bound"
             android:gravity="center"
             android:paddingBottom="@dimen/button_padding_vertical"
             android:paddingLeft="@dimen/button_padding_horizontal"
             android:paddingRight="@dimen/button_padding_horizontal"
             android:paddingTop="@dimen/button_padding_vertical"
             android:text="@string/conference_request_host_list_item_button_name_reject"
-            android:textColor="@color/button_text_color"
-            android:textSize="@dimen/common_item_text_size_16" />
+            android:textColor="@color/button_text_color_blue"
+            android:textSize="@dimen/conference_message_list_view_item_text2_font_size" />
     </LinearLayout>
 
 </LinearLayout>

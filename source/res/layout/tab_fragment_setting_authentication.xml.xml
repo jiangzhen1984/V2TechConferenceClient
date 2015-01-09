@@ -20,7 +20,7 @@
             android:paddingRight="8dp"
             android:paddingTop="10dp"
             android:text="设置"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size" />
 
         <TextView

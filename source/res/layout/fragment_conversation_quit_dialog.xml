@@ -44,7 +44,7 @@
             android:paddingRight="20dp"
             android:paddingTop="10dp"
             android:text="@string/conversation_quit_dialog_cancel_text"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="18sp" />
 
         <LinearLayout
@@ -65,7 +65,7 @@
             android:paddingRight="20dp"
             android:paddingTop="10dp"
             android:text="@string/conversation_quit_dialog_confirm_text"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="18sp" />
     </LinearLayout>
 

@@ -12,7 +12,7 @@
         android:focusable="false"
         android:padding="@dimen/common_delete_icon_padding"
         android:src="@drawable/ic_delete"
-        android:textColor="@color/button_text_color"
+        android:textColor="@color/button_text_color_blue"
         android:visibility="visible" />
     <RelativeLayout
         android:id="@+id/group_list_conference_image_view_rl"
@@ -95,14 +95,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_bg_blue_bound"
             android:gravity="center"
             android:paddingBottom="@dimen/button_padding_vertical"
             android:paddingLeft="@dimen/button_padding_horizontal"
             android:paddingRight="@dimen/button_padding_horizontal"
             android:paddingTop="@dimen/button_padding_vertical"
             android:text="@string/crowd_invitation_accept_button_name"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size_16" />
         <TextView
             android:id="@+id/b_suer_delete"

@@ -21,7 +21,7 @@
             android:paddingRight="8dp"
             android:paddingTop="10dp"
             android:text="@string/contacts_user_detail_return_button"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size" />
 
         <TextView
@@ -59,7 +59,7 @@
             android:paddingRight="8dp"
             android:paddingTop="10dp"
             android:text="下一步"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size" />
     </RelativeLayout>
 
@@ -125,14 +125,14 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_marginRight="@dimen/button_gap_horizontal"
-                android:background="@drawable/button_bg"
+                android:background="@drawable/button_bg_blue_bound"
                 android:gravity="center"
                 android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"
                 android:paddingLeft="@dimen/button_padding_horizontal"
                 android:paddingRight="@dimen/button_padding_horizontal"
                 android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
                 android:text="@string/contacts_user_detail_invite_video"
-                android:textColor="@color/button_text_color"
+                android:textColor="@color/button_text_color_blue"
                 android:textSize="@dimen/common_item_text_size_small"
                 android:visibility="gone" />
         </RelativeLayout>

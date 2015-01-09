@@ -50,7 +50,7 @@
                     android:button="@null"
                     android:gravity="center"
                     android:text="@string/conversation_discussion_tab_title"
-                    android:textColor="@color/button_text_color" />
+                    android:textColor="@color/button_text_color_blue" />
             </RadioGroup>
 
             <LinearLayout

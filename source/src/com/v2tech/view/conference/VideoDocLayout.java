@@ -1,6 +1,7 @@
 package com.v2tech.view.conference;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
+import android.media.ExifInterface;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
@@ -38,6 +40,7 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
+import com.v2tech.util.BitmapUtil;
 import com.v2tech.view.cus.TouchImageView;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2ShapeMeta;
@@ -486,6 +489,12 @@ public class VideoDocLayout extends LinearLayout {
 				mBackgroundBitMap = BitmapFactory.decodeFile(p.getFilePath(),
 						opsNew);
 
+				Matrix m = new Matrix();
+				m.postRotate(BitmapUtil.getBitmapRotation(p.getFilePath()));
+				mBackgroundBitMap = Bitmap.createBitmap(mBackgroundBitMap, 0,
+						0, mBackgroundBitMap.getWidth(),
+						mBackgroundBitMap.getHeight(), m, true);
+
 				dest.left = (src.right - opsNew.outWidth) / 2;
 				dest.right = opsNew.outWidth;
 				dest.top = (src.bottom - opsNew.outHeight) / 2;
@@ -865,7 +874,7 @@ public class VideoDocLayout extends LinearLayout {
 
 		mergeBitmapToImage(mBackgroundBitMap, mShapeBitmap);
 
-		//mDocDisplayContainer.postInvalidate();
+		// mDocDisplayContainer.postInvalidate();
 	}
 
 	/**

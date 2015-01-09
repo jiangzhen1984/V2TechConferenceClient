@@ -45,7 +45,7 @@
             android:paddingRight="15dp"
             android:paddingTop="10dp"
             android:text="@string/search_title_return_button"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size" />
     </RelativeLayout>
 

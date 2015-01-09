@@ -7,21 +7,22 @@
         android:id="@+id/common_pop_window_out_container"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:background="@drawable/rounded_corners_of_title_bar_popup_window_outer"
-        android:orientation="vertical" >
+        android:orientation="vertical" 
+        android:background="#ffffff">
 
         <LinearLayout
             android:id="@+id/common_pop_window_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="1dp"
-            android:background="@drawable/rounded_corners_of_title_bar_popup_window_inner"
             android:orientation="vertical" >
 
             <ListView
                 android:id="@+id/conference_request_host_list_view"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent" 
+                android:divider="@color/common_line_color"
+                android:dividerHeight="1px">
             </ListView>
         </LinearLayout>
     </LinearLayout>

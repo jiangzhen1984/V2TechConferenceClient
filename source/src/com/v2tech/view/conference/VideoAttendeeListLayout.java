@@ -1138,8 +1138,18 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else {
 					return 1;
 				}
+			} else if (!this.a.isJoined()) {
+				if (wr.a == null) {
+					return -1;
+				} else if (!wr.a.isJoined()) {
+					return 0;
+				} else {
+					return 1;
+				}
 			} else if (this.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 				if (wr.a == null) {
+					return -1;
+				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return compareToCall(wr);
@@ -1159,15 +1169,20 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.isChairMan()) {
 				if (wr.a == null) {
 					return -1;
+				}  else if (!wr.a.isJoined()) {
+					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
-				} else if (wr.a.isSelf()) {
-					return 1;
+				} else if (wr.a.isChairMan()) {
+					// return 0;
+					return calledByCompareTo(wr);
 				} else {
 					return -1;
 				}
 			} else if (this.a.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
 				if (wr.a == null) {
+					return -1;
+				}  else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
@@ -1175,11 +1190,16 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					return 1;
 				} else if (wr.a.isChairMan()) {
 					return 1;
+				} else if (wr.a.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
+					// return 0;
+					return calledByCompareTo(wr);
 				} else {
 					return -1;
 				}
 			} else if (this.a.getLectureState() == Attendee.LECTURE_STATE_APPLYING) {
 				if (wr.a == null) {
+					return -1;
+				}  else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
@@ -1198,6 +1218,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.isSpeaking()) {
 				if (wr.a == null) {
 					return -1;
+				}  else if (!wr.a.isJoined()) {
+					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
 				} else if (wr.a.isSelf()) {
@@ -1210,14 +1232,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					return 1;
 				} else if (this.a.isSpeaking()) {
 					return compareToCall(wr);
-
 				} else {
 					return -1;
 				}
 			} else {
 				if (wr.a == null) {
 					return -1;
-				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+				} else if (!wr.a.isJoined()) {
+					return -1;
+				}  else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
 				} else if (wr.a.isSelf()) {
 					return 1;
@@ -1230,18 +1253,17 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else if (this.a.isSpeaking()) {
 					return 1;
 				} else {
-					return compareToCall(wr);
-
+					// return 0;
+					return calledByCompareTo(wr);
 				}
 			}
-
 		}
 
 		private int compareToCall(Wrapper wr) {
 			int ret = this.a.compareTo(wr.a);
 			if (ret == 0) {
 				return this.sortFlag;
-			} else if (ret < 0 || ret > 0) {
+			} else {
 				if (this.a.isJoined()) {
 					return -1;
 				} else if (wr.a.isJoined()) {
@@ -1249,11 +1271,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else {
 					return 0;
 				}
-			} else {
-				return ret;
 			}
 		}
-
 	}
 
 	private void configAttendee(Attendee at) {

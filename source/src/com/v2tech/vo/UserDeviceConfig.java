@@ -51,7 +51,6 @@ public class UserDeviceConfig {
 	private boolean isShowing;
 	private boolean isEnable;
 	private boolean isDefault;
-	
 
 	private Attendee mBelongsAttendee;
 
@@ -59,44 +58,50 @@ public class UserDeviceConfig {
 
 	/**
 	 * 
-	 * @param groupType Conference or IM
+	 * @param groupType
+	 *            Conference or IM
 	 * @param groupID
 	 * @param mUerID
 	 * @param mDeviceID
 	 * @param mVP
 	 * @param type
 	 */
-	public UserDeviceConfig(int groupType , long groupID , long mUerID, String mDeviceID, VideoPlayer mVP,
-			UserDeviceConfigType type) {
-		this(groupType , groupID , mUerID, mDeviceID, mVP, 1);
+	public UserDeviceConfig(int groupType, long groupID, long mUerID,
+			String mDeviceID, VideoPlayer mVP, UserDeviceConfigType type) {
+		this(groupType, groupID, mUerID, mDeviceID, mVP, 1);
 		this.type = type;
 	}
 
 	/**
 	 * Construct EVIDEODEVTYPE_VIDEO device
 	 * 
-	 * @param groupType Conference or IM
+	 * @param groupType
+	 *            Conference or IM
 	 * @param groupID
 	 * @param mUerID
 	 * @param mDeviceID
 	 * @param mVP
 	 */
-	public UserDeviceConfig(int groupType , long groupID , long mUerID, String mDeviceID, VideoPlayer mVP) {
-		this(groupType , groupID , mUerID, mDeviceID, mVP, 1,UserDeviceConfigType.EVIDEODEVTYPE_VIDEO);
+	public UserDeviceConfig(int groupType, long groupID, long mUerID,
+			String mDeviceID, VideoPlayer mVP) {
+		this(groupType, groupID, mUerID, mDeviceID, mVP, 1,
+				UserDeviceConfigType.EVIDEODEVTYPE_VIDEO);
 	}
 
 	/**
 	 * According to parameter construct new user device donfiguration object
 	 * 
-	 * @param groupType Conference or IM
+	 * @param groupType
+	 *            Conference or IM
 	 * @param groupID
 	 * @param mUerID
 	 * @param mDeviceID
 	 * @param mVP
-	 * @param mBusinessType (Deprecated)
+	 * @param mBusinessType
+	 *            (Deprecated)
 	 */
-	public UserDeviceConfig(int groupType , long groupID ,long mUerID, String mDeviceID, VideoPlayer mVP,
-			int mBusinessType) {
+	public UserDeviceConfig(int groupType, long groupID, long mUerID,
+			String mDeviceID, VideoPlayer mVP, int mBusinessType) {
 		this.mUerID = mUerID;
 		this.mDeviceID = mDeviceID;
 		this.mVP = mVP;
@@ -104,24 +109,25 @@ public class UserDeviceConfig {
 		this.groupType = groupType;
 		this.groupID = groupID;
 	}
-	
-	
-	
+
 	/**
 	 * According to parameter construct new user device donfiguration object
 	 * 
-	 * @param groupType Conference or IM
+	 * @param groupType
+	 *            Conference or IM
 	 * @param groupID
 	 * @param mUerID
 	 * @param mDeviceID
 	 * @param mVP
-	 * @param mBusinessType (Deprecated)
+	 * @param mBusinessType
+	 *            (Deprecated)
 	 */
-	public UserDeviceConfig(int groupType , long groupID , long mUerID, String mDeviceID, VideoPlayer mVP,
-			int mBusinessType, UserDeviceConfigType type) {
+	public UserDeviceConfig(int groupType, long groupID, long mUerID,
+			String mDeviceID, VideoPlayer mVP, int mBusinessType,
+			UserDeviceConfigType type) {
 		this.mUerID = mUerID;
 		this.mDeviceID = mDeviceID;
-		
+
 		this.mVP = mVP;
 		this.mBusinessType = mBusinessType;
 		this.type = type;
@@ -201,8 +207,6 @@ public class UserDeviceConfig {
 		return this.type;
 	}
 
-	
-	
 	public boolean isEnable() {
 		return isEnable;
 	}
@@ -210,7 +214,6 @@ public class UserDeviceConfig {
 	public void setEnable(boolean isEnable) {
 		this.isEnable = isEnable;
 	}
-	
 
 	public boolean isDefault() {
 		return isDefault;
@@ -219,7 +222,7 @@ public class UserDeviceConfig {
 	public void setDefault(boolean isDefault) {
 		this.isDefault = isDefault;
 	}
-	
+
 	public int getGroupType() {
 		return groupType;
 	}
@@ -295,20 +298,23 @@ public class UserDeviceConfig {
 			doc.getDocumentElement().normalize();
 			String defaultId = "";
 			int start = xmlData.indexOf("defaultid='");
-			int end =  xmlData.indexOf("'", start+11);
-			defaultId = xmlData.substring(start+11, end);
+			int end = xmlData.indexOf("'", start + 11);
+			defaultId = xmlData.substring(start + 11, end);
 			NodeList videol = doc.getElementsByTagName("video");
 			for (int t = 0; t < videol.getLength(); t++) {
 				Element video = (Element) videol.item(t);
 				String deviceId = video.getAttribute("id");
-				UserDeviceConfig udc =new UserDeviceConfig(0 , 0 , uid, deviceId, null);
-				udc.setEnable("1".equals(video.getAttribute("inuse"))? true: false);
+				UserDeviceConfig udc = new UserDeviceConfig(0, 0, uid,
+						deviceId, null);
+				udc.setEnable("1".equals(video.getAttribute("inuse")) ? true
+						: false);
 				if (defaultId.equals(deviceId)) {
 					udc.setDefault(true);
-					l.add(0, udc);
-				} else {
-					l.add(udc);
+					// l.add(0, udc);
 				}
+
+				l.add(udc);
+
 			}
 
 		} catch (ParserConfigurationException e) {

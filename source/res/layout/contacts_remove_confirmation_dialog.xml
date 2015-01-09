@@ -60,13 +60,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight=".5"
-                android:background="@drawable/button_bg"
+                android:background="@drawable/button_bg_blue_bound"
                 android:paddingBottom="5dp"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:paddingTop="5dp"
                 android:text="@string/activiy_contact_group_button_confirm"
-                android:textColor="@color/button_text_color"
+                android:textColor="@color/button_text_color_blue"
                 android:textSize="20sp" />
 
             <Button
@@ -75,13 +75,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="40dp"
                 android:layout_weight=".5"
-                android:background="@drawable/button_bg"
+                android:background="@drawable/button_bg_blue_bound"
                 android:paddingBottom="5dp"
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:paddingTop="5dp"
                 android:text="@string/activiy_contact_group_button_cancel"
-                android:textColor="@color/button_text_color"
+                android:textColor="@color/button_text_color_blue"
                 android:textSize="20sp" />
         </LinearLayout>
     </RelativeLayout>

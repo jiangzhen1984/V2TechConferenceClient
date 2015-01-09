@@ -183,7 +183,7 @@ public class ConferenceActivity extends Activity {
 	private PopupWindow moreWindow;
 	private TextView mRequestButtonName;
 	private ImageView mRequestButtonImage;
-	private VideoShowHostRequest mHostRequestWindow;
+	private ConferenceMsgDialog mConferenceMsgDialog;
 
 	private Dialog mQuitDialog;
 	private VideoInvitionAttendeeLayout mInvitionContainer;
@@ -410,9 +410,9 @@ public class ConferenceActivity extends Activity {
 	protected void onStart() {
 		super.onStart();
 
-//		if (audioManager != null) {
-//			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-//		}
+		// if (audioManager != null) {
+		// audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		// }
 
 		if (mServiceBound) {
 			suspendOrResume(true);
@@ -1357,7 +1357,7 @@ public class ConferenceActivity extends Activity {
 							// 您当前没有会议消息
 							if (mHostRequestUsers != null
 									&& mHostRequestUsers.size() > 0) {
-								showConfMsgPopWindow();
+								showConferenceMsgDialog();
 							} else {
 								Toast.makeText(ConferenceActivity.this,
 										"您当前没有会议消息", Toast.LENGTH_SHORT).show();
@@ -1395,15 +1395,16 @@ public class ConferenceActivity extends Activity {
 				pos[1]);
 	}
 
-	private void showConfMsgPopWindow() {
-		if (mHostRequestWindow == null) {
-			mHostRequestWindow = new VideoShowHostRequest(mContext,
+	private void showConferenceMsgDialog() {
+		if (mConferenceMsgDialog == null) {
+			mConferenceMsgDialog = new ConferenceMsgDialog(mContext,
 					mHostRequestUsers, cb);
 		} else {
-			mHostRequestWindow.updateList(mHostRequestUsers);
+			mConferenceMsgDialog.updateList(mHostRequestUsers);
 		}
 
-		mHostRequestWindow.showAtLocation(mRootContainer, Gravity.CENTER, 0, 0);
+		mConferenceMsgDialog.show();
+		
 		mMsgNotification.setVisibility(View.GONE);
 		hasUnreadChiremanControllMsg = false;
 	}
@@ -2448,7 +2449,7 @@ public class ConferenceActivity extends Activity {
 			mAttendeeContainer.updateExitedAttendee(att);
 		}
 
-		// 咱不提示进入或退出
+		// 暂不提示进入或退出
 		// // Clean user device
 		// showToastNotification(att.getAttName()
 		// + mContext.getText(R.string.conf_notification_quited_meeting));
@@ -2551,6 +2552,7 @@ public class ConferenceActivity extends Activity {
 			if (mAttendeeContainer != null) {
 				mAttendeeContainer.updateDisplay();
 			}
+
 		}
 
 		return true;
@@ -3555,8 +3557,8 @@ public class ConferenceActivity extends Activity {
 						.getCurrentUserId()) {
 					mHostRequestUsers.add(GlobalHolder.getInstance().getUser(
 							rri.getUid()));
-					if (mHostRequestWindow == null
-							|| !mHostRequestWindow.isShowing()) {
+					if (mConferenceMsgDialog == null
+							|| !mConferenceMsgDialog.isShowing()) {
 						mMsgNotification.setVisibility(View.VISIBLE);
 						if (mConfMsgRedDot != null) {
 							mConfMsgRedDot.setVisibility(View.VISIBLE);
@@ -3575,8 +3577,8 @@ public class ConferenceActivity extends Activity {
 					}
 				}
 
-				if (mHostRequestWindow != null) {
-					mHostRequestWindow.updateList(mHostRequestUsers);
+				if (mConferenceMsgDialog != null) {
+					mConferenceMsgDialog.updateList(mHostRequestUsers);
 				}
 
 				break;
@@ -3604,15 +3606,15 @@ public class ConferenceActivity extends Activity {
 							mHostRequestUsers.remove(user);
 						}
 
-						if (mHostRequestWindow != null) {
-							mHostRequestWindow.updateList(mHostRequestUsers);
+						if (mConferenceMsgDialog != null) {
+							mConferenceMsgDialog.updateList(mHostRequestUsers);
 						}
 
 						if (mHostRequestUsers.size() == 0) {
 
-							if (mHostRequestWindow != null
-									&& mHostRequestWindow.isShowing()) {
-								mHostRequestWindow.dismiss();
+							if (mConferenceMsgDialog != null
+									&& mConferenceMsgDialog.isShowing()) {
+								mConferenceMsgDialog.dismiss();
 							}
 
 							hasUnreadChiremanControllMsg = false;

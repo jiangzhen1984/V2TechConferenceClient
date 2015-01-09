@@ -29,9 +29,9 @@
             android:id="@+id/okbut"
             android:layout_width="90dp"
             android:layout_height="35dp"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_bg_blue_bound"
             android:text="确   定"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="15sp" />
 
         <Button
@@ -39,9 +39,9 @@
             android:layout_width="90dp"
             android:layout_height="35dp"
             android:layout_marginLeft="20dp"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_bg_blue_bound"
             android:text="取   消"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="15sp" />
     </LinearLayout>
 

@@ -321,7 +321,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 											.findViewById(R.id.rb_crowd))
 											.setTextColor(getResources()
 													.getColor(
-															R.color.button_text_color));
+															R.color.button_text_color_blue));
 									populateConversation(
 											GroupType.DISCUSSION,
 											GlobalHolder
@@ -342,7 +342,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 											.findViewById(R.id.rb_discussion))
 											.setTextColor(getResources()
 													.getColor(
-															R.color.button_text_color));
+															R.color.button_text_color_blue));
 									((RadioButton) group
 											.findViewById(R.id.rb_crowd))
 											.setTextColor(Color.WHITE);

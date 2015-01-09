@@ -30,14 +30,14 @@
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="@dimen/specific_voice_message_margin_right"
-            android:background="@drawable/button_bg"
+            android:background="@drawable/button_bg_blue_bound"
             android:gravity="center"
             android:paddingBottom="5dp"
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
             android:paddingTop="5dp"
             android:text="@string/specificItem_voice_watchDetail"
-            android:textColor="@color/button_text_color"
+            android:textColor="@color/button_text_color_blue"
             android:textSize="16sp" />
         <CheckBox
             android:id="@+id/ws_specific_voice_check"

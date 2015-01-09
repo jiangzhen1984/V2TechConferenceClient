@@ -32,16 +32,17 @@
                 android:id="@+id/conference_activity_request_host_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/conference_activity_title_bar_button_padding"
-                android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
-                android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
-                android:paddingTop="@dimen/conference_activity_title_bar_button_padding" >
+                android:paddingBottom="@dimen/common_menu_item_padding_top_and_bottom"
+                android:paddingLeft="@dimen/common_menu_item_padding_left"
+                android:paddingRight="@dimen/common_menu_item_padding_right"
+                android:paddingTop="@dimen/common_menu_item_padding_top_and_bottom" >
 
                 <ImageView
                     android:id="@+id/conference_activity_request_host_iv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/logout_button" />
+                    android:layout_marginRight="@dimen/common_menu_item_drawable_text_distance"
+                    android:src="@drawable/host_request" />
 
                 <TextView
                     android:id="@+id/conference_activity_request_host_tv"
@@ -50,29 +51,32 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:text="@string/confs_title_button_request_host_name"
-                    android:textColor="@color/common_item_text_color_black" />
+                    android:textColor="@color/common_item_text_color_black"
+                    android:textSize="@dimen/common_menu_text_font_size" />
+
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#f2f2f2" >
+                android:background="@color/common_line_color" >
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/video_quality"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/conference_activity_title_bar_button_padding"
-                android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
-                android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
-                android:paddingTop="@dimen/conference_activity_title_bar_button_padding" >
+                android:paddingBottom="@dimen/common_menu_item_padding_top_and_bottom"
+                android:paddingLeft="@dimen/common_menu_item_padding_left"
+                android:paddingRight="@dimen/common_menu_item_padding_right"
+                android:paddingTop="@dimen/common_menu_item_padding_top_and_bottom" >
 
                 <ImageView
                     android:id="@+id/video_attendee_device_lectrue_state_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/title_bar_item_setting_button" />
+                    android:layout_marginRight="@dimen/common_menu_item_drawable_text_distance"
+                    android:src="@drawable/setting_button" />
 
                 <TextView
                     android:id="@+id/TextView01"
@@ -81,27 +85,30 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:text="视频质量"
-                    android:textColor="@color/common_item_text_color_black" />
+                    android:textColor="@color/common_item_text_color_black"
+                    android:textSize="@dimen/common_menu_text_font_size" />
+
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:background="#f2f2f2" >
+                android:background="@color/common_line_color" >
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/conference_activity_logout_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingBottom="@dimen/conference_activity_title_bar_button_padding"
-                android:paddingLeft="@dimen/conference_activity_title_bar_button_padding"
-                android:paddingRight="@dimen/conference_activity_title_bar_button_padding"
-                android:paddingTop="@dimen/conference_activity_title_bar_button_padding" >
+                android:paddingBottom="@dimen/common_menu_item_padding_top_and_bottom"
+                android:paddingLeft="@dimen/common_menu_item_padding_left"
+                android:paddingRight="@dimen/common_menu_item_padding_right"
+                android:paddingTop="@dimen/common_menu_item_padding_top_and_bottom" >
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/common_menu_item_drawable_text_distance"
                     android:src="@drawable/logout_button" />
 
                 <TextView
@@ -110,7 +117,9 @@
                     android:layout_gravity="center"
                     android:gravity="center"
                     android:text="@string/confs_title_button_logout_name"
-                    android:textColor="@color/common_item_text_color_black" />
+                    android:textColor="@color/common_item_text_color_black"
+                    android:textSize="@dimen/common_menu_text_font_size" />
+
             </LinearLayout>
         </LinearLayout>
 

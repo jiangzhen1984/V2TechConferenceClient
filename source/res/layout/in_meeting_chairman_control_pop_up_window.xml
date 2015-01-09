@@ -16,83 +16,119 @@
             android:background="@drawable/common_pop_up_window_bg"
             android:orientation="vertical" >
 
-            <CheckBox
-                android:id="@+id/cb_slience"
+            <FrameLayout
+                android:id="@+id/slience_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:button="@null"
-                android:drawableLeft="@drawable/check_mark_space"
-                android:drawablePadding="5dp"
-                android:editable="false"
-                android:enabled="true"
-                android:paddingBottom="5dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="10dp"
-                android:paddingTop="5dp"
-                android:text="会场静音"
-                android:textColor="@color/common_item_text_color_black"
-                android:textSize="@dimen/common_item_text_size_16" />
+                android:paddingBottom="@dimen/common_menu_item_padding_top_and_bottom"
+                android:paddingLeft="@dimen/common_menu_item_padding_left"
+                android:paddingRight="@dimen/common_menu_item_padding_right"
+                android:paddingTop="@dimen/common_menu_item_padding_top_and_bottom" >
 
-            <TextView
-                android:id="@+id/textView1"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/common_gray_color_cd" />
-
-            <CheckBox
-                android:id="@+id/cb_invitation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:button="@null"
-                android:checked="true"
-                android:drawableLeft="@drawable/check_state"
-                android:drawablePadding="5dp"
-                android:paddingBottom="5dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="10dp"
-                android:paddingTop="5dp"
-                android:text="邀请其他人"
-                android:textColor="@color/common_item_text_color_black"
-                android:textSize="@dimen/common_item_text_size_16" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@color/common_gray_color_cd" />
-
-            <RelativeLayout
-                android:id="@+id/conference_message_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/setting_button" />
 
                 <CheckBox
-                    android:id="@+id/conference_message"
+                    android:id="@+id/cb_slience"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:button="@null"
                     android:drawableLeft="@drawable/check_mark_space"
                     android:drawablePadding="5dp"
                     android:editable="false"
                     android:enabled="true"
-                    android:paddingBottom="5dp"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="10dp"
-                    android:paddingTop="5dp"
-                    android:text="@string/conference_chair_man_control_window_item_message"
+                    android:text="会场静音"
                     android:textColor="@color/common_item_text_color_black"
-                    android:textSize="@dimen/common_item_text_size_16" />
+                    android:textSize="@dimen/common_menu_text_font_size" />
 
-                <ImageView
-                    android:id="@+id/host_request_msg_notificator"
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_line_color" />
+
+            <FrameLayout
+                android:id="@+id/invitation_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/common_menu_item_padding_top_and_bottom"
+                android:paddingLeft="@dimen/common_menu_item_padding_left"
+                android:paddingRight="@dimen/common_menu_item_padding_right"
+                android:paddingTop="@dimen/common_menu_item_padding_top_and_bottom" >
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/setting_button" />
+
+                <CheckBox
+                    android:id="@+id/cb_invitation"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="false"
-                    android:layout_alignParentRight="false"
-                    android:layout_alignParentTop="true"
-                    android:layout_toRightOf="@+id/conference_message"
-                    android:src="@drawable/red_nofificator" />
+                    android:layout_gravity="center_vertical"
+                    android:button="@null"
+                    android:checked="true"
+                    android:drawableLeft="@drawable/check_state"
+                    android:drawablePadding="5dp"
+                    android:text="邀请其他人"
+                    android:textColor="@color/common_item_text_color_black"
+                    android:textSize="@dimen/common_menu_text_font_size" />
 
-            </RelativeLayout>
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/common_line_color" />
+
+            <FrameLayout
+                android:id="@+id/message_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/common_menu_item_padding_top_and_bottom"
+                android:paddingLeft="@dimen/common_menu_item_padding_left"
+                android:paddingRight="@dimen/common_menu_item_padding_left"
+                android:paddingTop="@dimen/common_menu_item_padding_top_and_bottom" >
+
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/setting_button" />
+
+                <RelativeLayout
+                    android:id="@+id/conference_message_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <CheckBox
+                        android:id="@+id/conference_message"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:button="@null"
+                        android:drawableLeft="@drawable/check_mark_space"
+                        android:drawablePadding="5dp"
+                        android:editable="false"
+                        android:enabled="true"
+                        android:text="@string/conference_chair_man_control_window_item_message"
+                        android:textColor="@color/common_item_text_color_black"
+                        android:textSize="@dimen/common_menu_text_font_size" />
+
+                    <ImageView
+                        android:id="@+id/host_request_msg_notificator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="false"
+                        android:layout_alignParentRight="false"
+                        android:layout_alignParentTop="true"
+                        android:layout_toRightOf="@+id/conference_message"
+                        android:src="@drawable/red_nofificator" />
+                </RelativeLayout>
+            </FrameLayout>
         </LinearLayout>
 
         <ImageView
