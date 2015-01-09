@@ -149,6 +149,12 @@ public class GroupListView extends ListView {
 		this.setOnItemLongClickListener(mItemLongClickListener);
 		this.setOnScrollListener(mLocalScrollListener);
 	}
+	
+	public void initCreateMode() {
+		setShowedCheckedBox(true);
+		setTextFilterEnabled(true);
+		setIgnoreCurrentUser(true);
+	}
 
 	public void setGroupList(List<Group> list) {
 		mGroupList.clear();

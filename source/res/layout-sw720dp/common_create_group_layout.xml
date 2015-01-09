@@ -4,74 +4,74 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".view.conference.GroupCreateActivity" >
+    tools:context=".view.conference.ConferenceCreateActivity" >
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
+
         <include layout="@layout/common_activity_title_layout" />
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="1dp"
             android:background="#cdcdcf"
             android:orientation="vertical" >
         </LinearLayout>
+
         <LinearLayout
-            android:id="@+id/group_create_error_notification"
+            android:id="@+id/conference_create_error_notification"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#FFDEAD"
             android:visibility="gone" >
+
             <TextView
-                android:id="@+id/group_create_error_notification_hints"
+                android:id="@+id/conference_create_error_notification_tv"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal|center"
                 android:layout_marginBottom="4dp"
                 android:layout_marginTop="4dp"
                 android:gravity="center_horizontal"
-                android:text="@string/crowd_create_activity_error_info"
+                android:text="@string/error_create_conference_failed_from_server_side"
                 android:textColor="@color/common_item_text_color_red"
                 android:textSize="12sp" />
         </LinearLayout>
+
         <RelativeLayout
             android:id="@+id/RelativeLayout2"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:background="@color/confs_search_bar_bg"
             android:orientation="horizontal" >
+
             <EditText
                 android:id="@+id/contacts_search"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:layout_alignParentLeft="true"
-                android:layout_gravity="center_vertical"
-                android:layout_marginBottom="10dp"
+                android:layout_centerInParent="true"
                 android:layout_marginLeft="30dp"
                 android:layout_marginRight="30dp"
-                android:layout_marginTop="10dp"
                 android:background="@drawable/input_bg"
-                android:inputType="text"
-                android:paddingLeft="50dp"
                 android:imeOptions="actionDone"
+                android:inputType="text"
+                android:paddingLeft="100dp"
                 android:textColor="#000000"
                 android:textSize="18sp" >
             </EditText>
+
             <ImageView
-                android:id="@+id/imageView1"
+                android:id="@+id/imageView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/contacts_search"
                 android:layout_alignLeft="@+id/contacts_search"
-                android:layout_alignTop="@+id/contacts_search"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="10dp"
+                android:padding="15dp"
                 android:src="@drawable/group_list_search_button" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="1dp"
-                android:layout_below="@+id/contacts_search" />
         </RelativeLayout>
+
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="1dp"
@@ -79,117 +79,155 @@
             android:orientation="vertical" >
         </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="#ffffff"
         android:orientation="horizontal" >
+
         <com.v2tech.view.widget.GroupListView
-            android:id="@+id/group_create_contacts_list"
+            android:id="@+id/ws_common_create_group_list_view"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight=".5"
+            android:cacheColorHint="#00000000"
             android:divider="@null"
-            android:focusable="false" >
+            android:fadingEdge="none"
+            android:focusable="false"
+            android:scrollingCache="false" >
         </com.v2tech.view.widget.GroupListView>
+
         <LinearLayout
             android:layout_width="1dp"
             android:layout_height="match_parent"
             android:background="#cdcdcf"
             android:orientation="vertical" >
         </LinearLayout>
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight=".5"
             android:background="@color/confs_search_bar_bg"
             android:orientation="vertical" >
+
             <LinearLayout
-                android:id="@+id/group_create_input_box"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:background="@drawable/rounded_corners_create_conf_box_bg"
                 android:orientation="vertical"
                 android:padding="1dp" >
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:orientation="horizontal" >
+                    android:layout_margin="5dp"
+                    android:orientation="horizontal"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp" >
+
                     <TextView
-                        android:id="@+id/textView1"
+                        android:id="@+id/ws_common_create_edit_name_hint"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_weight=".2"
                         android:gravity="left|center_vertical"
-                        android:paddingLeft="0dp"
-                        android:paddingRight="10dp"
-                        android:text="@string/group_create_group_name"
+                        android:paddingRight="5dp"
                         android:textColor="@color/activiy_group_create_edit_title"
-                        android:textSize="15sp" />
+                        android:textSize="@dimen/common_item_text_size_16" />
+
                     <EditText
-                        android:id="@+id/group_create_group_name"
+                        android:id="@+id/ws_common_create_edit_name_et"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_weight=".7"
+                        android:layout_height="30dp"
+                        android:layout_gravity="left"
+                        android:layout_weight=".8"
                         android:background="@null"
                         android:ems="10"
-                        android:hint="@string/crowd_create_name_input_hint"
+                        android:imeOptions="actionDone"
                         android:inputType="text"
                         android:maxLength="50"
+                        android:nextFocusDown="@null"
+                        android:nextFocusForward="@null"
                         android:paddingBottom="5dp"
-                        android:imeOptions="actionDone"
-                        android:paddingTop="5dp" >
+                        android:paddingTop="5dp"
+                        android:textSize="@dimen/common_item_text_size_16" >
+
                         <requestFocus />
                     </EditText>
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="#cdcdcf"
                     android:orientation="vertical" >
                 </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_margin="5dp"
                     android:orientation="horizontal"
-                    android:padding="1dp" >
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp" >
+
                     <TextView
+                        android:id="@+id/ws_common_create_edit_content_hint"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_weight=".2"
                         android:gravity="left|center_vertical"
-                        android:paddingLeft="0dp"
-                        android:paddingRight="10dp"
-                        android:text="@string/group_create_group_qualification"
+                        android:paddingRight="5dp"
                         android:textColor="@color/activiy_group_create_edit_title"
-                        android:textSize="15sp" />
-                    <Spinner
-                        android:id="@+id/group_create_group_rule"
+                        android:textSize="@dimen/common_item_text_size_16" />
+
+                    <LinearLayout
                         android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_weight=".7"
-                        android:background="@null"
-                        android:ems="10"
-                        android:entries="@array/crowd_rules"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center"
+                        android:layout_weight=".8"
+                        android:orientation="vertical"
                         android:paddingBottom="5dp"
-                        android:paddingTop="5dp" />
+                        android:paddingTop="5dp" >
+
+                        <EditText
+                            android:id="@+id/conference_create_conf_start_time"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:ems="10"
+                            android:gravity="left|center_vertical"
+                            android:inputType="datetime"
+                            android:textSize="@dimen/common_item_text_size_16" />
+
+                        <Spinner
+                            android:id="@+id/group_create_group_rule"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:ems="10"
+                            android:gravity="left|center_vertical"
+                            android:textSize="@dimen/common_item_text_size_16"
+                            android:visibility="gone" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
+
             <ListView
-                android:id="@+id/crowd_create_list_view"
+                android:id="@+id/ws_common_create_select_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_margin="15dp"
-                android:divider="#f2f2f2"
                 android:background="@drawable/rounded_corners_create_conf_box_bg"
+                android:divider="#f2f2f2"
                 android:tag="vertical" >
             </ListView>
         </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>

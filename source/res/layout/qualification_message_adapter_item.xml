@@ -127,7 +127,7 @@
             android:paddingTop="@dimen/button_padding_vertical"
             android:text="@string/activiy_contact_group_item_button_delete"
             android:textColor="@color/common_white_color"
-            android:textSize="@dimen/common_item_text_size_16"
+            android:textSize="@dimen/common_item_text_size"
             android:visibility="invisible" />
     </FrameLayout>
     <LinearLayout

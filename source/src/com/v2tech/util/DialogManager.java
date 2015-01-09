@@ -86,6 +86,10 @@ public class DialogManager {
 		});
 		return quitDialog;
 	}
+	
+	public void clearDialogObject(){
+		quitDialog = null;
+	}
 
 	public abstract class DialogInterface {
 

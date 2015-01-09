@@ -21,10 +21,7 @@
 
             <ImageView
                 android:id="@+id/contact_user_img"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:src="@drawable/avatar" />
+                style="@style/Common_user_icon_style"/>
 
             <ImageView
                 android:id="@+id/contact_user_status_iv"

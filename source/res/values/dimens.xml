@@ -8,8 +8,8 @@
     <dimen name="common_item_text_size_16">16sp</dimen>
     <dimen name="common_item_text_size_14">14sp</dimen>
     <dimen name="common_item_text_size_small">10sp</dimen>
-    <dimen name="button_padding_horizontal">24dp</dimen>
-    <dimen name="button_padding_vertical">12dp</dimen>
+    <dimen name="button_padding_horizontal">15dp</dimen>
+    <dimen name="button_padding_vertical">10dp</dimen>
     <dimen name="common_margin_horizontal">15dp</dimen>
     <dimen name="common_margin_verticial">15dp</dimen>
     <dimen name="common_margin_verticial_small">5dp</dimen>
@@ -18,6 +18,7 @@
     <dimen name="contact_detail_2_item_margin_right">5dp</dimen>
     
     <dimen name="common_user_head_icon_size">42dp</dimen>
+    <dimen name="common_user_head_icon_notify_size">15dp</dimen>
     <dimen name="common_item_triangle_icon_size">32dp</dimen>
     
     <dimen name="common_item_checkbox_icon_width_size">37dp</dimen>

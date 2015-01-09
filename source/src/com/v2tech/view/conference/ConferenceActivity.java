@@ -186,7 +186,6 @@ public class ConferenceActivity extends Activity {
 	private VideoShowHostRequest mHostRequestWindow;
 
 	private Dialog mQuitDialog;
-	private Dialog mMuteCameraDialog;
 	private VideoInvitionAttendeeLayout mInvitionContainer;
 	private VideoMsgChattingLayout mMessageContainer;
 	private VideoAttendeeListLayout mAttendeeContainer;
@@ -430,10 +429,10 @@ public class ConferenceActivity extends Activity {
 		// keep screen on
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		adjustContentLayout();
 		// Adjust content layout
+		adjustContentLayout();
 	}
-
+	
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
@@ -2115,6 +2114,7 @@ public class ConferenceActivity extends Activity {
 			return;
 		}
 
+		DialogManager.getInstance().clearDialogObject();
 		mContext.unregisterReceiver(mConfUserChangeReceiver);
 		mAttendeeList.clear();
 		if (mCurrentShowedSV != null) {

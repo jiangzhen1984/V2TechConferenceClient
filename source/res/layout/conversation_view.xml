@@ -21,13 +21,9 @@
                 style="@style/Common_user_icon_style"/>
             <ImageView
                 android:id="@+id/group_list_conference_notificator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/Common_user_icon_notify_style"
                 android:layout_alignRight="@+id/group_list_conference_image_view"
                 android:layout_alignTop="@+id/group_list_conference_image_view"
-                android:layout_marginRight="3dp"
-                android:layout_marginTop="3dp"
-                android:src="@drawable/red_nofificator"
                 android:visibility="invisible" />
         </RelativeLayout>
     </LinearLayout>
