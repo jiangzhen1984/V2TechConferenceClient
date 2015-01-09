@@ -61,6 +61,10 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 	private static final int UPDATE_CROWD_RESPONSE = 5;
 	private static final int START_GROUP_SELECT = 6;
 	private static final int END_CREATE_OPERATOR = 9;
+	
+	private static final int SEND_SERVER_TYPE_INVITE = 10;
+	private static final int SEND_SERVER_TYPE_CREATE = 11;
+	
 
 	private static final int OP_ADD_ALL_GROUP_USER = 1;
 	private static final int OP_DEL_ALL_GROUP_USER = 0;
@@ -184,13 +188,13 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 				for (int i = 0; i < removeUsers.size(); i++) {
 					mAttendeeList.remove(removeUsers.get(i));
 				}
-
-				List<User> newMembers = new ArrayList<User>(mAttendeeList);
-				for (User user : newMembers) {
-					saveQualication(user);
-				}
-				cg.inviteMember(crowd, newMembers, new MessageListener(
-						mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
+				
+				mCreateWaitingDialog = ProgressDialog.show(
+						mContext,
+						"",
+						mContext.getResources().getString(
+								R.string.notification_watiing_process), true);
+				sendServer(SEND_SERVER_TYPE_INVITE);
 			}
 		} else {
 			crowd = new CrowdGroup(0, mCrowdTitleET.getText().toString(),
@@ -211,20 +215,24 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 					"",
 					mContext.getResources().getString(
 							R.string.notification_watiing_process), true);
-
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					List<User> userList = new ArrayList<User>(mAttendeeList);
-					for (User user : userList) {
-						saveQualication(user);
-					}
-					Message.obtain(mLocalHandler, END_CREATE_OPERATOR, userList)
-							.sendToTarget();
-				}
-			}).start();
+			sendServer(SEND_SERVER_TYPE_CREATE);
 		}
+	}
+	
+	private void sendServer(final int type){
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				List<User> userList = new ArrayList<User>(mAttendeeList);
+				Message msg = Message.obtain(mLocalHandler, END_CREATE_OPERATOR , userList);
+				msg.arg1 = type;
+				msg.sendToTarget();
+				for (User user : userList) {
+					saveQualication(user);
+				}
+			}
+		}).start();
 	}
 
 	@Override
@@ -352,12 +360,6 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 	}
 
 	private void saveQualication(User user) {
-
-		if (user == null) {
-			V2Log.e("CrowdCreateActivity --> Save VMessageQualification Cache Object failed , "
-					+ "Because given user object is null");
-			return;
-		}
 
 		if (crowd == null)
 			crowd = new CrowdGroup(0, "", null);
@@ -500,9 +502,15 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 				}
 
 				List<User> userList = (List<User>) msg.obj;
-				// Do not add userList to crowd, because this just invitation.
-				cg.createCrowdGroup(crowd, userList, new MessageListener(
-						mLocalHandler, CREATE_GROUP_MESSAGE, crowd));
+				int opType = msg.arg1;
+				if(opType == SEND_SERVER_TYPE_CREATE){
+					// Do not add userList to crowd, because this just invitation.
+					cg.createCrowdGroup(crowd, userList, new MessageListener(
+							mLocalHandler, CREATE_GROUP_MESSAGE, crowd));
+				} else {
+					cg.inviteMember(crowd, userList, new MessageListener(
+							mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
+				}
 				break;
 			}
 		}

@@ -9,30 +9,24 @@ import android.widget.TextView;
 import com.v2tech.R;
 
 /**
- * Resources res = getResources();
-		mQuitDialog = DialogManager.getInstance().showQuitModeDialog(DialogManager.getInstance().
-				new DialogInterface(mContext,
-				res.getString(R.string.in_meeting_quit_notification) ,
-				res.getString(R.string.in_meeting_quit_text) ,
-				res.getString(R.string.in_meeting_quit_quit_button) ,
-				res.getString(R.string.in_meeting_quit_cancel_button)) {
-			
-			@Override
-			public void confirmCallBack() {
-				mQuitDialog.dismiss();
-				VerificationProvider.deleteCrowdVerificationMessage(conf
-						.getId() , -1);
-				finish();
-			}
-			
-			@Override
-			public void cannelCallBack() {
-				mQuitDialog.dismiss();
-			}
-		});
-		mQuitDialog.show();
- * @author 
- *
+ * For example :
+ * <pre>
+ * Resources res = getResources(); 
+ * mQuitDialog = DialogManager.getInstance().showQuitModeDialog(
+ * 	DialogManager.getInstance().new DialogInterface(
+ * 		mContext,res.getString(R.string.xxx) ,
+ * 			res.getString(R.string.xxx) ,
+ * 			res.getString(R.string.xxx) ,
+ * 			res.getString(R.string.xxx)) {
+ * 		public void confirmCallBack() {}
+ * 
+ * 		public void cannelCallBack() {};
+ * mQuitDialog.show();
+ * 
+ * 如果使用该类，需要再Activity销毁时，调用clearDialogObject函数，用来解除绑定关系。
+ * </pre>
+ * @author
+ * 
  */
 public class DialogManager {
 
@@ -86,8 +80,8 @@ public class DialogManager {
 		});
 		return quitDialog;
 	}
-	
-	public void clearDialogObject(){
+
+	public void clearDialogObject() {
 		quitDialog = null;
 	}
 
