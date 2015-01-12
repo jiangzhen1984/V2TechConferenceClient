@@ -429,16 +429,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		List<Attendee> list = new ArrayList<Attendee>(l);
 		for (Attendee at : list) {
 			List<UserDeviceConfig> dList = at.getmDevices();
-
 			int i = 0;
 			int deviceIndex = 1;
 			do {
 				if (dList == null || dList.size() <= 0) {
 					mList.add(new Wrapper(at, null, FIRST_DEVICE_FLAG));
 				} else {
-					// mList.add(new Wrapper(at, dList.get(i),
-					// i == 0 ? DEFAULT_DEVICE_FLAG : deviceIndex++));
-					// 20141225 2
 					UserDeviceConfig tempUdc = dList.get(i);
 
 					if (i == 0) {
@@ -449,44 +445,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 				i++;
 			} while (dList != null && i < dList.size());
-			// 设备显示不出问题时删除这段注释
-			// 默认的设备在第一个，现在不需要
-			// int deviceIndex = 1;
-			//
-			// if (dList == null || dList.size() <= 0) {
-			// mList.add(new Wrapper(at, null, DEFAULT_DEVICE_FLAG));
-			// } else {
-			// UserDeviceConfig defaultDevice = null;
-			// for (int i = 0; i < dList.size(); i++) {
-			// UserDeviceConfig udc = dList.get(i);
-			// if (udc.isDefault()) {
-			// defaultDevice = udc;
-			// }
-			// }
-			//
-			// // 再添加用户的设备信息
-			// if (defaultDevice != null) {
-			// mList.add(new Wrapper(at, defaultDevice,
-			// DEFAULT_DEVICE_FLAG));
-			// for (int i = 0; i < dList.size(); i++) {
-			// UserDeviceConfig udc = dList.get(i);
-			// if (!udc.isDefault()) {
-			// mList.add(new Wrapper(at, udc, deviceIndex++));
-			// }
-			// }
-			// } else {
-			// for (int i = 0; i < dList.size(); i++) {
-			// UserDeviceConfig udc = dList.get(i);
-			// if (i == 0) {
-			// mList.add(new Wrapper(at, udc, DEFAULT_DEVICE_FLAG));
-			// } else {
-			// mList.add(new Wrapper(at, udc, deviceIndex++));
-			// }
-			// }
-			// }
-			//
-			// }
-
 			configAttendee(at);
 		}
 		Collections.sort(mList);
@@ -649,10 +607,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			return;
 		}
 
-		at.setmDevices(null);
-		at.setJoined(false);
-		at.setSpeakingState(false);
-		at.setLectureState(Attendee.LECTURE_STATE_NOT);
 		boolean found = false;
 		for (int i = 0; i < mList.size(); i++) {
 			Wrapper wr = mList.get(i);

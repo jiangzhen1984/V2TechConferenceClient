@@ -118,7 +118,7 @@
                     android:layout_margin="10dp"
                     android:orientation="horizontal" >
                     <TextView
-                        android:id="@+id/textView1"
+                        android:id="@+id/state_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"

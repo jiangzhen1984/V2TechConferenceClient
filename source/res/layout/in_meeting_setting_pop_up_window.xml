@@ -18,7 +18,7 @@
             android:paddingRight="10dp" >
 
             <TextView
-                android:id="@+id/textView1"
+                android:id="@+id/state_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="5dp"
@@ -31,7 +31,7 @@
                 android:id="@+id/camera_setting_quality"
                 android:layout_width="wrap_content"
                 android:layout_height="fill_parent"
-                android:layout_below="@+id/textView1"
+                android:layout_below="@+id/state_text"
                 android:max="100"
                 android:paddingBottom="20dp"
                 android:paddingLeft="10dp"

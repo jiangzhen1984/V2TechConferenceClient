@@ -264,11 +264,11 @@ public class ConferenceActivity extends Activity {
 	private boolean currentAttendeeTurnedpage = false;
 
 	/**
-	 * 当Activity从后台切回前台，有可能子布局测量的宽度有问题，导致展开的菜单布局宽度有问题。
-	 * 在进入Stop状态时，把子布局的宽度记录下来
+	 * 当Activity从后台切回前台，有可能子布局测量的宽度有问题，导致展开的菜单布局宽度有问题。 在进入Stop状态时，把子布局的宽度记录下来
 	 */
 	private int mSaveWidth;
 	private boolean activityFromStop;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -432,7 +432,7 @@ public class ConferenceActivity extends Activity {
 		// Adjust content layout
 		adjustContentLayout();
 	}
-	
+
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
@@ -813,7 +813,7 @@ public class ConferenceActivity extends Activity {
 			if (mContentHeight == -1) {
 				mContentHeight = mContentLayoutMain.getHeight();
 			}
-			
+
 			if (activityFromStop) {
 				mContentWidth = mSaveWidth;
 				activityFromStop = false;
@@ -1064,13 +1064,15 @@ public class ConferenceActivity extends Activity {
 			}
 
 			// Update button background
-			int selectedColor = mContext.getResources().getColor(R.color.confs_common_bg);
+			int selectedColor = mContext.getResources().getColor(
+					R.color.confs_common_bg);
 			int unSelectedColor = Color.rgb(255, 255, 255);
 			for (View button : mMenuButtonGroup) {
 				int backGroundColor = 0;
 				if (button == v) {
 					ColorDrawable drawable = (ColorDrawable) v.getBackground();
-					if(drawable == null || drawable.getColor() == unSelectedColor)
+					if (drawable == null
+							|| drawable.getColor() == unSelectedColor)
 						backGroundColor = selectedColor;
 					else
 						backGroundColor = unSelectedColor;
@@ -1400,11 +1402,11 @@ public class ConferenceActivity extends Activity {
 			mConferenceMsgDialog = new ConferenceMsgDialog(mContext,
 					mHostRequestUsers, cb);
 		} else {
-			mConferenceMsgDialog.updateList(mHostRequestUsers);
+			mConferenceMsgDialog.resetList(mHostRequestUsers);
 		}
 
 		mConferenceMsgDialog.show();
-		
+
 		mMsgNotification.setVisibility(View.GONE);
 		hasUnreadChiremanControllMsg = false;
 	}
@@ -2221,51 +2223,51 @@ public class ConferenceActivity extends Activity {
 
 	private void showQuitDialog(String content) {
 		Resources res = getResources();
-		mQuitDialog = DialogManager.getInstance().showQuitModeDialog(DialogManager.getInstance().
-				new DialogInterface(mContext,
-				res.getString(R.string.in_meeting_quit_notification) ,
-				content ,
-				res.getString(R.string.in_meeting_quit_quit_button) ,
-				res.getString(R.string.in_meeting_quit_cancel_button)) {
-			
-			@Override
-			public void confirmCallBack() {
-				mQuitDialog.dismiss();
-				VerificationProvider.deleteCrowdVerificationMessage(conf
-						.getId() , -1);
-				finish();
-			}
-			
-			@Override
-			public void cannelCallBack() {
-				mQuitDialog.dismiss();
-			}
-		});
+		mQuitDialog = DialogManager.getInstance().showQuitModeDialog(
+				DialogManager.getInstance().new DialogInterface(mContext, res
+						.getString(R.string.in_meeting_quit_notification),
+						content,
+						res.getString(R.string.in_meeting_quit_quit_button),
+						res.getString(R.string.in_meeting_quit_cancel_button)) {
+
+					@Override
+					public void confirmCallBack() {
+						mQuitDialog.dismiss();
+						VerificationProvider.deleteCrowdVerificationMessage(
+								conf.getId(), -1);
+						finish();
+					}
+
+					@Override
+					public void cannelCallBack() {
+						mQuitDialog.dismiss();
+					}
+				});
 		mQuitDialog.show();
 	}
 
 	private void showMuteCameraDialog() {
 		Resources res = getResources();
-		mQuitDialog = DialogManager.getInstance().showQuitModeDialog(DialogManager.getInstance().
-				new DialogInterface(mContext,
-				res.getString(R.string.in_meeting_quit_notification) ,
-				res.getString(R.string.in_meeting_mute_hit_content) ,
-				res.getString(R.string.in_meeting_mute_button) ,
-				res.getString(R.string.in_meeting_mute_cancel_button)) {
-			
-			@Override
-			public void confirmCallBack() {
-				mQuitDialog.dismiss();
-				isMuteCamera = true;
-				cb.enableVideoDev("", false);
-				updateMCameraIVState(false);
-			}
-			
-			@Override
-			public void cannelCallBack() {
-				mQuitDialog.dismiss();
-			}
-		});
+		mQuitDialog = DialogManager.getInstance().showQuitModeDialog(
+				DialogManager.getInstance().new DialogInterface(mContext, res
+						.getString(R.string.in_meeting_quit_notification), res
+						.getString(R.string.in_meeting_mute_hit_content), res
+						.getString(R.string.in_meeting_mute_button), res
+						.getString(R.string.in_meeting_mute_cancel_button)) {
+
+					@Override
+					public void confirmCallBack() {
+						mQuitDialog.dismiss();
+						isMuteCamera = true;
+						cb.enableVideoDev("", false);
+						updateMCameraIVState(false);
+					}
+
+					@Override
+					public void cannelCallBack() {
+						mQuitDialog.dismiss();
+					}
+				});
 		mQuitDialog.show();
 	}
 
@@ -2436,6 +2438,11 @@ public class ConferenceActivity extends Activity {
 			}
 		}
 
+		att.setmDevices(null);
+		att.setJoined(false);
+		att.setSpeakingState(false);
+		att.setLectureState(Attendee.LECTURE_STATE_NOT);
+		
 		// adjust layout if we closed video
 		if (layoutChanged) {
 			adjustVideoLayout();
@@ -3523,7 +3530,26 @@ public class ConferenceActivity extends Activity {
 						mFastAttendeeList.remove(at);
 						mAttendeeList.remove(at);
 					}
+					
 					doHandleUserExited(at);
+
+					User user = null;
+					for (User tempUser : mHostRequestUsers) {
+						if (tempUser.getmUserId() == ut.getmUserId()) {
+							user = tempUser;
+							break;
+						}
+					}
+
+					if (user != null) {
+						mHostRequestUsers.remove(user);
+
+						if (mConferenceMsgDialog != null
+								&& mConferenceMsgDialog.isShowing()) {
+							mConferenceMsgDialog.deleteFromList(user);
+						}
+					}
+
 				}
 				break;
 
@@ -3557,6 +3583,13 @@ public class ConferenceActivity extends Activity {
 						.getCurrentUserId()) {
 					mHostRequestUsers.add(GlobalHolder.getInstance().getUser(
 							rri.getUid()));
+
+					if (mConferenceMsgDialog != null
+							&& mConferenceMsgDialog.isShowing()) {
+						mConferenceMsgDialog.addToList(GlobalHolder
+								.getInstance().getUser(rri.getUid()));
+					}
+
 					if (mConferenceMsgDialog == null
 							|| !mConferenceMsgDialog.isShowing()) {
 						mMsgNotification.setVisibility(View.VISIBLE);
@@ -3575,10 +3608,6 @@ public class ConferenceActivity extends Activity {
 					if (moreWindow != null && moreWindow.isShowing()) {
 						updateMoreWindowDisplay();
 					}
-				}
-
-				if (mConferenceMsgDialog != null) {
-					mConferenceMsgDialog.updateList(mHostRequestUsers);
 				}
 
 				break;
@@ -3606,8 +3635,9 @@ public class ConferenceActivity extends Activity {
 							mHostRequestUsers.remove(user);
 						}
 
-						if (mConferenceMsgDialog != null) {
-							mConferenceMsgDialog.updateList(mHostRequestUsers);
+						if (mConferenceMsgDialog != null
+								&& mConferenceMsgDialog.isShowing()) {
+							mConferenceMsgDialog.deleteFromList(user);
 						}
 
 						if (mHostRequestUsers.size() == 0) {

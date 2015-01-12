@@ -1,6 +1,7 @@
 package com.v2tech.view.conference;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -25,7 +26,7 @@ import android.widget.TextView;
 public class ConferenceMsgDialog extends Dialog {
 
 	private Set<User> users;
-	private List<User> mList;
+	private List<listViewItemData> mList;
 	private ListView lv;
 	private LayoutInflater inflater;
 	private ConferenceService service;
@@ -35,9 +36,16 @@ public class ConferenceMsgDialog extends Dialog {
 			ConferenceService service) {
 		super(context, R.style.DialogStyle1);
 		setCanceledOnTouchOutside(true);
-		mList = new ArrayList<User>();
-		mList.addAll(list);
 		users = list;
+		mList = new ArrayList<listViewItemData>();
+		Iterator<User> iterator = users.iterator();
+		while (iterator.hasNext()) {
+			listViewItemData itemData = new listViewItemData();
+			itemData.user = iterator.next();
+			itemData.state = listViewItemData.STATE_UNDISPOSED;
+			mList.add(itemData);
+		}
+
 		this.service = service;
 		initLayout(context);
 	}
@@ -58,11 +66,91 @@ public class ConferenceMsgDialog extends Dialog {
 				(int) (height * 2 / 3 + 0.5f)));
 	}
 
-	public void updateList(Set<User> list) {
-		mList.clear();
-		mList.addAll(list);
+	public void resetList(Set<User> list) {
 		users = list;
+		mList.clear();
+		Iterator<User> iterator = users.iterator();
+		while (iterator.hasNext()) {
+			listViewItemData itemData = new listViewItemData();
+			itemData.user = iterator.next();
+			itemData.state = listViewItemData.STATE_UNDISPOSED;
+			mList.add(itemData);
+		}
+
 		mAdapter.notifyDataSetChanged();
+	}
+
+	// public void updateList(Set<User> list) {
+	// users = list;
+	// Iterator<User> iterator = users.iterator();
+	// while (iterator.hasNext()) {
+	// listViewItemData itemData = new listViewItemData();
+	// itemData.user = iterator.next();
+	// itemData.state = listViewItemData.STATE_UNDISPOSED;
+	// mList.add(itemData);
+	// }
+	//
+	// mAdapter.notifyDataSetChanged();
+	// }
+
+	public void addToList(User user) {
+		if (user == null) {
+			return;
+		}
+		boolean ret = false;
+		Iterator<listViewItemData> iterator = mList.iterator();
+		while (iterator.hasNext()) {
+			listViewItemData itemData = new listViewItemData();
+			itemData = iterator.next();
+			if (user.getmUserId() == itemData.user.getmUserId()) {
+				itemData.state = listViewItemData.STATE_UNDISPOSED;
+				ret = true;
+			}
+		}
+
+		if (!ret) {
+			listViewItemData itemData = new listViewItemData();
+			itemData.user = user;
+			itemData.state = listViewItemData.STATE_UNDISPOSED;
+			mList.add(itemData);
+		}
+
+		mAdapter.notifyDataSetChanged();
+	}
+
+	public void deleteFromList(User user) {
+		if (user == null) {
+			return;
+		}
+		boolean ret = false;
+		Iterator<listViewItemData> iterator = mList.iterator();
+		while (iterator.hasNext()) {
+			listViewItemData itemData = new listViewItemData();
+			itemData = iterator.next();
+			if (user.getmUserId() == itemData.user.getmUserId()) {
+				iterator.remove();
+				ret = true;
+			}
+		}
+
+		if(mList.size()==0){
+			this.dismiss();
+			return;
+		}
+		
+		if (ret) {
+			mAdapter.notifyDataSetChanged();
+		}
+
+	}
+
+	class listViewItemData {
+		private static final int STATE_UNDISPOSED = 0;
+		private static final int STATE_ACCESS = 1;
+		private static final int STATE_REJECT = 2;
+
+		public User user;
+		public int state = STATE_UNDISPOSED;
 	}
 
 	class ListAdapter extends BaseAdapter {
@@ -79,7 +167,7 @@ public class ConferenceMsgDialog extends Dialog {
 
 		@Override
 		public long getItemId(int position) {
-			return mList.get(position).getmUserId();
+			return mList.get(position).user.getmUserId();
 		}
 
 		@Override
@@ -88,52 +176,72 @@ public class ConferenceMsgDialog extends Dialog {
 				convertView = inflater.inflate(
 						R.layout.conference_request_host_list_item, null);
 			}
-			User user = mList.get(position);
+			listViewItemData itemData = mList.get(position);
 			((TextView) convertView
 					.findViewById(R.id.conference_request_host_user_name))
-					.setText(user.getName());
-
+					.setText(itemData.user.getName());
 			View acceptButton = convertView
 					.findViewById(R.id.conference_request_host_button_accept);
-			acceptButton.setTag(user);
-			acceptButton.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					onAcceptButtonClick(v);
-				}
-			});
-
 			View rejectButton = convertView
 					.findViewById(R.id.conference_request_host_button_reject);
-			rejectButton.setTag(user);
-			rejectButton.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					onRejectButtonClick(v);
-				}
-			});
+
+			TextView state = (TextView) convertView
+					.findViewById(R.id.state_text);
+
+			switch (itemData.state) {
+			case listViewItemData.STATE_UNDISPOSED:
+				state.setVisibility(View.GONE);
+				acceptButton.setVisibility(View.VISIBLE);
+				acceptButton.setTag(itemData);
+				acceptButton.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						onAcceptButtonClick(v);
+					}
+				});
+
+				rejectButton.setVisibility(View.VISIBLE);
+				rejectButton.setTag(itemData);
+				rejectButton.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						onRejectButtonClick(v);
+					}
+				});
+				break;
+			case listViewItemData.STATE_ACCESS:
+				acceptButton.setVisibility(View.GONE);
+				rejectButton.setVisibility(View.GONE);
+				state.setVisibility(View.VISIBLE);
+				state.setText("已同意");
+				break;
+			case listViewItemData.STATE_REJECT:
+				acceptButton.setVisibility(View.GONE);
+				rejectButton.setVisibility(View.GONE);
+				state.setVisibility(View.VISIBLE);
+				state.setText("已拒绝");
+				break;
+			}
 
 			return convertView;
 		}
 
 		private void onAcceptButtonClick(View v) {
-			User user = (User) v.getTag();
-			service.grantPermission(user, ConferencePermission.CONTROL,
-					PermissionState.GRANTED, null);
-			mList.remove(user);
-			users.remove(user);
+			listViewItemData itemData = (listViewItemData) v.getTag();
+			service.grantPermission(itemData.user,
+					ConferencePermission.CONTROL, PermissionState.GRANTED, null);
+			itemData.state = listViewItemData.STATE_ACCESS;
+			users.remove(itemData.user);
 			mAdapter.notifyDataSetChanged();
-			ConferenceMsgDialog.this.dismiss();
 		}
 
 		private void onRejectButtonClick(View v) {
-			User user = (User) v.getTag();
-			service.grantPermission(user, ConferencePermission.CONTROL,
-					PermissionState.NORMAL, null);
-			mList.remove(user);
-			users.remove(user);
+			listViewItemData itemData = (listViewItemData) v.getTag();
+			service.grantPermission(itemData.user,
+					ConferencePermission.CONTROL, PermissionState.NORMAL, null);
+			itemData.state = listViewItemData.STATE_REJECT;
+			users.remove(itemData.user);
 			mAdapter.notifyDataSetChanged();
-			ConferenceMsgDialog.this.dismiss();
 		}
 	}
 
