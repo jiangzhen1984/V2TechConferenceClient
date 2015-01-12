@@ -1171,8 +1171,6 @@ public class MessageBodyView extends LinearLayout {
 				VMessageFileItem vfi);
 
 		public void requestStopOtherAudio(VMessage vm);
-		
-		public void requestFileTransUpdate();
 	}
 }
 

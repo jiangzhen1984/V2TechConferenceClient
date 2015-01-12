@@ -458,18 +458,18 @@ public class ConferenceActivity extends Activity {
 
 	private void initBroadcastReceiver() {
 		IntentFilter filter = new IntentFilter();
+		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE);
 		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
-		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		filter.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO);
 		filter.addAction(PublicIntent.PREPARE_FINISH_APPLICATION);
 		filter.addAction(PublicIntent.NOTIFY_CONFERENCE_ACTIVITY);
-		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
-		filter.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		filter.addAction(Intent.ACTION_USER_PRESENT);
 		filter.addAction(Intent.ACTION_HEADSET_PLUG);
@@ -1601,6 +1601,21 @@ public class ConferenceActivity extends Activity {
 					finish();
 				}
 
+			} else if(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO
+					.equals(intent.getAction())){
+				long uid = intent.getLongExtra("uid", -1);
+				Iterator<Attendee> iterator = mAttendeeList.iterator();
+				while(iterator.hasNext()){
+					Attendee next = iterator.next();
+					if(next.getAttId() == uid){
+						next.setUser(GlobalHolder.getInstance().getUser(uid));
+						if (mAttendeeContainer != null) {
+							mAttendeeContainer.updateDisplay();
+						}
+						break;
+					}
+				}
+				
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
 
@@ -3507,18 +3522,14 @@ public class ConferenceActivity extends Activity {
 						mAttendeeList.add(at);
 						mFastAttendeeList.add(at);
 					} else {
-
-						if (TextUtils.isEmpty(at.getAttName())) {
-							User user = GlobalHolder.getInstance().getUser(
-									at.getAttId());
-							if (user != null)
-								at.setUser(user);
-							else
-								V2Log.d(TAG,
-										"Successful receiver the 参会人加入的回调 , but get newst user object "
-												+ "from GlobleHolder is null!");
-						}
-
+//						if (TextUtils.isEmpty(at.getAttName())) {
+//							User user = GlobalHolder.getInstance().getUser(
+//									at.getAttId());
+//							at.setUser(user);
+//							V2Log.d(TAG,
+//									"Successful receiver the 参会人加入的回调 , but get newst user object "
+//											+ "from GlobleHolder is null!");
+//						}
 					}
 
 					V2Log.d(TAG, "Successful receiver the 参会人加入的回调");

@@ -107,6 +107,7 @@ import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.ReadState;
+import com.v2tech.vo.VMessageQualification.Type;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 import com.v2tech.vo.VMessageQualificationInvitationCrowd;
 import com.v2tech.vo.VideoBean;
@@ -390,12 +391,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_OFFLINE_MESSAGE_END);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUPS_LOADED);
+			intentFilter
+				.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO);
 
 			if (mCurrentTabFlag == Conversation.TYPE_CONFERNECE) {
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_INVATITION);
-				intentFilter
-						.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO);
 				intentFilter
 						.addAction(JNIService.JNI_BROADCAST_CONFERENCE_REMOVED);
 				intentFilter
@@ -1445,7 +1446,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (TextUtils.isEmpty(invitation.getInvitationUser().getName())) {
 					User user = GlobalHolder.getInstance().getUser(
 							invitation.getInvitationUser().getmUserId());
-					if (user != null) {
+					if (!user.isDirty()) {
 						boolean isFriend = GlobalHolder.getInstance().isFriend(
 								user);
 						if (isFriend && !TextUtils.isEmpty(user.getNickName()))
@@ -1485,7 +1486,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				if (TextUtils.isEmpty(applyUser.getName())) {
 					User user = GlobalHolder.getInstance().getUser(
 							apply.getApplicant().getmUserId());
-					if (user != null) {
+					if (!user.isDirty()) {
 						boolean isFriend = GlobalHolder.getInstance().isFriend(
 								user);
 						if (isFriend && !TextUtils.isEmpty(user.getNickName()))
@@ -2026,6 +2027,29 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		Notificator.updateSystemNotification(mContext,
 				res.getString(R.string.status_bar_notification), msg, 1, i,
 				PublicIntent.MESSAGE_NOTIFICATION_ID);
+	}
+	
+	private boolean isOutOrgShow;
+	/**
+	 * 当所有组织信息和组织内用户信息获取完毕后，检测当前验证消息显示的是否是组织外用户的群验证消息。
+	 */
+	private void checkEmptyVerificationMessage(){
+		VerificationMessageType messageType = ((ConversationFirendAuthenticationData) verificationMessageItemData)
+				.getMessageType();
+		if(messageType == VerificationMessageType.CROWD_TYPE){
+			VMessageQualification crowdVerificationMessage = VerificationProvider.getNewestCrowdVerificationMessage();
+			long uid = -1;
+			if(crowdVerificationMessage.getType() == Type.CROWD_APPLICATION)
+				uid = ((VMessageQualificationApplicationCrowd)crowdVerificationMessage).getApplicant().getmUserId();
+			else
+				uid = ((VMessageQualificationInvitationCrowd)crowdVerificationMessage).getInvitationUser().getmUserId();
+			User remote = GlobalHolder.getInstance().getUser(uid);
+			if(remote.isDirty()){
+				//The user info need to get
+				isOutOrgShow = true;
+				V2Log.e(TAG, "The current show Verification info need to update!");
+			}
+		}
 	}
 
 	/**
@@ -2834,6 +2858,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					checkWaittingFriendExist();
 					// 检测群组是否存在
 					checkGroupIsExist();
+					//当所有组织信息和组织内用户信息获取完毕后，检测当前验证消息显示的是否是组织外用户的群验证消息。
+					checkEmptyVerificationMessage();
 					// 检测讨论组
 					// checkNewGroup();
 					// 检测是否有重复验证会话
@@ -3360,6 +3386,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					mItemList.remove(voiceItem);
 					mItemList.add(0, voiceItem);
 					adapter.notifyDataSetChanged();
+				}
+			} else if(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO
+					.equals(intent.getAction())){
+				if(isOutOrgShow){
+					isOutOrgShow = false;
+					updateCrowdVerificationConversation(false);
 				}
 			}
 		}

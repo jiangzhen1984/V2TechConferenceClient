@@ -1,7 +1,6 @@
 package com.v2tech.view.conversation;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
@@ -24,7 +23,11 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
+import android.media.MediaPlayer.OnErrorListener;
+import android.media.MediaPlayer.OnPreparedListener;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
@@ -62,10 +65,7 @@ import android.widget.Toast;
 import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.util.V2Log;
-import com.spoledge.aacplayer.AACPlayer;
 import com.spoledge.aacplayer.ArrayAACPlayer;
-import com.spoledge.aacplayer.ArrayDecoder;
-import com.spoledge.aacplayer.Decoder;
 import com.spoledge.aacplayer.PlayerCallback;
 import com.v2tech.R;
 import com.v2tech.media.V2Encoder;
@@ -197,6 +197,8 @@ public class ConversationP2PTextActivity extends Activity implements
 	// Use local AAC encoder;
 	private V2Encoder mAacEncoder;
 
+	private MediaPlayer mediaPlayer = null;
+	
 	private MessageReceiver receiver = new MessageReceiver();
 
 	private ChatService mChat = new ChatService();
@@ -396,6 +398,93 @@ public class ConversationP2PTextActivity extends Activity implements
 		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
 		mToolLayout = (RelativeLayout) findViewById(R.id.contact_message_sub_feature_ly_inner);
 	}
+	
+	private void initExtraObject() {
+
+		Bundle bundle = this.getIntent().getExtras();
+		if (bundle != null) {
+			cov = (ConversationNotificationObject) bundle.get("obj");
+			if (cov == null)
+				cov = getIntent().getParcelableExtra("obj");
+		}
+
+		if (bundle == null || cov == null) {
+			V2Log.e(TAG,
+					"start activity was woring , please check given ConversationNotificationObject");
+			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					1);
+		}
+
+		// this.getIntent().getBooleanExtra("fromContactDetail", false);
+		initConversationInfos();
+	}
+
+	private void initConversationInfos() {
+		currentLoginUserID = GlobalHolder.getInstance().getCurrentUserId();
+		currentLoginUser = GlobalHolder.getInstance().getUser(
+				currentLoginUserID);
+		if (cov.getConversationType() == Conversation.TYPE_CONTACT) {
+			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
+			remoteChatUserID = cov.getExtId();
+			remoteChatUser = GlobalHolder.getInstance().getUser(
+					remoteChatUserID);
+			if (remoteChatUser == null) {
+				remoteChatUser = new User(remoteChatUserID);
+			}
+
+			if (!TextUtils.isEmpty(remoteChatUser.getNickName()))
+				mUserTitleTV.setText(remoteChatUser.getNickName());
+			else
+				mUserTitleTV.setText(remoteChatUser.getName());
+			mButtonCreateMetting.setVisibility(View.GONE);
+			mVideoCallButton.setVisibility(View.VISIBLE);
+			mAudioCallButton.setVisibility(View.VISIBLE);
+			mShowContactDetailButton.setVisibility(View.VISIBLE);
+			mButtonCreateMetting.setVisibility(View.GONE);
+			mShowCrowdDetailButton.setVisibility(View.GONE);
+			mButtonCreateMetting.setVisibility(View.GONE);
+		} else if (cov.getConversationType() == Conversation.TYPE_GROUP) {
+			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
+			remoteGroupID = cov.getExtId();
+			Group group = GlobalHolder.getInstance()
+					.getGroupById(remoteGroupID);
+			if(group == null){
+				group = new CrowdGroup(remoteGroupID, "", null);
+			}
+			mVideoCallButton.setVisibility(View.GONE);
+			mAudioCallButton.setVisibility(View.GONE);
+			mShowContactDetailButton.setVisibility(View.GONE);
+			mButtonCreateMetting.setVisibility(View.VISIBLE);
+			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
+			mUserTitleTV.setText(group.getName());
+		} else if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT
+				|| cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+			if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+				mShowContactDetailButton.setVisibility(View.GONE);
+				mShowCrowdDetailButton.setVisibility(View.GONE);
+				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+				OrgGroup departmentGroup = (OrgGroup) GlobalHolder
+						.getInstance().getGroupById(
+								V2GlobalEnum.GROUP_TYPE_DEPARTMENT,
+								cov.getExtId());
+				mUserTitleTV.setText(departmentGroup.getName());
+			} else {
+				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DISCUSSION;
+				DiscussionGroup discussionGroup = (DiscussionGroup) GlobalHolder
+						.getInstance().getGroupById(
+								V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+								cov.getExtId());
+				mUserTitleTV.setText(discussionGroup.getName());
+			}
+			remoteGroupID = cov.getExtId();
+			mVideoCallButton.setVisibility(View.GONE);
+			mAudioCallButton.setVisibility(View.GONE);
+			mShowContactDetailButton.setVisibility(View.GONE);
+			mSelectFileButtonIV.setVisibility(View.GONE);
+			mButtonCreateMetting.setVisibility(View.VISIBLE);
+			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
+		}
+	}
 
 	/**
 	 * 用于接收从个人信息传递过来的文件
@@ -537,13 +626,6 @@ public class ConversationP2PTextActivity extends Activity implements
 	}
 
 	@Override
-	public void onBackPressed() {
-		checkMessageEmpty();
-		V2Log.d(TAG, "entry onBackPressed");
-		super.onBackPressed();
-	}
-
-	@Override
 	protected void onStop() {
 		super.onStop();
 		Log.d(TAG, "entry onStop....");
@@ -560,17 +642,109 @@ public class ConversationP2PTextActivity extends Activity implements
 	}
 
 	@Override
-	public void finish() {
-		super.finish();
+	public void onBackPressed() {
+		checkMessageEmpty();
+		V2Log.d(TAG, "entry onBackPressed");
+		super.onBackPressed();
 		this.overridePendingTransition(R.animator.nonam_scale_null,
 				R.animator.nonam_scale_center_100_0);
 	}
-
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		V2Log.e(TAG, "entry onDestroy....");
 		finishWork();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == SELECT_PICTURE_CODE && data != null) {
+			String filePath = data.getStringExtra("checkedImage");
+			if (filePath == null) {
+				Toast.makeText(mContext,
+						R.string.error_contact_messag_invalid_image_path,
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			VMessage vim = MessageBuilder.buildImageMessage(
+					cov.getConversationType(), remoteGroupID, currentLoginUser,
+					remoteChatUser, filePath);
+			// Send message to server
+			sendMessageToRemote(vim);
+		} else if (requestCode == RECEIVE_SELECTED_FILE) {
+			if (data != null) {
+				if(isFinishActivity){
+					onBackPressed();
+				}
+					
+				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
+				if (mCheckedList == null || mCheckedList.size() <= 0)
+					return;
+
+				switch (currentConversationViewType) {
+				case V2GlobalEnum.GROUP_TYPE_CROWD:
+
+					for (FileInfoBean bean : mCheckedList) {
+						if (bean == null || TextUtils.isEmpty(bean.filePath))
+							continue;
+
+						VMessage vm = MessageBuilder.buildFileMessage(
+								cov.getConversationType(), remoteGroupID,
+								currentLoginUser, remoteChatUser, bean);
+						bean.fileUUID = vm.getFileItems().get(0).getUuid();
+						// // Save message
+						vm.setmXmlDatas(vm.toXml());
+						vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
+
+						MessageBuilder.saveMessage(this, vm);
+						MessageBuilder.saveFileVMessage(this, vm);
+
+						addMessageToContainer(vm);
+						
+						GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_SENDING, 
+								mContext, true, remoteGroupID, "ConversationP2PTextActivity onActivity crowd");
+					}
+
+					Intent intent = new Intent(this, FileService.class);
+					intent.putExtra("gid", remoteGroupID);
+					intent.putParcelableArrayListExtra("uploads", mCheckedList);
+					startService(intent);
+					break;
+				case V2GlobalEnum.GROUP_TYPE_USER:
+					startSendMoreFile();
+					mCheckedList = null;
+					break;
+				}
+			}
+		} else if (requestCode == SHOW_GROUP_DETAIL) {
+			Group group = GlobalHolder.getInstance()
+					.getGroupById(remoteGroupID);
+			mUserTitleTV.setText(group.getName());
+		} else if (requestCode == UPDATE_FILE_SENDING_STATE) {
+			if (data != null) {
+				// String[] updates = data.getStringArrayExtra("updateList");
+				// if(updates != null && updates.length > 0){
+				// for (int i = 0; i < updates.length; i++) {
+				// for (int j = 0; j < messageArray.size(); j++) {
+				// CommonAdapterItemWrapper wrapper = messageArray.get(i);
+				// VMessage tempVm = (VMessage) wrapper.getItemObject();
+				// if(tempVm.getFileItems().size() > 0){
+				// VMessageFileItem vMessageFileItem =
+				// tempVm.getFileItems().get(0);
+				// if (vMessageFileItem.getUuid().equals(updates[i])) {
+				// VMessageFileItem queryFileItemByID = MessageLoader.
+				// queryFileItemByID(V2GlobalEnum.GROUP_TYPE_CROWD, updates[i]);
+				// ((MessageBodyView) wrapper
+				// .getView()).updateView(queryFileItemByID);
+				// }
+				// }
+				// }
+				// }
+				// }
+			}
+		}
 	}
 	
 	private void chanageAudioFlag(){
@@ -655,92 +829,6 @@ public class ConversationP2PTextActivity extends Activity implements
 		}
 	}
 
-	private void initExtraObject() {
-
-		Bundle bundle = this.getIntent().getExtras();
-		if (bundle != null) {
-			cov = (ConversationNotificationObject) bundle.get("obj");
-			if (cov == null)
-				cov = getIntent().getParcelableExtra("obj");
-		}
-
-		if (bundle == null || cov == null) {
-			V2Log.e(TAG,
-					"start activity was woring , please check given ConversationNotificationObject");
-			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					1);
-		}
-
-		// this.getIntent().getBooleanExtra("fromContactDetail", false);
-		initConversationInfos();
-	}
-
-	private void initConversationInfos() {
-		currentLoginUserID = GlobalHolder.getInstance().getCurrentUserId();
-		currentLoginUser = GlobalHolder.getInstance().getUser(
-				currentLoginUserID);
-		if (cov.getConversationType() == Conversation.TYPE_CONTACT) {
-			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
-			remoteChatUserID = cov.getExtId();
-			remoteChatUser = GlobalHolder.getInstance().getUser(
-					remoteChatUserID);
-			if (remoteChatUser == null) {
-				remoteChatUser = new User(remoteChatUserID);
-			}
-
-			if (!TextUtils.isEmpty(remoteChatUser.getNickName()))
-				mUserTitleTV.setText(remoteChatUser.getNickName());
-			else
-				mUserTitleTV.setText(remoteChatUser.getName());
-			mButtonCreateMetting.setVisibility(View.GONE);
-			mVideoCallButton.setVisibility(View.VISIBLE);
-			mAudioCallButton.setVisibility(View.VISIBLE);
-			mShowContactDetailButton.setVisibility(View.VISIBLE);
-			mButtonCreateMetting.setVisibility(View.GONE);
-			mShowCrowdDetailButton.setVisibility(View.GONE);
-			mButtonCreateMetting.setVisibility(View.GONE);
-		} else if (cov.getConversationType() == Conversation.TYPE_GROUP) {
-			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
-			remoteGroupID = cov.getExtId();
-			Group group = GlobalHolder.getInstance()
-					.getGroupById(remoteGroupID);
-			if(group == null){
-				group = new CrowdGroup(remoteGroupID, "", null);
-			}
-			mVideoCallButton.setVisibility(View.GONE);
-			mAudioCallButton.setVisibility(View.GONE);
-			mShowContactDetailButton.setVisibility(View.GONE);
-			mButtonCreateMetting.setVisibility(View.VISIBLE);
-			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
-			mUserTitleTV.setText(group.getName());
-		} else if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT
-				|| cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
-			if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
-				mShowContactDetailButton.setVisibility(View.GONE);
-				mShowCrowdDetailButton.setVisibility(View.GONE);
-				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
-				OrgGroup departmentGroup = (OrgGroup) GlobalHolder
-						.getInstance().getGroupById(
-								V2GlobalEnum.GROUP_TYPE_DEPARTMENT,
-								cov.getExtId());
-				mUserTitleTV.setText(departmentGroup.getName());
-			} else {
-				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DISCUSSION;
-				DiscussionGroup discussionGroup = (DiscussionGroup) GlobalHolder
-						.getInstance().getGroupById(
-								V2GlobalEnum.GROUP_TYPE_DISCUSSION,
-								cov.getExtId());
-				mUserTitleTV.setText(discussionGroup.getName());
-			}
-			remoteGroupID = cov.getExtId();
-			mVideoCallButton.setVisibility(View.GONE);
-			mAudioCallButton.setVisibility(View.GONE);
-			mShowContactDetailButton.setVisibility(View.GONE);
-			mSelectFileButtonIV.setVisibility(View.GONE);
-			mButtonCreateMetting.setVisibility(View.VISIBLE);
-			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
-		}
-	}
 
 	private void scrollToBottom() {
 		mMessagesContainer.post(new Runnable() {
@@ -836,9 +924,8 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	private InputStream currentPlayedStream;
 	private TextView tips;
-
 	private synchronized boolean startPlaying(String fileName) {
-
+		//AACPlayer Version One
 		// mAACPlayer = new AACPlayer(fileName);
 		// try {
 		// if (currentPlayedStream != null) {
@@ -852,19 +939,38 @@ public class ConversationP2PTextActivity extends Activity implements
 		// e.printStackTrace();
 		// }
 
-		mAACPlayer = new ArrayAACPlayer(
-				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
-				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS,
-				AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
+		//AACPlayer Version Two
+//		mAACPlayer = new ArrayAACPlayer(
+//				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
+//				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS,
+//				AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
+//		try {
+//			if (currentPlayedStream != null) {
+//				currentPlayedStream.close();
+//			}
+//			// currentPlayedStream = new FileInputStream(new File(fileName));
+//			mAACPlayer.playAsync(fileName);
+//		} catch (FileNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		
 		try {
-			if (currentPlayedStream != null) {
-				currentPlayedStream.close();
+			if(mediaPlayer == null){
+				mediaPlayer = new MediaPlayer();
+				initMediaPlayerListener(mediaPlayer);
 			}
-			// currentPlayedStream = new FileInputStream(new File(fileName));
-			mAACPlayer.playAsync(fileName);
-		} catch (FileNotFoundException e) {
+			mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+			mediaPlayer.setDataSource(fileName);
+			mediaPlayer.prepareAsync();
+		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
-		} catch (Exception e) {
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalStateException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
@@ -872,25 +978,81 @@ public class ConversationP2PTextActivity extends Activity implements
 	}
 
 	private void stopPlaying() {
-		if (mAACPlayer != null) {
-			mAACPlayer.stop();
-			mAACPlayer = null;
-		}
-		if (currentPlayedStream != null) {
-			try {
-				currentPlayedStream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+//		if (mAACPlayer != null) {
+//			mAACPlayer.stop();
+//			mAACPlayer = null;
+//		}
+//		if (currentPlayedStream != null) {
+//			try {
+//				currentPlayedStream.close();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		}
+		
+		if(mediaPlayer != null){
+			playingAudioBodyView.stopVoiceAnimation();
+			playingAudioMessage.getAudioItems().get(0).setPlaying(false);
+			mediaPlayer.stop();
+			mediaPlayer.release();
+			mediaPlayer = null;
 		}
 	}
 
 	private void releasePlayer() {
-		if (mAACPlayer != null) {
-			// mAACPlayer.release();
-			mAACPlayer.stop();
-			mAACPlayer = null;
+//		if (mAACPlayer != null) {
+////			mAACPlayer.release();
+//			mAACPlayer.stop();
+//			mAACPlayer = null;
+//		}
+		
+		if(mediaPlayer != null){
+			mediaPlayer.release();
+			mediaPlayer = null;
 		}
+	}
+	
+	private void stopCurrentAudioPlaying() {
+		if (playingAudioMessage != null
+				&& playingAudioMessage.getAudioItems().size() > 0) {
+			playingAudioMessage.getAudioItems().get(0).setPlaying(false);
+			stopPlaying();
+		}
+	}
+	
+	private void initMediaPlayerListener(MediaPlayer mediaPlayer) {
+		mediaPlayer.setOnErrorListener(new OnErrorListener() {
+			
+			@Override
+			public boolean onError(MediaPlayer mp, int what, int extra) {
+				V2Log.e(TAG, "playing wroing!");
+				mp.reset();
+				playingAudioBodyView.stopVoiceAnimation();
+				playingAudioMessage.getAudioItems().get(0).setPlaying(false);
+				return false;
+			}
+		});
+		
+		mediaPlayer.setOnPreparedListener(new OnPreparedListener() {
+			
+			@Override
+			public void onPrepared(MediaPlayer mp) {
+				mp.start();
+				playingAudioBodyView.startVoiceAnimation();
+				playingAudioMessage.getAudioItems().get(0).setPlaying(true);
+			}
+		});
+		
+		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+			
+			@Override
+			public void onCompletion(MediaPlayer mp) {
+				releasePlayer();
+				playingAudioBodyView.stopVoiceAnimation();
+				playingAudioMessage.getAudioItems().get(0).setPlaying(false);
+				Message.obtain(lh, PLAY_NEXT_UNREAD_MESSAGE).sendToTarget();
+			}
+		});
 	}
 
 	private void showOrCloseVoiceDialog() {
@@ -1038,6 +1200,31 @@ public class ConversationP2PTextActivity extends Activity implements
 		mRecorder.release();
 		mRecorder = null;
 
+	}
+	
+	/**
+	 * 异常终止录音
+	 */
+	private void breakRecording() {
+
+		if (mRecorder != null && realRecoding) {
+			breakRecord = true;
+			lastTime = 0;
+			starttime = 0;
+			realRecoding = false;
+			// Hide voice dialog
+			showOrCloseVoiceDialog();
+			stopRecording();
+			starttime = 0;
+			if (audioFilePath != null) {
+				File f = new File(audioFilePath);
+				f.delete();
+				audioFilePath = null;
+			}
+			lh.removeCallbacks(mUpdateMicStatusTimer);
+			lh.removeCallbacks(timeOutMonitor);
+			lh.removeCallbacks(mUpdateSurplusTime);
+		}
 	}
 
 	private void cleanRangeBitmapCache(int before, int after) {
@@ -1438,31 +1625,6 @@ public class ConversationP2PTextActivity extends Activity implements
 		}
 	};
 
-	/**
-	 * 异常终止录音
-	 */
-	private void breakRecording() {
-
-		if (mRecorder != null && realRecoding) {
-			breakRecord = true;
-			lastTime = 0;
-			starttime = 0;
-			realRecoding = false;
-			// Hide voice dialog
-			showOrCloseVoiceDialog();
-			stopRecording();
-			starttime = 0;
-			if (audioFilePath != null) {
-				File f = new File(audioFilePath);
-				f.delete();
-				audioFilePath = null;
-			}
-			lh.removeCallbacks(mUpdateMicStatusTimer);
-			lh.removeCallbacks(timeOutMonitor);
-			lh.removeCallbacks(mUpdateSurplusTime);
-		}
-	}
-
 	private OnClickListener moreFeatureButtonListenr = new OnClickListener() {
 
 		@Override
@@ -1495,12 +1657,6 @@ public class ConversationP2PTextActivity extends Activity implements
 
 		@Override
 		public void onClick(View v) {
-			// Intent intent = new Intent();
-			// intent.setType("image/*");
-			// intent.setAction(Intent.ACTION_GET_CONTENT);
-			// startActivityForResult(
-			// Intent.createChooser(intent, "Select Picture"),
-			// SELECT_PICTURE_CODE);
 			Intent intent = new Intent(ConversationP2PTextActivity.this,
 					ConversationSelectImage.class);
 			startActivityForResult(intent, SELECT_PICTURE_CODE);
@@ -1637,96 +1793,6 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	};
 
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == SELECT_PICTURE_CODE && data != null) {
-			String filePath = data.getStringExtra("checkedImage");
-			if (filePath == null) {
-				Toast.makeText(mContext,
-						R.string.error_contact_messag_invalid_image_path,
-						Toast.LENGTH_SHORT).show();
-				return;
-			}
-			VMessage vim = MessageBuilder.buildImageMessage(
-					cov.getConversationType(), remoteGroupID, currentLoginUser,
-					remoteChatUser, filePath);
-			// Send message to server
-			sendMessageToRemote(vim);
-		} else if (requestCode == RECEIVE_SELECTED_FILE) {
-			if (data != null) {
-				if(isFinishActivity){
-					onBackPressed();
-				}
-					
-				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
-				if (mCheckedList == null || mCheckedList.size() <= 0)
-					return;
-
-				switch (currentConversationViewType) {
-				case V2GlobalEnum.GROUP_TYPE_CROWD:
-
-					for (FileInfoBean bean : mCheckedList) {
-						if (bean == null || TextUtils.isEmpty(bean.filePath))
-							continue;
-
-						VMessage vm = MessageBuilder.buildFileMessage(
-								cov.getConversationType(), remoteGroupID,
-								currentLoginUser, remoteChatUser, bean);
-						bean.fileUUID = vm.getFileItems().get(0).getUuid();
-						// // Save message
-						vm.setmXmlDatas(vm.toXml());
-						vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
-
-						MessageBuilder.saveMessage(this, vm);
-						MessageBuilder.saveFileVMessage(this, vm);
-
-						addMessageToContainer(vm);
-						
-						GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_SENDING, 
-								mContext, true, remoteGroupID, "ConversationP2PTextActivity onActivity crowd");
-					}
-
-					Intent intent = new Intent(this, FileService.class);
-					intent.putExtra("gid", remoteGroupID);
-					intent.putParcelableArrayListExtra("uploads", mCheckedList);
-					startService(intent);
-					break;
-				case V2GlobalEnum.GROUP_TYPE_USER:
-					startSendMoreFile();
-					mCheckedList = null;
-					break;
-				}
-			}
-		} else if (requestCode == SHOW_GROUP_DETAIL) {
-			Group group = GlobalHolder.getInstance()
-					.getGroupById(remoteGroupID);
-			mUserTitleTV.setText(group.getName());
-		} else if (requestCode == UPDATE_FILE_SENDING_STATE) {
-			if (data != null) {
-				// String[] updates = data.getStringArrayExtra("updateList");
-				// if(updates != null && updates.length > 0){
-				// for (int i = 0; i < updates.length; i++) {
-				// for (int j = 0; j < messageArray.size(); j++) {
-				// CommonAdapterItemWrapper wrapper = messageArray.get(i);
-				// VMessage tempVm = (VMessage) wrapper.getItemObject();
-				// if(tempVm.getFileItems().size() > 0){
-				// VMessageFileItem vMessageFileItem =
-				// tempVm.getFileItems().get(0);
-				// if (vMessageFileItem.getUuid().equals(updates[i])) {
-				// VMessageFileItem queryFileItemByID = MessageLoader.
-				// queryFileItemByID(V2GlobalEnum.GROUP_TYPE_CROWD, updates[i]);
-				// ((MessageBodyView) wrapper
-				// .getView()).updateView(queryFileItemByID);
-				// }
-				// }
-				// }
-				// }
-				// }
-			}
-		}
-
-	}
 
 	private void doSendMessage() {
 		VMessage vm = null;
@@ -1892,7 +1958,7 @@ public class ConversationP2PTextActivity extends Activity implements
 					CommonAdapterItemWrapper wrapper = messageArray.get(i);
 					VMessage tempVm = (VMessage) wrapper.getItemObject();
 					if (tempVm.getUUID().equals(playingAudioMessage.getUUID())) {
-
+						vai.setPlaying(true);
 						tempVm.getAudioItems()
 								.get(0)
 								.setReadState(VMessageAbstractItem.STATE_READED);
@@ -2062,21 +2128,7 @@ public class ConversationP2PTextActivity extends Activity implements
 			stopOhterAudio = true;
 			stopCurrentAudioPlaying();
 		}
-
-		@Override
-		public void requestFileTransUpdate() {
-			Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个",
-					Toast.LENGTH_LONG).show();
-		}
 	};
-
-	protected void stopCurrentAudioPlaying() {
-		if (playingAudioMessage != null
-				&& playingAudioMessage.getAudioItems().size() > 0) {
-			playingAudioMessage.getAudioItems().get(0).setPlaying(false);
-			stopPlaying();
-		}
-	}
 
 	private List<VMessage> loadMessages() {
 
@@ -2561,7 +2613,7 @@ public class ConversationP2PTextActivity extends Activity implements
 				}
 
 				if (obj.getmGroupId() == remoteGroupID) {
-					finish();
+					onBackPressed();
 				}
 			} else if ((PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
 					.equals(intent.getAction()))
@@ -2569,7 +2621,7 @@ public class ConversationP2PTextActivity extends Activity implements
 							.equals(intent.getAction()))
 					|| PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION
 							.equals(intent.getAction())) {
-				finish();
+				onBackPressed();
 			} else if ((JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION
 					.equals(intent.getAction()))) {
 
