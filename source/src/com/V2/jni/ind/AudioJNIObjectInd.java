@@ -1,11 +1,11 @@
 package com.V2.jni.ind;
 
-
 /**
  * This class wrapped audio JNI request returned result
+ * 
  * @see com.V2.jni.AudioRequest
  * @author jiangzhen
- *
+ * 
  */
 public class AudioJNIObjectInd extends JNIObjectInd {
 
@@ -16,17 +16,32 @@ public class AudioJNIObjectInd extends JNIObjectInd {
 	private String szSessionID;
 	private long mGroupId;
 	private long mFromUserId;
-	
-	public AudioJNIObjectInd(String szSessionID, long fromUserId, int requestType) {
+	//success : 0 , fail : -1
+	private int result;
+
+	public AudioJNIObjectInd(String szSessionID, long fromUserId,
+			int requestType) {
 		this.szSessionID = szSessionID;
 		this.mFromUserId = fromUserId;
 		this.mRequestType = requestType;
 		this.mType = JNIIndType.AUDIO;
 	}
-	
+
 	public AudioJNIObjectInd(String szSessionID, long fromUserId) {
 		this.szSessionID = szSessionID;
 		this.mFromUserId = fromUserId;
+		this.mType = JNIIndType.AUDIO;
+	}
+
+	/**
+	 * This constructor for audio recording
+	 * 
+	 * @param szSessionID
+	 * @param result
+	 */
+	public AudioJNIObjectInd(String szSessionID, int result) {
+		this.szSessionID = szSessionID;
+		this.result = result;
 		this.mType = JNIIndType.AUDIO;
 	}
 
@@ -37,7 +52,7 @@ public class AudioJNIObjectInd extends JNIObjectInd {
 	public void setGroupId(long groupId) {
 		this.mGroupId = groupId;
 	}
-	
+
 	public String getSzSessionID() {
 		return szSessionID;
 	}
@@ -53,6 +68,13 @@ public class AudioJNIObjectInd extends JNIObjectInd {
 	public void setFromUserId(long fromUserId) {
 		this.mFromUserId = fromUserId;
 	}
-	
-	
+
+	public int getResult() {
+		return result;
+	}
+
+	public void setResult(int result) {
+		this.result = result;
+	}
+
 }

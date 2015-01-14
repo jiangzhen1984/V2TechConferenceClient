@@ -55,6 +55,7 @@
             android:background="@color/confs_search_bar_bg"
             android:orientation="vertical" >
             <LinearLayout
+                android:id="@+id/ws_common_create_custom_content_ly"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"

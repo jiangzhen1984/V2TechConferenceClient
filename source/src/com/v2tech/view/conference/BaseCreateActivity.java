@@ -58,7 +58,7 @@ public abstract class BaseCreateActivity extends Activity {
 	protected TextView rightButtonTV;
 	protected SearchEditText searchedTextET;
 	protected TextView mErrorNotification;
-	protected RelativeLayout customLayout;
+	protected View customLayout;
 	
 	protected AdapterView<ListAdapter> mAttendeeContainer;
 	protected GroupListView mGroupListView;
@@ -109,7 +109,7 @@ public abstract class BaseCreateActivity extends Activity {
 		searchedTextET = (SearchEditText) findViewById(R.id.ws_common_create_search);
 		searchedTextET.addTextListener(mGroupListView);
 
-		customLayout = (RelativeLayout) findViewById(R.id.ws_common_create_custom_content_ly);
+		customLayout = findViewById(R.id.ws_common_create_custom_content_ly);
 		TextView editNameHint = (TextView) findViewById(R.id.ws_common_create_edit_name_hint);
 		TextView editContentHint = (TextView) findViewById(R.id.ws_common_create_edit_content_hint);
 		View confStartTime = findViewById(R.id.conference_create_conf_start_time);

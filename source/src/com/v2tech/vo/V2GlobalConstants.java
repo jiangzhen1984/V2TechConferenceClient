@@ -61,4 +61,6 @@ public class V2GlobalConstants {
 	 */
 	public static final int FILE_TYPE_OFFLINE = 2;
 	
+	public static final int RECORD_TYPE_START = 0x0001;
+	public static final int RECORD_TYPE_STOP = 0x0002;
 }

@@ -119,7 +119,6 @@
                 android:paddingRight="5dp"
                 android:paddingTop="5dp"
                 android:src="@drawable/speaking_button"
-                android:visibility="gone"
                 android:tag="speaker" />
             <ImageView
                 android:id="@+id/contact_message_plus"

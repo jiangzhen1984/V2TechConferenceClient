@@ -20,16 +20,13 @@ import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
-import com.v2tech.service.jni.FileDownLoadErrorIndication;
-import com.v2tech.service.jni.FileTransCannelIndication;
 import com.v2tech.service.jni.FileTransStatusIndication;
-import com.v2tech.service.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestChatServiceResponse;
 import com.v2tech.util.GlobalConfig;
-import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.vo.UserChattingObject;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAudioItem;
 import com.v2tech.vo.VMessageFileItem;
@@ -91,6 +88,7 @@ public class ChatService extends DeviceService {
 	private static final int KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER = 2;
 	private static final int KEY_VIDEO_CONNECTED = 3;
 	private static final int KEY_P2P_CALL_RESPONSE = 4;
+	private static final int KEY_P2P_RECORD_CALL_RESPONSE = 5;
 
 	public ChatService() {
 		super();
@@ -179,6 +177,15 @@ public class ChatService extends DeviceService {
 
 	public void removeP2PCallResponseListener(Handler h, int what, Object obj) {
 		unRegisterListener(KEY_P2P_CALL_RESPONSE, h, what, obj);
+
+	}
+	
+	public void registerP2PRecordResponseListener(Handler h, int what, Object obj) {
+		registerListener(KEY_P2P_RECORD_CALL_RESPONSE, h, what, obj);
+	}
+
+	public void removeP2PRecordResponseListener(Handler h, int what, Object obj) {
+		unRegisterListener(KEY_P2P_RECORD_CALL_RESPONSE, h, what, obj);
 
 	}
 
@@ -514,6 +521,14 @@ public class ChatService extends DeviceService {
 			AudioRequest.getInstance().PausePlayout();
 		}
 	}
+	
+	public void startAudioRecord(String fileID){
+		AudioRequest.getInstance().RecordFile(fileID);
+	}
+	
+	public void stopAudioRecord(String fileID){
+		AudioRequest.getInstance().StopRecord(fileID);
+	}
 
 	class VideoRequestCallbackImpl extends VideoRequestCallbackAdapter {
 
@@ -612,6 +627,15 @@ public class ChatService extends DeviceService {
 			mCaller = null;
 		}
 
+		@Override
+		public void OnRecordStart(AudioJNIObjectInd ind) {
+			notifyListener(KEY_P2P_RECORD_CALL_RESPONSE, ind.getResult(), V2GlobalConstants.RECORD_TYPE_START, ind.getSzSessionID());
+		}
+
+		@Override
+		public void OnRecordStop(AudioJNIObjectInd ind) {
+			notifyListener(KEY_P2P_RECORD_CALL_RESPONSE, ind.getResult(), V2GlobalConstants.RECORD_TYPE_STOP, ind.getSzSessionID());
+		}
 	}
 
 	class FileRequestCB extends FileRequestCallbackAdapter {

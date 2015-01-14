@@ -12,6 +12,7 @@ import com.V2.jni.util.V2Log;
 
 public class AudioRequest {
 
+	private final String TAG = "AudioRequest";
 	private Context context;
 	private static AudioRequest mAudioRequest;
 
@@ -111,19 +112,31 @@ public class AudioRequest {
 	 */
 	public native void CloseAudioChat(String szSessionID, long nToUserID);
 
-	public native void RecordFile(String arg1);
+	/**
+	 * 让底层开始录音的函数接口
+	 * 
+	 * @param arg1
+	 */
+	public native void RecordFile(String fileID);
 
-	public native void StopRecord();
+	/**
+	 * 让底层停止录音的函数接口
+	 */
+	public native void StopRecord(String fileID);
 
+	/**
+	 * 让底层开始播放录音文件的函数接口
+	 * 
+	 * @param arg1
+	 */
 	public native void PlayFile(String arg1);
 
+	/**
+	 * 让底层停止播放录音文件的函数接口
+	 * 
+	 * @param arg1
+	 */
 	public native void StopPlay();
-
-	private void OnRecordStart(String arg1, int arg2) {
-	};
-
-	private void OnRecordStop(String arg1, String arg2, int arg3) {
-	};
 
 	/**
 	 * 
@@ -140,14 +153,56 @@ public class AudioRequest {
 
 	public native void CancelAudioChat(String szSessionID, long nToUserID);
 
-	/**
-	 * 
-	 */
 	public native void PausePlayout();
 
 	public native void ResumePlayout();
 
-	// �յ���Ƶͨ��������Ļص�
+	/**
+	 * 当录音开始的时候，此函数会被底层回调
+	 * 
+	 * @param id
+	 * @param result
+	 *            success : 0 , fail : -1
+	 */
+	private void OnRecordStart(String fileID, int result) {
+		V2Log.d(TAG, "OnRecordStart ---> fileID :" + fileID + " | result: "
+				+ result);
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
+			Object obj = wr.get();
+			if (obj != null) {
+				((AudioRequestCallback) obj)
+						.OnRecordStart(new AudioJNIObjectInd(fileID, result));
+			}
+		}
+	};
+
+	/**
+	 * 当录音结束的时候，此函数会被底层回调
+	 * 
+	 * @param arg1
+	 * @param arg2
+	 * @param arg3
+	 */
+	private void OnRecordStop(String fileID, String filePath, int result) {
+		V2Log.d(TAG, "OnRecordStop ---> fileID :" + fileID + " | filePath: "
+				+ filePath + " | result: " + result);
+		for (int i = 0; i < callbacks.size(); i++) {
+			WeakReference<AudioRequestCallback> wr = callbacks.get(i);
+			Object obj = wr.get();
+			if (obj != null) {
+				((AudioRequestCallback) obj)
+						.OnRecordStop(new AudioJNIObjectInd(fileID, result));
+			}
+		}
+	};
+
+	/**
+	 * 当接收到其他人发来的音频通话邀请时，此函数会被底层回调
+	 * 
+	 * @param szSessionID
+	 * @param nFromUserID
+	 */
 	private void OnAudioChatInvite(String szSessionID, long nFromUserID) {
 		V2Log.d("OnAudioChaInvite " + szSessionID + ":" + nFromUserID);
 		for (int i = 0; i < callbacks.size(); i++) {

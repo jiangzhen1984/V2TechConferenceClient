@@ -203,6 +203,7 @@ public class JNIService extends Service implements
 
 	private Context mContext;
 
+	private HashMap<String, VMessage> cacheImageMetaSize = new HashMap<String, VMessage>();
 	private List<VMessage> cacheImageMeta = new ArrayList<VMessage>();
 	private List<VMessage> cacheAudioMeta = new ArrayList<VMessage>();
 
@@ -1888,6 +1889,10 @@ public class JNIService extends Service implements
 			if (cache.getItems().size() > 0) {
 				synchronized (cacheImageMeta) {
 					cacheImageMeta.add(cache);
+					for (int i = 0; i < cache.getImageItems().size(); i++) {
+						String key = cache.getImageItems().get(i).getUuid();
+						cacheImageMetaSize.put(key, cache);
+					}
 					return;
 				}
 			}
@@ -1929,8 +1934,8 @@ public class JNIService extends Service implements
 						nToUserID, nTime, messageId, binaryPath);
 				break;
 			case BINARY_TYPE_AUDIO:
-				// handlerChatAudioCallback(eGroupType, nGroupID, nFromUserID,
-				// nToUserID, nTime, messageId, binaryPath);
+				 handlerChatAudioCallback(eGroupType, nGroupID, nFromUserID,
+						 nToUserID, nTime, messageId, binaryPath);
 				break;
 			default:
 				break;
@@ -2005,7 +2010,6 @@ public class JNIService extends Service implements
 					List<VMessageImageItem> items = v.getImageItems();
 					int receivedCount = 0;
 					for (int i = 0; i < items.size(); i++) {
-
 						VMessageImageItem vait = (VMessageImageItem) items
 								.get(i);
 						if (vait.isReceived()) {
@@ -2016,6 +2020,7 @@ public class JNIService extends Service implements
 						if (vait.getUuid().equals(uuid)) {
 							receivedCount++;
 							vm = v;
+							cacheImageMetaSize.remove(vait.getUuid());
 							vait.setFilePath(binaryPath);
 							vait.setReceived(true);
 							continue;
@@ -2168,20 +2173,21 @@ public class JNIService extends Service implements
 		public void OnFileTransError(String szFileID, int errorCode,
 				int nTransType) {
 			if (!szFileID.contains("AVATAR")) {
-				// for (int i = 0; i < cacheImageMeta.size(); i++) {
-				// VMessage vm = cacheImageMeta.get(i);
-				// List<VMessageImageItem> imageItems = vm.getImageItems();
-				// for (int j = 0; j < imageItems.size(); j++) {
-				// VMessageImageItem vMessageImageItem = imageItems.get(j);
-				// if(vMessageImageItem.getUuid().equals(szFileID)){
-				// vMessageImageItem.setTransState(V2GlobalEnum.FILE_TRANS_ERROR);
-				// cacheImageMeta.remove(i);
-				// Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE,
-				// vm).sendToTarget();
-				// }
-				// }
-				// }
-
+				VMessage vm = cacheImageMetaSize.get(szFileID);
+				if(vm != null && vm.getImageItems().size() == 1){
+					VMessageImageItem image = vm.getImageItems().get(0);
+					if (image.getUuid().equals(szFileID)) {
+						cacheImageMetaSize.remove(image.getUuid());
+						cacheImageMeta.remove(vm);
+						image.setFilePath("error");
+						vm.setmXmlDatas(vm.toXml());
+						V2Log.e(TAG, "the image -" + szFileID + "- trans error!");
+						vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
+						Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
+								.sendToTarget();
+					}
+				}
+				
 				mark.remove(szFileID);
 				GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
 				VMessageFileItem fileItem = MessageLoader

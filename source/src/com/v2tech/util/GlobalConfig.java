@@ -147,7 +147,6 @@ public class GlobalConfig {
 			// --mnt/sdcard
 			return SDCARD_GLOBLE_PATH + "/v2tech" + "/" + SERVER_DATABASE_ID;
 		}
-		// return getGlobalPath()+"/.v2tech/";
 	}
 	
 	public static String getGlobalUserAvatarPath() {

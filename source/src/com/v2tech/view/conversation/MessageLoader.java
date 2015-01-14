@@ -1889,8 +1889,15 @@ public class MessageLoader {
 					int fileSize = mCur
 							.getInt(mCur
 									.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SIZE));
+					String filePath = mCur
+							.getString(mCur
+									.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
 					item.setState(fileTransState);
 					item.setFileSize(fileSize);
+					//为了兼容群文件中重名文件更改
+					item.setFilePath(filePath);
+					String name = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length());
+					item.setFileName(name);
 				}
 			}
 			return true;

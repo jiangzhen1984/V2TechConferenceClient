@@ -40,4 +40,21 @@ public interface AudioRequestCallback {
 	 */
 	public void OnAudioChatClosed(AudioJNIObjectInd ind);
 
+	/**
+	 * This callBack is called when layer start recording.
+	 * 
+	 * @param ind
+	 *            indication object
+	 * @see AudioJNIObjectInd
+	 */
+	public void OnRecordStart(AudioJNIObjectInd ind);
+	
+	/**
+	 * This callBack is called when layer stop recording.
+	 * 
+	 * @param ind
+	 *            indication object
+	 * @see AudioJNIObjectInd
+	 */
+	public void OnRecordStop(AudioJNIObjectInd ind);
 }

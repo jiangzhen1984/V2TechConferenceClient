@@ -7,22 +7,31 @@ public abstract class AudioRequestCallbackAdapter implements
 
 	@Override
 	public void OnAudioChatInvite(AudioJNIObjectInd ind) {
-		
+
 	}
 
 	@Override
 	public void OnAudioChatAccepted(AudioJNIObjectInd ind) {
-		
+
 	}
 
 	@Override
 	public void OnAudioChatRefused(AudioJNIObjectInd ind) {
-		
+
 	}
 
 	@Override
 	public void OnAudioChatClosed(AudioJNIObjectInd ind) {
-		
+
 	}
-	
+
+	@Override
+	public void OnRecordStart(AudioJNIObjectInd ind) {
+
+	}
+
+	@Override
+	public void OnRecordStop(AudioJNIObjectInd ind) {
+
+	}
 }

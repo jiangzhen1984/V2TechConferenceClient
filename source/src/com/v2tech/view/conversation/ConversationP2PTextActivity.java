@@ -77,6 +77,7 @@ import com.v2tech.service.FileOperationEnum;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.jni.FileTransStatusIndication;
 import com.v2tech.service.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
+import com.v2tech.service.jni.JNIResponse.Result;
 import com.v2tech.util.FileUitls;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.util.MessageUtil;
@@ -105,6 +106,7 @@ import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -126,6 +128,7 @@ public class ConversationP2PTextActivity extends Activity implements
 	private final int REQUEST_DEL_MESSAGE = 8;
 	private final int ADAPTER_NOTIFY = 9;
 	private final int FILE_STATUS_LISTENER = 20;
+	private final int RECORD_STATUS_LISTENER = 21;
 
 	private final int BATCH_COUNT = 10;
 
@@ -198,7 +201,7 @@ public class ConversationP2PTextActivity extends Activity implements
 	private V2Encoder mAacEncoder;
 
 	private MediaPlayer mediaPlayer = null;
-	
+
 	private MessageReceiver receiver = new MessageReceiver();
 
 	private ChatService mChat = new ChatService();
@@ -241,12 +244,12 @@ public class ConversationP2PTextActivity extends Activity implements
 	 * executeConversationCreate only called once
 	 */
 	private boolean isFirstCall = true;
-	
+
 	/**
 	 * 
 	 */
 	private boolean isFinishActivity;
-	
+
 	/**
 	 * 当群文件有新的文件上传，或在上传界面更改了状态，则需要返回聊天界面时滚动到底部
 	 */
@@ -284,6 +287,8 @@ public class ConversationP2PTextActivity extends Activity implements
 				avatarChangedListener);
 		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
 				null);
+		mChat.registerP2PRecordResponseListener(this.lh, RECORD_STATUS_LISTENER,
+				null);
 		mGroupChat.registerFileTransStatusListener(this.lh,
 				FILE_STATUS_LISTENER, null);
 		// Start animation
@@ -293,7 +298,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		createVideoDialog();
 		// Initalize get members of file that file state is sending from
 		// database
-//		initTransingObserver();
+		// initTransingObserver();
 		// request ConversationTabFragment to update
 		requestUpdateTabFragment();
 		isCreate = true;
@@ -386,7 +391,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		mAudioSpeakerIV.setOnClickListener(mMessageTypeSwitchListener);
 
 		mButtonRecordAudio = (Button) findViewById(R.id.message_button_audio_record);
-		mButtonRecordAudio.setOnTouchListener(mButtonHolderListener);
+		setRecordAudioTouchListener();
 
 		mButtonCreateMetting = findViewById(R.id.contact_message_create_metting_button_layout);
 		mButtonCreateMetting.setOnClickListener(mButtonCreateMettingListener);
@@ -398,7 +403,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		mFaceLayout = (LinearLayout) findViewById(R.id.contact_message_face_item_ly);
 		mToolLayout = (RelativeLayout) findViewById(R.id.contact_message_sub_feature_ly_inner);
 	}
-	
+
 	private void initExtraObject() {
 
 		Bundle bundle = this.getIntent().getExtras();
@@ -448,7 +453,7 @@ public class ConversationP2PTextActivity extends Activity implements
 			remoteGroupID = cov.getExtId();
 			Group group = GlobalHolder.getInstance()
 					.getGroupById(remoteGroupID);
-			if(group == null){
+			if (group == null) {
 				group = new CrowdGroup(remoteGroupID, "", null);
 			}
 			mVideoCallButton.setVisibility(View.GONE);
@@ -501,44 +506,48 @@ public class ConversationP2PTextActivity extends Activity implements
 	 * Get the number of files that file state is transing , and put variable
 	 * into the global collections
 	 */
-//	private void initTransingObserver() {
-//		List<VMessageFileItem> files;
-//		int count = 0;
-//		long key;
-//		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
-//			files = MessageLoader.loadFileMessages(currentConversationViewType,
-//					remoteGroupID);
-//			key = remoteGroupID;
-//		} else {
-//			files = MessageLoader.loadFileMessages(currentConversationViewType,
-//					remoteChatUserID);
-//			key = remoteChatUserID;
-//		}
-//
-//		Integer transing = GlobalConfig.mTransingFiles.get(key);
-//		if (transing == null)
-//			transing = 0;
-//
-//		for (VMessageFileItem vMessageFileItem : files) {
-//			if (vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING
-//					|| vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING
-//					|| vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING
-//					|| vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
-//				count += 1;
-//			}
-//		}
-//
-//		long remoteID;
-//		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-//			remoteID = remoteChatUserID;
-//		else
-//			remoteID = remoteGroupID;
-//		V2Log.d("TRANSING_File_SIZE",
-//				"ConversationP2PTextActivity initTransingObserver --> 用户"
-//						+ remoteID + "初始化文件传输个数：" + transing);
-//		transing = transing + count;
-//		GlobalConfig.mTransingFiles.put(key, transing);
-//	}
+	// private void initTransingObserver() {
+	// List<VMessageFileItem> files;
+	// int count = 0;
+	// long key;
+	// if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+	// files = MessageLoader.loadFileMessages(currentConversationViewType,
+	// remoteGroupID);
+	// key = remoteGroupID;
+	// } else {
+	// files = MessageLoader.loadFileMessages(currentConversationViewType,
+	// remoteChatUserID);
+	// key = remoteChatUserID;
+	// }
+	//
+	// Integer transing = GlobalConfig.mTransingFiles.get(key);
+	// if (transing == null)
+	// transing = 0;
+	//
+	// for (VMessageFileItem vMessageFileItem : files) {
+	// if (vMessageFileItem.getState() ==
+	// VMessageAbstractItem.STATE_FILE_SENDING
+	// || vMessageFileItem.getState() ==
+	// VMessageAbstractItem.STATE_FILE_PAUSED_SENDING
+	// || vMessageFileItem.getState() ==
+	// VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING
+	// || vMessageFileItem.getState() ==
+	// VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
+	// count += 1;
+	// }
+	// }
+	//
+	// long remoteID;
+	// if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+	// remoteID = remoteChatUserID;
+	// else
+	// remoteID = remoteGroupID;
+	// V2Log.d("TRANSING_File_SIZE",
+	// "ConversationP2PTextActivity initTransingObserver --> 用户"
+	// + remoteID + "初始化文件传输个数：" + transing);
+	// transing = transing + count;
+	// GlobalConfig.mTransingFiles.put(key, transing);
+	// }
 
 	private Dialog mVoiceDialog = null;
 	private ImageView mVolume;
@@ -598,12 +607,12 @@ public class ConversationP2PTextActivity extends Activity implements
 			lh.sendMessageDelayed(m, 500);
 		}
 
-		//当群文件有新的文件上传，或在上传界面更改了状态，则需要返回聊天界面时滚动到底部
-		if(isScrollButtom){
+		// 当群文件有新的文件上传，或在上传界面更改了状态，则需要返回聊天界面时滚动到底部
+		if (isScrollButtom) {
 			scrollToBottom();
 			isScrollButtom = false;
 		}
-			
+
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
 		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
@@ -649,14 +658,40 @@ public class ConversationP2PTextActivity extends Activity implements
 		this.overridePendingTransition(R.animator.nonam_scale_null,
 				R.animator.nonam_scale_center_100_0);
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
 		V2Log.e(TAG, "entry onDestroy....");
 		finishWork();
 	}
-	
+
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
+		V2Log.d(TAG, "entry onNewIntent....");
+		ConversationNotificationObject tempCov = intent
+				.getParcelableExtra("obj");
+		if (tempCov != null)
+			cov = tempCov;
+		else
+			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
+					1);
+		if (!isReLoading) {
+			V2Log.d(TAG, "entry onNewIntent , reloading chating datas...");
+			remoteChatUserID = 0;
+			remoteGroupID = 0;
+			remoteChatUser = null;
+			mIsInited = false;
+			mLoadedAllMessages = false;
+			currentItemPos = 0;
+			offset = 0;
+			messageArray.clear();
+			messageAllID.clear();
+			initConversationInfos();
+		}
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -675,10 +710,10 @@ public class ConversationP2PTextActivity extends Activity implements
 			sendMessageToRemote(vim);
 		} else if (requestCode == RECEIVE_SELECTED_FILE) {
 			if (data != null) {
-				if(isFinishActivity){
+				if (isFinishActivity) {
 					onBackPressed();
 				}
-					
+
 				mCheckedList = data.getParcelableArrayListExtra("checkedFiles");
 				if (mCheckedList == null || mCheckedList.size() <= 0)
 					return;
@@ -702,9 +737,11 @@ public class ConversationP2PTextActivity extends Activity implements
 						MessageBuilder.saveFileVMessage(this, vm);
 
 						addMessageToContainer(vm);
-						
-						GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_SENDING, 
-								mContext, true, remoteGroupID, "ConversationP2PTextActivity onActivity crowd");
+
+						GlobalHolder.getInstance().changeGlobleTransFileMember(
+								V2GlobalEnum.FILE_TRANS_SENDING, mContext,
+								true, remoteGroupID,
+								"ConversationP2PTextActivity onActivity crowd");
 					}
 
 					Intent intent = new Intent(this, FileService.class);
@@ -746,8 +783,8 @@ public class ConversationP2PTextActivity extends Activity implements
 			}
 		}
 	}
-	
-	private void chanageAudioFlag(){
+
+	private void chanageAudioFlag() {
 		isStopped = false;
 		// recover record all flag
 		starttime = 0;
@@ -797,38 +834,13 @@ public class ConversationP2PTextActivity extends Activity implements
 				avatarChangedListener);
 		mChat.removeRegisterFileTransStatusListener(this.lh,
 				FILE_STATUS_LISTENER, null);
+		mChat.removeP2PRecordResponseListener(this.lh, RECORD_STATUS_LISTENER,
+				null);
 		mGroupChat.unRegisterFileTransStatusListener(this.lh,
 				FILE_STATUS_LISTENER, null);
-		stopPlaying();
+		stopAudioPlaying();
 		releasePlayer();
 	}
-
-	@Override
-	protected void onNewIntent(Intent intent) {
-		super.onNewIntent(intent);
-		V2Log.d(TAG, "entry onNewIntent....");
-		ConversationNotificationObject tempCov = intent
-				.getParcelableExtra("obj");
-		if (tempCov != null)
-			cov = tempCov;
-		else
-			cov = new ConversationNotificationObject(Conversation.TYPE_CONTACT,
-					1);
-		if (!isReLoading) {
-			V2Log.d(TAG, "entry onNewIntent , reloading chating datas...");
-			remoteChatUserID = 0;
-			remoteGroupID = 0;
-			remoteChatUser = null;
-			mIsInited = false;
-			mLoadedAllMessages = false;
-			currentItemPos = 0;
-			offset = 0;
-			messageArray.clear();
-			messageAllID.clear();
-			initConversationInfos();
-		}
-	}
-
 
 	private void scrollToBottom() {
 		mMessagesContainer.post(new Runnable() {
@@ -852,11 +864,6 @@ public class ConversationP2PTextActivity extends Activity implements
 			return;
 		}
 
-		// if(pos >= 3)
-		// mMessagesContainer.setSelection(pos + 3);
-		// else
-		// mMessagesContainer.setSelection(pos);
-
 		if (isCreate) {
 			isCreate = false;
 			mMessagesContainer.setSelection(pos);
@@ -879,6 +886,323 @@ public class ConversationP2PTextActivity extends Activity implements
 			}
 		}
 	}
+
+	private String recordingFileID;
+	private long starttime = 0; // 记录真正开始录音时的开始时间
+	private long lastTime = 0; // 记录每次录音时的当前时间(毫秒值) ， 用于判断用户点击录音的频率
+	private boolean realRecoding;
+	private boolean cannelRecoding;
+	private boolean timeOutRecording;
+	private boolean breakRecord;
+	private boolean isDown;
+
+	private long recordTimes = 0;
+	private boolean successRecord;
+	private int count = 11;
+	private Timer mTimer;
+
+	private void setRecordAudioTouchListener() {
+		mButtonRecordAudio.setOnTouchListener(new OnTouchListener() {
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+					isDown = true;
+					cannelRecoding = false;
+					stopCurrentAudioPlaying();
+					showOrCloseVoiceDialog();
+					long currentTime = System.currentTimeMillis();
+					lh.postDelayed(preparedRecoding, 250);
+					if (currentTime - lastTime < 250) {
+						V2Log.d(TAG, "间隔太短，取消录音");
+					}
+					lastTime = currentTime;
+					break;
+				case MotionEvent.ACTION_MOVE:
+					Rect r = new Rect();
+					view.getDrawingRect(r);
+					// check if touch position out of button than cancel send
+					// voice
+					// message
+					if (isDown) {
+						if (timeOutRecording) {
+							mButtonRecordAudio
+									.setText(R.string.contact_message_button_send_audio_msg);
+						} else {
+							if (r.contains((int) event.getX(),
+									(int) event.getY())) {
+								updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
+							} else {
+								updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_CANCEL);
+							}
+						}
+					}
+					break;
+				case MotionEvent.ACTION_CANCEL:
+				case MotionEvent.ACTION_UP:
+					// audio message send by 计时器
+					if (timeOutRecording) {
+						V2Log.d(TAG,
+								"audio message send by 计时器，ignore the up event once");
+						timeOutRecording = false;
+						return true;
+					}
+					// entry normal process , stop recording state 进入正常结束流程
+					if (realRecoding) {
+						// 计算录音时间
+						long seconds = (System.currentTimeMillis() - starttime);
+						// recover all flag 复原标记位
+						lastTime = 0;
+						starttime = 0;
+						realRecoding = false;
+						// Remove timer
+//						lh.removeCallbacks(mUpdateMicStatusTimer);
+						lh.removeCallbacks(timeOutMonitor);
+						// recover button show state
+						mButtonRecordAudio
+								.setText(R.string.contact_message_button_send_audio_msg);
+						// check if touch position out of button than cancel send voice message
+						Rect rect = new Rect();
+						view.getDrawingRect(rect);
+						if (rect.contains((int) event.getX(),
+								(int) event.getY())
+								&& seconds > 1500) {
+							successRecord = true;
+							recordTimes = seconds / 1000;
+						} else {
+							if (seconds < 1500) {
+								updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
+							} else {
+								Toast.makeText(
+										mContext,
+										R.string.contact_message_message_cancelled,
+										Toast.LENGTH_SHORT).show();
+							}
+						}
+						
+						// stop recording and sending
+						stopRecording(recordingFileID);
+						recordingFileID = null;
+						
+						if (seconds < 1500) {
+							// Send delay message for close dialog
+							lh.postDelayed(new Runnable() {
+								@Override
+								public void run() {
+									showOrCloseVoiceDialog();
+								}
+
+							}, 1000);
+						} else {
+							showOrCloseVoiceDialog();
+						}
+
+						if (mTimer != null) {
+							V2Log.d(TAG, "时间没到，手动停止，恢复原状");
+							mTimer.cancel();
+							mTimer.purge();
+							mTimer = null;
+							count = 11;
+						} else {
+							lh.removeCallbacks(mUpdateSurplusTime);
+						}
+
+					} else { // beacuse click too much quick , stop recording..
+						// 此判断是为了防止对话框叠加
+						if (!breakRecord) {
+							cannelRecoding = true;
+							Log.d(TAG, "由于间隔太短，显示short对话框");
+							lh.removeCallbacks(preparedRecoding);
+							updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
+							showOrCloseVoiceDialog();
+						} else {
+							breakRecord = false;
+							mButtonRecordAudio
+									.setText(R.string.contact_message_button_send_audio_msg);
+						}
+					}
+					break;
+				}
+				return true;
+			}
+		});
+	}
+
+	/**
+	 * FIXME If want to support lower 4.0 for ACC should code by self
+	 * 
+	 * @param filePath
+	 * @return
+	 */
+	private boolean startReocrding(String filePath) {
+		// AAC Record version one
+		// mAacEncoder = new AACEncoder(filePath);
+		// mAacEncoder.start();
+		// return true;
+
+		// AAC Record version two
+		// mRecorder = new MediaRecorder();
+		// mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+		// mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+		// mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+		// mRecorder.setOutputFile(filePath);
+		// mRecorder.setMaxDuration(60000);
+		// mRecorder.setAudioSamplingRate(44100);
+		// mRecorder.setAudioChannels(2);
+		// try {
+		// mRecorder.prepare();
+		// mRecorder.start();
+		// } catch (IOException e) {
+		// V2Log.e(" can not prepare media recorder ");
+		// return false;
+		// } catch (IllegalStateException e) {
+		// V2Log.e(" can not prepare media recorder ");
+		// return false;
+		// } catch (Exception e) {
+		// V2Log.e("error , can not prepare media recorder ");
+		// return false;
+		// }
+		
+		//MP3
+		mChat.startAudioRecord(filePath);
+		return true;
+
+	}
+
+	private void stopRecording(String fileID) {
+		// mAacEncoder.stop();
+		// //FIXME should delay some millicseconds
+		// if (mAacEncoder.getState() != MediaState.NORMAL
+		// && mAacEncoder.getState() != MediaState.STOPPED) {
+		// V2Log.e("=========recording file error " +mAacEncoder.getState());
+		//
+		// }
+		// mAacEncoder.release();
+
+//		try {
+//			// Ignore stop fialed exception
+//			mRecorder.stop();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		mRecorder.reset();
+//		mRecorder.release();
+//		mRecorder = null;
+		
+		mChat.stopAudioRecord(fileID);
+	}
+
+	/**
+	 * 异常终止录音
+	 */
+	private void breakRecording() {
+
+		if (mRecorder != null && realRecoding) {
+			breakRecord = true;
+			lastTime = 0;
+			starttime = 0;
+			realRecoding = false;
+			// Hide voice dialog
+			showOrCloseVoiceDialog();
+			stopRecording(recordingFileID);
+			recordingFileID = null;
+			starttime = 0;
+//			lh.removeCallbacks(mUpdateMicStatusTimer);
+			lh.removeCallbacks(timeOutMonitor);
+			lh.removeCallbacks(mUpdateSurplusTime);
+		}
+	}
+
+	private void showOrCloseVoiceDialog() {
+		if (mVoiceDialog.isShowing()) {
+			mVoiceDialog.dismiss();
+			mButtonRecordAudio
+					.setText(R.string.contact_message_button_send_audio_msg);
+		} else {
+			tips = (TextView) mSpeakingLayout
+					.findViewById(R.id.message_voice_dialog_listening_container_tips);
+			tips.setText(R.string.contact_message_voice_dialog_text);
+			mVoiceDialog.show();
+			root.setVisibility(View.VISIBLE);
+			updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
+		}
+	}
+
+	private Runnable preparedRecoding = new Runnable() {
+		@Override
+		public void run() {
+
+			if (!cannelRecoding) {
+				realRecoding = true;
+				recordingFileID = UUID.randomUUID().toString();
+				//GlobalConfig.getGlobalAudioPath() + "/" + UUID.randomUUID().toString() + ".mp3";
+				boolean resultReocrding = startReocrding(recordingFileID);
+				if (resultReocrding) {
+					starttime = System.currentTimeMillis();
+					// Start update db for voice
+//					lh.postDelayed(mUpdateMicStatusTimer, 200);
+					// Start timer
+					lh.postDelayed(timeOutMonitor, 59 * 1000);
+					// start timer for prompt surplus time
+					lh.postDelayed(mUpdateSurplusTime, 48 * 1000);
+				} else
+					breakRecording();
+			}
+		}
+	};
+
+	private Runnable mUpdateSurplusTime = new Runnable() {
+
+		@Override
+		public void run() {
+			V2Log.d(TAG, "entry surplus time ...");
+			mTimer = new Timer();
+			mTimer.schedule(new TimerTask() {
+
+				@Override
+				public void run() {
+
+					runOnUiThread(new Runnable() {
+
+						public void run() {
+							if (count == 0) {
+								V2Log.d(TAG, "time is over.");
+								mTimer.cancel();
+								mTimer.purge();
+								mTimer = null;
+								count = 11;
+								return;
+							}
+							String str = mContext.getText(
+									R.string.contact_message_tips_rest_seconds)
+									.toString();
+							str = str.replace("[]", (count - 1) + "");
+							tips.setText(str);
+							count--;
+						}
+					});
+				}
+			}, 0, 1000);
+		}
+	};
+
+	private Runnable timeOutMonitor = new Runnable() {
+
+		@Override
+		public void run() {
+			stopRecording(recordingFileID);
+			// send
+			timeOutRecording = true;
+			realRecoding = false;
+			successRecord = true;
+			recordTimes = 60;
+			recordingFileID = null;
+			starttime = 0;
+//			lh.removeCallbacks(mUpdateMicStatusTimer);
+			lh.removeCallbacks(mUpdateSurplusTime);
+			showOrCloseVoiceDialog();
+		}
+	};
 
 	private boolean playNextUnreadMessage() {
 		boolean found = false;
@@ -924,8 +1248,9 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	private InputStream currentPlayedStream;
 	private TextView tips;
-	private synchronized boolean startPlaying(String fileName) {
-		//AACPlayer Version One
+
+	private synchronized boolean startAudioPlaying(String fileName) {
+		// AACPlayer Version One
 		// mAACPlayer = new AACPlayer(fileName);
 		// try {
 		// if (currentPlayedStream != null) {
@@ -939,25 +1264,25 @@ public class ConversationP2PTextActivity extends Activity implements
 		// e.printStackTrace();
 		// }
 
-		//AACPlayer Version Two
-//		mAACPlayer = new ArrayAACPlayer(
-//				ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
-//				AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS,
-//				AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
-//		try {
-//			if (currentPlayedStream != null) {
-//				currentPlayedStream.close();
-//			}
-//			// currentPlayedStream = new FileInputStream(new File(fileName));
-//			mAACPlayer.playAsync(fileName);
-//		} catch (FileNotFoundException e) {
-//			e.printStackTrace();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-		
+		// AACPlayer Version Two
+		// mAACPlayer = new ArrayAACPlayer(
+		// ArrayDecoder.create(Decoder.DECODER_FAAD2), mAACPlayerCallback,
+		// AACPlayer.DEFAULT_AUDIO_BUFFER_CAPACITY_MS,
+		// AACPlayer.DEFAULT_DECODE_BUFFER_CAPACITY_MS);
+		// try {
+		// if (currentPlayedStream != null) {
+		// currentPlayedStream.close();
+		// }
+		// // currentPlayedStream = new FileInputStream(new File(fileName));
+		// mAACPlayer.playAsync(fileName);
+		// } catch (FileNotFoundException e) {
+		// e.printStackTrace();
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+
 		try {
-			if(mediaPlayer == null){
+			if (mediaPlayer == null) {
 				mediaPlayer = new MediaPlayer();
 				initMediaPlayerListener(mediaPlayer);
 			}
@@ -977,20 +1302,20 @@ public class ConversationP2PTextActivity extends Activity implements
 		return true;
 	}
 
-	private void stopPlaying() {
-//		if (mAACPlayer != null) {
-//			mAACPlayer.stop();
-//			mAACPlayer = null;
-//		}
-//		if (currentPlayedStream != null) {
-//			try {
-//				currentPlayedStream.close();
-//			} catch (IOException e) {
-//				e.printStackTrace();
-//			}
-//		}
-		
-		if(mediaPlayer != null){
+	private void stopAudioPlaying() {
+		// if (mAACPlayer != null) {
+		// mAACPlayer.stop();
+		// mAACPlayer = null;
+		// }
+		// if (currentPlayedStream != null) {
+		// try {
+		// currentPlayedStream.close();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
+		// }
+
+		if (mediaPlayer != null) {
 			playingAudioBodyView.stopVoiceAnimation();
 			playingAudioMessage.getAudioItems().get(0).setPlaying(false);
 			mediaPlayer.stop();
@@ -1000,29 +1325,29 @@ public class ConversationP2PTextActivity extends Activity implements
 	}
 
 	private void releasePlayer() {
-//		if (mAACPlayer != null) {
-////			mAACPlayer.release();
-//			mAACPlayer.stop();
-//			mAACPlayer = null;
-//		}
-		
-		if(mediaPlayer != null){
+		// if (mAACPlayer != null) {
+		// // mAACPlayer.release();
+		// mAACPlayer.stop();
+		// mAACPlayer = null;
+		// }
+
+		if (mediaPlayer != null) {
 			mediaPlayer.release();
 			mediaPlayer = null;
 		}
 	}
-	
+
 	private void stopCurrentAudioPlaying() {
 		if (playingAudioMessage != null
 				&& playingAudioMessage.getAudioItems().size() > 0) {
 			playingAudioMessage.getAudioItems().get(0).setPlaying(false);
-			stopPlaying();
+			stopAudioPlaying();
 		}
 	}
-	
+
 	private void initMediaPlayerListener(MediaPlayer mediaPlayer) {
 		mediaPlayer.setOnErrorListener(new OnErrorListener() {
-			
+
 			@Override
 			public boolean onError(MediaPlayer mp, int what, int extra) {
 				V2Log.e(TAG, "playing wroing!");
@@ -1032,9 +1357,9 @@ public class ConversationP2PTextActivity extends Activity implements
 				return false;
 			}
 		});
-		
+
 		mediaPlayer.setOnPreparedListener(new OnPreparedListener() {
-			
+
 			@Override
 			public void onPrepared(MediaPlayer mp) {
 				mp.start();
@@ -1042,9 +1367,9 @@ public class ConversationP2PTextActivity extends Activity implements
 				playingAudioMessage.getAudioItems().get(0).setPlaying(true);
 			}
 		});
-		
+
 		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
-			
+
 			@Override
 			public void onCompletion(MediaPlayer mp) {
 				releasePlayer();
@@ -1053,21 +1378,6 @@ public class ConversationP2PTextActivity extends Activity implements
 				Message.obtain(lh, PLAY_NEXT_UNREAD_MESSAGE).sendToTarget();
 			}
 		});
-	}
-
-	private void showOrCloseVoiceDialog() {
-		if (mVoiceDialog.isShowing()) {
-			mVoiceDialog.dismiss();
-			mButtonRecordAudio
-					.setText(R.string.contact_message_button_send_audio_msg);
-		} else {
-			tips = (TextView) mSpeakingLayout
-					.findViewById(R.id.message_voice_dialog_listening_container_tips);
-			tips.setText(R.string.contact_message_voice_dialog_text);
-			mVoiceDialog.show();
-			root.setVisibility(View.VISIBLE);
-			updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
-		}
 	}
 
 	private void updateCancelSendVoiceMsgNotification(int flag) {
@@ -1140,90 +1450,6 @@ public class ConversationP2PTextActivity extends Activity implements
 			}
 			mVolume.setImageResource(resId);
 
-		}
-	}
-
-	/**
-	 * FIXME If want to support lower 4.0 for ACC should code by self
-	 * 
-	 * @param filePath
-	 * @return
-	 */
-	private boolean startReocrding(String filePath) {
-
-		// mAacEncoder = new AACEncoder(filePath);
-		// mAacEncoder.start();
-		// return true;+
-
-		mRecorder = new MediaRecorder();
-		mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-		mRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
-		mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-		mRecorder.setOutputFile(filePath);
-		mRecorder.setMaxDuration(60000);
-		mRecorder.setAudioSamplingRate(44100);
-		mRecorder.setAudioChannels(2);
-		try {
-			mRecorder.prepare();
-			mRecorder.start();
-		} catch (IOException e) {
-			V2Log.e(" can not prepare media recorder ");
-			return false;
-		} catch (IllegalStateException e) {
-			V2Log.e(" can not prepare media recorder ");
-			return false;
-		} catch (Exception e) {
-			V2Log.e("error , can not prepare media recorder ");
-			return false;
-		}
-		return true;
-
-	}
-
-	private void stopRecording() {
-		// mAacEncoder.stop();
-		// //FIXME should delay some millicseconds
-		// if (mAacEncoder.getState() != MediaState.NORMAL
-		// && mAacEncoder.getState() != MediaState.STOPPED) {
-		// V2Log.e("=========recording file error " +mAacEncoder.getState());
-		//
-		// }
-		// mAacEncoder.release();
-
-		try {
-			// Ignore stop fialed exception
-			mRecorder.stop();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		mRecorder.reset();
-		mRecorder.release();
-		mRecorder = null;
-
-	}
-	
-	/**
-	 * 异常终止录音
-	 */
-	private void breakRecording() {
-
-		if (mRecorder != null && realRecoding) {
-			breakRecord = true;
-			lastTime = 0;
-			starttime = 0;
-			realRecoding = false;
-			// Hide voice dialog
-			showOrCloseVoiceDialog();
-			stopRecording();
-			starttime = 0;
-			if (audioFilePath != null) {
-				File f = new File(audioFilePath);
-				f.delete();
-				audioFilePath = null;
-			}
-			lh.removeCallbacks(mUpdateMicStatusTimer);
-			lh.removeCallbacks(timeOutMonitor);
-			lh.removeCallbacks(mUpdateSurplusTime);
 		}
 	}
 
@@ -1404,227 +1630,6 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	};
 
-	private String audioFilePath = null;
-	private long starttime = 0; // 记录真正开始录音时的开始时间
-	private long lastTime = 0; // 记录每次录音时的当前时间(毫秒值) ， 用于判断用户点击录音的频率
-	private boolean realRecoding;
-	private boolean cannelRecoding;
-	private boolean timeOutRecording;
-	private boolean breakRecord;
-	private boolean isDown;
-	private OnTouchListener mButtonHolderListener = new OnTouchListener() {
-
-		@Override
-		public boolean onTouch(View view, MotionEvent event) {
-			V2Log.d(TAG, "event action : " + event.getAction());
-			switch (event.getAction()) {
-			case MotionEvent.ACTION_DOWN:
-				isDown = true;
-				cannelRecoding = false;
-				showOrCloseVoiceDialog();
-				stopCurrentAudioPlaying();
-				long currentTime = System.currentTimeMillis();
-				Log.e(TAG, (currentTime - lastTime) + "");
-				lh.postDelayed(preparedRecoding, 250);
-				if (currentTime - lastTime < 250) {
-					V2Log.d(TAG, "间隔太短，取消录音");
-				}
-				lastTime = currentTime;
-				break;
-			case MotionEvent.ACTION_MOVE:
-				Rect r = new Rect();
-				view.getDrawingRect(r);
-				// check if touch position out of button than cancel send voice
-				// message
-				if (isDown) {
-					if (timeOutRecording) {
-						mButtonRecordAudio
-								.setText(R.string.contact_message_button_send_audio_msg);
-					} else {
-						if (r.contains((int) event.getX(), (int) event.getY())) {
-							updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_RECORDING);
-						} else {
-							updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_CANCEL);
-						}
-					}
-				}
-				break;
-			case MotionEvent.ACTION_CANCEL:
-			case MotionEvent.ACTION_UP:
-				// audio message send by 计时器
-				if (timeOutRecording) {
-					V2Log.d(TAG,
-							"audio message send by 计时器，ignore the up event once");
-					timeOutRecording = false;
-					return true;
-				}
-				// entry normal process , stop recording state 进入正常结束流程
-				if (realRecoding) {
-					// stop recording
-					stopRecording();
-					// 计算录音时间
-					long seconds = (System.currentTimeMillis() - starttime);
-					// recover all flag 复原标记位
-					lastTime = 0;
-					starttime = 0;
-					realRecoding = false;
-					// Remove timer
-					lh.removeCallbacks(mUpdateMicStatusTimer);
-					lh.removeCallbacks(timeOutMonitor);
-					// recover button show state
-					mButtonRecordAudio
-							.setText(R.string.contact_message_button_send_audio_msg);
-					// check if touch position out of button than cancel send
-					// voice message
-					Rect rect = new Rect();
-					view.getDrawingRect(rect);
-					if (rect.contains((int) event.getX(), (int) event.getY())
-							&& seconds > 1500) {
-						// send
-						VMessage vm = MessageBuilder.buildAudioMessage(
-								cov.getConversationType(), remoteGroupID,
-								currentLoginUser, remoteChatUser,
-								audioFilePath, (int) (seconds / 1000));
-						// Send message to server
-						sendMessageToRemote(vm);
-					} else {
-						if (seconds < 1500) {
-							updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
-						} else {
-							Toast.makeText(mContext,
-									R.string.contact_message_message_cancelled,
-									Toast.LENGTH_SHORT).show();
-						}
-						// delete audio file
-						File f = new File(audioFilePath);
-						f.delete();
-					}
-					audioFilePath = null;
-					if (seconds < 1500) {
-						// Send delay message for close dialog
-						lh.postDelayed(new Runnable() {
-							@Override
-							public void run() {
-								showOrCloseVoiceDialog();
-							}
-
-						}, 1000);
-					} else {
-						showOrCloseVoiceDialog();
-					}
-
-					if (mTimer != null) {
-						V2Log.d(TAG, "时间没到，手动停止，恢复原状");
-						mTimer.cancel();
-						mTimer.purge();
-						mTimer = null;
-						count = 11;
-					} else {
-						lh.removeCallbacks(mUpdateSurplusTime);
-					}
-
-				} else { // beacuse click too much quick , stop recording..
-					// 此判断是为了防止对话框叠加
-					if (!breakRecord) {
-						cannelRecoding = true;
-						Log.d(TAG, "由于间隔太短，显示short对话框");
-						lh.removeCallbacks(preparedRecoding);
-						updateCancelSendVoiceMsgNotification(VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT);
-						showOrCloseVoiceDialog();
-					} else {
-						breakRecord = false;
-						mButtonRecordAudio
-								.setText(R.string.contact_message_button_send_audio_msg);
-					}
-				}
-				break;
-			}
-			return true;
-		}
-	};
-
-	private Runnable preparedRecoding = new Runnable() {
-		@Override
-		public void run() {
-
-			if (!cannelRecoding) {
-				realRecoding = true;
-				audioFilePath = GlobalConfig.getGlobalAudioPath() + "/"
-						+ UUID.randomUUID().toString() + ".aac";
-				boolean resultReocrding = startReocrding(audioFilePath);
-				if (resultReocrding) {
-					starttime = System.currentTimeMillis();
-					// Start update db for voice
-					lh.postDelayed(mUpdateMicStatusTimer, 200);
-					// Start timer
-					lh.postDelayed(timeOutMonitor, 59 * 1000);
-					// start timer for prompt surplus time
-					lh.postDelayed(mUpdateSurplusTime, 48 * 1000);
-				} else
-					breakRecording();
-			}
-		}
-	};
-
-	private int count = 11;
-	private Timer mTimer;
-	private Runnable mUpdateSurplusTime = new Runnable() {
-
-		@Override
-		public void run() {
-			V2Log.d(TAG, "entry surplus time ...");
-			mTimer = new Timer();
-			mTimer.schedule(new TimerTask() {
-
-				@Override
-				public void run() {
-
-					runOnUiThread(new Runnable() {
-
-						public void run() {
-							if (count == 0) {
-								V2Log.d(TAG, "time is over.");
-								mTimer.cancel();
-								mTimer.purge();
-								mTimer = null;
-								count = 11;
-								return;
-							}
-							String str = mContext.getText(
-									R.string.contact_message_tips_rest_seconds)
-									.toString();
-							str = str.replace("[]", (count - 1) + "");
-							tips.setText(str);
-							count--;
-						}
-					});
-				}
-			}, 0, 1000);
-		}
-	};
-
-	private Runnable timeOutMonitor = new Runnable() {
-
-		@Override
-		public void run() {
-			stopRecording();
-			// send
-			timeOutRecording = true;
-			realRecoding = false;
-			VMessage vm = MessageBuilder.buildAudioMessage(
-					cov.getConversationType(), remoteGroupID, currentLoginUser,
-					remoteChatUser, audioFilePath, 60);
-			// Send message to server
-			sendMessageToRemote(vm);
-
-			starttime = 0;
-			audioFilePath = null;
-			lh.removeCallbacks(mUpdateMicStatusTimer);
-			lh.removeCallbacks(mUpdateSurplusTime);
-			showOrCloseVoiceDialog();
-		}
-	};
-
 	private OnClickListener moreFeatureButtonListenr = new OnClickListener() {
 
 		@Override
@@ -1777,7 +1782,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		@Override
 		public void afterTextChanged(Editable edit) {
 			mMessageET.removeTextChangedListener(this);
-			MessageUtil.buildChatPasteMessageContent(mContext , mMessageET);
+			MessageUtil.buildChatPasteMessageContent(mContext, mMessageET);
 			mMessageET.addTextChangedListener(this);
 		}
 
@@ -1785,7 +1790,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		public void beforeTextChanged(CharSequence ch, int arg1, int arg2,
 				int arg3) {
 		}
-		
+
 		@Override
 		public void onTextChanged(CharSequence arg0, int arg1, int arg2,
 				int arg3) {
@@ -1793,16 +1798,15 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	};
 
-
 	private void doSendMessage() {
 		VMessage vm = null;
-		if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
-			vm = MessageUtil.buildChatMessage(mContext, mMessageET, currentConversationViewType,
-					remoteGroupID, remoteChatUser);
+		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+			vm = MessageUtil.buildChatMessage(mContext, mMessageET,
+					currentConversationViewType, remoteGroupID, remoteChatUser);
 		else
-			vm = MessageUtil.buildChatMessage(mContext, mMessageET, currentConversationViewType,
-					remoteGroupID, null);
-		if(vm != null)
+			vm = MessageUtil.buildChatMessage(mContext, mMessageET,
+					currentConversationViewType, remoteGroupID, null);
+		if (vm != null)
 			sendMessageToRemote(vm);
 	}
 
@@ -1857,8 +1861,9 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	private void startSendMoreFile() {
 		for (int i = 0; i < mCheckedList.size(); i++) {
-			GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_SENDING, 
-					mContext, true, remoteChatUserID, "ConversationP2PTextActivity onActivity");
+			GlobalHolder.getInstance().changeGlobleTransFileMember(
+					V2GlobalEnum.FILE_TRANS_SENDING, mContext, true,
+					remoteChatUserID, "ConversationP2PTextActivity onActivity");
 			sendSelectedFile(mCheckedList.get(i));
 		}
 	}
@@ -1968,7 +1973,7 @@ public class ConversationP2PTextActivity extends Activity implements
 				}
 				V2Log.i(TAG, "start play , currentPlayingAudio id is : "
 						+ playingAudioMessage.getId());
-				startPlaying(vai.getAudioFilePath());
+				startAudioPlaying(vai.getAudioFilePath());
 			}
 		}
 
@@ -2061,7 +2066,7 @@ public class ConversationP2PTextActivity extends Activity implements
 					"request current playing audioItem 停止 , id is ："
 							+ vm.getId());
 			vai.setPlaying(false);
-			stopPlaying();
+			stopAudioPlaying();
 		}
 
 		@Override
@@ -2261,13 +2266,14 @@ public class ConversationP2PTextActivity extends Activity implements
 	private void deleteMessage(VMessage vm, int location) {
 		messageArray.remove(location);
 		boolean isDeleteOther = true;
-//		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD
-//				&& vm.getFileItems().size() > 0
-//				&& vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
-//						.getCurrentUserId()
-//				&& vm.getFileItems().get(0).getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
-//			isDeleteOther = false;
-//		}
+		// if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD
+		// && vm.getFileItems().size() > 0
+		// && vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
+		// .getCurrentUserId()
+		// && vm.getFileItems().get(0).getState() ==
+		// VMessageAbstractItem.STATE_FILE_SENDING) {
+		// isDeleteOther = false;
+		// }
 		MessageLoader.deleteMessage(mContext, vm, isDeleteOther);
 		List<VMessage> messagePages = MessageLoader.loadGroupMessageByPage(
 				mContext, Conversation.TYPE_GROUP, remoteGroupID, 1,
@@ -2465,19 +2471,19 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	};
 
-	private Runnable mUpdateMicStatusTimer = new Runnable() {
-		public void run() {
-			int ratio = mRecorder.getMaxAmplitude() / 600;
-			int db = 0;// 分贝
-			if (ratio > 1)
-				db = (int) (20 * Math.log10(ratio));
-
-			// int db = (int)mAacEncoder.getDB();
-			updateVoiceVolume(db / 4);
-
-			lh.postDelayed(mUpdateMicStatusTimer, 200);
-		}
-	};
+//	private Runnable mUpdateMicStatusTimer = new Runnable() {
+//		public void run() {
+//			int ratio = mRecorder.getMaxAmplitude() / 600;
+//			int db = 0;// 分贝
+//			if (ratio > 1)
+//				db = (int) (20 * Math.log10(ratio));
+//
+//			// int db = (int)mAacEncoder.getDB();
+//			updateVoiceVolume(db / 4);
+//
+//			lh.postDelayed(mUpdateMicStatusTimer, 200);
+//		}
+//	};
 
 	class MessageAdapter extends BaseAdapter {
 
@@ -2548,7 +2554,8 @@ public class ConversationP2PTextActivity extends Activity implements
 					if (result) {
 						offset += 1;
 						if (!isAppBack) {
-							CommonCallBack.getInstance().executeNotifyCrowdDetailActivity();
+							CommonCallBack.getInstance()
+									.executeNotifyCrowdDetailActivity();
 							// abort send down broadcast
 							this.abortBroadcast();
 						}
@@ -2662,7 +2669,7 @@ public class ConversationP2PTextActivity extends Activity implements
 							"JNI_BROADCAST_GROUP_USER_REMOVED --> Update Conversation failed that the user removed ... given GroupUserObject is null");
 					return;
 				}
-				
+
 				isFinishActivity = true;
 			} else if (intent
 					.getAction()
@@ -2737,28 +2744,30 @@ public class ConversationP2PTextActivity extends Activity implements
 						CommonAdapterItemWrapper wrapper = messageArray.get(i);
 						VMessage tempVm = (VMessage) wrapper.getItemObject();
 						if (tempVm.getFileItems().size() > 0) {
-							VMessageFileItem vMessageFileItem = tempVm.getFileItems()
-									.get(0);
-							if (vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING ||
-									vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING){
-								vMessageFileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+							VMessageFileItem vMessageFileItem = tempVm
+									.getFileItems().get(0);
+							if (vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
+									|| vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING) {
+								vMessageFileItem
+										.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
 							}
-							
-							if (vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING || 
-									vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING){
-								vMessageFileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+
+							if (vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING
+									|| vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+								vMessageFileItem
+										.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 							}
-							
+
 							MessageBodyView bodyView = (MessageBodyView) wrapper
 									.getView();
-							if (bodyView != null){
+							if (bodyView != null) {
 								bodyView.updateView(vMessageFileItem);
 							}
 						}
 					}
 				}
-			} else if(intent.getAction().equals(
-					JNIService.JNI_BROADCAST_GROUP_UPDATED)){
+			} else if (intent.getAction().equals(
+					JNIService.JNI_BROADCAST_GROUP_UPDATED)) {
 				if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
 					OrgGroup departmentGroup = (OrgGroup) GlobalHolder
 							.getInstance().getGroupById(
@@ -2771,7 +2780,7 @@ public class ConversationP2PTextActivity extends Activity implements
 									V2GlobalEnum.GROUP_TYPE_DISCUSSION,
 									cov.getExtId());
 					mUserTitleTV.setText(discussionGroup.getName());
-				} else if(currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD){
+				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
 					CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder
 							.getInstance().getGroupById(
 									V2GlobalEnum.GROUP_TYPE_CROWD,
@@ -2833,19 +2842,19 @@ public class ConversationP2PTextActivity extends Activity implements
 					}
 					// 群文件处理,如果是远端用户上传的文件，则强制更改状态为已上传，因为群中远端文件只有一种状态
 					if (vm.getFileItems().size() > 0
-							&& vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD){
+							&& vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD) {
 						VMessageFileItem fileItem = vm.getFileItems().get(0);
-						//如果该文件时其他人上传的，则在下载的时候，强制将聊天界面的状态改成已上传
-						if(vm.getFromUser().getmUserId() != GlobalHolder
-								.getInstance().getCurrentUserId()){
-							if(fileItem.getState() != VMessageAbstractItem.STATE_FILE_SENT){
+						// 如果该文件时其他人上传的，则在下载的时候，强制将聊天界面的状态改成已上传
+						if (vm.getFromUser().getmUserId() != GlobalHolder
+								.getInstance().getCurrentUserId()) {
+							if (fileItem.getState() != VMessageAbstractItem.STATE_FILE_SENT) {
 								fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT);
 							}
-						} else { //如果该文件是自己上传的，则在下载的时候，强制将聊天界面的状态改成已上传
-							if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED ||
-									fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING || 
-									fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED || 
-									fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING){
+						} else { // 如果该文件是自己上传的，则在下载的时候，强制将聊天界面的状态改成已上传
+							if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED
+									|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING
+									|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED
+									|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
 								fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT);
 							}
 						}
@@ -2917,6 +2926,49 @@ public class ConversationP2PTextActivity extends Activity implements
 							((FileTransProgressStatusIndication) ind).nTranedSize,
 							progress.progressType);
 				}
+				break;
+			case RECORD_STATUS_LISTENER:
+				int result = msg.arg1;
+				int recordType = msg.arg2;
+				String fileID = (String)(((AsyncResult) msg.obj).getResult());
+				if(result == Result.SUCCESS.value()){
+					if(recordType == V2GlobalConstants.RECORD_TYPE_START){
+						V2Log.d(TAG, "the file start recording , id is : " + fileID);
+					} else {
+						String filePath = 
+								GlobalConfig.getGlobalAudioPath() + "/" + fileID + ".mp3";
+						if(successRecord){
+							V2Log.d(TAG, "the record file sending successfully! id is : " + fileID);
+							VMessage vm = MessageBuilder.buildAudioMessage(
+									cov.getConversationType(), remoteGroupID,
+									currentLoginUser, remoteChatUser,
+									filePath, (int) recordTimes);
+							// Send message to server
+							sendMessageToRemote(vm);
+							successRecord = false;
+							recordTimes = 0;
+						} else {
+							// delete audio file
+							File f = new File(filePath);
+							if(f.exists())
+								f.delete();
+						}
+					}
+				} else {
+					if(recordType == V2GlobalConstants.RECORD_TYPE_START){
+						V2Log.e(TAG, "record failed! error code is : " + result);
+						breakRecording();
+						String filePath = 
+								GlobalConfig.getGlobalAudioPath() + "/" + fileID + ".mp3";
+						File f = new File(filePath);
+						if(f.exists())
+							f.delete();
+					} else {
+						recordTimes = 0;
+						successRecord = false;
+					}
+				}
+				break;
 			case ADAPTER_NOTIFY:
 				adapter.notifyDataSetChanged();
 				break;

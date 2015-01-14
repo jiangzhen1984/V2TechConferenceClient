@@ -18,8 +18,6 @@ import org.xml.sax.SAXException;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
-import com.V2.jni.util.XmlAttributeExtractor;
-import com.v2tech.service.GlobalHolder;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2Doc.Page;
 import com.v2tech.vo.V2Shape;

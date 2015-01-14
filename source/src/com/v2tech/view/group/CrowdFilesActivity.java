@@ -228,11 +228,6 @@ public class CrowdFilesActivity extends Activity {
 								"CrowdFilesActivity onActivityResult");
 						File file = new File(fb.filePath);
 						if(file.exists() && file.isFile()){
-							file.setReadable(false, true);
-							file.setExecutable(false, true);
-//							File dir = new File(file.getParent());
-//							dir.setReadOnly();
-//							dir.setExecutable(false , false);
 							GlobalHolder.getInstance().mTransingLockFiles.put(vf.getId(), fb.filePath);
 						}
 						// 发送文件
@@ -328,7 +323,6 @@ public class CrowdFilesActivity extends Activity {
 			V2Log.e("Unknow crowd");
 			return;
 		}
-
 		// loading local files and judging whether show uploading icon
 		loadLocalSaveFile();
 		// fetch files from server
@@ -392,27 +386,38 @@ public class CrowdFilesActivity extends Activity {
 		mServerExistFiles.clear();
 		mServerExistFiles.addAll(fetchFiles);
 		for (VCrowdFile serverFile : mServerExistFiles) {
+			// 从数据库读取该文件存的状态
+			VMessageFileItem dataBaseSaveFile = mLocalSaveFile.get(serverFile.getId());
+			if(dataBaseSaveFile != null && serverFile.getId().equals(dataBaseSaveFile.getUuid())){
+				String localName = dataBaseSaveFile.getFileName();
+				serverFile.setName(localName);
+				
+				String serverPath = serverFile.getPath();
+				String prefix = serverPath.substring(0, serverPath.lastIndexOf("/"));
+				String newPath = prefix + "/" + localName;
+				serverFile.setPath(newPath);
+			}
+			
 			// 自己上传的文件，从数据库获取文件路径，判断文件是否存在
 			if (serverFile.getUploader().getmUserId() == GlobalHolder
 					.getInstance().getCurrentUserId()) {
-				VMessageFileItem temp = mLocalSaveFile.get(serverFile.getId());
-				if (temp != null) {
-					File ownerFile = new File(temp.getFilePath());
+				if (dataBaseSaveFile != null) {
+					File ownerFile = new File(dataBaseSaveFile.getFilePath());
 					if (!ownerFile.exists()) {
-						if(State.fromInt(temp.getState()) == VCrowdFile.State.DOWNLOADED)
+						if(State.fromInt(dataBaseSaveFile.getState()) == VCrowdFile.State.DOWNLOADED)
 							serverFile.setState(VCrowdFile.State.UNKNOWN);
 						else
-							serverFile.setState(State.fromInt(temp.getState()));
+							serverFile.setState(State.fromInt(dataBaseSaveFile.getState()));
 					} else {
 						if (ownerFile.length() == serverFile.getSize()) {
 							serverFile.setState(VCrowdFile.State.DOWNLOADED);
-							serverFile.setPath(temp.getFilePath());
+							serverFile.setPath(dataBaseSaveFile.getFilePath());
 						} else {
 							ownerFile.delete();
-							if(State.fromInt(temp.getState()) == VCrowdFile.State.DOWNLOADED)
+							if(State.fromInt(dataBaseSaveFile.getState()) == VCrowdFile.State.DOWNLOADED)
 								serverFile.setState(VCrowdFile.State.UNKNOWN);
 							else
-								serverFile.setState(State.fromInt(temp.getState()));
+								serverFile.setState(State.fromInt(dataBaseSaveFile.getState()));
 						}
 					}
 				} else {
@@ -421,9 +426,6 @@ public class CrowdFilesActivity extends Activity {
 			} else {
 				// 其他人的文件路径，则根据文件类型，通过默认路径去判断
 				File localFile = buildDefaultFilePath(serverFile);
-				// 从数据库读取该文件存的状态
-				VMessageFileItem dataBaseSaveFile = mLocalSaveFile.get(serverFile
-						.getId());
 				if (!localFile.exists()) {
 					if (dataBaseSaveFile != null) {
 						changeServerFileState(serverFile, dataBaseSaveFile,
@@ -1447,8 +1449,10 @@ public class CrowdFilesActivity extends Activity {
 					return;
 				}
 
+				boolean isUpdatePath = false;
 				boolean isUpload = false;
 				if (file.getState() == VFile.State.UNKNOWN) {
+					
 					boolean isAdd = GlobalHolder.getInstance().changeGlobleTransFileMember(
 							V2GlobalEnum.FILE_TRANS_DOWNLOADING, mContext,
 							true, crowd.getmGId(),
@@ -1456,7 +1460,33 @@ public class CrowdFilesActivity extends Activity {
 					if(!isAdd){
 						return ;
 					}
-
+					
+					int count = 0;
+					for (int i = 0; i < mServerExistFiles.size(); i++) {
+						VCrowdFile temp = mServerExistFiles.get(i);
+						if(!temp.getId().equals(file.getId())){
+							if(temp.getName().equals(file.getName())){
+								File tempFile = buildDefaultFilePath(temp);
+								if(tempFile.exists()){
+									count++;
+								}
+							}
+						}
+					}
+					// if count > 0 mean have repeat file
+					if(count != 0){
+						String name = file.getName();
+						String prefix = name.substring(0, name.indexOf("."));
+						String postfixName = name.substring(name.indexOf("."));
+						String newName = prefix + "("+count+")" + postfixName;
+						file.setName(newName);
+						
+						String prefixPath = file.getPath().substring(0 , file.getPath().lastIndexOf("/"));
+						String newPath = prefixPath + "/" + newName;
+						file.setPath(newPath);
+						isUpdatePath = true;
+					}
+					
 					file.setState(VFile.State.DOWNLOADING);
 					file.setStartTime(new Date(GlobalConfig
 							.getGlobalServerTime()));
@@ -1512,6 +1542,10 @@ public class CrowdFilesActivity extends Activity {
 						.queryFileItemByID(file.getId());
 				// save state to database
 				if (fileItem != null) {
+					if(isUpdatePath){
+						fileItem.setFilePath(file.getPath());
+						fileItem.setFileName(file.getName());
+					}
 					fileItem.setState(file.getState().intValue());
 					fileItem.setUuid(file.getId());
 					MessageBuilder.updateVMessageItem(mContext, fileItem);
@@ -1521,8 +1555,12 @@ public class CrowdFilesActivity extends Activity {
 					VMessage vm = new VMessage(crowd.getGroupType().intValue(),
 							crowd.getmGId(), file.getUploader(), null,
 							new Date(GlobalConfig.getGlobalServerTime()));
-					new VMessageFileItem(vm, file.getPath(), file.getState()
+					VMessageFileItem newFileItem = new VMessageFileItem(vm, file.getPath(), file.getState()
 							.intValue());
+					if(isUpdatePath){
+						newFileItem.setFilePath(file.getPath());
+						newFileItem.setFileName(file.getName());
+					}
 					vm.getFileItems().get(0).setUuid(file.getId());
 					vm.setmXmlDatas(vm.toXml());
 					MessageBuilder.saveFileVMessage(mContext, vm);

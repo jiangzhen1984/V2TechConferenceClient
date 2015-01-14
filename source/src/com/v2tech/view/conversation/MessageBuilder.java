@@ -411,6 +411,9 @@ public class MessageBuilder {
 			itemVal.put(
 					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_SEND_STATE,
 					fileItem.getState());
+			itemVal.put(
+					ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH,
+					fileItem.getFilePath());
 			updates = mContext.getContentResolver().update(
 					ContentDescriptor.HistoriesFiles.CONTENT_URI,
 					itemVal,
