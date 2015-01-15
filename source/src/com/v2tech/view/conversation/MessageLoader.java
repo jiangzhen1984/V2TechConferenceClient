@@ -16,7 +16,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.ContentDescriptor.HistoriesMessage;
@@ -29,6 +28,7 @@ import com.v2tech.vo.AudioVideoMessageBean;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
@@ -290,10 +290,7 @@ public class MessageLoader {
 				current = new VMessage(groupType, groupID, fromUser, new Date(
 						date));
 				current.setUUID(imageID);
-				item = new VMessageImageItem(current);
-				item.setUuid(imageID);
-				item.setFilePath(imagePath);
-				imageItems.add(current);
+				item = new VMessageImageItem(current , imageID , imagePath , 0);
 			}
 			return imageItems;
 		} catch (Exception e) {
@@ -564,9 +561,7 @@ public class MessageLoader {
 				}
 				current = new VMessage(groupType, groupID, fromUser, new Date(
 						date));
-				item = new VMessageImageItem(current);
-				item.setUuid(imageID);
-				item.setFilePath(imagePath);
+				item = new VMessageImageItem(current , imageID , imagePath , 0);
 				imageItems.add(current);
 			}
 			return imageItems;
@@ -592,10 +587,10 @@ public class MessageLoader {
 			long remoteID) {
 		// 传两个-1是在MainActivity中需要查出文件表中所有文件而传递的
 		if (type != -1 && remoteID != -1) {
-			if (type == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			if (type == V2GlobalConstants.GROUP_TYPE_CROWD) {
 				if (!isTableExist(mContext, type, remoteID, 0, CROWD_TYPE))
 					return null;
-			} else if (type == V2GlobalEnum.GROUP_TYPE_USER) {
+			} else if (type == V2GlobalConstants.GROUP_TYPE_USER) {
 				if (!isTableExist(mContext, 0, 0, remoteID, CONTACT_TYPE))
 					return null;
 			}
@@ -705,7 +700,7 @@ public class MessageLoader {
 
 			while (cursor.moveToNext()) {
 				VMessageFileItem fileItem = extractFileItem(cursor,
-						V2GlobalEnum.GROUP_TYPE_CROWD, gid);
+						V2GlobalConstants.GROUP_TYPE_CROWD, gid);
 				if (fileItem != null) {
 					fileItems.add(fileItem);
 				}
@@ -800,9 +795,9 @@ public class MessageLoader {
 					Group tempGroup = GlobalHolder.getInstance().getGroupById(
 							remoteUserID);
 					if (tempGroup == null)
-						groupType = V2GlobalEnum.GROUP_TYPE_USER;
+						groupType = V2GlobalConstants.GROUP_TYPE_USER;
 					else
-						groupType = V2GlobalEnum.GROUP_TYPE_CROWD;
+						groupType = V2GlobalConstants.GROUP_TYPE_CROWD;
 				} else {
 					V2Log.e(TAG,
 							"queryFileItemByID -- > Get remoteID is -1 , uuid is : "
@@ -810,7 +805,7 @@ public class MessageLoader {
 					return null;
 				}
 
-				if (groupType == V2GlobalEnum.GROUP_TYPE_USER)
+				if (groupType == V2GlobalConstants.GROUP_TYPE_USER)
 					vm = new VMessage(groupType, -1, GlobalHolder.getInstance()
 							.getUser(fromUserID), GlobalHolder.getInstance()
 							.getUser(remoteUserID), new Date(saveDate));
@@ -966,7 +961,7 @@ public class MessageLoader {
 			return -1;
 
 		long remoteID = 0;
-		if (vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER) {
+		if (vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER) {
 
 			if (vm.getFromUser() == null || vm.getToUser() == null) {
 				V2Log.e(TAG,
@@ -986,7 +981,7 @@ public class MessageLoader {
 				vm.getMsgCode(),
 				vm.getGroupId(),
 				remoteID,
-				vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER ? MessageLoader.CONTACT_TYPE
+				vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER ? MessageLoader.CONTACT_TYPE
 						: MessageLoader.CROWD_TYPE))
 			return -1;
 
@@ -1051,7 +1046,7 @@ public class MessageLoader {
 				.getDataBaseTableCacheName();
 		String sql = "";
 		String tableName;
-		if (groupType != V2GlobalEnum.GROUP_TYPE_USER)
+		if (groupType != V2GlobalConstants.GROUP_TYPE_USER)
 			tableName = "Histories_" + groupType + "_" + groupID + "_0";
 		else
 			tableName = "Histories_0_0_" + userID;
@@ -1124,7 +1119,7 @@ public class MessageLoader {
 		if (isDeleteFile) {
 			// 删除文件
 			String[] fileArgs;
-			if (groupType == V2GlobalEnum.GROUP_TYPE_USER)
+			if (groupType == V2GlobalConstants.GROUP_TYPE_USER)
 				fileArgs = new String[] { String.valueOf(userID) };
 			else
 				fileArgs = new String[] { String.valueOf(groupID) };
@@ -1702,9 +1697,9 @@ public class MessageLoader {
 		}
 
 		VMessage current = null;
-		if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+		if (groupType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 			current = new VMessage(groupType, groupID, fromUser, new Date(date));
-		} else if (groupType == V2GlobalEnum.GROUP_TYPE_USER) {
+		} else if (groupType == V2GlobalConstants.GROUP_TYPE_USER) {
 			current = new VMessage(groupType, 0, fromUser, new Date(date));
 		} else {
 			current = new VMessage(-1, -1, fromUser, new Date(date));

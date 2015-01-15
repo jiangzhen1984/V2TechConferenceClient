@@ -32,7 +32,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.AsyncResult;
@@ -60,6 +59,7 @@ import com.v2tech.vo.FileDownLoadBean;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VCrowdFile;
 import com.v2tech.vo.VFile;
 import com.v2tech.vo.VFile.State;
@@ -207,7 +207,7 @@ public class CrowdFilesActivity extends Activity {
 						mShowProgressFileMap.put(vf.getId(), vf);
 						// 保存到数据库
 						VMessage vm = MessageBuilder.buildFileMessage(
-								V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getmGId(),
+								V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getmGId(),
 								GlobalHolder.getInstance().getCurrentUser(),
 								null, fb);
 						VMessageFileItem fileItem = vm.getFileItems().get(0);
@@ -223,7 +223,7 @@ public class CrowdFilesActivity extends Activity {
 										CrowdFileExeType.ADD_FILE);
 
 						GlobalHolder.getInstance().changeGlobleTransFileMember(
-								V2GlobalEnum.FILE_TRANS_SENDING, mContext,
+								V2GlobalConstants.FILE_TRANS_SENDING, mContext,
 								true, crowd.getmGId(),
 								"CrowdFilesActivity onActivityResult");
 						File file = new File(fb.filePath);
@@ -571,7 +571,6 @@ public class CrowdFilesActivity extends Activity {
 
 	/**
 	 * Handle file removed notification
-	 * 
 	 * @param files
 	 */
 	private void handleFileRemovedEvent(List<VCrowdFile> files) {
@@ -581,10 +580,15 @@ public class CrowdFilesActivity extends Activity {
 						.equals(removedFile.getId())) {
 					VCrowdFile file = mServerExistFiles.get(i);
 					V2Log.d(TAG,
-							"handleFileRemovedEvent --> cancel downloading was called!");
-					service.handleCrowdFile(file,
-							FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
-							null);
+							"handleFileRemovedEvent -->The group file was remove! cancel downloading was called!");
+					if(file.getState() == State.DOWNLOADING){
+						GlobalHolder.getInstance().changeGlobleTransFileMember(
+								V2GlobalConstants.FILE_TRANS_DOWNLOADING, mContext, false,
+								crowd.getmGId(), "CrowdFilesActivity handleFileRemovedEvent");
+						service.handleCrowdFile(file,
+								FileOperationEnum.OPERATION_CANCEL_DOWNLOADING,
+								null);
+					}
 					file.setState(VFile.State.REMOVED);
 					break;
 				}
@@ -906,7 +910,7 @@ public class CrowdFilesActivity extends Activity {
 				if (fileID == null || transType == -1)
 					return;
 				
-				if(transType == V2GlobalEnum.FILE_TRANS_SENDING){
+				if(transType == V2GlobalConstants.FILE_TRANS_SENDING){
 					for (int i = 0; i < mUploadedFiles.size(); i++) {
 						VCrowdFile temp = mUploadedFiles.get(i);
 						if(temp.getId().equals(fileID)){
@@ -1250,9 +1254,9 @@ public class CrowdFilesActivity extends Activity {
 				} else {
 					int transType;
 					if (file.getState() == VFile.State.UPLOAD_FAILED) {
-						transType = V2GlobalEnum.FILE_TRANS_SENDING;
+						transType = V2GlobalConstants.FILE_TRANS_SENDING;
 					} else {
-						transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;
+						transType = V2GlobalConstants.FILE_TRANS_DOWNLOADING;
 					}
 						
 					boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(transType, mContext, true,
@@ -1262,7 +1266,7 @@ public class CrowdFilesActivity extends Activity {
 
 					if (file.getState() == VFile.State.DOWNLOAD_FAILED) {
 						GlobalHolder.getInstance().changeGlobleTransFileMember(
-								V2GlobalEnum.FILE_TRANS_DOWNLOADING, mContext,
+								V2GlobalConstants.FILE_TRANS_DOWNLOADING, mContext,
 								true, crowd.getmGId(),
 								"CrowdFilesActivity mFailIconListener");
 						file.setState(VFile.State.DOWNLOADING);
@@ -1275,7 +1279,7 @@ public class CrowdFilesActivity extends Activity {
 								null);
 					} else if (file.getState() == VFile.State.UPLOAD_FAILED) {
 						GlobalHolder.getInstance().changeGlobleTransFileMember(
-								V2GlobalEnum.FILE_TRANS_SENDING, mContext,
+								V2GlobalConstants.FILE_TRANS_SENDING, mContext,
 								true, crowd.getmGId(),
 								"CrowdFilesActivity mFailIconListener");
 						file.setState(VFile.State.UPLOADING);
@@ -1304,7 +1308,7 @@ public class CrowdFilesActivity extends Activity {
 						sendBroadcast(i);
 					} else {
 						VMessage vm = new VMessage(
-								V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getmGId(),
+								V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getmGId(),
 								file.getUploader(), GlobalHolder.getInstance()
 										.getCurrentUser(), new Date(
 										GlobalConfig.getGlobalServerTime()));
@@ -1393,10 +1397,10 @@ public class CrowdFilesActivity extends Activity {
 				int transType = -1;
 				if (tag.vf.getState() == State.DOWNLOADING
 						|| tag.vf.getState() == State.DOWNLOAD_PAUSE) {
-					transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;
+					transType = V2GlobalConstants.FILE_TRANS_DOWNLOADING;
 				} else if (tag.vf.getState() == State.UPLOADING
 						|| tag.vf.getState() == State.UPLOAD_PAUSE) {
-					transType = V2GlobalEnum.FILE_TRANS_SENDING;
+					transType = V2GlobalConstants.FILE_TRANS_SENDING;
 				}
 				GlobalHolder.getInstance().changeGlobleTransFileMember(
 						transType, mContext, false, crowd.getmGId(),
@@ -1454,7 +1458,7 @@ public class CrowdFilesActivity extends Activity {
 				if (file.getState() == VFile.State.UNKNOWN) {
 					
 					boolean isAdd = GlobalHolder.getInstance().changeGlobleTransFileMember(
-							V2GlobalEnum.FILE_TRANS_DOWNLOADING, mContext,
+							V2GlobalConstants.FILE_TRANS_DOWNLOADING, mContext,
 							true, crowd.getmGId(),
 							"CrowdFilesActivity mButtonListener");
 					if(!isAdd){

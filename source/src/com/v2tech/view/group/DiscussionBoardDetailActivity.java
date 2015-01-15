@@ -153,7 +153,7 @@ public class DiscussionBoardDetailActivity extends Activity {
 		i.putExtra("userId", GlobalHolder.getInstance().getCurrentUserId());
 		i.putExtra("groupId", crowd.getmGId());
 		sendBroadcast(i);
-		finish();
+		onBackPressed();
 	}
 
 	private OnClickListener mQuitButtonListener = new OnClickListener() {

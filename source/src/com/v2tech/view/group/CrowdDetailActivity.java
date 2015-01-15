@@ -23,7 +23,6 @@ import android.widget.Toast;
 import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.TextView;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.CrowdGroupService;
@@ -37,6 +36,7 @@ import com.v2tech.view.conversation.CommonCallBack.CommonNotifyCrowdDetailNewMes
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.V2GlobalConstants;
 
 public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDetailNewMessage{
 
@@ -270,7 +270,7 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 		//send broadcast to notify conversationtabfragment refresh list
 		Intent i = new Intent(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-		i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getmGId(), -1));
+		i.putExtra("group", new GroupUserObject(V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getmGId(), -1));
 		this.sendBroadcast(i);
 		
 		
@@ -443,7 +443,7 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 				GroupUserObject guo = (GroupUserObject)intent.getExtras().get("obj");
 				if (guo.getmGroupId() == crowd.getmGId()) {
 					CrowdGroup newGroup = (CrowdGroup) GlobalHolder.getInstance().
-							getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getmGId());
+							getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getmGId());
 					if(newGroup != null){
 						crowd = newGroup;
 						mMembersCountsTV.setText(String.valueOf(crowd.getUsers().size()));
@@ -451,7 +451,7 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 				}
 			} else if (intent.getAction().equals(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 				CrowdGroup newGroup = (CrowdGroup) GlobalHolder.getInstance().
-						getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getmGId());
+						getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getmGId());
 				if(newGroup != null){
 					crowd = newGroup;
 					mMembersCountsTV.setText(String.valueOf(crowd.getUsers().size()));

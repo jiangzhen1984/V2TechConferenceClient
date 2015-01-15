@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 
-import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.view.adapter.CreateConfOrCrowdAdapter;
@@ -36,6 +35,7 @@ import com.v2tech.vo.ConferenceGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 
 public class VideoInvitionAttendeeLayout extends LinearLayout {
 
@@ -57,8 +57,6 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 	private EditText mConfStartTimeET;
 	private View mInvitionButton;
 
-	private LinearLayout mErrorNotificationLayout;
-
 	private AdapterView<ListAdapter> mAttendeeContainer;
 	private CreateConfOrCrowdAdapter mAdapter;
 
@@ -75,7 +73,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 	private Listener listener;
 
 	public interface Listener {
-		public void requestInvitation(Conference conf, List<User> l);
+		public void requestInvitation(Conference conf, List<User> attendUsers , boolean isNotify);
 	}
 
 	public VideoInvitionAttendeeLayout(Context context, Conference conf) {
@@ -116,8 +114,6 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		searchedTextET = (EditText) view.findViewById(R.id.contacts_search);
 		searchedTextET.addTextChangedListener(textChangedListener);
 
-		mErrorNotificationLayout = (LinearLayout) view
-				.findViewById(R.id.conference_create_error_notification);
 		mInvitionButton = view
 				.findViewById(R.id.video_invition_attendee_ly_invition_button);
 		mInvitionButton.setOnClickListener(confirmButtonListener);
@@ -260,11 +256,12 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		public void onClick(View view) {
 			List<User> removeUsers = new ArrayList<User>();
 			ConferenceGroup confGroup = (ConferenceGroup) GlobalHolder.getInstance().
-					getGroupById(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId());
+					getGroupById(V2GlobalConstants.GROUP_TYPE_CONFERENCE, conf.getId());
 			List<User> users = confGroup.getUsers();
-			Iterator<User> iterator = mAttendeeList.iterator();
-			while (iterator.hasNext()) {
-				User checkUser = iterator.next();
+			List<User> attends = new ArrayList<User>(mAttendeeList);
+			// Clean
+			mGroupListView.updateUserItemcCheck(attends , false);
+			for(User checkUser : attends){
 				for (User user : users) {
 					if (user.getmUserId() == checkUser.getmUserId()) {
 						removeUsers.add(checkUser);
@@ -274,19 +271,19 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 			}
 
 			for (int i = 0; i < removeUsers.size(); i++) {
-				mAttendeeList.remove(removeUsers.get(i));
+				attends.remove(removeUsers.get(i));
 			}
-			
-			List<User> l = new ArrayList<User>(mAttendeeList);
 			
 			if (listener != null) {
-				listener.requestInvitation(conf, l);
+				if(removeUsers.size() > 0)
+					listener.requestInvitation(conf, attends , false);
+				else
+					listener.requestInvitation(conf, attends , true);
 			}
 
-			// Clean
-			mGroupListView.updateUserItemcCheck(l , false);
 			mAttendeeList.clear();
 			mUserListArray.clear();
+			removeUsers = null;
 			if(mAttendeeContainer.getChildCount() > 0){
 				mAttendeeContainer.removeAllViewsInLayout();
 				mAdapter.notifyDataSetChanged();

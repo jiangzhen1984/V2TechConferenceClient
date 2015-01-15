@@ -1,6 +1,5 @@
 package com.v2tech.vo;
 
-import com.V2.jni.V2GlobalEnum;
 import com.v2tech.vo.Group.GroupType;
 
 public class DiscussionConversation extends Conversation {
@@ -17,7 +16,7 @@ public class DiscussionConversation extends Conversation {
 		
 		this.discussionGroup = discussion;
 		super.mExtId = discussionGroup.getmGId();
-		super.mType = V2GlobalEnum.GROUP_TYPE_DISCUSSION;
+		super.mType = V2GlobalConstants.GROUP_TYPE_DISCUSSION;
 	}
 
 	@Override

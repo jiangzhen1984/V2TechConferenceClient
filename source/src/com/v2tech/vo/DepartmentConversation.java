@@ -4,7 +4,6 @@ import com.v2tech.util.DateUtil;
 
 import java.util.Date;
 
-import com.V2.jni.V2GlobalEnum;
 import com.v2tech.vo.Group.GroupType;
 
 public class DepartmentConversation extends Conversation {
@@ -23,7 +22,7 @@ public class DepartmentConversation extends Conversation {
 		}
 		this.departmentGroup = departmentGroup;
 		super.mExtId = departmentGroup.getmGId();
-		super.mType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+		super.mType = V2GlobalConstants.GROUP_TYPE_DEPARTMENT;
 	}
 
 	@Override

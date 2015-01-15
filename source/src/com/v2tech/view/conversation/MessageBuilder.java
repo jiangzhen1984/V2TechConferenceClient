@@ -14,7 +14,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.DataBaseContext;
@@ -22,6 +21,7 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.FileInfoBean;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -71,9 +71,8 @@ public class MessageBuilder {
 		imagePath = newFile.getAbsolutePath();
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
-		VMessageImageItem item = new VMessageImageItem(vm, imagePath);
+		VMessageImageItem item = new VMessageImageItem(vm, uuid , imagePath , 0);
 		item.setState(VMessageAbstractItem.STATE_NORMAL);
-		item.setUuid(uuid);
 		return item.getVm();
 	}
 
@@ -301,15 +300,15 @@ public class MessageBuilder {
 		// 确定远程用户
 		long remote = -1;
 		switch (vm.getMsgCode()) {
-		case V2GlobalEnum.GROUP_TYPE_USER:
+		case V2GlobalConstants.GROUP_TYPE_USER:
 			if (vm.getFromUser().getmUserId() == GlobalHolder.getInstance()
 					.getCurrentUserId())
 				remote = vm.getToUser().getmUserId();
 			else
 				remote = vm.getFromUser().getmUserId();
 			break;
-		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
-		case V2GlobalEnum.GROUP_TYPE_CROWD:
+		case V2GlobalConstants.GROUP_TYPE_DEPARTMENT:
+		case V2GlobalConstants.GROUP_TYPE_CROWD:
 			remote = vm.getGroupId();
 			break;
 		default:

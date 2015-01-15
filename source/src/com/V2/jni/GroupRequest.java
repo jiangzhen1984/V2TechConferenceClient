@@ -13,6 +13,7 @@ import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
+import com.v2tech.vo.V2GlobalConstants;
 
 public class GroupRequest {
 
@@ -568,7 +569,7 @@ public class GroupRequest {
 		if (gid != null && !gid.isEmpty() && createUesrID != null) {
 			vg.owner = new V2User(Long.valueOf(createUesrID));
 			vg.creator = vg.owner;
-			if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			if (groupType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 				vg.setAnnounce(announcement);
 				vg.setBrief(brief);
 				vg.authType = Integer.valueOf(authType);
@@ -607,7 +608,7 @@ public class GroupRequest {
 						+ sXml);
 
 		V2Group group = new V2Group(nGroupID, groupType);
-		if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+		if (groupType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
 			String announcement = XmlAttributeExtractor.extractAttribute(sXml,
 					"announcement");
@@ -624,10 +625,10 @@ public class GroupRequest {
 				V2Log.e("No found authtype attrbitue, use 0 as default");
 			}
 
-		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
+		} else if (groupType == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 			// 会议室
 			group.xml = sXml;
-		} else if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+		} else if (groupType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
 			String name = XmlAttributeExtractor.extractAttribute(sXml, "name");
 			group.setName(name);
 		}

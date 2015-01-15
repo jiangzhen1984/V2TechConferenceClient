@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
@@ -28,6 +27,7 @@ import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.ReceiveQualificationType;
 import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.ReadState;
 import com.v2tech.vo.VMessageQualification.Type;
@@ -754,7 +754,7 @@ public class VerificationProvider extends DatabaseProvider {
 		}
 
 		CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
-				.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupID);
+				.getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, groupID);
 		if (crowdGroup == null) {
 			V2Log.e("MessageBuilder updateQualicationMessageState --> the VMessageQualification Object is null , Need to build"
 					+ "groupID is : " + groupID + " userID is : " + userID);
@@ -807,7 +807,7 @@ public class VerificationProvider extends DatabaseProvider {
 		long groupID = crowd.id;
 
 		CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
-				.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, groupID);
+				.getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, groupID);
 		if (crowdGroup == null) {
 			V2Log.e("MessageBuilder updateQualicationMessageState --> the VMessageQualification Object is null , Need to build"
 					+ "groupID is : " + groupID + " userID is : " + userID);

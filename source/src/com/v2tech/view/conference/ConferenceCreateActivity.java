@@ -213,7 +213,6 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 			} else {
 				flag = OP_ADD_ALL_GROUP_USER;
 			}
-
 			User user = (User) obj;
 			updateUserToAttendList(user, flag);
 
@@ -262,6 +261,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 		if (u == null) {
 			return;
 		}
+		
 		if (op == OP_DEL_ALL_GROUP_USER) {
 			removeAttendee(u);
 		} else if (op == OP_ADD_ALL_GROUP_USER) {
@@ -288,6 +288,11 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 	}
 
 	private void selectGroup(Group selectGroup, boolean addOrRemove) {
+		if(addOrRemove){
+			mAttendeeList.clear();
+			mAttendeeArrayList.clear();
+		}
+			
 		List<Group> subGroups = selectGroup.getChildGroup();
 		for (int i = 0; i < subGroups.size(); i++) {
 			selectGroup(subGroups.get(i), addOrRemove);
@@ -406,12 +411,12 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 							+ rccr.getResult().name());
 					mErrorNotification.setVisibility(View.VISIBLE);
 					if (rccr.getResult() == JNIResponse.Result.ERR_CONF_LOCKDOG_NORESOURCE)
-						mErrorMessageTV.setText(R.string.error_no_resource);
+						mErrorNotification.setText(R.string.error_no_resource);
 					else if (rccr.getResult() == JNIResponse.Result.TIME_OUT) {
-						mErrorMessageTV
+						mErrorNotification
 								.setText(R.string.error_time_out_create_conference_failed);
 					} else {
-						mErrorMessageTV
+						mErrorNotification
 								.setText(R.string.error_create_conference_failed_from_server_side);
 					}
 					break;

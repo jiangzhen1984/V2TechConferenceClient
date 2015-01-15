@@ -8,7 +8,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.db.ContentDescriptor;
 import com.v2tech.service.GlobalHolder;
@@ -25,6 +24,7 @@ import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessage;
 
 public class ConversationProvider extends DatabaseProvider{
@@ -47,7 +47,7 @@ public class ConversationProvider extends DatabaseProvider{
 		long remoteID = 0;
 		int readState = 0;
 		switch (vm.getMsgCode()) {
-		case V2GlobalEnum.GROUP_TYPE_USER:
+		case V2GlobalConstants.GROUP_TYPE_USER:
 			if (vm.getFromUser() == null || vm.getToUser() == null){
 				V2Log.e("ConversationsTabFragment" , "Save Conversation Failed... Because getFromeUser or getToUser is null"
 						+ "for given VMessage Object ... id is : " + vm.getId());
@@ -129,7 +129,7 @@ public class ConversationProvider extends DatabaseProvider{
 			String where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
 					+ "= ?";
 			String[] args = new String[] { String
-					.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT) };
+					.valueOf(V2GlobalConstants.GROUP_TYPE_DEPARTMENT) };
 			cursor = mContext
 					.getContentResolver()
 					.query(ContentDescriptor.RecentHistoriesMessage.CONTENT_URI,
@@ -221,10 +221,10 @@ public class ConversationProvider extends DatabaseProvider{
 									+ "= ? or "
 									+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE + "= ? ",
 							new String[] {
-									String.valueOf(V2GlobalEnum.GROUP_TYPE_USER),
-									String.valueOf(V2GlobalEnum.GROUP_TYPE_CROWD),
-									String.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT),
-									String.valueOf(V2GlobalEnum.GROUP_TYPE_DISCUSSION)},
+									String.valueOf(V2GlobalConstants.GROUP_TYPE_USER),
+									String.valueOf(V2GlobalConstants.GROUP_TYPE_CROWD),
+									String.valueOf(V2GlobalConstants.GROUP_TYPE_DEPARTMENT),
+									String.valueOf(V2GlobalConstants.GROUP_TYPE_DISCUSSION)},
 							ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
 									+ " desc");
 	
@@ -338,7 +338,7 @@ public class ConversationProvider extends DatabaseProvider{
 			break;
 		case Conversation.TYPE_DEPARTMENT:
 		case Conversation.TYPE_GROUP:
-		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+		case V2GlobalConstants.GROUP_TYPE_DISCUSSION:
 			where = ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_USER_TYPE_ID
 					+ "=? and "
 					+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_GROUP_TYPE
@@ -397,7 +397,7 @@ public class ConversationProvider extends DatabaseProvider{
 									+ ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_REMOTE_USER_ID
 									+ " = ? " ,
 							new String[] {
-									String.valueOf(V2GlobalEnum.GROUP_TYPE_USER) , 
+									String.valueOf(V2GlobalConstants.GROUP_TYPE_USER) , 
 									String.valueOf(remoteUserID)},
 							ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_SAVEDATE
 									+ " desc");
@@ -476,9 +476,9 @@ public class ConversationProvider extends DatabaseProvider{
 		VMessage vm = null;
 		int groupType = cur.getInt(cur.getColumnIndex("GroupType"));
 		switch (groupType) {
-		case V2GlobalEnum.GROUP_TYPE_CROWD:
-		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
-		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+		case V2GlobalConstants.GROUP_TYPE_CROWD:
+		case V2GlobalConstants.GROUP_TYPE_DISCUSSION:
+		case V2GlobalConstants.GROUP_TYPE_DEPARTMENT:
 			long groupID = cur.getLong(cur.getColumnIndex("GroupID"));
 			Group group = GlobalHolder.getInstance().getGroupById(groupType,
 					groupID);
@@ -488,15 +488,15 @@ public class ConversationProvider extends DatabaseProvider{
 			}
 
 			switch (groupType) {
-			case V2GlobalEnum.GROUP_TYPE_CROWD:
+			case V2GlobalConstants.GROUP_TYPE_CROWD:
 				group = new CrowdGroup(groupID, null, null);
 				cov = new CrowdConversation(group);
 				break;
-			case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+			case V2GlobalConstants.GROUP_TYPE_DEPARTMENT:
 				group = new OrgGroup(groupID, null);
 				cov = new DepartmentConversation(group);
 				break;
-			case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+			case V2GlobalConstants.GROUP_TYPE_DISCUSSION:
 				group = new DiscussionGroup(groupID, null , null);
 				cov = new DiscussionConversation(group);
 				break;
@@ -511,7 +511,7 @@ public class ConversationProvider extends DatabaseProvider{
 				V2Log.e("ConversationProvider:extractConversation ---> get Newest VMessage is null , update failed , id is :"
 						+ groupID);
 			break;
-		case V2GlobalEnum.GROUP_TYPE_USER:
+		case V2GlobalConstants.GROUP_TYPE_USER:
 			long extId = cur.getLong(cur.getColumnIndex("RemoteUserID"));
 			User u = GlobalHolder.getInstance().getUser(extId);
 			if (u == null) {

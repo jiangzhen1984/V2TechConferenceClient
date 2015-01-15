@@ -1,5 +1,7 @@
 package com.v2tech.view.conversation;
 
+import java.util.UUID;
+
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -54,7 +56,7 @@ public class PlaceSlideFragment extends Fragment {
 		rlContainer.measure(MeasureSpec.UNSPECIFIED,
 				MeasureSpec.UNSPECIFIED);
 		if(vim == null)
-			vim = new VMessageImageItem(new VMessage(0, 0, null, null), filePath);
+			vim = new VMessageImageItem(new VMessage(0, 0, null, null), UUID.randomUUID().toString() , filePath , 0);
 //		if(".gif".equals(vim.getExtension())){
 //			GifView view = (GifView) v.findViewById(R.id.imageview_smile);
 //			view.setGIFResource(filePath);

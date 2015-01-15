@@ -27,7 +27,6 @@ import android.widget.TabHost.TabContentFactory;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.provider.SearchContentProvider;
@@ -38,6 +37,7 @@ import com.v2tech.view.widget.TitleBar;
 import com.v2tech.vo.Conference;
 import com.v2tech.vo.Conversation;
 import com.v2tech.vo.NetworkStateCode;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VFile.State;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFileItem;
@@ -47,6 +47,7 @@ public class MainActivity extends FragmentActivity implements
 
 	private Context mContext;
 	private boolean exitedFlag = false;
+	private Conference conf;
 
 	private TitleBar titleBar;
 	private EditText searchEdit;
@@ -247,24 +248,22 @@ public class MainActivity extends FragmentActivity implements
 	}
 
 	@Override
-	protected void onStart() {
-		super.onStart();
+	protected void onResume() {
+		super.onResume();
+		if (conf != null) {
+			mConfListener.requestJoinConf(conf);
+			conf = null;
+		}
 	}
-
+	
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
 		int index = intent.getIntExtra("initFragment", 0);
 		mViewPager.setCurrentItem(index);
 		if (intent.getExtras() != null) {
-			Conference conf = (Conference) intent.getExtras().get("conf");
-			mConfListener.requestJoinConf(conf);
+			conf = (Conference) intent.getExtras().get("conf");
 		}
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
 	}
 
 	@Override
@@ -313,7 +312,7 @@ public class MainActivity extends FragmentActivity implements
 
 		View noticator = null;
 		if (type == Conversation.TYPE_GROUP
-				|| type == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+				|| type == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
 			noticator = mTabClasses[2].notificator;
 		} else if (type == Conversation.TYPE_CONFERNECE) {
 			noticator = mTabClasses[3].notificator;
@@ -463,7 +462,6 @@ public class MainActivity extends FragmentActivity implements
 				}
 			}
 		}
-
 	}
 
 	class TabClass {

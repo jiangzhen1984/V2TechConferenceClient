@@ -12,10 +12,8 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
-
+import com.v2tech.util.DateUtil;
 
 /**
  * Group information
@@ -39,13 +37,12 @@ public abstract class Group implements Comparable<Group> {
 	private Object mLock = new Object();
 
 	public enum GroupType {
-		ORG(V2GlobalEnum.GROUP_TYPE_DEPARTMENT), 
-		CONTACT(V2GlobalEnum.GROUP_TYPE_CONTACT), 
-		CHATING(V2GlobalEnum.GROUP_TYPE_CROWD), 
-		CONFERENCE(V2GlobalEnum.GROUP_TYPE_CONFERENCE), 
-		DISCUSSION(V2GlobalEnum.GROUP_TYPE_DISCUSSION),
-		SINGLE_PERSON(V2GlobalEnum.GROUP_TYPE_USER),
-		UNKNOWN(-1);
+		ORG(V2GlobalConstants.GROUP_TYPE_DEPARTMENT), CONTACT(
+				V2GlobalConstants.GROUP_TYPE_CONTACT), CHATING(
+				V2GlobalConstants.GROUP_TYPE_CROWD), CONFERENCE(
+				V2GlobalConstants.GROUP_TYPE_CONFERENCE), DISCUSSION(
+				V2GlobalConstants.GROUP_TYPE_DISCUSSION), SINGLE_PERSON(
+				V2GlobalConstants.GROUP_TYPE_USER), UNKNOWN(-1);
 
 		private int type;
 
@@ -55,17 +52,17 @@ public abstract class Group implements Comparable<Group> {
 
 		public static GroupType fromInt(int code) {
 			switch (code) {
-			case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+			case V2GlobalConstants.GROUP_TYPE_DEPARTMENT:
 				return ORG;
-			case V2GlobalEnum.GROUP_TYPE_CONTACT:
+			case V2GlobalConstants.GROUP_TYPE_CONTACT:
 				return CONTACT;
-			case V2GlobalEnum.GROUP_TYPE_CROWD:
+			case V2GlobalConstants.GROUP_TYPE_CROWD:
 				return CHATING;
-			case V2GlobalEnum.GROUP_TYPE_CONFERENCE:
+			case V2GlobalConstants.GROUP_TYPE_CONFERENCE:
 				return CONFERENCE;
-			case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+			case V2GlobalConstants.GROUP_TYPE_DISCUSSION:
 				return DISCUSSION;
-			case V2GlobalEnum.GROUP_TYPE_USER:
+			case V2GlobalConstants.GROUP_TYPE_USER:
 				return SINGLE_PERSON;
 			default:
 				return UNKNOWN;
@@ -100,13 +97,13 @@ public abstract class Group implements Comparable<Group> {
 
 	}
 
-    /**
-     *
-     * @param gId
-     * @param groupType
-     * @param name
-     * @param owner
-     */
+	/**
+	 * 
+	 * @param gId
+	 * @param groupType
+	 * @param name
+	 * @param owner
+	 */
 	protected Group(long gId, GroupType groupType, String name, User owner) {
 		this(gId, groupType, name, owner, new Date());
 
@@ -142,9 +139,7 @@ public abstract class Group implements Comparable<Group> {
 
 	public String getStrCreateDate() {
 		if (this.mCreateDate != null) {
-			DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-					Locale.getDefault());
-			return df.format(this.mCreateDate);
+			return DateUtil.getStringDate(this.mCreateDate.getTime());
 		} else {
 			return null;
 		}
@@ -161,6 +156,10 @@ public abstract class Group implements Comparable<Group> {
 
 	public void setOwnerUser(User mOwnerUser) {
 		this.mOwnerUser = mOwnerUser;
+	}
+
+	public void setmOwner(long mOwner) {
+		this.mOwner = mOwner;
 	}
 
 	public Group getParent() {
@@ -243,6 +242,7 @@ public abstract class Group implements Comparable<Group> {
 	/**
 	 * Find use in current group and childs group.<br>
 	 * If find and return first belongs group.
+	 * 
 	 * @param u
 	 * @return
 	 */
@@ -252,7 +252,7 @@ public abstract class Group implements Comparable<Group> {
 		}
 		return internalSearchUser(null, u);
 	}
-	
+
 	public Group internalSearchUser(Group g, User user) {
 		if (g == null) {
 			g = this;
@@ -272,7 +272,7 @@ public abstract class Group implements Comparable<Group> {
 			}
 		}
 		return null;
-		
+
 	}
 
 	public List<User> searchUser(String text) {
@@ -298,7 +298,7 @@ public abstract class Group implements Comparable<Group> {
 	}
 
 	public int getOnlineUserCount() {
-		//FIXME should optimze data structure
+		// FIXME should optimze data structure
 		Set<User> counter = new HashSet<User>();
 		this.populateUser(this, counter);
 
@@ -313,8 +313,7 @@ public abstract class Group implements Comparable<Group> {
 		}
 		return c;
 	}
-	
-	
+
 	public Set<User> getOnlineUserSet() {
 		Set<User> counter = new HashSet<User>();
 		this.populateUser(this, counter);

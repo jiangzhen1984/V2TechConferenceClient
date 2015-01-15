@@ -31,7 +31,6 @@ import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
@@ -92,9 +91,9 @@ public class User implements Comparable<User> {
 	// This value indicate this object is dirty, construct locally without any
 	// user information
 	private boolean isDirty;
-	
-	//会议中的快速入会用户
-	private boolean isRapidInitiation=false;
+
+	// 会议中的快速入会用户
+	private boolean isRapidInitiation = false;
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
@@ -247,7 +246,7 @@ public class User implements Comparable<User> {
 			return loadCompany(g.getParent());
 		} else {
 			List<Group> contacts = GlobalHolder.getInstance().getGroup(
-					V2GlobalEnum.GROUP_TYPE_CONTACT);
+					V2GlobalConstants.GROUP_TYPE_CONTACT);
 			if (contacts.contains(g))
 				return "";
 			else
@@ -487,15 +486,24 @@ public class User implements Comparable<User> {
 				.getCurrentUserId()) {
 			return 1;
 		}
+
 		if (another.getmStatus() == this.mStatus) {
 			return this.abbra.compareTo(another.abbra);
 		}
-		// if (this.mStatus == Status.ONLINE) {
-		// return -1;
-		// } else if (another.getmStatus() == Status.ONLINE) {
-		// return 1;
-		// }
+		
+		//保证状态排序是对的
+		if ((this.mStatus == Status.HIDDEN || this.mStatus == Status.OFFLINE)
+				&& (another.getmStatus() != Status.HIDDEN || another
+						.getmStatus() != Status.OFFLINE)) {
+			return 1;
+		}
 
+		if ((this.mStatus != Status.HIDDEN || this.mStatus != Status.OFFLINE)
+				&& (another.getmStatus() == Status.HIDDEN || another
+						.getmStatus() == Status.OFFLINE)) {
+			return -1;
+		}
+		
 		if (this.mStatus == Status.ONLINE || this.mStatus == Status.LEAVE
 				|| this.mStatus == Status.DO_NOT_DISTURB
 				|| this.mStatus == Status.BUSY) {

@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.text.Editable;
+import android.text.TextUtils;
 import android.util.SparseArray;
 
 import com.V2.jni.util.V2Log;
@@ -274,6 +275,10 @@ public class SearchUtils {
 		for (int i = 0; i < searchCacheList.size(); i++) {
 			Object obj = searchCacheList.get(i);
 			V2Log.e(TAG, "current search word : " + getObjectValue(obj));
+			if(TextUtils.isEmpty(getObjectValue(obj))){
+				return ;
+			}
+			
 			// 获取名字，将名字变成拼音串起来
 			//FIXME 包含有多音字，需要重新组合
 			char[] charArray = getObjectValue(obj).toCharArray();

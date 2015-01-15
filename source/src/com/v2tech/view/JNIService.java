@@ -87,6 +87,7 @@ import com.v2tech.vo.GroupQualicationState;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -398,7 +399,7 @@ public class JNIService extends Service implements
 
 				if (gl != null && gl.size() > 0) {
 					GlobalHolder.getInstance().updateGroupList(msg.arg1, gl);
-					if (msg.arg1 == V2GlobalEnum.GROUP_TYPE_DEPARTMENT
+					if (msg.arg1 == V2GlobalConstants.GROUP_TYPE_DEPARTMENT
 							&& !noNeedBroadcast) {
 						V2Log.d(TAG,
 								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
@@ -412,13 +413,13 @@ public class JNIService extends Service implements
 					}
 				}
 				break;
-
 			case JNI_GROUP_USER_INFO_NOTIFICATION:
 				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
 				if (go != null && go.xml != null) {
 					List<User> lu = User.fromXml(go.xml);
 					Group group = GlobalHolder.getInstance().findGroupById(
 							go.gId);
+					User creator = group.getOwnerUser();
 					for (User tu : lu) {
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
@@ -432,6 +433,7 @@ public class JNIService extends Service implements
 							ImRequest.getInstance().getUserBaseInfo(
 									existU.getmUserId());
 						}
+						
 						if (existU.getmUserId() == GlobalHolder.getInstance()
 								.getCurrentUserId()) {
 							// Update logged user object.
@@ -446,16 +448,15 @@ public class JNIService extends Service implements
 							existU.setDeviceType(User.DeviceType
 									.fromInt(userStatusObject.getDeviceType()));
 						}
-
+						
 						if (group == null) {
-							V2Log.e(" didn't find group information  " + go.gId);
+							V2Log.e(TAG , "didn't find group information  " + go.gId);
 						} else {
 							group.addUserToGroup(existU);
 						}
 					}
-					V2Log.w("  group:" + go.gId + "  user size:" + lu.size()
-							+ "  " + group);
-
+					V2Log.w(TAG , "The Group -" + go.gId + "- users info have update over! "
+							+ " type is : " + go.gType + "- user size is : " + lu.size());
 					if (!noNeedBroadcast) {
 						V2Log.d(TAG,
 								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
@@ -538,7 +539,7 @@ public class JNIService extends Service implements
 					MessageBuilder.saveFileVMessage(mContext, vm);
 					MessageBuilder.saveMessage(mContext, vm);
 
-					if (vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
+					if (vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
@@ -1070,24 +1071,24 @@ public class JNIService extends Service implements
 				}
 			} else if (groupType == GroupType.CHATING.intValue()) {
 				GlobalHolder.getInstance().removeGroup(
-						GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_CROWD),
+						GroupType.fromInt(V2GlobalConstants.GROUP_TYPE_CROWD),
 						nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("group", new GroupUserObject(
-						V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
+						V2GlobalConstants.GROUP_TYPE_CROWD, nGroupID, -1));
 				sendBroadcast(i, null);
 
 			} else if (groupType == GroupType.DISCUSSION.intValue()) {
 				GlobalHolder.getInstance().removeGroup(
-						GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_DISCUSSION),
+						GroupType.fromInt(V2GlobalConstants.GROUP_TYPE_DISCUSSION),
 						nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("group", new GroupUserObject(
-						V2GlobalEnum.GROUP_TYPE_DISCUSSION, nGroupID, -1));
+						V2GlobalConstants.GROUP_TYPE_DISCUSSION, nGroupID, -1));
 				sendBroadcast(i);
 
 			}
@@ -1098,7 +1099,7 @@ public class JNIService extends Service implements
 		public void OnDelGroupUserCallback(int groupType, long nGroupID,
 				long nUserID) {
 
-			if (groupType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT
+			if (groupType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT
 					&& nUserID == GlobalHolder.getInstance().getCurrentUserId()) {
 				// TODO 说明已被管理系统删除，需要给用户提示并退出程序
 			}
@@ -1115,24 +1116,24 @@ public class JNIService extends Service implements
 			} else if (groupType == GroupType.CHATING.intValue()
 					&& GlobalHolder.getInstance().getCurrentUserId() == nUserID) {
 				GlobalHolder.getInstance().removeGroup(
-						GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_CROWD),
+						GroupType.fromInt(V2GlobalConstants.GROUP_TYPE_CROWD),
 						nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("group", new GroupUserObject(
-						V2GlobalEnum.GROUP_TYPE_CROWD, nGroupID, -1));
+						V2GlobalConstants.GROUP_TYPE_CROWD, nGroupID, -1));
 				sendBroadcast(i);
 			} else if (groupType == GroupType.DISCUSSION.intValue()
 					&& GlobalHolder.getInstance().getCurrentUserId() == nUserID) {
 				GlobalHolder.getInstance().removeGroup(
-						GroupType.fromInt(V2GlobalEnum.GROUP_TYPE_DISCUSSION),
+						GroupType.fromInt(V2GlobalConstants.GROUP_TYPE_DISCUSSION),
 						nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("group", new GroupUserObject(
-						V2GlobalEnum.GROUP_TYPE_DISCUSSION, nGroupID, -1));
+						V2GlobalConstants.GROUP_TYPE_DISCUSSION, nGroupID, -1));
 				sendBroadcast(i);
 			}
 
@@ -1275,7 +1276,7 @@ public class JNIService extends Service implements
 			}
 
 			CrowdGroup g = (CrowdGroup) GlobalHolder.getInstance()
-					.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, group.id);
+					.getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, group.id);
 			if (g == null) {
 				User user = GlobalHolder.getInstance().getUser(
 						group.creator.uid);
@@ -1306,7 +1307,7 @@ public class JNIService extends Service implements
 			i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			i.putExtra("group", new GroupUserObject(
-					V2GlobalEnum.GROUP_TYPE_CROWD, group.id, -1));
+					V2GlobalConstants.GROUP_TYPE_CROWD, group.id, -1));
 			sendBroadcast(i);
 
 			Intent intent = new Intent();
@@ -1366,6 +1367,13 @@ public class JNIService extends Service implements
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
 			} else if (gType == GroupType.CHATING) {
+				
+				Group isExist = GlobalHolder.getInstance().getGroupById(
+						V2GlobalConstants.GROUP_TYPE_CROWD, obj.groupID);
+				if(isExist == null){
+					V2Log.e(TAG, "The Crowd Group already no exist! group id is : " + obj.groupID);
+					return ;
+				}
 				long waitMessageExist = VerificationProvider
 						.queryCrowdInviteWaitingQualMessageById(obj.userID);
 				if (waitMessageExist != -1) {
@@ -1451,13 +1459,13 @@ public class JNIService extends Service implements
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 				i.putExtra("group", new GroupUserObject(
-						V2GlobalEnum.GROUP_TYPE_CROWD, crowd.id, -1));
+						V2GlobalConstants.GROUP_TYPE_CROWD, crowd.id, -1));
 				sendBroadcast(i);
 			} else if (crowd.type == V2Group.TYPE_DISCUSSION_BOARD
 					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.owner.uid) {
 				if (GlobalHolder.getInstance().getCurrentUserId() == crowd.creator.uid) {
 					Group existGroup = GlobalHolder.getInstance().getGroupById(
-							V2GlobalEnum.GROUP_TYPE_DISCUSSION, crowd.id);
+							V2GlobalConstants.GROUP_TYPE_DISCUSSION, crowd.id);
 					if (existGroup != null)
 						return;
 				}
@@ -1481,7 +1489,7 @@ public class JNIService extends Service implements
 				i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 				i.putExtra("group", new GroupUserObject(
-						V2GlobalEnum.GROUP_TYPE_DISCUSSION, crowd.id, -1));
+						V2GlobalConstants.GROUP_TYPE_DISCUSSION, crowd.id, -1));
 				sendBroadcast(i);
 			}
 		}
@@ -1493,13 +1501,13 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			if (group.type == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			if (group.type == V2GlobalConstants.GROUP_TYPE_CROWD) {
 				CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
 						.getGroupById(group.id);
 				if (cg != null) {
 					cg.addNewFileNum(list.size());
 				}
-			} else if (group.type == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
+			} else if (group.type == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 				// TODO 会议共享文件
 				return;
 			}
@@ -1510,7 +1518,7 @@ public class JNIService extends Service implements
 				if (GlobalHolder.getInstance().getCurrentUserId() == uploadUserID)
 					continue;
 				User user = GlobalHolder.getInstance().getUser(uploadUserID);
-				VMessage vm = new VMessage(V2GlobalEnum.GROUP_TYPE_CROWD,
+				VMessage vm = new VMessage(V2GlobalConstants.GROUP_TYPE_CROWD,
 						group.id, user, null, new Date(
 								GlobalConfig.getGlobalServerTime()));
 				VMessageFileItem item = new VMessageFileItem(vm,
@@ -2155,10 +2163,10 @@ public class JNIService extends Service implements
 				int transType;
 				if (nTransType == FileDownLoadErrorIndication.TYPE_SEND) {
 					fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT);
-					transType = V2GlobalEnum.FILE_TRANS_SENDING;
+					transType = V2GlobalConstants.FILE_TRANS_SENDING;
 				} else {
 					fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
-					transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;
+					transType = V2GlobalConstants.FILE_TRANS_DOWNLOADING;
 				}
 				updateFileState(transType, fileItem,
 						"JNIService OnFileTransEnd", false);
@@ -2197,12 +2205,12 @@ public class JNIService extends Service implements
 
 					if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING
 							|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING) {
-						transType = V2GlobalEnum.FILE_TRANS_SENDING;
+						transType = V2GlobalConstants.FILE_TRANS_SENDING;
 						fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 					} else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
 							|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING) {
 						fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
-						transType = V2GlobalEnum.FILE_TRANS_DOWNLOADING;
+						transType = V2GlobalConstants.FILE_TRANS_DOWNLOADING;
 						;
 					}
 					int updates = MessageBuilder.updateVMessageItem(mContext,
@@ -2310,7 +2318,7 @@ public class JNIService extends Service implements
 			String tag, boolean isAdd) {
 		long remoteID;
 		VMessage vm = fileItem.getVm();
-		if (vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER)
+		if (vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER)
 			remoteID = vm.getToUser().getmUserId();
 		else
 			remoteID = vm.getGroupId();

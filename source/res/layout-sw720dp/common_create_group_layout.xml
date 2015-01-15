@@ -16,14 +16,7 @@
             android:background="#cdcdcf"
             android:orientation="vertical" >
         </LinearLayout>
-        <LinearLayout
-            android:id="@+id/conference_create_error_notification"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#FFDEAD"
-            android:visibility="gone" >
-            <include layout="@layout/common_create_error_connect_layout" />
-        </LinearLayout>
+        <include layout="@layout/common_create_error_connect_layout" />
         <include layout="@layout/common_create_search_layout" />
     </LinearLayout>
     <LinearLayout

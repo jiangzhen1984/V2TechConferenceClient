@@ -10,7 +10,6 @@ import com.V2.jni.FileRequest;
 import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.GroupRequestCallbackAdapter;
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
@@ -32,6 +31,7 @@ import com.v2tech.vo.DiscussionGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VCrowdFile;
 
 //组别统一名称
@@ -797,7 +797,7 @@ public class CrowdGroupService extends AbstractHandler {
                 return ;
             }
             
-            if(group.type == V2GlobalEnum.GROUP_TYPE_CONFERENCE){
+            if(group.type == V2GlobalConstants.GROUP_TYPE_CONFERENCE){
             	V2Log.e("CrowdGroupService OnAddGroupFile--> add a new group file failed , Group Type is Conference!");
             	return ;
             }

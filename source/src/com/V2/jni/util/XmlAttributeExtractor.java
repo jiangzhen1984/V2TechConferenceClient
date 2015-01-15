@@ -22,11 +22,11 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.text.TextUtils;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 
 public class XmlAttributeExtractor {
 
@@ -56,10 +56,10 @@ public class XmlAttributeExtractor {
 	 * @return
 	 */
 	public static String extractAttribute(String str, String attribute) {
-		if (str == null || attribute == null || attribute.isEmpty()
-				) {
+		if (TextUtils.isEmpty(str) || TextUtils.isEmpty(attribute)) {
 			return null;
 		}
+		
 		String key =" "+ attribute+"=";
 		int start = str.indexOf(key);
 		if (start == -1) {
@@ -186,7 +186,7 @@ public class XmlAttributeExtractor {
 						}
 						
 						String name = pull.getAttributeValue(null, "name");
-						v2Group = new V2Group(Long.parseLong(id), name, V2GlobalEnum.GROUP_TYPE_CROWD);
+						v2Group = new V2Group(Long.parseLong(id), name, V2GlobalConstants.GROUP_TYPE_CROWD);
 
 						String summary = pull.getAttributeValue(null, "summary");
 						String announcement = pull.getAttributeValue(null, "announcement");
@@ -548,4 +548,5 @@ public class XmlAttributeExtractor {
 		}
 		return u;
 	}
+	
 }

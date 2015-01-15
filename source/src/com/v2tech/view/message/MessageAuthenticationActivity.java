@@ -37,7 +37,6 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
@@ -68,6 +67,7 @@ import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.ReadState;
@@ -744,7 +744,7 @@ public class MessageAuthenticationActivity extends Activity {
 		Intent i = new Intent();
 		if (imsg.getQualState() == QualificationState.BE_ACCEPTED) {
 			if (GlobalHolder.getInstance().getGroupById(
-					V2GlobalEnum.GROUP_TYPE_CROWD,
+					V2GlobalConstants.GROUP_TYPE_CROWD,
 					imsg.getCrowdGroup().getmGId()) != null) {
 				i.putExtra("obj", new ConversationNotificationObject(
 						Conversation.TYPE_GROUP,
@@ -757,7 +757,7 @@ public class MessageAuthenticationActivity extends Activity {
 			}
 		} else {
 			CrowdGroup group = (CrowdGroup) GlobalHolder.getInstance()
-					.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD,
+					.getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD,
 							imsg.getCrowdGroup().getmGId());
 			Crowd crowd;
 			if (group != null) {
@@ -810,7 +810,9 @@ public class MessageAuthenticationActivity extends Activity {
 				else
 					intent.putExtra("isOtherShowPrompt", false);
 			}
-			setResult(16, intent);
+			intent.setAction(PublicIntent.BROADCAST_AUTHENTIC_TO_CONVERSATIONS_TAB_FRAGMENT_NOTIFICATION);
+			intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			sendBroadcast(intent);
 			super.onBackPressed();
 		}
 
@@ -1385,7 +1387,7 @@ public class MessageAuthenticationActivity extends Activity {
 						intent.putExtra(
 								"group",
 								new GroupUserObject(
-										V2GlobalEnum.GROUP_TYPE_CROWD, cg
+										V2GlobalConstants.GROUP_TYPE_CROWD, cg
 												.getmGId(), -1));
 						sendBroadcast(intent);
 
@@ -1582,6 +1584,9 @@ public class MessageAuthenticationActivity extends Activity {
 					groupAdapter.notifyDataSetChanged();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
 					.equals(intent.getAction())) {
+				if(currentRadioType != PROMPT_TYPE_GROUP)
+					return ;
+				
 				GroupUserObject obj = (GroupUserObject) intent.getExtras().get(
 						"obj");
 
@@ -1590,6 +1595,7 @@ public class MessageAuthenticationActivity extends Activity {
 							"JNI_BROADCAST_GROUP_USER_REMOVED --> Update Conversation failed that the user removed ... given GroupUserObject is null");
 					return;
 				}
+				
 				for (int i = 0 ; i < mMessageList.size() ; i++) {
 					ListItemWrapper wrapper = mMessageList.get(i);
 					VMessageQualification message = (VMessageQualification) wrapper.obj;

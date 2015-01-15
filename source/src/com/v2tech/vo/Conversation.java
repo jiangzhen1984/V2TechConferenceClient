@@ -2,20 +2,19 @@ package com.v2tech.vo;
 
 import android.text.TextUtils;
 
-import com.V2.jni.V2GlobalEnum;
 import com.v2tech.util.DateUtil;
 
 public class Conversation implements Comparable<Conversation>{
 
-	public static final int TYPE_CONFERNECE = V2GlobalEnum.GROUP_TYPE_CONFERENCE;
+	public static final int TYPE_CONFERNECE = V2GlobalConstants.GROUP_TYPE_CONFERENCE;
 
-	public static final int TYPE_CONTACT = V2GlobalEnum.GROUP_TYPE_USER;
+	public static final int TYPE_CONTACT = V2GlobalConstants.GROUP_TYPE_USER;
 
-	public static final int TYPE_GROUP = V2GlobalEnum.GROUP_TYPE_CROWD;
+	public static final int TYPE_GROUP = V2GlobalConstants.GROUP_TYPE_CROWD;
 	
-	public static final int TYPE_DEPARTMENT = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+	public static final int TYPE_DEPARTMENT = V2GlobalConstants.GROUP_TYPE_DEPARTMENT;
 	
-	public static final int TYPE_DISCUSSION = V2GlobalEnum.GROUP_TYPE_DISCUSSION;
+	public static final int TYPE_DISCUSSION = V2GlobalConstants.GROUP_TYPE_DISCUSSION;
 
 	public static final int TYPE_VOICE_MESSAGE = 7;
 

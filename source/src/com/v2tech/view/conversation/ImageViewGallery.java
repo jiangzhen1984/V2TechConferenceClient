@@ -14,8 +14,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
-import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageImageItem;
 
@@ -44,23 +44,23 @@ public class ImageViewGallery extends FragmentActivity {
 		currentImageID = getIntent().getStringExtra("imageID");
 		int type = getIntent().getIntExtra("type", 0);
 		switch (type) {
-		case V2GlobalEnum.GROUP_TYPE_USER:
+		case V2GlobalConstants.GROUP_TYPE_USER:
 			loadUserImages(getIntent().getLongExtra("uid1", 0), getIntent()
 					.getLongExtra("uid2", 0));
 			break;
-		case V2GlobalEnum.GROUP_TYPE_CONFERENCE:
+		case V2GlobalConstants.GROUP_TYPE_CONFERENCE:
 			long conferenceID = getIntent().getLongExtra("gid", 0);
 			loadConferenceImages(conferenceID);
 			break;
-		case V2GlobalEnum.GROUP_TYPE_CROWD:
+		case V2GlobalConstants.GROUP_TYPE_CROWD:
 			long gid = getIntent().getLongExtra("gid", 0);
 			loadCrowdImages(gid); 
 			break;
-		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+		case V2GlobalConstants.GROUP_TYPE_DEPARTMENT:
 			long departmentID = getIntent().getLongExtra("gid", 0);
 			loadDepartmentImages(departmentID); 
 			break;
-		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+		case V2GlobalConstants.GROUP_TYPE_DISCUSSION:
 			long discussionID = getIntent().getLongExtra("gid", 0);
 			loadDiscussionImages(discussionID); 
 			break;
@@ -98,7 +98,7 @@ public class ImageViewGallery extends FragmentActivity {
 	 */
 	private void loadCrowdImages(long groupId) {
 		List<VMessage> list = MessageLoader
-				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_CROWD) , groupId);
+				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalConstants.GROUP_TYPE_CROWD) , groupId);
 		populateImageMessage(list);
 	}
 
@@ -110,19 +110,19 @@ public class ImageViewGallery extends FragmentActivity {
 	
 	private void loadConferenceImages(long groupId) {
 		List<VMessage> list = MessageLoader
-				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_CONFERENCE) , groupId);
+				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalConstants.GROUP_TYPE_CONFERENCE) , groupId);
 		populateImageMessage(list);
 	}
 	
 	private void loadDepartmentImages(long groupId) {
 		List<VMessage> list = MessageLoader
-				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_DEPARTMENT) , groupId);
+				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalConstants.GROUP_TYPE_DEPARTMENT) , groupId);
 		populateImageMessage(list);
 	}
 	
 	private void loadDiscussionImages(long groupId) {
 		List<VMessage> list = MessageLoader
-				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalEnum.GROUP_TYPE_DISCUSSION) , groupId);
+				.loadGroupImageMessage(this, Integer.valueOf(V2GlobalConstants.GROUP_TYPE_DISCUSSION) , groupId);
 		populateImageMessage(list);
 	}
 

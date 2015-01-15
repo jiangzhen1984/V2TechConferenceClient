@@ -16,7 +16,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.provider.VerificationProvider;
@@ -30,12 +29,13 @@ import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.ConversationNotificationObject;
 import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.message.MessageAuthenticationActivity;
+import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
 import com.v2tech.vo.CrowdGroup.AuthType;
-import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.GroupQualicationState;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
 import com.v2tech.vo.VMessageQualification.ReadState;
@@ -45,6 +45,7 @@ public class CrowdInvitationActivity extends Activity {
 
 	private final static int ACCEPT_INVITATION_DONE = 1;
 	private final static int REFUSE_INVITATION_DONE = 2;
+	private final static int UPDATE_CROWD_INFO = 3;
 
 	private TextView mTitleName;
 	private TextView mNameTV;
@@ -90,6 +91,7 @@ public class CrowdInvitationActivity extends Activity {
 		mNameTV = (TextView) findViewById(R.id.crowd_invitation_name);
 		mNoTV = (TextView) findViewById(R.id.crowd_invitation_crowd_no);
 		mCreatorTV = (TextView) findViewById(R.id.crowd_invitation_creator_tv);
+		mCreatorTV.setSingleLine();
 		mBriefTV = (TextView) findViewById(R.id.crowd_invitation_brief);
 		mAnnounceTV = (TextView) findViewById(R.id.crowd_invitation_announcement);
 		mMembersTV = (TextView) findViewById(R.id.crowd_invitation_members);
@@ -124,7 +126,7 @@ public class CrowdInvitationActivity extends Activity {
 		mAnnounceTV.setText(crowd.getAnnounce());
 
 		Group group = GlobalHolder.getInstance().getGroupById(
-				V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getId());
+				V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getId());
 		if (group != null && group.getUsers() != null)
 			mMembersTV.setText(String.valueOf(group.getUsers().size()) + "人");
 
@@ -178,6 +180,7 @@ public class CrowdInvitationActivity extends Activity {
 		IntentFilter filter = new IntentFilter();
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		filter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED);
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 		filter.addAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
@@ -186,7 +189,7 @@ public class CrowdInvitationActivity extends Activity {
 
 	private void handleAcceptDone() {
 		CrowdGroup group = (CrowdGroup) GlobalHolder.getInstance()
-				.getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getId());
+				.getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getId());
 		if (group != null && group.getUsers() != null) {
 			mMembersTV.setText(String.valueOf(group.getUsers().size()) + "人");
 			mAnnounceTV.setText(group.getAnnouncement());
@@ -234,13 +237,13 @@ public class CrowdInvitationActivity extends Activity {
 					"isFromApplication", false);
 			if (isFromApplication) {
 				CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance().
-						getGroupById(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getId());
+						getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getId());
 				if(crowdGroup != null){
 					mMembersTV.setText(String.valueOf(crowdGroup.getUsers().size())
 							+ "人");
 					mAnnounceTV.setText(crowdGroup.getAnnouncement());
 					mBriefTV.setText(crowdGroup.getBrief());
-				}
+				} 
 				mTitleName.setText(R.string.crowd_application_title);
 				mAcceptedLy.setVisibility(View.VISIBLE);
 				mButtonLayout.setVisibility(View.GONE);
@@ -447,6 +450,16 @@ public class CrowdInvitationActivity extends Activity {
 					onBackPressed();
 				else
 					isNeedFinish = true;
+			} else if(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
+					.equals(intent.getAction())){
+				CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance().
+						getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getId());
+				if(crowdGroup != null){
+					mMembersTV.setText(String.valueOf(crowdGroup.getUsers().size())
+							+ "人");
+					mAnnounceTV.setText(crowdGroup.getAnnouncement());
+					mBriefTV.setText(crowdGroup.getBrief());
+				}
 			}
 		}
 	}
@@ -488,6 +501,13 @@ public class CrowdInvitationActivity extends Activity {
 			case REFUSE_INVITATION_DONE:
 				// ProgressUtils.showNormalWithHintProgress(mContext, false);
 				// handleDeclineDone();
+				break;
+			case UPDATE_CROWD_INFO:
+				CrowdGroup crowdGroup = (CrowdGroup) msg.obj;
+				mMembersTV.setText(String.valueOf(crowdGroup.getUsers().size())
+						+ "人");
+				mAnnounceTV.setText(crowdGroup.getAnnouncement());
+				mBriefTV.setText(crowdGroup.getBrief());
 				break;
 			}
 			ProgressUtils.showNormalWithHintProgress(mContext, false);

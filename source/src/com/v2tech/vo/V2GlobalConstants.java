@@ -63,4 +63,21 @@ public class V2GlobalConstants {
 	
 	public static final int RECORD_TYPE_START = 0x0001;
 	public static final int RECORD_TYPE_STOP = 0x0002;
+
+	/**
+	 * groupType 的分类
+	 */
+	public static final int GROUP_TYPE_USER = 0;
+	public static final int GROUP_TYPE_DEPARTMENT = 1;
+	public static final int GROUP_TYPE_CONTACT = 2;
+	public static final int GROUP_TYPE_CROWD = 3;
+	public static final int GROUP_TYPE_CONFERENCE = 4;
+	public static final int GROUP_TYPE_DISCUSSION = 5;
+
+	/**
+	 * 文件传输的flag
+	 */
+	public static final int FILE_TRANS_SENDING = 10;
+	public static final int FILE_TRANS_DOWNLOADING = 11;
+	public static final int FILE_TRANS_ERROR = 13;
 }

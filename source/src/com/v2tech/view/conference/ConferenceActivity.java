@@ -108,6 +108,7 @@ import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
 import com.v2tech.vo.V2Doc;
 import com.v2tech.vo.V2Doc.Page;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.V2ShapeMeta;
 import com.v2tech.vo.VMessage;
 
@@ -493,7 +494,7 @@ public class ConferenceActivity extends Activity {
 		conf = (Conference) this.getIntent().getExtras().get("conf");
 
 		cg = (ConferenceGroup) GlobalHolder.getInstance().getGroupById(
-				V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf.getId());
+				V2GlobalConstants.GROUP_TYPE_CONFERENCE, conf.getId());
 
 		if (cg == null) {
 			V2Log.e(" doesn't receive group information  yet");
@@ -775,7 +776,7 @@ public class ConferenceActivity extends Activity {
 		}
 		return mDocContainer;
 	}
-
+	
 	private View initInvitionContainer() {
 		if (mInvitionContainer == null) {
 			mInvitionContainer = new VideoInvitionAttendeeLayout(this, conf);
@@ -1478,7 +1479,7 @@ public class ConferenceActivity extends Activity {
 								0,
 								0,
 								new UserDeviceConfig(
-										V2GlobalEnum.GROUP_TYPE_CONFERENCE,
+										V2GlobalConstants.GROUP_TYPE_CONFERENCE,
 										conf.getId(), GlobalHolder
 												.getInstance()
 												.getCurrentUserId(), "", null))
@@ -1528,7 +1529,7 @@ public class ConferenceActivity extends Activity {
 					.getAction())) {
 				long mid = intent.getLongExtra("mid", 0);
 				VMessage vm = MessageLoader.loadGroupMessageById(mContext,
-						V2GlobalEnum.GROUP_TYPE_CONFERENCE,
+						V2GlobalConstants.GROUP_TYPE_CONFERENCE,
 						intent.getLongExtra("groupID", 0), mid);
 				if (mMessageContainer != null) {
 					mMessageContainer.addNewMessage(vm);
@@ -1580,7 +1581,7 @@ public class ConferenceActivity extends Activity {
 					return;
 				}
 
-				if (obj.getmType() != V2GlobalEnum.GROUP_TYPE_CONFERENCE)
+				if (obj.getmType() != V2GlobalConstants.GROUP_TYPE_CONFERENCE)
 					return;
 
 				Message.obtain(mVideoHandler, USER_DELETE_GROUP, obj)
@@ -1957,7 +1958,7 @@ public class ConferenceActivity extends Activity {
 			// udc = new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE,
 			// conf.getId(), atd.getAttId(),
 			// String.valueOf(atd.getAttId())+":Camera", null);
-			udc = new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE,
+			udc = new UserDeviceConfig(V2GlobalConstants.GROUP_TYPE_CONFERENCE,
 					conf.getId(), atd.getAttId(), "", null);
 			// Make sure current user device is enable
 			udc.setEnable(true);
@@ -2003,7 +2004,7 @@ public class ConferenceActivity extends Activity {
 					REQUEST_OPEN_OR_CLOSE_DEVICE,
 					0,
 					0,
-					new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE,
+					new UserDeviceConfig(V2GlobalConstants.GROUP_TYPE_CONFERENCE,
 							conf.getId(), GlobalHolder.getInstance()
 									.getCurrentUserId(), "", null))
 					.sendToTarget();
@@ -2025,7 +2026,7 @@ public class ConferenceActivity extends Activity {
 				REQUEST_OPEN_OR_CLOSE_DEVICE,
 				1,
 				0,
-				new UserDeviceConfig(V2GlobalEnum.GROUP_TYPE_CONFERENCE, conf
+				new UserDeviceConfig(V2GlobalConstants.GROUP_TYPE_CONFERENCE, conf
 						.getId(),
 						GlobalHolder.getInstance().getCurrentUserId(), "", null))
 				.sendToTarget();
@@ -3360,16 +3361,20 @@ public class ConferenceActivity extends Activity {
 		}
 
 		@Override
-		public void requestInvitation(Conference conf, List<User> l) {
-			if (l == null || l.size() <= 0) {
-				Toast.makeText(mContext, R.string.warning_no_attendee_selected,
-						Toast.LENGTH_SHORT).show();
-				return;
+		public void requestInvitation(Conference conf, List<User> attendUsers , boolean isNotify) {
+			if (attendUsers == null || attendUsers.size() <= 0) {
+				if(isNotify){
+					Toast.makeText(mContext, R.string.warning_no_attendee_selected,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
 			}
 			// ignore call back;
-			cb.inviteAttendee(conf, l, null);
+			cb.inviteAttendee(conf, attendUsers, null);
 			// Hide invitation layout
-			showOrHideSubWindow(initInvitionContainer());
+			mMenuInviteAttendeeButton.performClick();
+			//用该函数隐藏，会有按钮背景色异常的问题
+//			showOrHideSubWindow(initInvitionContainer());
 		}
 	}
 
@@ -3470,7 +3475,7 @@ public class ConferenceActivity extends Activity {
 				break;
 			case GROUP_ADD_USER:
 				GroupUserObject ro1 = (GroupUserObject) msg.obj;
-				if (ro1.getmType() == V2GlobalEnum.GROUP_TYPE_CONFERENCE) { // CONFGROUP
+				if (ro1.getmType() == V2GlobalConstants.GROUP_TYPE_CONFERENCE) { // CONFGROUP
 
 					boolean contain = false;
 					for (Attendee attendee : mAttendeeList) {

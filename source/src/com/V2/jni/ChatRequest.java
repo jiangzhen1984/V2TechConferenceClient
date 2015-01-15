@@ -174,8 +174,7 @@ public class ChatRequest {
 		V2Log.d("ChatRequest UI", "OnRecvChatText ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nFromUserID: "
 				+ nFromUserID + " | nToUserID: " + nToUserID + " | nTime: "
-				+ nTime + " | szSeqID: " + szSeqID + " | szXmlText: "
-				+ szXmlText);
+				+ nTime + " | szSeqID: " + szSeqID);
 		if (callback != null) {
 			 callback.OnRecvChatTextCallback(eGroupType, nGroupID, nFromUserID,
 						 nToUserID, nTime, szSeqID, szXmlText);
@@ -204,7 +203,7 @@ public class ChatRequest {
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nFromUserID: "
 				+ nFromUserID + " | nToUserID: " + nToUserID + " | nTime: "
 				+ nTime + " | binaryType: " + binaryType + " | messageId: "
-				+ messageId + " | binaryPath: " + binaryPath);
+				+ messageId);
 		if (callback != null) {
 			 callback.OnRecvChatBinary(eGroupType, nGroupID, nFromUserID,
 						nToUserID, nTime, binaryType, messageId,

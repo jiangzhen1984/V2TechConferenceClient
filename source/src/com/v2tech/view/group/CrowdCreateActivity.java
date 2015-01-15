@@ -26,7 +26,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.provider.VerificationProvider;
@@ -46,6 +45,7 @@ import com.v2tech.vo.CrowdGroup.AuthType;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessageQualificationApplicationCrowd;
 
 /**
@@ -445,7 +445,7 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 					i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
 					i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 					i.putExtra("group", new GroupUserObject(
-							V2GlobalEnum.GROUP_TYPE_CROWD, id, -1));
+							V2GlobalConstants.GROUP_TYPE_CROWD, id, -1));
 					mContext.sendBroadcast(i);
 
 					Intent crowdIntent = new Intent(

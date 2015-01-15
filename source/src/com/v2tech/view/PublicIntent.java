@@ -207,4 +207,8 @@ public class PublicIntent {
 	 */
 	public static final String BROADCAST_CROWD_FILE_ACTIVITY_SEND_NOTIFICATION = "com.v2tech.broadcast.add_other_friend_waiting_notification";
 	
+	/**
+	 * Broadcast for MessageAuthenticationActivity notify ConversationsTabFragment
+	 */
+	public static final String BROADCAST_AUTHENTIC_TO_CONVERSATIONS_TAB_FRAGMENT_NOTIFICATION = "com.v2tech.broadcast.authentic_to_conversations_tab_fragment_notification";
 }

@@ -31,7 +31,6 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
@@ -44,6 +43,7 @@ import com.v2tech.view.widget.GroupListView.ItemData;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 
 public class ContactsTabFragment extends Fragment implements TextWatcher {
 
@@ -65,8 +65,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 
 	private ContactsHandler mHandler = new ContactsHandler();
 
-	private static final int TAG_ORG = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
-	private static final int TAG_CONTACT = V2GlobalEnum.GROUP_TYPE_CONTACT;
+	private static final int TAG_ORG = V2GlobalConstants.GROUP_TYPE_DEPARTMENT;
+	private static final int TAG_CONTACT = V2GlobalConstants.GROUP_TYPE_CONTACT;
 	public static final String TAG = "ContactsTabFragment";
 
 	private int flag;

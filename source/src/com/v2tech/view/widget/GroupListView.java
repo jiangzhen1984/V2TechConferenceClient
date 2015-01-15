@@ -44,6 +44,8 @@ import com.v2tech.vo.User;
  */
 public class GroupListView extends ListView {
 
+	private static final String TAG = "GroupListView";
+
 	private Context mContext;
 
 	/**
@@ -387,15 +389,14 @@ public class GroupListView extends ListView {
 							user.getmStatus());
 					//计算出的位置需要+1，因为pos指的是被添加的item与该pos的item对比之后break的结果，需要排在其后面
 					pos++;
-					Log.i("20141223 1", "组名 = " + group.getName() + " 组开始位置 = "
+					Log.i(TAG, "组名 = " + group.getName() + " 组开始位置 = "
 							+ startPos + " ，组结束位置  = " + endPos + " ,插入位置 = "
 							+ pos);
-
-					if (pos != -1 && pos < mFilterList.size()) {
+					if (pos != -1) {
 						ItemData userItem = this.getItem(group, user);
 						((User) userItem.getObject()).updateStatus(user
 								.getmStatus());
-						if (pos == mFilterList.size()) {
+						if(pos >= mFilterList.size()){
 							mFilterList.add(userItem);
 						} else {
 							if (pos == 0 && mFilterList.size() == 1)
@@ -738,13 +739,9 @@ public class GroupListView extends ListView {
 		return calculateGroupStartIndex(item, group);
 	}
 
-	// 好友有问题 开始位置为0是为什么要++
 	public int calculateGroupStartIndex(GroupItemData item, Group group) {
 		int itemStartPos = getGroupItemPos(item);
-//		if (itemStartPos == 0)
-//			itemStartPos++;
 		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
-		// return startPos;
 		return startPos + 1;
 	}
 	
@@ -754,12 +751,6 @@ public class GroupListView extends ListView {
 		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
 		return startPos;
 	}
-
-	// public int calculateGroupStartIndex(GroupItemData item, Group group) {
-	// int itemStartPos = getGroupItemPos(item);
-	// int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
-	// return startPos;
-	// }
 
 	public int getExpandGroupSize(List<Group> groups) {
 		int groupLength = 0;
@@ -824,57 +815,80 @@ public class GroupListView extends ListView {
 		
 		while (start <= end) {
 			pos = start;
-			if (start == mFilterList.size())
+			if (start == mFilterList.size()){
+				ItemData lastItem = mFilterList.get(start - 1);
+				User lastUser = (User) ((UserItemData) lastItem).getObject();
+				boolean result = compareUserSort(user , lastUser , ust);
+				if(result){
+					pos = pos - 1;
+				}
 				break;
+			}
+			
 			ItemData item = mFilterList.get(start++);
 			if (item instanceof GroupItemData) {
 				continue;
 			}
 			User u = (User) ((UserItemData) item).getObject();
 			// if item is current user, always sort after current user
-			if (u == null
-					|| u.getmUserId() == GlobalHolder.getInstance()
-							.getCurrentUserId()) {
+			boolean result = compareUserSort(user , u , ust);
+			if(result)
+				break;
+			else
 				continue;
-			}
-
-			if (ust == User.Status.ONLINE || ust == User.Status.BUSY
-					|| ust == User.Status.DO_NOT_DISTURB
-					|| ust == User.Status.LEAVE) {
-				if ((u.getmStatus() == User.Status.ONLINE
-						|| u.getmStatus() == User.Status.BUSY
-						|| u.getmStatus() == User.Status.DO_NOT_DISTURB || u
-						.getmStatus() == User.Status.LEAVE)
-						&& u.compareTo(user) < 0) {
-					continue;
-				} else {
-					break;
-				}
-			} else if (ust == User.Status.OFFLINE || ust == User.Status.HIDDEN) {
-				if ((u.getmStatus() == User.Status.OFFLINE || u.getmStatus() == User.Status.HIDDEN)
-						&& user.compareTo(u) > 0) {
-					continue;
-				} else if (u.getmStatus() != User.Status.OFFLINE
-						&& u.getmStatus() != User.Status.HIDDEN) {
-					continue;
-				} else {
-					break;
-				}
-			} else {
-				if (u.getmStatus() == User.Status.ONLINE) {
-					continue;
-				} else if (u.getmStatus() == User.Status.OFFLINE
-						|| u.getmStatus() == User.Status.HIDDEN) {
-					break;
-				} else if (u.compareTo(user) < 0) {
-					continue;
-				} else {
-					break;
-				}
-			}
 		}
 
 		return pos;
+	}
+	
+	/**
+	 * continue is false , break is true
+	 * @param comparedUser
+	 * @param beComparedUser
+	 * @param compUserStus
+	 * @return
+	 */
+	private boolean compareUserSort(User comparedUser , User beComparedUser , User.Status compUserStus){
+		if (beComparedUser == null
+				|| beComparedUser.getmUserId() == GlobalHolder.getInstance()
+						.getCurrentUserId()) {
+			return false;
+		}
+
+		if (compUserStus == User.Status.ONLINE || compUserStus == User.Status.BUSY
+				|| compUserStus == User.Status.DO_NOT_DISTURB
+				|| compUserStus == User.Status.LEAVE) {
+			if ((beComparedUser.getmStatus() == User.Status.ONLINE
+					|| beComparedUser.getmStatus() == User.Status.BUSY
+					|| beComparedUser.getmStatus() == User.Status.DO_NOT_DISTURB || beComparedUser
+					.getmStatus() == User.Status.LEAVE)
+					&& beComparedUser.compareTo(comparedUser) < 0) {
+				return false;
+			} else {
+				return true;
+			}
+		} else if (compUserStus == User.Status.OFFLINE || compUserStus == User.Status.HIDDEN) {
+			if ((beComparedUser.getmStatus() == User.Status.OFFLINE || beComparedUser.getmStatus() == User.Status.HIDDEN)
+					&& comparedUser.compareTo(beComparedUser) > 0) {
+				return false;
+			} else if (beComparedUser.getmStatus() != User.Status.OFFLINE
+					&& beComparedUser.getmStatus() != User.Status.HIDDEN) {
+				return false;
+			} else {
+				return true;
+			}
+		} else {
+			if (beComparedUser.getmStatus() == User.Status.ONLINE) {
+				return false;
+			} else if (beComparedUser.getmStatus() == User.Status.OFFLINE
+					|| beComparedUser.getmStatus() == User.Status.HIDDEN) {
+				return true;
+			} else if (beComparedUser.compareTo(comparedUser) < 0) {
+				return false;
+			} else {
+				return true;
+			}
+		}
 	}
 
 	private ItemData getItem(Group g) {
@@ -1043,7 +1057,6 @@ public class GroupListView extends ListView {
 			Group subG = subGroupList.get(i);
 			GroupItemData groupItem = (GroupItemData) getItem(subG);
 			if (mFilterList.size() == pos + 1) {
-
 				mFilterList.add(groupItem);
 			} else {
 				mFilterList.add(pos + 1, groupItem);
@@ -1274,6 +1287,7 @@ public class GroupListView extends ListView {
 				FilterResults results) {
 			if (results.values != null) {
 				mFilterList = (List<ItemData>) results.values;
+				Collections.sort(mFilterList);
 				adapter.notifyDataSetChanged();
 			} else {
 				// TODO toast search error
@@ -1435,11 +1449,18 @@ public class GroupListView extends ListView {
 
 		@Override
 		public int compareTo(ItemData another) {
+			if(another == null || another.getObject() == null)
+				return -1;
+			
 			if (another instanceof UserItemData) {
-				return mUser.compareTo(((UserItemData) another).mUser);
-			} else {
+				User anotherUser = (User) another.getObject();
+				boolean result = compareUserSort(anotherUser, mUser, anotherUser.getmStatus());
+				if(result)
+					return 1;
+				else 
+					return -1;
+			} else 
 				return 1;
-			}
 		}
 
 	}
@@ -1514,7 +1535,6 @@ public class GroupListView extends ListView {
 
 		private void updateGroupItem() {
 			Group g = ((Group) ((GroupItemData) mItem).getObject());
-
 			TextView mGroupNameTV = (TextView) mRoot
 					.findViewById(R.id.group_name);
 			mGroupNameTV.setText(g.getName());
@@ -1577,12 +1597,12 @@ public class GroupListView extends ListView {
 		private void updateUserItem() {
 			User u = ((User) ((UserItemData) mItem).getObject());
 			u = GlobalHolder.getInstance().getUser(u.getmUserId());
-			if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
-				if (TextUtils.isEmpty(u.getName()))
-					throw new RuntimeException(
-							"所有用户信息已获取完毕，但该用户空名：id is --> "
-									+ u.getmUserId());
-			}
+//			if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
+//				if (TextUtils.isEmpty(u.getName()))
+//					throw new RuntimeException(
+//							"所有用户信息已获取完毕，但该用户空名：id is --> "
+//									+ u.getmUserId());
+//			}
 
 			ImageView mPhotoIV = (ImageView) mRoot.findViewById(R.id.user_img);
 			if (u.getAvatarBitmap() != null) {

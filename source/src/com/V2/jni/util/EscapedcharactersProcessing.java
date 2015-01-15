@@ -88,10 +88,7 @@ public class EscapedcharactersProcessing {
 			str = str.replace("&quot;", "\"");
 			return str;
 		}
-		else{
-			V2Log.e("HeartCharacterProcessing : reverse failed...the given String is --" + str);
-			return "";
-		}
+		return null;
 	}
 
 }

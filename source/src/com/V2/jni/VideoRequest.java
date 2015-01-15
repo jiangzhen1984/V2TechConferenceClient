@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
+import com.v2tech.vo.V2GlobalConstants;
 
 public class VideoRequest {
 
@@ -65,12 +66,12 @@ public class VideoRequest {
 	 * 
 	 * @param groupType
 	 * 
-	 *            {@link V2GlobalEnum#GROUP_TYPE_USER} <br/>
-	 *            {@link V2GlobalEnum# GROUP_TYPE_DEPARTMENT} <br/>
-	 *            {@link V2GlobalEnum#GROUP_TYPE_CONTACT} <br/>
-	 *            {@link V2GlobalEnum#GROUP_TYPE_CROWD } <br/>
-	 *            {@link V2GlobalEnum#GROUP_TYPE_CONFERENCE} conference <br/>
-	 *            {@link V2GlobalEnum#GROUP_TYPE_DISCUSSION} <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_USER} <br/>
+	 *            {@link V2GlobalConstants# GROUP_TYPE_DEPARTMENT} <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_CONTACT} <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_CROWD } <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_CONFERENCE} conference <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_DISCUSSION} <br/>
 	 * 
 	 * @param nGroupID   0 for IM
 	 * @param type
@@ -93,12 +94,12 @@ public class VideoRequest {
 	 * 
 	 * @param groupType
 	 * 
-	 *            {@link V2GlobalEnum#GROUP_TYPE_USER} <br/>
-	 *            {@link V2GlobalEnum# GROUP_TYPE_DEPARTMENT} <br/>
-	 *            {@link V2GlobalEnum#GROUP_TYPE_CONTACT} <br/>
-	 *            {@link V2GlobalEnum#GROUP_TYPE_CROWD } <br/>
-	 *            {@link V2GlobalEnum#GROUP_TYPE_CONFERENCE} conference <br/>
-	 *            {@link V2GlobalEnum#GROUP_TYPE_DISCUSSION} <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_USER} <br/>
+	 *            {@link V2GlobalConstants# GROUP_TYPE_DEPARTMENT} <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_CONTACT} <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_CROWD } <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_CONFERENCE} conference <br/>
+	 *            {@link V2GlobalConstants#GROUP_TYPE_DISCUSSION} <br/>
 	 * 
 	 * @param nGroupID   0 for IM
 	 * @param type

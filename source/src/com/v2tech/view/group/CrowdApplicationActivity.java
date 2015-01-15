@@ -16,7 +16,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.provider.VerificationProvider;
@@ -31,7 +30,6 @@ import com.v2tech.view.bo.GroupUserObject;
 import com.v2tech.view.message.MessageAuthenticationActivity;
 import com.v2tech.vo.Crowd;
 import com.v2tech.vo.CrowdGroup;
-import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
 import com.v2tech.vo.VMessageQualification;
 import com.v2tech.vo.VMessageQualification.QualificationState;
@@ -380,7 +378,7 @@ public class CrowdApplicationActivity extends Activity {
 				if (obj.getmGroupId() == crowd.getId()) {
 					onBackPressed();
 				}
-			}
+			} 
         }
     }
 
@@ -402,18 +400,6 @@ public class CrowdApplicationActivity extends Activity {
                                 Toast.LENGTH_SHORT).show();
                         if(crowd.getAuth() == CrowdGroup.AuthType.ALLOW_ALL
                                 .intValue()){
-//                            CrowdGroup g = new CrowdGroup(crowd.getId(),
-//                                    crowd.getName(), crowd.getCreator(), null);
-//                            g.setBrief(crowd.getBrief());
-//                            g.setAnnouncement(crowd.getAnnounce());
-//                            GlobalHolder.getInstance().addGroupToList(
-//                                    GroupType.CHATING.intValue(), g);
-//
-//                            Intent i = new Intent();
-//                            i.setAction(PublicIntent.BROADCAST_NEW_CROWD_NOTIFICATION);
-//                            i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-//                            i.putExtra("group", new GroupUserObject(V2GlobalEnum.GROUP_TYPE_CROWD, crowd.getId(), -1));
-//                            sendBroadcast(i);
                             mLocalHandler.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {

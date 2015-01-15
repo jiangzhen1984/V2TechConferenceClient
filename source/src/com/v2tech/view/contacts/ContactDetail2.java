@@ -28,7 +28,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.V2GlobalEnum;
 import com.v2tech.R;
 import com.v2tech.service.BitmapManager;
 import com.v2tech.service.ContactsService;
@@ -51,6 +50,7 @@ import com.v2tech.vo.Conversation;
 import com.v2tech.vo.Group;
 import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 
 public class ContactDetail2 extends Activity implements OnTouchListener {
 
@@ -699,7 +699,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 						return;
 					}
 					if ((belongs = GlobalHolder.getInstance().getGroupById(
-							V2GlobalEnum.GROUP_TYPE_CONTACT, gid)) == null) {
+							V2GlobalConstants.GROUP_TYPE_CONTACT, gid)) == null) {
 						return;
 					}
 					isRelation = true;

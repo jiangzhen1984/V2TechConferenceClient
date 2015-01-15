@@ -16,7 +16,6 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.V2.jni.ImRequest;
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.GlobalConfig;
@@ -33,6 +32,7 @@ import com.v2tech.vo.Group.GroupType;
 import com.v2tech.vo.OrgGroup;
 import com.v2tech.vo.User;
 import com.v2tech.vo.UserDeviceConfig;
+import com.v2tech.vo.V2GlobalConstants;
 
 public class GlobalHolder {
 
@@ -157,17 +157,14 @@ public class GlobalHolder {
 				if (u.getName() != null) {
 					cu.setName(u.getName());
 				}
-				cu.updateUser(false);
 				return cu;
 			}
 			mUserHolder.put(key, u);
-			
 			Bitmap avatar = mAvatarBmHolder.get(key);
 			if (avatar != null) {
 				u.setAvatarBitmap(avatar);
 			}
 		}
-
 		return u;
 	}
 
@@ -220,7 +217,7 @@ public class GlobalHolder {
 				V2Log.e("parse the group name is wroing...the group is :" + vg.id);
 				
 			Group g = null;
-			if (gType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+			if (gType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 				boolean flag = true;
 				for (Group group : mCrowdGroup) {
 					if(group.getmGId() == vg.id){
@@ -236,17 +233,17 @@ public class GlobalHolder {
 					((CrowdGroup) g).setAuthType(AuthType.fromInt(vg.authType));
 					mCrowdGroup.add(g);
 				}
-			} else if (gType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
+			} else if (gType == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
 				User chairMan = GlobalHolder.getInstance().getUser(
 						vg.chairMan.uid);
 				g = new ConferenceGroup(vg.id, vg.getName(), owner, vg.createTime,
 						chairMan);
 				mConfGroup.add(g);
-			} else if (gType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+			} else if (gType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
 				g = new OrgGroup(vg.id, vg.getName());
 				mOrgGroup.add(g);
-			} else if (gType == V2GlobalEnum.GROUP_TYPE_CONTACT) {
+			} else if (gType == V2GlobalConstants.GROUP_TYPE_CONTACT) {
 				g = new ContactGroup(vg.id, vg.getName());
 				if (vg.isDefault) {
 					((ContactGroup) g).setDefault(true);
@@ -254,7 +251,7 @@ public class GlobalHolder {
 				}
 
 				mContactsGroup.add(g);
-			}  else if (gType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+			}  else if (gType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
 				g = new DiscussionGroup(vg.id, vg.getName(), owner, null);
 				mDiscussionBoardGroup.add(g);
@@ -271,14 +268,14 @@ public class GlobalHolder {
 	}
 
 	public void addGroupToList(int groupType , Group g) {
-		if (groupType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
-		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
+		if (groupType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
+		} else if (groupType == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 			mConfGroup.add(g);
-		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+		} else if (groupType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 			this.mCrowdGroup.add(g);
-		} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONTACT) {
+		} else if (groupType == V2GlobalConstants.GROUP_TYPE_CONTACT) {
 			this.mContactsGroup.add(g);
-		}  else if (groupType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+		}  else if (groupType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
 			this.mDiscussionBoardGroup.add(g);
 		}
 		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
@@ -316,20 +313,20 @@ public class GlobalHolder {
 				// Update new name
 				cache.setName(vg.getName());
 			} else {
-				if (groupType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+				if (groupType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 					User owner = GlobalHolder.getInstance().getUser(
 							vg.owner.uid);
 					g = new CrowdGroup(vg.id, vg.getName(), owner);
-				} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONFERENCE) {
+				} else if (groupType == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 					User owner = GlobalHolder.getInstance().getUser(
 							vg.owner.uid);
 					User chairMan = GlobalHolder.getInstance().getUser(
 							vg.chairMan.uid);
 					g = new ConferenceGroup(vg.id, vg.getName(), owner,
 							vg.createTime, chairMan);
-				} else if (groupType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+				} else if (groupType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
 					g = new OrgGroup(vg.id, vg.getName());
-				} else if (groupType == V2GlobalEnum.GROUP_TYPE_CONTACT) {
+				} else if (groupType == V2GlobalConstants.GROUP_TYPE_CONTACT) {
 					g = new ContactGroup(vg.id, vg.getName());
 				} else {
 					throw new RuntimeException(" Can not support this type");
@@ -361,21 +358,21 @@ public class GlobalHolder {
 	 */
 	public List<Group> getGroup(int groupType) {
 		switch (groupType) {
-		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+		case V2GlobalConstants.GROUP_TYPE_DEPARTMENT:
 			return this.mOrgGroup;
-		case V2GlobalEnum.GROUP_TYPE_CONTACT:
+		case V2GlobalConstants.GROUP_TYPE_CONTACT:
 			return mContactsGroup;
-		case V2GlobalEnum.GROUP_TYPE_CROWD:
+		case V2GlobalConstants.GROUP_TYPE_CROWD:
 			List<Group> ct = new CopyOnWriteArrayList<Group>();
 			ct.addAll(this.mCrowdGroup);
 			return ct;
-		case V2GlobalEnum.GROUP_TYPE_CONFERENCE:
+		case V2GlobalConstants.GROUP_TYPE_CONFERENCE:
 			List<Group> confL = new ArrayList<Group>();
 			confL.addAll(this.mConfGroup);
 			Collections.sort(confL);
 			List<Group> sortConfL = new CopyOnWriteArrayList<Group>(confL);
 			return sortConfL;
-		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+		case V2GlobalConstants.GROUP_TYPE_DISCUSSION:
 			return mDiscussionBoardGroup;
 		default:
 			throw new RuntimeException("Unkonw type");
@@ -665,7 +662,7 @@ public class GlobalHolder {
 			}
 			
 			long currentUserID = user.getmUserId();
-			List<Group> friendGroup = GlobalHolder.getInstance().getGroup(V2GlobalEnum.GROUP_TYPE_CONTACT);
+			List<Group> friendGroup = GlobalHolder.getInstance().getGroup(V2GlobalConstants.GROUP_TYPE_CONTACT);
 			if(friendGroup.size() >= 0){
 				for (Group friend : friendGroup) {
 					List<User> users = friend.getUsers();
@@ -744,7 +741,7 @@ public class GlobalHolder {
 		Map<Long, Integer> transingCollection = getFileTypeColl(transType);
 		Integer transing = transingCollection.get(key);
 		String typeString = null;
-		if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
+		if(transType == V2GlobalConstants.FILE_TRANS_SENDING)
 			typeString = "发送或上传";
 		else
 			typeString = "下载";

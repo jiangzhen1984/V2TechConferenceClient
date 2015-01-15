@@ -62,7 +62,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.util.V2Log;
 import com.spoledge.aacplayer.ArrayAACPlayer;
@@ -143,9 +142,7 @@ public class ConversationP2PTextActivity extends Activity implements
 	 * for activity result
 	 */
 	private static final int SELECT_PICTURE_CODE = 100;
-	private static final int SHOW_GROUP_DETAIL = 200;
 	protected static final int RECEIVE_SELECTED_FILE = 1000;
-	public static final int UPDATE_FILE_SENDING_STATE = 300;
 
 	private int offset = 0;
 	private long currentLoginUserID = 0;
@@ -308,7 +305,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		Intent i = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		long conversationID;
-		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+		if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
 			conversationID = remoteChatUserID;
 		else
 			conversationID = remoteGroupID;
@@ -429,7 +426,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		currentLoginUser = GlobalHolder.getInstance().getUser(
 				currentLoginUserID);
 		if (cov.getConversationType() == Conversation.TYPE_CONTACT) {
-			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_USER;
+			currentConversationViewType = V2GlobalConstants.GROUP_TYPE_USER;
 			remoteChatUserID = cov.getExtId();
 			remoteChatUser = GlobalHolder.getInstance().getUser(
 					remoteChatUserID);
@@ -449,7 +446,7 @@ public class ConversationP2PTextActivity extends Activity implements
 			mShowCrowdDetailButton.setVisibility(View.GONE);
 			mButtonCreateMetting.setVisibility(View.GONE);
 		} else if (cov.getConversationType() == Conversation.TYPE_GROUP) {
-			currentConversationViewType = V2GlobalEnum.GROUP_TYPE_CROWD;
+			currentConversationViewType = V2GlobalConstants.GROUP_TYPE_CROWD;
 			remoteGroupID = cov.getExtId();
 			Group group = GlobalHolder.getInstance()
 					.getGroupById(remoteGroupID);
@@ -462,32 +459,32 @@ public class ConversationP2PTextActivity extends Activity implements
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
 			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
 			mUserTitleTV.setText(group.getName());
-		} else if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT
-				|| cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
-			if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+		} else if (cov.getConversationType() == V2GlobalConstants.GROUP_TYPE_DEPARTMENT
+				|| cov.getConversationType() == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
+			if (cov.getConversationType() == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
 				mShowContactDetailButton.setVisibility(View.GONE);
 				mShowCrowdDetailButton.setVisibility(View.GONE);
-				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DEPARTMENT;
+				currentConversationViewType = V2GlobalConstants.GROUP_TYPE_DEPARTMENT;
 				OrgGroup departmentGroup = (OrgGroup) GlobalHolder
 						.getInstance().getGroupById(
-								V2GlobalEnum.GROUP_TYPE_DEPARTMENT,
+								V2GlobalConstants.GROUP_TYPE_DEPARTMENT,
 								cov.getExtId());
 				mUserTitleTV.setText(departmentGroup.getName());
 			} else {
-				currentConversationViewType = V2GlobalEnum.GROUP_TYPE_DISCUSSION;
+				mShowContactDetailButton.setVisibility(View.GONE);
+				mShowCrowdDetailButton.setVisibility(View.VISIBLE);
+				currentConversationViewType = V2GlobalConstants.GROUP_TYPE_DISCUSSION;
 				DiscussionGroup discussionGroup = (DiscussionGroup) GlobalHolder
 						.getInstance().getGroupById(
-								V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+								V2GlobalConstants.GROUP_TYPE_DISCUSSION,
 								cov.getExtId());
 				mUserTitleTV.setText(discussionGroup.getName());
 			}
 			remoteGroupID = cov.getExtId();
 			mVideoCallButton.setVisibility(View.GONE);
 			mAudioCallButton.setVisibility(View.GONE);
-			mShowContactDetailButton.setVisibility(View.GONE);
 			mSelectFileButtonIV.setVisibility(View.GONE);
 			mButtonCreateMetting.setVisibility(View.VISIBLE);
-			mShowCrowdDetailButton.setVisibility(View.VISIBLE);
 		}
 	}
 
@@ -719,7 +716,7 @@ public class ConversationP2PTextActivity extends Activity implements
 					return;
 
 				switch (currentConversationViewType) {
-				case V2GlobalEnum.GROUP_TYPE_CROWD:
+				case V2GlobalConstants.GROUP_TYPE_CROWD:
 
 					for (FileInfoBean bean : mCheckedList) {
 						if (bean == null || TextUtils.isEmpty(bean.filePath))
@@ -739,7 +736,7 @@ public class ConversationP2PTextActivity extends Activity implements
 						addMessageToContainer(vm);
 
 						GlobalHolder.getInstance().changeGlobleTransFileMember(
-								V2GlobalEnum.FILE_TRANS_SENDING, mContext,
+								V2GlobalConstants.FILE_TRANS_SENDING, mContext,
 								true, remoteGroupID,
 								"ConversationP2PTextActivity onActivity crowd");
 					}
@@ -749,39 +746,13 @@ public class ConversationP2PTextActivity extends Activity implements
 					intent.putParcelableArrayListExtra("uploads", mCheckedList);
 					startService(intent);
 					break;
-				case V2GlobalEnum.GROUP_TYPE_USER:
+				case V2GlobalConstants.GROUP_TYPE_USER:
 					startSendMoreFile();
 					mCheckedList = null;
 					break;
 				}
 			}
-		} else if (requestCode == SHOW_GROUP_DETAIL) {
-			Group group = GlobalHolder.getInstance()
-					.getGroupById(remoteGroupID);
-			mUserTitleTV.setText(group.getName());
-		} else if (requestCode == UPDATE_FILE_SENDING_STATE) {
-			if (data != null) {
-				// String[] updates = data.getStringArrayExtra("updateList");
-				// if(updates != null && updates.length > 0){
-				// for (int i = 0; i < updates.length; i++) {
-				// for (int j = 0; j < messageArray.size(); j++) {
-				// CommonAdapterItemWrapper wrapper = messageArray.get(i);
-				// VMessage tempVm = (VMessage) wrapper.getItemObject();
-				// if(tempVm.getFileItems().size() > 0){
-				// VMessageFileItem vMessageFileItem =
-				// tempVm.getFileItems().get(0);
-				// if (vMessageFileItem.getUuid().equals(updates[i])) {
-				// VMessageFileItem queryFileItemByID = MessageLoader.
-				// queryFileItemByID(V2GlobalEnum.GROUP_TYPE_CROWD, updates[i]);
-				// ((MessageBodyView) wrapper
-				// .getView()).updateView(queryFileItemByID);
-				// }
-				// }
-				// }
-				// }
-				// }
-			}
-		}
+		} 
 	}
 
 	private void chanageAudioFlag() {
@@ -798,21 +769,21 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	private void checkMessageEmpty() {
 		boolean isDelete = false;
-		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
+		if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER) {
 			isDelete = MessageLoader.getNewestMessage(mContext,
 					currentLoginUserID, remoteChatUserID) == null ? true
 					: false;
-		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+		} else if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 			isDelete = MessageLoader.getNewestGroupMessage(mContext,
-					V2GlobalEnum.GROUP_TYPE_CROWD, remoteGroupID) == null ? true
+					V2GlobalConstants.GROUP_TYPE_CROWD, remoteGroupID) == null ? true
 					: false;
-		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+		} else if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
 			isDelete = MessageLoader.getNewestGroupMessage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, remoteGroupID) == null ? true
+					V2GlobalConstants.GROUP_TYPE_DEPARTMENT, remoteGroupID) == null ? true
 					: false;
-		} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+		} else if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
 			isDelete = MessageLoader.getNewestGroupMessage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID) == null ? true
+					V2GlobalConstants.GROUP_TYPE_DISCUSSION, remoteGroupID) == null ? true
 					: false;
 		}
 
@@ -1726,11 +1697,11 @@ public class ConversationP2PTextActivity extends Activity implements
 		public void onClick(View arg0) {
 			if (SPUtil.checkCurrentAviNetwork(mContext)) {
 				Intent intent = null;
-				if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER) {
+				if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER) {
 					intent = new Intent(ConversationP2PTextActivity.this,
 							ConversationSelectFileEntry.class);
 					intent.putExtra("uid", remoteChatUserID);
-				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+				} else if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 					intent = new Intent(ConversationP2PTextActivity.this,
 							ConversationSelectFile.class);
 					intent.putExtra("type", "crowdFile");
@@ -1800,7 +1771,7 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	private void doSendMessage() {
 		VMessage vm = null;
-		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+		if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
 			vm = MessageUtil.buildChatMessage(mContext, mMessageET,
 					currentConversationViewType, remoteGroupID, remoteChatUser);
 		else
@@ -1862,7 +1833,7 @@ public class ConversationP2PTextActivity extends Activity implements
 	private void startSendMoreFile() {
 		for (int i = 0; i < mCheckedList.size(); i++) {
 			GlobalHolder.getInstance().changeGlobleTransFileMember(
-					V2GlobalEnum.FILE_TRANS_SENDING, mContext, true,
+					V2GlobalConstants.FILE_TRANS_SENDING, mContext, true,
 					remoteChatUserID, "ConversationP2PTextActivity onActivity");
 			sendSelectedFile(mCheckedList.get(i));
 		}
@@ -1952,7 +1923,7 @@ public class ConversationP2PTextActivity extends Activity implements
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("cid", remoteGroupID);
 			i.putExtra("crowdFileActivityType", type);
-			startActivityForResult(i, UPDATE_FILE_SENDING_STATE);
+			startActivity(i);
 		};
 
 		@Override
@@ -2009,18 +1980,18 @@ public class ConversationP2PTextActivity extends Activity implements
 					switch (item.getState()) {
 					case VMessageAbstractItem.STATE_FILE_SENDING:
 					case VMessageAbstractItem.STATE_FILE_PAUSED_SENDING:
-						if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+						if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
 							GlobalHolder
 									.getInstance()
 									.changeGlobleTransFileMember(
-											V2GlobalEnum.FILE_TRANS_SENDING,
+											V2GlobalConstants.FILE_TRANS_SENDING,
 											mContext, false, remoteChatUserID,
 											"ConversationP2PText REQUEST_DEL_MESSAGE");
 						else
 							GlobalHolder
 									.getInstance()
 									.changeGlobleTransFileMember(
-											V2GlobalEnum.FILE_TRANS_SENDING,
+											V2GlobalConstants.FILE_TRANS_SENDING,
 											mContext, false, remoteGroupID,
 											"ConversationP2PText REQUEST_DEL_MESSAGE");
 						if (item.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
@@ -2031,18 +2002,18 @@ public class ConversationP2PTextActivity extends Activity implements
 						break;
 					case VMessageAbstractItem.STATE_FILE_DOWNLOADING:
 					case VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING:
-						if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+						if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
 							GlobalHolder
 									.getInstance()
 									.changeGlobleTransFileMember(
-											V2GlobalEnum.FILE_TRANS_DOWNLOADING,
+											V2GlobalConstants.FILE_TRANS_DOWNLOADING,
 											mContext, false, remoteChatUserID,
 											"ConversationP2PText REQUEST_DEL_MESSAGE");
 						else
 							GlobalHolder
 									.getInstance()
 									.changeGlobleTransFileMember(
-											V2GlobalEnum.FILE_TRANS_DOWNLOADING,
+											V2GlobalConstants.FILE_TRANS_DOWNLOADING,
 											mContext, false, remoteGroupID,
 											"ConversationP2PText REQUEST_DEL_MESSAGE");
 						if (item.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
@@ -2139,24 +2110,24 @@ public class ConversationP2PTextActivity extends Activity implements
 
 		List<VMessage> array = null;
 		switch (currentConversationViewType) {
-		case V2GlobalEnum.GROUP_TYPE_USER:
+		case V2GlobalConstants.GROUP_TYPE_USER:
 			array = MessageLoader.loadMessageByPage(mContext,
 					Conversation.TYPE_CONTACT, currentLoginUserID,
 					remoteChatUserID, BATCH_COUNT, offset);
 			break;
-		case V2GlobalEnum.GROUP_TYPE_CROWD:
+		case V2GlobalConstants.GROUP_TYPE_CROWD:
 			array = MessageLoader
 					.loadGroupMessageByPage(mContext, Conversation.TYPE_GROUP,
 							remoteGroupID, BATCH_COUNT, offset);
 			break;
-		case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
+		case V2GlobalConstants.GROUP_TYPE_DEPARTMENT:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DEPARTMENT, remoteGroupID,
+					V2GlobalConstants.GROUP_TYPE_DEPARTMENT, remoteGroupID,
 					BATCH_COUNT, offset);
 			break;
-		case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+		case V2GlobalConstants.GROUP_TYPE_DISCUSSION:
 			array = MessageLoader.loadGroupMessageByPage(mContext,
-					V2GlobalEnum.GROUP_TYPE_DISCUSSION, remoteGroupID,
+					V2GlobalConstants.GROUP_TYPE_DISCUSSION, remoteGroupID,
 					BATCH_COUNT, offset);
 			break;
 		default:
@@ -2206,7 +2177,7 @@ public class ConversationP2PTextActivity extends Activity implements
 		}
 
 		VMessage m;
-		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+		if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
 			m = MessageLoader.loadUserMessageById(mContext, remoteChatUserID,
 					msgId);
 		else
@@ -2238,7 +2209,7 @@ public class ConversationP2PTextActivity extends Activity implements
 	}
 
 	private void setMessageBodyViewBelongId(MessageBodyView mv) {
-		if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_USER)
+		if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
 			mv.setCurrentBelongID(remoteChatUserID);
 		else
 			mv.setCurrentBelongID(remoteGroupID);
@@ -2413,7 +2384,7 @@ public class ConversationP2PTextActivity extends Activity implements
 				i.setAction(PublicIntent.SHOW_DISCUSSION_BOARD_DETAIL_ACTIVITY);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				i.putExtra("cid", cov.getExtId());
-				startActivityForResult(i, SHOW_GROUP_DETAIL);
+				startActivity(i);
 			}
 		}
 
@@ -2534,12 +2505,12 @@ public class ConversationP2PTextActivity extends Activity implements
 				long remoteID = intent.getLongExtra("remoteUserID", -1l);
 				if (currentConversationViewType == groupType) {
 					switch (currentConversationViewType) {
-					case V2GlobalEnum.GROUP_TYPE_CROWD:
-					case V2GlobalEnum.GROUP_TYPE_DEPARTMENT:
-					case V2GlobalEnum.GROUP_TYPE_DISCUSSION:
+					case V2GlobalConstants.GROUP_TYPE_CROWD:
+					case V2GlobalConstants.GROUP_TYPE_DEPARTMENT:
+					case V2GlobalConstants.GROUP_TYPE_DISCUSSION:
 						isReLoading = groupID == remoteGroupID;
 						break;
-					case V2GlobalEnum.GROUP_TYPE_USER:
+					case V2GlobalConstants.GROUP_TYPE_USER:
 						isReLoading = remoteID == remoteChatUserID;
 						break;
 					}
@@ -2628,11 +2599,10 @@ public class ConversationP2PTextActivity extends Activity implements
 							.equals(intent.getAction()))
 					|| PublicIntent.BROADCAST_DISCUSSION_QUIT_NOTIFICATION
 							.equals(intent.getAction())) {
-				onBackPressed();
+				finish();
 			} else if ((JNIService.BROADCAST_CROWD_NEW_UPLOAD_FILE_NOTIFICATION
 					.equals(intent.getAction()))) {
-
-				if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+				if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 					ArrayList<FileJNIObject> list = intent
 							.getParcelableArrayListExtra("fileJniObjects");
 					long groupID = intent.getLongExtra("groupID", -1l);
@@ -2715,11 +2685,11 @@ public class ConversationP2PTextActivity extends Activity implements
 						VMessageFileItem vfi = vm.getFileItems().get(0);
 						if (vfi.getUuid().equals(fileID)) {
 							switch (transType) {
-							case V2GlobalEnum.FILE_TRANS_SENDING:
+							case V2GlobalConstants.FILE_TRANS_SENDING:
 								vfi.setDownloadedSize(0);
 								vfi.setState(VMessageFileItem.STATE_FILE_SENT_FALIED);
 								break;
-							case V2GlobalEnum.FILE_TRANS_DOWNLOADING:
+							case V2GlobalConstants.FILE_TRANS_DOWNLOADING:
 								vfi.setDownloadedSize(0);
 								vfi.setState(VMessageFileItem.STATE_FILE_DOWNLOADED_FALIED);
 								break;
@@ -2768,22 +2738,22 @@ public class ConversationP2PTextActivity extends Activity implements
 				}
 			} else if (intent.getAction().equals(
 					JNIService.JNI_BROADCAST_GROUP_UPDATED)) {
-				if (cov.getConversationType() == V2GlobalEnum.GROUP_TYPE_DEPARTMENT) {
+				if (cov.getConversationType() == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
 					OrgGroup departmentGroup = (OrgGroup) GlobalHolder
 							.getInstance().getGroupById(
-									V2GlobalEnum.GROUP_TYPE_DEPARTMENT,
+									V2GlobalConstants.GROUP_TYPE_DEPARTMENT,
 									cov.getExtId());
 					mUserTitleTV.setText(departmentGroup.getName());
-				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_DISCUSSION) {
+				} else if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
 					DiscussionGroup discussionGroup = (DiscussionGroup) GlobalHolder
 							.getInstance().getGroupById(
-									V2GlobalEnum.GROUP_TYPE_DISCUSSION,
+									V2GlobalConstants.GROUP_TYPE_DISCUSSION,
 									cov.getExtId());
 					mUserTitleTV.setText(discussionGroup.getName());
-				} else if (currentConversationViewType == V2GlobalEnum.GROUP_TYPE_CROWD) {
+				} else if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 					CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder
 							.getInstance().getGroupById(
-									V2GlobalEnum.GROUP_TYPE_CROWD,
+									V2GlobalConstants.GROUP_TYPE_CROWD,
 									cov.getExtId());
 					mUserTitleTV.setText(crowdGroup.getName());
 				}
@@ -2842,7 +2812,7 @@ public class ConversationP2PTextActivity extends Activity implements
 					}
 					// 群文件处理,如果是远端用户上传的文件，则强制更改状态为已上传，因为群中远端文件只有一种状态
 					if (vm.getFileItems().size() > 0
-							&& vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD) {
+							&& vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_CROWD) {
 						VMessageFileItem fileItem = vm.getFileItems().get(0);
 						// 如果该文件时其他人上传的，则在下载的时候，强制将聊天界面的状态改成已上传
 						if (vm.getFromUser().getmUserId() != GlobalHolder

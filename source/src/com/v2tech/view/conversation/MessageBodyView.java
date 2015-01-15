@@ -37,7 +37,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.service.GlobalHolder;
@@ -48,6 +47,7 @@ import com.v2tech.util.SPUtil;
 import com.v2tech.view.group.CrowdFilesActivity.CrowdFileActivityType;
 import com.v2tech.vo.FileDownLoadBean;
 import com.v2tech.vo.User;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageAudioItem;
@@ -119,7 +119,7 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		this.mMsg = m;
-		if (mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER) {
+		if (mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER) {
 			this.bodyType = MessageBodyType.SINGLE_USER_TYPE;
 			rootView = LayoutInflater.from(context).inflate(
 					R.layout.message_body, null, false);
@@ -805,7 +805,7 @@ public class MessageBodyView extends LinearLayout {
 			TextView view, ImageView actionButton) {
 		String strState = "";
 		boolean showProgressLayout = false;
-		if (vfi.getVm().getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
+		if (vfi.getVm().getMsgCode() == V2GlobalConstants.GROUP_TYPE_CROWD)
 			actionButton.setVisibility(View.GONE);
 		else
 			actionButton.setVisibility(View.VISIBLE);
@@ -942,7 +942,7 @@ public class MessageBodyView extends LinearLayout {
 			VMessageFileItem item = (VMessageFileItem) view.getTag();
 
 			if (callback != null) {
-				if (mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD) {
+				if (mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_CROWD) {
 					if (item.getState() == VMessageAbstractItem.STATE_FILE_SENDING ||
 							item.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING ||
 							item.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED)
@@ -955,11 +955,11 @@ public class MessageBodyView extends LinearLayout {
 					} else {
 						if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
 							long key;
-							if(mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER)
+							if(mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER)
 								key = mMsg.getToUser().getmUserId();
 							else
 								key = mMsg.getGroupId();
-							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_DOWNLOADING, 
+							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalConstants.FILE_TRANS_DOWNLOADING, 
 									getContext(), true, key, "MessageBodyView fileMessageItemClickListener");
 							if(!flag)
 								return ;
@@ -1062,11 +1062,11 @@ public class MessageBodyView extends LinearLayout {
 						if (mMsg.getItems().size() > 0
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
 							long key;
-							if(mMsg.getMsgCode() == V2GlobalEnum.GROUP_TYPE_USER)
+							if(mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER)
 								key = mMsg.getToUser().getmUserId();
 							else
 								key = mMsg.getGroupId();
-							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalEnum.FILE_TRANS_SENDING, 
+							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalConstants.FILE_TRANS_SENDING, 
 									getContext(), true, key, "MessageBodyView mResendButtonListener");
 							if(!flag)
 								return ;

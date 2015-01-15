@@ -6,6 +6,7 @@ import java.io.IOException;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
@@ -75,19 +76,24 @@ public class BitmapUtil {
 		return avatar;
 	}
 
-	public static Bitmap getCompressedBitmap(String file) {
-		if (file == null) {
+	public static Bitmap getCompressedBitmap(String filePath) {
+		if (TextUtils.isEmpty(filePath)) {
 			throw new NullPointerException(" file is null");
 		}
-		File f = new File(file);
+		
+		if(filePath.equals("error")){
+			return BitmapFactory.decodeResource(context.getResources(), R.drawable.ws_download_error_icon);
+		}
+		
+		File f = new File(filePath);
 		if (!f.exists()) {
-			throw new RuntimeException(" file is no exists :" + file);
+			throw new RuntimeException(" file is no exists :" + filePath);
 		}
 
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
-		BitmapFactory.decodeFile(file, options);
+		BitmapFactory.decodeFile(filePath, options);
 		if (options.outWidth >= 1080 || options.outHeight >= 1080) {
 			options.inSampleSize = 8;
 		} else if (options.outWidth > 500 || options.outHeight > 500) {
@@ -98,7 +104,7 @@ public class BitmapUtil {
 		options.inJustDecodeBounds = false;
 		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
 		options.inPurgeable = true;
-		Bitmap bp = BitmapFactory.decodeFile(file, options);
+		Bitmap bp = BitmapFactory.decodeFile(filePath, options);
 		return bp;
 	}
 

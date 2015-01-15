@@ -10,6 +10,7 @@ import java.util.UUID;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.text.TextUtils;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.BitmapUtil;
@@ -24,27 +25,36 @@ public class VMessageImageItem extends VMessageAbstractItem{
 	private boolean isReceived;
 	private int transState;
 
-	public VMessageImageItem(VMessage vm, String filePath) {
-		super(vm);
-		this.filePath = filePath;
-		this.type = ITEM_TYPE_IMAGE;
-		this.uuid = UUID.randomUUID().toString();
+	public VMessageImageItem(VMessage vm, String uuid , String filePath , int placeHolder) {
+		this(vm , uuid , filePath , null);
 	}
 
 	public VMessageImageItem(VMessage vm, String uuid, String extension) {
-		super(vm);
-		this.uuid = uuid;
-		this.extension = extension;
-		this.type = ITEM_TYPE_IMAGE;
-		this.filePath = getFilePath();
+		this(vm , uuid , null , extension);
 	}
 	
-	public VMessageImageItem(VMessage vm) {
+	public VMessageImageItem(VMessage vm, String uuid, String filePath , String extension) {
 		super(vm);
+		if(uuid == null)
+			this.uuid = UUID.randomUUID().toString();
+		else
+			this.uuid = uuid;
+		
+		if(filePath == null && extension != null)
+			this.filePath = GlobalConfig.getGlobalPicsPath() + "/" + uuid + extension;
+		else
+			this.filePath = filePath;
+		
+		if(filePath != null && extension == null){
+			int pos = filePath.lastIndexOf(".");
+			if (pos != -1) {
+				this.extension = filePath.substring(pos);
+			}
+		} else
+			this.extension = extension;
 		this.type = ITEM_TYPE_IMAGE;
-		this.filePath = getFilePath();
 	}
-
+	
 	public String getFilePath() {
 		if (filePath == null && extension != null)
 			return GlobalConfig.getGlobalPicsPath() + "/" + uuid + extension;
@@ -132,7 +142,7 @@ public class VMessageImageItem extends VMessageAbstractItem{
 
 	public synchronized Bitmap getCompressedBitmap() {
 		if (mCompressedBitmap == null || mCompressedBitmap.isRecycled()) {
-			mCompressedBitmap = BitmapUtil.getCompressedBitmap(this.filePath);
+			mCompressedBitmap = BitmapUtil.getCompressedBitmap(filePath);
 		}
 		return mCompressedBitmap;
 	}

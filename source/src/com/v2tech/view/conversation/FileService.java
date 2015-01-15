@@ -17,11 +17,11 @@ import android.text.TextUtils;
 import com.V2.jni.FileRequest;
 import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
-import com.V2.jni.V2GlobalEnum;
 import com.V2.jni.util.V2Log;
 import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.GlobalConfig;
 import com.v2tech.vo.FileInfoBean;
+import com.v2tech.vo.V2GlobalConstants;
 import com.v2tech.vo.VMessage;
 import com.v2tech.vo.VMessageAbstractItem;
 import com.v2tech.vo.VMessageFileItem;
@@ -181,7 +181,7 @@ public class FileService extends Service {
 						continue;
 					}
 					//build VMessage Object and save in database.
-					VMessage vm = new VMessage(V2GlobalEnum.GROUP_TYPE_CROWD, lfo.gid, GlobalHolder.getInstance().getCurrentUser(), null,
+					VMessage vm = new VMessage(V2GlobalConstants.GROUP_TYPE_CROWD, lfo.gid, GlobalHolder.getInstance().getCurrentUser(), null,
 							new Date(GlobalConfig.getGlobalServerTime())); 
 					VMessageFileItem item = new VMessageFileItem(vm , bean.filePath , 0);
 					item.setUuid(bean.fileUUID);
