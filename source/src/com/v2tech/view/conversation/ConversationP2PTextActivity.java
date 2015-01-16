@@ -284,18 +284,15 @@ public class ConversationP2PTextActivity extends Activity implements
 				avatarChangedListener);
 		mChat.registerFileTransStatusListener(this.lh, FILE_STATUS_LISTENER,
 				null);
-		mChat.registerP2PRecordResponseListener(this.lh, RECORD_STATUS_LISTENER,
-				null);
+		mChat.registerP2PRecordResponseListener(this.lh,
+				RECORD_STATUS_LISTENER, null);
 		mGroupChat.registerFileTransStatusListener(this.lh,
 				FILE_STATUS_LISTENER, null);
 		// Start animation
 		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
 				R.animator.nonam_scale_null);
 		// initalize vioce function that showing dialog
-		createVideoDialog();
-		// Initalize get members of file that file state is sending from
-		// database
-		// initTransingObserver();
+		createVideoDialog();	
 		// request ConversationTabFragment to update
 		requestUpdateTabFragment();
 		isCreate = true;
@@ -752,7 +749,7 @@ public class ConversationP2PTextActivity extends Activity implements
 					break;
 				}
 			}
-		} 
+		}
 	}
 
 	private void chanageAudioFlag() {
@@ -927,12 +924,13 @@ public class ConversationP2PTextActivity extends Activity implements
 						starttime = 0;
 						realRecoding = false;
 						// Remove timer
-//						lh.removeCallbacks(mUpdateMicStatusTimer);
+						// lh.removeCallbacks(mUpdateMicStatusTimer);
 						lh.removeCallbacks(timeOutMonitor);
 						// recover button show state
 						mButtonRecordAudio
 								.setText(R.string.contact_message_button_send_audio_msg);
-						// check if touch position out of button than cancel send voice message
+						// check if touch position out of button than cancel
+						// send voice message
 						Rect rect = new Rect();
 						view.getDrawingRect(rect);
 						if (rect.contains((int) event.getX(),
@@ -950,11 +948,11 @@ public class ConversationP2PTextActivity extends Activity implements
 										Toast.LENGTH_SHORT).show();
 							}
 						}
-						
+
 						// stop recording and sending
 						stopRecording(recordingFileID);
 						recordingFileID = null;
-						
+
 						if (seconds < 1500) {
 							// Send delay message for close dialog
 							lh.postDelayed(new Runnable() {
@@ -1033,8 +1031,8 @@ public class ConversationP2PTextActivity extends Activity implements
 		// V2Log.e("error , can not prepare media recorder ");
 		// return false;
 		// }
-		
-		//MP3
+
+		// MP3
 		mChat.startAudioRecord(filePath);
 		return true;
 
@@ -1050,16 +1048,16 @@ public class ConversationP2PTextActivity extends Activity implements
 		// }
 		// mAacEncoder.release();
 
-//		try {
-//			// Ignore stop fialed exception
-//			mRecorder.stop();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		mRecorder.reset();
-//		mRecorder.release();
-//		mRecorder = null;
-		
+		// try {
+		// // Ignore stop fialed exception
+		// mRecorder.stop();
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// mRecorder.reset();
+		// mRecorder.release();
+		// mRecorder = null;
+
 		mChat.stopAudioRecord(fileID);
 	}
 
@@ -1078,7 +1076,7 @@ public class ConversationP2PTextActivity extends Activity implements
 			stopRecording(recordingFileID);
 			recordingFileID = null;
 			starttime = 0;
-//			lh.removeCallbacks(mUpdateMicStatusTimer);
+			// lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(timeOutMonitor);
 			lh.removeCallbacks(mUpdateSurplusTime);
 		}
@@ -1106,12 +1104,13 @@ public class ConversationP2PTextActivity extends Activity implements
 			if (!cannelRecoding) {
 				realRecoding = true;
 				recordingFileID = UUID.randomUUID().toString();
-				//GlobalConfig.getGlobalAudioPath() + "/" + UUID.randomUUID().toString() + ".mp3";
+				// GlobalConfig.getGlobalAudioPath() + "/" +
+				// UUID.randomUUID().toString() + ".mp3";
 				boolean resultReocrding = startReocrding(recordingFileID);
 				if (resultReocrding) {
 					starttime = System.currentTimeMillis();
 					// Start update db for voice
-//					lh.postDelayed(mUpdateMicStatusTimer, 200);
+					// lh.postDelayed(mUpdateMicStatusTimer, 200);
 					// Start timer
 					lh.postDelayed(timeOutMonitor, 59 * 1000);
 					// start timer for prompt surplus time
@@ -1169,7 +1168,7 @@ public class ConversationP2PTextActivity extends Activity implements
 			recordTimes = 60;
 			recordingFileID = null;
 			starttime = 0;
-//			lh.removeCallbacks(mUpdateMicStatusTimer);
+			// lh.removeCallbacks(mUpdateMicStatusTimer);
 			lh.removeCallbacks(mUpdateSurplusTime);
 			showOrCloseVoiceDialog();
 		}
@@ -2442,19 +2441,19 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	};
 
-//	private Runnable mUpdateMicStatusTimer = new Runnable() {
-//		public void run() {
-//			int ratio = mRecorder.getMaxAmplitude() / 600;
-//			int db = 0;// 分贝
-//			if (ratio > 1)
-//				db = (int) (20 * Math.log10(ratio));
-//
-//			// int db = (int)mAacEncoder.getDB();
-//			updateVoiceVolume(db / 4);
-//
-//			lh.postDelayed(mUpdateMicStatusTimer, 200);
-//		}
-//	};
+	// private Runnable mUpdateMicStatusTimer = new Runnable() {
+	// public void run() {
+	// int ratio = mRecorder.getMaxAmplitude() / 600;
+	// int db = 0;// 分贝
+	// if (ratio > 1)
+	// db = (int) (20 * Math.log10(ratio));
+	//
+	// // int db = (int)mAacEncoder.getDB();
+	// updateVoiceVolume(db / 4);
+	//
+	// lh.postDelayed(mUpdateMicStatusTimer, 200);
+	// }
+	// };
 
 	class MessageAdapter extends BaseAdapter {
 
@@ -2900,19 +2899,22 @@ public class ConversationP2PTextActivity extends Activity implements
 			case RECORD_STATUS_LISTENER:
 				int result = msg.arg1;
 				int recordType = msg.arg2;
-				String fileID = (String)(((AsyncResult) msg.obj).getResult());
-				if(result == Result.SUCCESS.value()){
-					if(recordType == V2GlobalConstants.RECORD_TYPE_START){
-						V2Log.d(TAG, "the file start recording , id is : " + fileID);
+				String fileID = (String) (((AsyncResult) msg.obj).getResult());
+				if (result == Result.SUCCESS.value()) {
+					if (recordType == V2GlobalConstants.RECORD_TYPE_START) {
+						V2Log.d(TAG, "the file start recording , id is : "
+								+ fileID);
 					} else {
-						String filePath = 
-								GlobalConfig.getGlobalAudioPath() + "/" + fileID + ".mp3";
-						if(successRecord){
-							V2Log.d(TAG, "the record file sending successfully! id is : " + fileID);
+						String filePath = GlobalConfig.getGlobalAudioPath()
+								+ "/" + fileID + ".mp3";
+						if (successRecord) {
+							V2Log.d(TAG,
+									"the record file sending successfully! id is : "
+											+ fileID);
 							VMessage vm = MessageBuilder.buildAudioMessage(
 									cov.getConversationType(), remoteGroupID,
-									currentLoginUser, remoteChatUser,
-									filePath, (int) recordTimes);
+									currentLoginUser, remoteChatUser, filePath,
+									(int) recordTimes);
 							// Send message to server
 							sendMessageToRemote(vm);
 							successRecord = false;
@@ -2920,18 +2922,18 @@ public class ConversationP2PTextActivity extends Activity implements
 						} else {
 							// delete audio file
 							File f = new File(filePath);
-							if(f.exists())
+							if (f.exists())
 								f.delete();
 						}
 					}
 				} else {
-					if(recordType == V2GlobalConstants.RECORD_TYPE_START){
+					if (recordType == V2GlobalConstants.RECORD_TYPE_START) {
 						V2Log.e(TAG, "record failed! error code is : " + result);
 						breakRecording();
-						String filePath = 
-								GlobalConfig.getGlobalAudioPath() + "/" + fileID + ".mp3";
+						String filePath = GlobalConfig.getGlobalAudioPath()
+								+ "/" + fileID + ".mp3";
 						File f = new File(filePath);
-						if(f.exists())
+						if (f.exists())
 							f.delete();
 					} else {
 						recordTimes = 0;

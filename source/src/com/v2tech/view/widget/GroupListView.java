@@ -271,9 +271,16 @@ public class GroupListView extends ListView {
 			throw new NullPointerException("Group is null");
 		}
 		updateCheckItemWithoutNotification(group, flag);
-		
+		GroupItemData targetItem = (GroupItemData) getItem(group);
 		for (Group temp : mGroupList) {
 			checkBelongGroupAllChecked(temp, temp.getUsers());
+			if(!flag){
+				GroupItemData tempItem = (GroupItemData) getItem(temp);
+				if(tempItem.getLevel() < targetItem.getLevel() &&
+						temp.getChildGroup().contains(group)){
+					tempItem.setChecked(false);
+				}
+			}
 		}
 		adapter.notifyDataSetChanged();
 	}

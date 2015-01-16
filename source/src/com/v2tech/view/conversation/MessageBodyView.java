@@ -744,6 +744,14 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_file_item_progress_size);
 			TextView speed = (TextView) rootView
 					.findViewById(R.id.message_body_file_item_progress_speed);
+			final View iv = rootView
+					.findViewById(R.id.message_body_file_item_progress_state);
+			final android.view.ViewGroup.LayoutParams params = iv.getLayoutParams();
+			FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress
+					.get(vfi.getUuid());
+			if(bean != null){
+				vfi.setDownloadedSize(bean.currentLoadSize);
+			}
 			//设置 已下载/文件大小 显示状态
 			progress.setText(vfi.getDownloadSizeStr() + "/"
 					+ vfi.getFileSizeStr());
@@ -752,7 +760,6 @@ public class MessageBodyView extends LinearLayout {
 					vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING ){
 				speed.setText("0kb");
 			} else {
-				FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress.get(vfi.getUuid());
 				if(bean != null){
 					V2Log.e(TAG, "lastLoadTime : " + bean.lastLoadTime + " lastLoadSize : " + bean.lastLoadSize
 							 + " currentLoadSize : " + bean.currentLoadSize);
@@ -769,7 +776,7 @@ public class MessageBodyView extends LinearLayout {
 				}
 			}
 			//设置进度
-			float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
+			final float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
 			final ViewGroup progressC = (ViewGroup) rootView
 					.findViewById(R.id.message_body_file_item_progress_state_ly);
@@ -781,6 +788,8 @@ public class MessageBodyView extends LinearLayout {
 					if (width == 0) {
 						width = progressC.getMeasuredWidth();
 						V2Log.d(TAG, "total width：" + width);
+						params.width = (int) (width * percent);
+						iv.setLayoutParams(params);
 					}
 					return true;
 				}
@@ -789,9 +798,6 @@ public class MessageBodyView extends LinearLayout {
 			// View.MeasureSpec.UNSPECIFIED), View.MeasureSpec
 			// .makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
 			// width = progressC.getMeasuredWidth();
-			View iv = rootView
-					.findViewById(R.id.message_body_file_item_progress_state);
-			android.view.ViewGroup.LayoutParams params = iv.getLayoutParams();
 			params.width = (int) (width * percent);
 			iv.setLayoutParams(params);
 

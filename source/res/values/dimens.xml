@@ -1,8 +1,9 @@
 <resources>
-	<!-- listViewItem -->
+
+    <!-- listViewItem -->
     <dimen name="conference_message_list_view_item_text1_font_size">16sp</dimen>
     <dimen name="conference_message_list_view_item_text2_font_size">15sp</dimen>
-  
+
     <!-- 菜单尺寸 -->
     <dimen name="common_menu_text_font_size">15sp</dimen>
     <dimen name="common_menu_item_padding_left">5dp</dimen>
@@ -29,10 +30,8 @@
     <dimen name="common_user_head_icon_size">42dp</dimen>
     <dimen name="common_user_head_icon_notify_size">15dp</dimen>
     <dimen name="common_item_triangle_icon_size">32dp</dimen>
-    
     <dimen name="common_item_checkbox_icon_width_size">37dp</dimen>
     <dimen name="common_item_checkbox_icon_height_size">37dp</dimen>
-    
     <dimen name="common_delete_icon_width">50dp</dimen>
     <dimen name="common_delete_icon_height">50dp</dimen>
     <dimen name="common_delete_icon_padding">8dp</dimen>
@@ -116,23 +115,29 @@
     <dimen name="in_meeting_local_video_layout_height">144dp</dimen>
     <dimen name="in_meeting_tools_bar_margin_right">15dp</dimen>
 
-    <!-- fragment conversation_incoming_audio_call layout -->
-    <dimen name="fragment_conversation_audio_incoming_call_title_text_size">25sp</dimen>
-    <dimen name="fragment_conversation_audio_incoming_call_name_size">16sp</dimen>
-    <dimen name="fragment_conversation_audio_incoming_call_button_padding_vertical">15dp</dimen>
-    <dimen name="fragment_conversation_audio_incoming_call_button_margin">20dp</dimen>
-    <dimen name="fragment_conversation_audio_incoming_call_button_margin_hor">10dp</dimen>
-    <dimen name="fragment_conversation_audio_incoming_call_button_margin_bottom">10dp</dimen>
-    <dimen name="fragment_conversation_audio_incoming_call_title_margin_top">100dp</dimen>
-    <dimen name="fragment_conversation_audio_incoming_call_button_container_margin">10dp</dimen>
+    <!-- fragment conversation_audio_or_video_common_attribute -->
+    <dimen name="fragment_conversation_call_user_icon_size">75dp</dimen>
+    <dimen name="fragment_conversation_call_button_padding_vertical">15dp</dimen>
 
-    <!-- fragment conversation_incoming_video_call layout -->
-    <dimen name="fragment_conversation_incoming_video_call_avatar_margin_left">40dp</dimen>
-    <dimen name="fragment_conversation_incoming_video_call_avatar_margin_top">40dp</dimen>
-    <dimen name="fragment_conversation_incoming_video_call_name_margin_left">10dp</dimen>
-    <dimen name="fragment_conversation_incoming_video_call_button_container_margin">10dp</dimen>
+    <!-- fragment conversation_incoming_audio_or_video_common_attribute -->
+    <dimen name="fragment_conversation_incoming_call_title_text_size">25sp</dimen>
+    <dimen name="fragment_conversation_incoming_call_name_size">18sp</dimen>
+    <dimen name="fragment_conversation_incoming_call_button_margin">20dp</dimen>
+    <dimen name="fragment_conversation_incoming_call_button_margin_hor">10dp</dimen>
+    <dimen name="fragment_conversation_incoming_call_button_margin_bottom">10dp</dimen>
+    <dimen name="fragment_conversation_incoming_call_title_margin_top">100dp</dimen>
+    <dimen name="fragment_conversation_incoming_call_button_container_margin">10dp</dimen>
+
+    <!-- fragment conversation_waiting layout -->
+    <dimen name="fragment_conversation_waiting_invitation_button_margin_bottom">10dp</dimen>
+    <dimen name="fragment_conversation_waiting_button_text_size">25sp</dimen>
+    <dimen name="fragment_conversation_waiting_invitation_voice_avatar_margin_top">40dp</dimen>
+    <dimen name="fragment_conversation_waiting_host_invitation_button_margin_left">20dp</dimen>
+    <dimen name="fragment_conversation_waiting_host_invitation_button_margin_right">20dp</dimen>
 
     <!-- fragment conversation connected layout -->
+    <dimen name="fragment_conversation_connected_time_title_text_size">25sp</dimen>
+    <dimen name="fragment_conversation_connected_time_title_margin_top">100dp</dimen>
     <dimen name="fragment_conversation_connected_voice_gray_button_padding_vertical">20dp</dimen>
     <dimen name="fragment_conversation_connected_gray_button_padding_vertical">5dp</dimen>
     <dimen name="fragment_conversation_connected_gray_button_margin_hor">10dp</dimen>
