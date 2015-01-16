@@ -253,7 +253,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 							R.string.confs_user_video_device_item)
 					+ wr.sortFlag);
 		} else {
-			nameTV.setText(wr.a.getAttName());
+			if (wr.a.getUser() != null) {
+				if (wr.a.getUser().isRapidInitiation()) {
+					nameTV.setText("<" + wr.a.getAttName() + ">");
+				} else {
+					nameTV.setText(wr.a.getAttName());
+				}
+			} else {
+				nameTV.setText(wr.a.getAttName());
+			}
 		}
 
 		if (wr.udc != null) {
@@ -1092,8 +1100,22 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else {
 					return 1;
 				}
+			} else if (this.a.getUser() != null
+					&& this.a.getUser().isRapidInitiation()) {
+				if (wr.a == null) {
+					return -1;
+				} else if (wr.a.getUser() != null
+						&& wr.a.getUser().isRapidInitiation()) {
+					// return 0;
+					return calledByCompareTo(wr);
+				} else {
+					return 1;
+				}
 			} else if (!this.a.isJoined()) {
 				if (wr.a == null) {
+					return -1;
+				} else if (wr.a.getUser() != null
+						&& wr.a.getUser().isRapidInitiation()) {
 					return -1;
 				} else if (!wr.a.isJoined()) {
 					return 0;
@@ -1102,6 +1124,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			} else if (this.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 				if (wr.a == null) {
+					return -1;
+				} else if (wr.a.getUser() != null
+						&& wr.a.getUser().isRapidInitiation()) {
 					return -1;
 				} else if (!wr.a.isJoined()) {
 					return -1;
@@ -1113,6 +1138,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 			} else if (this.a.isChairMan()) {
 				if (wr.a == null) {
+					return -1;
+				} else if (wr.a.getUser() != null
+						&& wr.a.getUser().isRapidInitiation()) {
 					return -1;
 				} else if (!wr.a.isJoined()) {
 					return -1;
@@ -1126,6 +1154,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			} else if (this.a.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
 				if (wr.a == null) {
+					return -1;
+				} else if (wr.a.getUser() != null
+						&& wr.a.getUser().isRapidInitiation()) {
 					return -1;
 				} else if (!wr.a.isJoined()) {
 					return -1;
@@ -1141,6 +1172,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			} else if (this.a.getLectureState() == Attendee.LECTURE_STATE_APPLYING) {
 				if (wr.a == null) {
+					return -1;
+				} else if (wr.a.getUser() != null
+						&& wr.a.getUser().isRapidInitiation()) {
 					return -1;
 				} else if (!wr.a.isJoined()) {
 					return -1;
@@ -1159,6 +1193,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.isSpeaking()) {
 				if (wr.a == null) {
 					return -1;
+				} else if (wr.a.getUser() != null
+						&& wr.a.getUser().isRapidInitiation()) {
+					return -1;
 				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
@@ -1176,6 +1213,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			} else {
 				if (wr.a == null) {
+					return -1;
+				} else if (wr.a.getUser() != null
+						&& wr.a.getUser().isRapidInitiation()) {
 					return -1;
 				} else if (!wr.a.isJoined()) {
 					return -1;

@@ -59,8 +59,9 @@
 
         <service android:name="com.v2tech.view.JNIService" >
         </service>
-        <service android:name="com.v2tech.util.LogService" 
-                 android:process=":Server">
+        <service
+            android:name="com.v2tech.util.LogService"
+            android:process=":Server" >
         </service>
         <service android:name="com.v2tech.service.ConferencMessageSyncService" >
         </service>

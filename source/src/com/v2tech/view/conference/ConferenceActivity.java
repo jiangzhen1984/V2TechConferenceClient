@@ -451,10 +451,10 @@ public class ConferenceActivity extends Activity {
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 
-		mContentLayoutMain.measure(View.MeasureSpec.EXACTLY,
-				View.MeasureSpec.EXACTLY);
-		this.mContentWidth = -1;
-		this.mContentHeight = -1;
+//		mContentLayoutMain.measure(View.MeasureSpec.EXACTLY,
+//				View.MeasureSpec.EXACTLY);
+//		this.mContentWidth = -1;
+//		this.mContentHeight = -1;
 	}
 
 	private void initBroadcastReceiver() {
@@ -815,12 +815,12 @@ public class ConferenceActivity extends Activity {
 				mContentHeight = mContentLayoutMain.getHeight();
 			}
 
-			if (activityFromStop) {
-				mContentWidth = mSaveWidth;
-				activityFromStop = false;
-			} else {
-				mSaveWidth = mContentWidth;
-			}
+//			if (activityFromStop) {
+//				mContentWidth = mSaveWidth;
+//				activityFromStop = false;
+//			} else {
+//				mSaveWidth = mContentWidth;
+//			}
 
 			int flag = getSubViewWindowState();
 			// If sub window request full screen
@@ -831,6 +831,10 @@ public class ConferenceActivity extends Activity {
 			}
 
 			height = mContentHeight;
+			
+			Log.i("2014014 1","mContentWidth = "+mContentWidth);
+			Log.i("2014014 1","marginLeft = "+marginLeft);
+			
 
 			if (fl == null) {
 				fl = new FrameLayout.LayoutParams(width, height);

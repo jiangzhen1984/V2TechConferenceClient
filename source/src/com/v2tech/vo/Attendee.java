@@ -51,7 +51,7 @@ public class Attendee implements Comparable<Attendee> {
 	public Attendee(User user, List<UserDeviceConfig> mDevices, boolean isSelf,
 			boolean isChairMan) {
 		super();
-		this.user = user;
+		this.setUser(user);
 		this.mDevices = mDevices;
 		this.isSelf = isSelf;
 		this.isChairMan = isChairMan;
@@ -61,7 +61,7 @@ public class Attendee implements Comparable<Attendee> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((user == null) ? 0 : user.hashCode());
+		result = prime * result + ((getUser() == null) ? 0 : getUser().hashCode());
 		return result;
 	}
 
@@ -74,10 +74,10 @@ public class Attendee implements Comparable<Attendee> {
 		if (getClass() != obj.getClass())
 			return false;
 		Attendee other = (Attendee) obj;
-		if (user == null) {
-			if (other.user != null)
+		if (getUser() == null) {
+			if (other.getUser() != null)
 				return false;
-		} else if (!user.equals(other.user))
+		} else if (!getUser().equals(other.getUser()))
 			return false;
 		return true;
 	}
@@ -123,33 +123,33 @@ public class Attendee implements Comparable<Attendee> {
 	// }
 
 	public long getAttId() {
-		if (user != null) {
-			return user.getmUserId();
+		if (getUser() != null) {
+			return getUser().getmUserId();
 		}
 		return 0;
 	}
 
 	public String getAttName() {
-		if (user != null) {
-			if (!TextUtils.isEmpty(user.getNickName()))
-				return user.getNickName();
+		if (getUser() != null) {
+			if (!TextUtils.isEmpty(getUser().getNickName()))
+				return getUser().getNickName();
 			else
-				return user.getName();
+				return getUser().getName();
 
 		}
 		return null;
 	}
 
 	public boolean isRapidInitiation(){
-		if (user != null) {
-			return user.isRapidInitiation();
+		if (getUser() != null) {
+			return getUser().isRapidInitiation();
 		}
 		return false;
 	}
 	
 	public String getAbbraName() {
-		if (user != null) {
-			return user.getArra();
+		if (getUser() != null) {
+			return getUser().getArra();
 		}
 		return null;
 	}
@@ -198,10 +198,10 @@ public class Attendee implements Comparable<Attendee> {
 	}
 
 	public Bitmap getAvatar() {
-		if (user == null) {
+		if (getUser() == null) {
 			return null;
 		}
-		Bitmap map = this.user.getAvatarBitmap();
+		Bitmap map = this.getUser().getAvatarBitmap();
 		return map;
 	}
 
@@ -227,18 +227,22 @@ public class Attendee implements Comparable<Attendee> {
 
 	@Override
 	public int compareTo(Attendee attendee) {
-		if (this.user == null) {
+		if (this.getUser() == null) {
 			return 1;
 		}
-		if (attendee.user == null) {
+		if (attendee.getUser() == null) {
 			return -1;
 		}
 
-		if (this.user.getmUserId() == attendee.user.getmUserId()) {
+		if (this.getUser().getmUserId() == attendee.getUser().getmUserId()) {
 			return 0;
 		} else {
 			return 1;
 		}
+	}
+
+	public User getUser() {
+		return user;
 	}
 
 }
