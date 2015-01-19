@@ -40,11 +40,7 @@ public class ConferenceMessageBodyView extends LinearLayout{
 	private View rootView;
 
 	private TextView senderTV;
-	private ImageView mImageIV;
 	private Context mContext;
-	private ClickListener callback;
-	private boolean isImageItem;
-	private ActionListener actionLisener;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
@@ -54,11 +50,10 @@ public class ConferenceMessageBodyView extends LinearLayout{
 		public void NotChangeTaskToBack();
 	}
 
-	public ConferenceMessageBodyView(Context context, VMessage m, ActionListener actionLisener) {
+	public ConferenceMessageBodyView(Context context, VMessage m) {
 		super(context);
 		this.mMsg = m;
 		this.mContext = context;
-		this.actionLisener = actionLisener;
 		rootView = LayoutInflater.from(context).inflate(
 				R.layout.conference_message_body, null, false);
 		initView();
@@ -98,14 +93,9 @@ public class ConferenceMessageBodyView extends LinearLayout{
 
 			@Override
 			public void onClick(View v) {
-				if(isImageItem){
-					
-					List<VMessageImageItem> imageItems = mMsg.getImageItems();
-					VMessageImageItem imageItem = null;
-					if (imageItems != null && imageItems.size() > 0) {
-						imageItem = mMsg.getImageItems().get(0);
-					}
-					
+				List<VMessageImageItem> imageItems = mMsg.getImageItems();
+				if (imageItems != null && imageItems.size() > 0) {
+					VMessageImageItem imageItem = mMsg.getImageItems().get(0);
 					//notify conferenceActivity chanage flag isMoveToBack
 					Intent notify = new Intent();
 					notify.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -159,7 +149,6 @@ public class ConferenceMessageBodyView extends LinearLayout{
 						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				et.setText(builder);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
-				isImageItem = true;
 				Drawable dr = new BitmapDrawable(this.getContext()
 						.getResources(),
 						((VMessageImageItem) item).getCompressedBitmap());
@@ -185,10 +174,6 @@ public class ConferenceMessageBodyView extends LinearLayout{
 
 	public VMessage getItem() {
 		return this.mMsg;
-	}
-
-	public void setCallback(ClickListener cl) {
-		this.callback = cl;
 	}
 
 	public void recycle() {

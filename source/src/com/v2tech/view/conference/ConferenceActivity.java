@@ -234,7 +234,7 @@ public class ConferenceActivity extends Activity {
 
 	private boolean mServiceBound = false;
 	private boolean mLocalHolderIsCreate = false;
-	private boolean isMoveTaskBack = true;
+	private boolean isMoveTaskBack = false;
 
 	private int mVideoMaxCols = 2;
 
@@ -450,11 +450,11 @@ public class ConferenceActivity extends Activity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-
-		// mContentLayoutMain.measure(View.MeasureSpec.EXACTLY,
-		// View.MeasureSpec.EXACTLY);
-		// this.mContentWidth = -1;
-		// this.mContentHeight = -1;
+//		if(isMoveTaskBack){
+//			isMoveTaskBack = false;
+//		}
+//		isMoveTaskBack = true;
+		moveTaskToBack(true);
 	}
 
 	private void initBroadcastReceiver() {
@@ -471,9 +471,9 @@ public class ConferenceActivity extends Activity {
 		filter.addAction(PublicIntent.PREPARE_FINISH_APPLICATION);
 		filter.addAction(PublicIntent.NOTIFY_CONFERENCE_ACTIVITY);
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
-		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		filter.addAction(Intent.ACTION_USER_PRESENT);
 		filter.addAction(Intent.ACTION_HEADSET_PLUG);
+	    filter.addAction(Intent.ACTION_SCREEN_OFF);  
 		filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
 		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO);
 		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO);
@@ -1650,7 +1650,7 @@ public class ConferenceActivity extends Activity {
 				// from VideoMsgChattingLayout 聊天打开图片
 				isMoveTaskBack = false;
 			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-
+				
 			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
 
 			} else if (Intent.ACTION_HEADSET_PLUG.equals(intent.getAction())) {
@@ -1910,7 +1910,7 @@ public class ConferenceActivity extends Activity {
 
 				}
 
-			}
+			} 
 		}
 	};
 
@@ -2215,11 +2215,10 @@ public class ConferenceActivity extends Activity {
 			mSettingWindow.dismiss();
 		}
 
-		if (!isMoveTaskBack) {
-			isMoveTaskBack = true;
-		} else {
-			moveTaskToBack(true);
-		}
+//		if (!isMoveTaskBack) {
+//			isMoveTaskBack = true;
+//		else
+//			moveTaskToBack(true);
 	}
 
 	/**

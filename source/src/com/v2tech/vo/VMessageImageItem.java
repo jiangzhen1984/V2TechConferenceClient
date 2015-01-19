@@ -1,6 +1,7 @@
 package com.v2tech.vo;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 
 import com.V2.jni.util.V2Log;
 import com.v2tech.util.BitmapUtil;
@@ -158,22 +160,22 @@ public class VMessageImageItem extends VMessageAbstractItem{
 
 	public synchronized Bitmap getFullQuantityBitmap() {
 		if (mFullQualityBitmap == null || mFullQualityBitmap.isRecycled()) {
+			
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
-			options.inPreferredConfig = Config.RGB_565;
+			options.inPreferredConfig = Config.ARGB_8888;
 			options.inDither = true;
 			BitmapFactory.decodeFile(this.filePath, options);
 			options.inJustDecodeBounds = false;
-			if (options.outWidth > 1920 || options.outHeight > 1080) {
-				options.inSampleSize = 2;
-				mFullQualityBitmap = BitmapFactory.decodeFile(this.filePath,
+			
+			int widthScale = options.outWidth / GlobalConfig.SCREEN_WIDTH;
+			int heightScale = options.outHeight / GlobalConfig.SCREEN_HEIGHT;
+			if(widthScale > heightScale && options.outWidth > GlobalConfig.SCREEN_WIDTH)
+				options.inSampleSize = widthScale;
+			else if(heightScale > widthScale && options.outHeight > GlobalConfig.SCREEN_HEIGHT)
+				options.inSampleSize = heightScale;
+			mFullQualityBitmap = BitmapFactory.decodeFile(this.filePath,
 						options);
-			}  else {
-				options.inSampleSize = 1;
-				mFullQualityBitmap = BitmapFactory.decodeFile(this.filePath,
-						options);
-			}
-
 		}
 
 		return mFullQualityBitmap;

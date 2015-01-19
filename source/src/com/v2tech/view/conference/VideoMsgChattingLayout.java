@@ -223,7 +223,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			
 			VMessage vm = (VMessage) wr.getItemObject();
 			if (convertView == null) {
-				ConferenceMessageBodyView mv = new ConferenceMessageBodyView(getContext(), vm, actionLisener);
+				ConferenceMessageBodyView mv = new ConferenceMessageBodyView(getContext(), vm);
 				mv.setConf(conf);
 				convertView = mv;
 			} else {

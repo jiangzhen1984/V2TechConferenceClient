@@ -114,8 +114,7 @@ public class AudioRequest {
 
 	/**
 	 * 让底层开始录音的函数接口
-	 * 
-	 * @param arg1
+	 * @param fileID
 	 */
 	public native void RecordFile(String fileID);
 
@@ -127,14 +126,12 @@ public class AudioRequest {
 	/**
 	 * 让底层开始播放录音文件的函数接口
 	 * 
-	 * @param arg1
+	 * @param fileID
 	 */
-	public native void PlayFile(String arg1);
+	public native void PlayFile(String fileID);
 
 	/**
 	 * 让底层停止播放录音文件的函数接口
-	 * 
-	 * @param arg1
 	 */
 	public native void StopPlay();
 

@@ -403,15 +403,26 @@ public class GroupListView extends ListView {
 
 					int pos = calculateIndex(startPos, endPos - 1, user,
 							user.getmStatus());
-					//计算出的位置需要+1，因为pos指的是被添加的item与该pos的item对比之后break的结果，需要排在其后面
-					pos++;
-					Log.i(TAG, "组名 = " + group.getName() + " 组开始位置 = "
-							+ startPos + " ，组结束位置  = " + endPos + " ,插入位置 = "
-							+ pos);
+					//计算出的位置pos，是指的是被添加的item与该pos的item对比之后break的结果
+					int replaceItem = pos;
+					Log.i(TAG, "计算插入位置 : " + pos);
 					if (pos != -1) {
 						ItemData userItem = this.getItem(group, user);
-						((User) userItem.getObject()).updateStatus(user
-								.getmStatus());
+						User insertUser = ((User) userItem.getObject());
+						insertUser.updateStatus(user.getmStatus());
+						
+						ItemData itemData = mFilterList.get(replaceItem);
+						if(itemData instanceof UserItemData){
+							User replacedUser = ((User) itemData.getObject());
+							int result = replacedUser.compareTo(insertUser);
+							if(result < 0)
+								pos++;
+						} 
+						
+						Log.i(TAG, "组名 = " + group.getName() + " 组开始位置 = "
+								+ startPos + " ，组结束位置  = " + endPos + " ,插入位置 = "
+								+ pos);
+						
 						if(pos >= mFilterList.size()){
 							mFilterList.add(userItem);
 						} else {

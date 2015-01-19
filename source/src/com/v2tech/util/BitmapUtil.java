@@ -119,8 +119,7 @@ public class BitmapUtil {
 		options.inJustDecodeBounds = false;
 		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
 		options.inPurgeable = true;
-		Bitmap bp = BitmapFactory.decodeFile(filePath, options);
-		return bp;
+		return BitmapFactory.decodeFile(filePath, options);
 	}
 
 	public static void getCompressedBitmapBounds(String file, int[] r) {
@@ -153,7 +152,7 @@ public class BitmapUtil {
 	}
 
 	public static Bitmap getSizeBitmap(Context context, String file) {
-		if (file == null) {
+		if (TextUtils.isEmpty(file)) {
 			throw new NullPointerException(" file is null");
 		}
 		File f = new File(file);
@@ -162,13 +161,25 @@ public class BitmapUtil {
 		}
 
 		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
+		options.inJustDecodeBounds = true;
+		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
+		BitmapFactory.decodeFile(file, options);
+		if (options.outWidth >= 1080 || options.outHeight >= 1080) {
+			options.inSampleSize = 8;
+		} else if (options.outWidth > 500 || options.outHeight > 500) {
+			options.inSampleSize = 4;
+		} else if (options.outWidth > 200 || options.outHeight > 200) {
+			options.inSampleSize = 2;
+		} else {
+			options.inSampleSize = 1;
+		}
+		options.inJustDecodeBounds = false;
 		options.inPurgeable = true;
+		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
 		DensityUtils.dip2px(context, 100);
 		options.outHeight = DensityUtils.dip2px(context, 100);
 		options.outWidth = DensityUtils.dip2px(context, 100);
-		Bitmap bp = BitmapFactory.decodeFile(file, options);
-		return bp;
+		return BitmapFactory.decodeFile(file, options);
 	}
 
 	public static int getBitmapRotation(String imgpath) {

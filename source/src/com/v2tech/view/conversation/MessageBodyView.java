@@ -132,9 +132,16 @@ public class MessageBodyView extends LinearLayout {
 		}
 		this.isShowTime = isShowTime;
 		this.localHandler = new Handler();
+		
 		initView();
 		initData();
 		initPopupWindow();
+		
+		if (isShowTime && mMsg.getDate() != null) {
+			timeTV.setText(mMsg.getStringDate());
+		} else {
+			timeTV.setVisibility(View.GONE);
+		}
 	}
 
 	private void initView() {
@@ -161,12 +168,6 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	private void initData() {
-
-		if (isShowTime && mMsg.getDate() != null) {
-			timeTV.setText(mMsg.getStringDate());
-		} else {
-			timeTV.setVisibility(View.GONE);
-		}
 
 		if (!mMsg.isLocal()) {
 			mHeadIcon = (ImageView) rootView
@@ -237,7 +238,7 @@ public class MessageBodyView extends LinearLayout {
 				& mMsg.getFileItems().size() <= 0) {
 			updateSendingFlag(true);
 		}
-
+		
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
 			User fromUser = GlobalHolder.getInstance().getUser(
 					mMsg.getFromUser().getmUserId());
@@ -692,6 +693,10 @@ public class MessageBodyView extends LinearLayout {
 		}
 		this.mMsg = vm;
 		initData();
+		if (mMsg.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
+			updateFailedFlag(true);
+		} else 
+			updateFailedFlag(false);
 	}
 
 	public void updateDate() {

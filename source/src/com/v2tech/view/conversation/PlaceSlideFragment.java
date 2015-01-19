@@ -63,10 +63,7 @@ public class PlaceSlideFragment extends Fragment {
 //		}
 //		else{
 			final TouchImageView iv  = new TouchImageView(this.getActivity());
-			VMessageImageItem.Size si = vim.getFullBitmapSize();
-			int width =si.width;
-			int height =  si.height;
-			mHoldPlaceBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+			mHoldPlaceBitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.RGB_565);
 			iv.setImageBitmap(mHoldPlaceBitmap);
 			
 			at = new AsyncTask<Void, Void, Bitmap>() {
@@ -88,8 +85,7 @@ public class PlaceSlideFragment extends Fragment {
 							return;
 						}
 						iv.setImageBitmap(result);
-//						iv.resetZoom();
-//						iv.setImageDrawable(new BitmapDrawable(PlaceSlideFragment.this.getActivity().getResources(), vim.getFullQuantityBitmap()));
+						iv.setFilePath(filePath);
 				}
 
 				@Override

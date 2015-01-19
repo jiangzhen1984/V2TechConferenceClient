@@ -1951,16 +1951,6 @@ public class JNIService extends Service implements
 		public void OnSendChatResult(SendingResultJNIObjectInd ind) {
 			super.OnSendChatResult(ind);
 
-			int state;
-			int fileState;
-			if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
-				state = VMessageAbstractItem.STATE_SENT_FALIED;
-				fileState = VMessageAbstractItem.STATE_FILE_SENT_FALIED;
-			} else {
-				state = VMessageAbstractItem.STATE_SENT_SUCCESS;
-				fileState = VMessageAbstractItem.STATE_FILE_SENT;
-			}
-
 			List<String> cacheNames = GlobalHolder.getInstance()
 					.getDataBaseTableCacheName();
 			if (!cacheNames.contains(ContentDescriptor.HistoriesMessage.NAME)) {
@@ -1969,12 +1959,22 @@ public class JNIService extends Service implements
 								+ ContentDescriptor.HistoriesMessage.NAME);
 				return;
 			}
-
+			
 			List<VMessage> messages = MessageLoader.queryMessage(
 					ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 							+ "= ? ", new String[] { ind.getUuid() }, null);
 			if (messages != null && messages.size() > 0) {
 				VMessage vm = messages.get(0);
+				int state;
+				int fileState;
+				if (ind.getRet() == SendingResultJNIObjectInd.Result.FAILED) {
+					state = VMessageAbstractItem.STATE_SENT_FALIED;
+					fileState = VMessageAbstractItem.STATE_FILE_SENT_FALIED;
+				} else {
+					state = VMessageAbstractItem.STATE_SENT_SUCCESS;
+					fileState = VMessageAbstractItem.STATE_FILE_SENT;
+				}
+				
 				vm.setState(state);
 				List<VMessageAbstractItem> items = vm.getItems();
 				for (VMessageAbstractItem item : items) {
@@ -1989,18 +1989,13 @@ public class JNIService extends Service implements
 					}
 				}
 				MessageLoader.updateChatMessageState(mContext, messages.get(0));
-			} else {
-				V2Log.e(TAG,
-						"Resend message failed...update to database failed...uuid is : "
-								+ ind.getUuid());
-			}
-
-			Intent i = new Intent();
-			i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_RESULT);
-			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			i.putExtra("uuid", ind.getUuid());
-			i.putExtra("errorCode", ind.getErrorCode());
-			sendBroadcast(i);
+				Intent i = new Intent();
+				i.setAction(JNIService.JNI_BROADCAST_MESSAGE_SENT_RESULT);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("uuid", ind.getUuid());
+				i.putExtra("errorCode", ind.getErrorCode());
+				sendBroadcast(i);
+			} 
 		}
 
 		private void handlerChatPictureCallback(int eGroupType, long nGroupID,

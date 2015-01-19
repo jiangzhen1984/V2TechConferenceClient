@@ -159,7 +159,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private boolean isLoadedCov;
 
 	private boolean mIsStartedSearch;
-	private boolean showAuthenticationNotification;
 	private boolean isUpdateGroup;
 	private boolean isUpdateDeparment;
 	private boolean isCallBack;
@@ -607,6 +606,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		return isCrowd;
 	}
 
+	/**
+	 * According populateType to fill the List Data. The data from server!
+	 * @param populateType
+	 * @param list
+	 */
 	private void populateConversation(GroupType populateType, List<Group> list) {
 		mItemList.clear();
 		adapter.notifyDataSetChanged();
@@ -664,12 +668,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	}
 
 	/**
-	 * Add conversation to list
-	 * 
+	 * Add a new conversation to current list.
 	 * @param g
-	 * @param flag
+	 * @param readState   
+	 * 		Indicate that whether the new conversaion should display the prompt!
 	 */
-	private void addConversation(Group g, boolean flag) {
+	private void addConversation(Group g, boolean readState) {
 
 		if (g == null) {
 			V2Log.e(TAG,
@@ -736,7 +740,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							+ " and name is : " + cov.getName());
 		}
 
-		if (flag) {
+		if (readState) {
 			currentItem.cov.setReadFlag(Conversation.READ_FLAG_UNREAD);
 		} else {
 			currentItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
@@ -1374,7 +1378,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (msg.getReadState() == VMessageQualification.ReadState.UNREAD) {
 				verificationMessageItemData
 						.setReadFlag(Conversation.READ_FLAG_UNREAD);
-				showAuthenticationNotification = true;
 				if (verificationMessageItemData.getMsg() != null) {
 					updateVerificationStateBar(verificationMessageItemData
 							.getMsg().toString(),
@@ -2331,9 +2334,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		else
 			intent.putExtra("isFriendActivity", false);
 
-		intent.putExtra("isCrowdShowNotification",
-				showAuthenticationNotification);
-		showAuthenticationNotification = false;
+		boolean flag = VerificationProvider.getUNReandMessage(false);
+		intent.putExtra("isCrowdShowNotification", flag);
 		return intent;
 	}
 
@@ -2735,6 +2737,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (mIsStartedSearch) {
 				return searchList.get(position).gp;
 			} else {
+				if(mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER){
+					Conversation cov = mItemList.get(position).cov;
+					if(cov.getType() == Conversation.TYPE_CONTACT){
+						Bitmap bp = ((ContactConversation)cov).getU().getAvatarBitmap();
+						GroupLayout gl = (GroupLayout) mItemList.get(position).gp;
+						gl.updateIcon(bp);
+					}
+				}
 				return mItemList.get(position).gp;
 			}
 		}
@@ -3122,7 +3132,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 
 				if (!GlobalHolder.getInstance().isOfflineLoaded()) {
-					V2Log.e("test", "接收到离线会议，需要显示红点！");
 					offLineConf.add(gid);
 				}
 

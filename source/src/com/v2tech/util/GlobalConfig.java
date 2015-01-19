@@ -26,6 +26,12 @@ public class GlobalConfig {
 	public static String GLOBAL_VERSION_NAME = "1.3.0.1";
 
 	public static double SCREEN_INCHES = 0;
+	
+	public static int SCREEN_WIDTH = 0;
+	
+	public static int SCREEN_HEIGHT = 0;
+	
+	public static int BITMAP_MAX_SIZE = 4096;
 
 	public static boolean isConversationOpen = false;
 

@@ -273,6 +273,7 @@ public class CrowdFilesActivity extends Activity {
 	public void onBackPressed() {
 		if (isInDeleteMode) {
 			mCannelButton.setVisibility(View.INVISIBLE);
+			mUploadingFileNotificationIcon.setClickable(true);
 			isInDeleteMode = false;
 			// resume all uploading files
 			if (showUploaded)
@@ -791,6 +792,7 @@ public class CrowdFilesActivity extends Activity {
 						// update upload button text to cancel
 						mShowUploadedFileButton
 								.setText(R.string.crowd_files_title_cancel_button);
+						mUploadingFileNotificationIcon.setClickable(false);
 					}
 				}
 				return true;

@@ -27,7 +27,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
@@ -37,6 +36,8 @@ import com.v2tech.service.GlobalHolder;
 import com.v2tech.service.MessageListener;
 import com.v2tech.service.jni.JNIResponse;
 import com.v2tech.service.jni.RequestConfCreateResponse;
+import com.v2tech.util.DateUtil;
+import com.v2tech.util.GlobalConfig;
 import com.v2tech.view.JNIService;
 import com.v2tech.view.PublicIntent;
 import com.v2tech.view.bo.UserStatusObject;
@@ -62,7 +63,6 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 
 	private EditText mConfTitleET;
 	private EditText mConfStartTimeET;
-	private TextView mErrorMessageTV;
 
 	private ConferenceService cs = new ConferenceService();
 	private Conference conf;
@@ -107,6 +107,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 		mConfTitleET = (EditText) findViewById(R.id.ws_common_create_edit_name_et);
 		mConfStartTimeET = (EditText) findViewById(R.id.conference_create_conf_start_time);
 		mConfStartTimeET.setOnTouchListener(mDateTimePickerListener);
+		mConfStartTimeET.setText(DateUtil.getStandardDate(new Date(GlobalConfig.getGlobalServerTime())));
 
 		new LoadContactsAT().execute();
 	}
@@ -307,14 +308,15 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 								int dayOfMonth, int hour, int minute) {
 							((EditText) view).setText(year
 									+ "-"
-									+ monthOfYear
+									+ (monthOfYear < 10 ? ("0" + monthOfYear) : monthOfYear)
 									+ "-"
 									+ dayOfMonth
 									+ " "
 									+ (hour < 10 ? ("0" + hour) : (hour + ""))
 									+ ":"
 									+ (minute < 10 ? ("0" + minute)
-											: (minute + "")));
+											: (minute + ""))
+									+ ":00");
 						}
 
 					});

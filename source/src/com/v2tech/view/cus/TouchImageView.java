@@ -1,11 +1,11 @@
 package com.v2tech.view.cus;
 
-import com.V2.jni.util.V2Log;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -16,6 +16,8 @@ import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -28,10 +30,12 @@ import android.widget.ImageView;
 import android.widget.OverScroller;
 import android.widget.Scroller;
 
+import com.v2tech.util.GlobalConfig;
+
 public class TouchImageView extends ImageView {
 
 	private static final String DEBUG = "DEBUG";
-
+	private static final int SCALE_OPT = 0x0001;
 	//
 	// SuperMin and SuperMax multipliers. Determine how much the image can be
 	// zoomed below or above the zoom boundaries, before animating back to the
@@ -87,6 +91,12 @@ public class TouchImageView extends ImageView {
     private GestureDetector.OnDoubleTapListener doubleTapListener = null;
     private OnTouchListener userTouchListener = null;
     private OnTouchImageViewListener touchImageViewListener = null;
+    
+    private LocalHanlder mHandler = new LocalHanlder();
+	private boolean startDecode;
+	private int lastScaleWidth;
+	private int lastScaleHeight;
+	private String filePath;
 
     public TouchImageView(Context context) {
         super(context);
@@ -428,6 +438,10 @@ public class TouchImageView extends ImageView {
      */
     public void setScrollPosition(float focusX, float focusY) {
     	setZoom(normalizedScale, focusX, focusY);
+    }
+    
+    public void setFilePath(String filePath){
+    	this.filePath = filePath;
     }
     
     /**
@@ -875,7 +889,8 @@ public class TouchImageView extends ImageView {
      *
      */
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-        @Override
+
+		@Override
         public boolean onScaleBegin(ScaleGestureDetector detector) {
             setState(State.ZOOM);
             return true;
@@ -908,6 +923,51 @@ public class TouchImageView extends ImageView {
         		targetZoom = minScale;
         		animateToZoomBoundary = true;
         	}
+        	
+        	int currentBmWidth = (int) getImageWidth();
+			int currentBmHeight = (int) getImageHeight();
+			if (lastScaleWidth < currentBmWidth || lastScaleHeight < currentBmHeight) {
+				lastScaleWidth = currentBmWidth;
+				lastScaleHeight = currentBmHeight;
+				if (!startDecode) {
+					new Thread(new Runnable() {
+
+						@Override
+						public void run() {
+							startDecode = true;
+							BitmapFactory.Options options = new BitmapFactory.Options();
+							options.inJustDecodeBounds = true;
+							options.inPreferredConfig = Config.RGB_565;
+							options.inDither = true;
+							BitmapFactory.decodeFile(filePath, options);
+							options.inJustDecodeBounds = false;
+							int widthScale = options.outWidth / lastScaleWidth;
+							int heightScale = options.outHeight
+									/ lastScaleHeight;
+							if (widthScale >= heightScale
+									&& options.outWidth > lastScaleWidth)
+								options.inSampleSize = widthScale;
+							else if (heightScale > widthScale
+									&& options.outHeight > lastScaleHeight)
+								options.inSampleSize = heightScale;
+							Bitmap bm = BitmapFactory.decodeFile(filePath,
+									options);
+
+							if (bm.getWidth() > GlobalConfig.BITMAP_MAX_SIZE
+									|| bm.getHeight() > GlobalConfig.BITMAP_MAX_SIZE) {
+								bm = Bitmap.createScaledBitmap(
+										bm,
+										bm.getWidth() > GlobalConfig.BITMAP_MAX_SIZE ? GlobalConfig.BITMAP_MAX_SIZE
+												: bm.getWidth(),
+										bm.getHeight() > GlobalConfig.BITMAP_MAX_SIZE ? GlobalConfig.BITMAP_MAX_SIZE
+												: bm.getHeight(), true);
+							}
+							Message.obtain(mHandler, SCALE_OPT, bm)
+									.sendToTarget();
+						}
+					}).start();
+				}
+			}
         	
         	if (animateToZoomBoundary) {
 	        	DoubleTapZoom doubleTap = new DoubleTapZoom(targetZoom, viewWidth / 2, viewHeight / 2, true);
@@ -1264,4 +1324,22 @@ public class TouchImageView extends ImageView {
     	matrix.getValues(n);
     	Log.d(DEBUG, "Scale: " + n[Matrix.MSCALE_X] + " TransX: " + n[Matrix.MTRANS_X] + " TransY: " + n[Matrix.MTRANS_Y]);
     }
+    
+    class LocalHanlder extends Handler {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case SCALE_OPT:
+				Bitmap bm = (Bitmap) msg.obj;
+				setDrawingCacheEnabled(true);
+				getDrawingCache().recycle();
+				setDrawingCacheEnabled(false);
+				setImageBitmap(bm);
+				startDecode = false;
+				setState(State.NONE);
+				break;
+			}
+		}
+	}
 }

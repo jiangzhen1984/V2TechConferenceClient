@@ -1515,21 +1515,28 @@ public class VerificationProvider extends DatabaseProvider {
 	}
 
 	/**
-	 * 判断数据库是否有未读的好友验证消息
-	 * 
+	 * 从数据库获取验证消息，判断是否有未读的。
+	 * @param isFriend
+	 * 			true verification message type is friend , false is crowd!
 	 * @return
 	 */
-	public static boolean getUNReandFriendMessage() {
+	public static boolean getUNReandMessage(boolean isFriend) {
 		Cursor cursor = null;
 		try {
 			String selection = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_MEDIA_READ_STATE
 					+ "= ?";
 			String[] selectionArgs = new String[] { String
 					.valueOf(ReadState.UNREAD.intValue()) };
-			cursor = mContext.getContentResolver().query(
-					ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
-					ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS,
-					selection, selectionArgs, null);
+			if(isFriend)
+				cursor = mContext.getContentResolver().query(
+						ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
+						ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS,
+						selection, selectionArgs, null);
+			else
+				cursor = mContext.getContentResolver().query(
+						ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+						ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS,
+						selection, selectionArgs, null);
 			if (cursor == null) {
 				return false;
 			}

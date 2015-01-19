@@ -40,7 +40,6 @@ import android.widget.Toast;
 import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
-import com.v2tech.db.ContentDescriptor;
 import com.v2tech.db.DataBaseContext;
 import com.v2tech.db.V2TechDBHelper;
 import com.v2tech.db.provider.VerificationProvider;
@@ -161,30 +160,16 @@ public class MessageAuthenticationActivity extends Activity {
 
 	private void initPrompt() {
 		boolean showFriendNotification = false;
-		// 查出未读的第一条按时间顺序
-		String order = ContentDescriptor.HistoriesAddFriends.Cols.HISTORY_FRIEND_SAVEDATE
-				+ " desc limit 1";
-		Cursor cursor = mContext.getContentResolver().query(
-				ContentDescriptor.HistoriesAddFriends.CONTENT_URI, null,
-				"ReadState = ?",
-				new String[] { String.valueOf(ReadState.UNREAD.intValue()) },
-				order);
-		if ((cursor != null) && (cursor.getCount() == 0))
-			showFriendNotification = false;
-		else
-			showFriendNotification = true;
-
-		if (cursor != null)
-			cursor.close();
-
+		showFriendNotification = VerificationProvider.getUNReandMessage(true);
+		if (showFriendNotification && !isFriendAuthentication)
+			updateTabPrompt(PROMPT_TYPE_FRIEND, true);
+		V2Log.d(TAG, "Is show friend notification : " + showFriendNotification);
+		
 		boolean showCrwodNotification = getIntent().getBooleanExtra(
 				"isCrowdShowNotification", false);
 		if (showCrwodNotification && isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_GROUP, true);
 		V2Log.d(TAG, "Is show crowd notification : " + showCrwodNotification);
-		if (showFriendNotification && !isFriendAuthentication)
-			updateTabPrompt(PROMPT_TYPE_FRIEND, true);
-		V2Log.d(TAG, "Is show friend notification : " + showFriendNotification);
 
 		if (!showCrwodNotification && !showFriendNotification)
 			requestUpdateConversation();

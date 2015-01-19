@@ -86,9 +86,7 @@ public class SearchService extends AbstractHandler {
 		public void OnSearchUserCallback(List<V2User> list) {
 			SearchedResult result = new SearchedResult();
 			for (V2User u : list) {
-				User temp = GlobalHolder.getInstance().getUser(u.uid);
-				if(temp.isDirty())
-					ImRequest.getInstance().getUserBaseInfo(u.uid);
+				GlobalHolder.getInstance().getUser(u.uid);
 				result.addItem(SearchedResult.Type.USER, u.uid, u.getName());
 			}
 			JNIResponse jniRES = new JNIResponse(JNIResponse.Result.SUCCESS);

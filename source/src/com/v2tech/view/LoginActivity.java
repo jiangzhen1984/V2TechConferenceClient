@@ -17,6 +17,7 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -234,6 +235,12 @@ public class LoginActivity extends Activity {
 	private String[] local;
 
 	private void init() {
+		
+		DisplayMetrics dm = new DisplayMetrics();
+		getWindowManager().getDefaultDisplay().getMetrics(dm);
+		GlobalConfig.SCREEN_WIDTH = dm.widthPixels;
+		GlobalConfig.SCREEN_HEIGHT = dm.heightPixels;
+		
 		String user = SPUtil.getConfigStrValue(this, "user");
 		String password = SPUtil.getConfigStrValue(this, "passwd");
 		if (user != null && !user.trim().isEmpty()) {

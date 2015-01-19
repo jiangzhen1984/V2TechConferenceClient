@@ -682,6 +682,7 @@ public class ConversationP2PTextActivity extends Activity implements
 			offset = 0;
 			messageArray.clear();
 			messageAllID.clear();
+			adapter.notifyDataSetChanged();
 			initConversationInfos();
 		}
 	}
@@ -950,6 +951,7 @@ public class ConversationP2PTextActivity extends Activity implements
 						}
 
 						// stop recording and sending
+						V2Log.w("AudioRequest", "invoking stop recording! id is : " + recordingFileID);
 						stopRecording(recordingFileID);
 						recordingFileID = null;
 
@@ -1824,6 +1826,7 @@ public class ConversationP2PTextActivity extends Activity implements
 				offset++;
 				judgeShouldShowTime(msg);
 				messageArray.add(new VMessageAdater(msg));
+				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 				scrollToBottom();
 			}
 		});
@@ -2274,7 +2277,6 @@ public class ConversationP2PTextActivity extends Activity implements
 			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
 			if (vm.getFileItems().size() > 0) {
 				VMessageFileItem item = vm.getFileItems().get(0);
-				V2Log.e("test", "item uuid : " + item.getUuid());
 				if (item.getUuid().equals(uuid)) {
 					VMessageFileItem vfi = ((VMessageFileItem) item);
 					switch (progressType) {
@@ -2296,7 +2298,6 @@ public class ConversationP2PTextActivity extends Activity implements
 				}
 			} else if(vm.getAudioItems().size() > 0){
 				VMessageAudioItem item = vm.getAudioItems().get(0);
-				V2Log.e("test", "item uuid : " + item.getUuid());
 				if (item.getUuid().equals(uuid)) {
 					CommonAdapterItemWrapper common = messageArray.get(i);
 					MessageBodyView mv = (MessageBodyView) common.getView();
@@ -2534,7 +2535,9 @@ public class ConversationP2PTextActivity extends Activity implements
 								.get(i).getView());
 						if (mdv != null) {
 							mdv.updateSendingFlag(false);
-							if (result != SEND_MESSAGE_SUCCESS)
+							if (result == SEND_MESSAGE_SUCCESS)
+								mdv.updateFailedFlag(false);
+							else
 								mdv.updateFailedFlag(true);
 						}
 
@@ -2543,7 +2546,26 @@ public class ConversationP2PTextActivity extends Activity implements
 						else
 							vm.setState(VMessageAbstractItem.STATE_SENT_FALIED);
 
-						if (result == SEND_MESSAGE_SUCCESS) {
+						List<VMessageAbstractItem> items = vm.getItems();
+						for (int j = 0; j < items.size(); j++) {
+							VMessageAbstractItem item = items.get(j);
+							if (uuid.equals(item.getUuid())) {
+								if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE){
+									if (result == SEND_MESSAGE_SUCCESS)
+										vm.setState(VMessageAbstractItem.STATE_FILE_SENT);
+									else
+										vm.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+								} else {
+									if (result == SEND_MESSAGE_SUCCESS)
+										vm.setState(VMessageAbstractItem.STATE_SENT_SUCCESS);
+									else
+										vm.setState(VMessageAbstractItem.STATE_SENT_FALIED);
+								}
+								break;
+							}
+						}
+						
+						if (vm.isResendMessage() && result == SEND_MESSAGE_SUCCESS) {
 							CommonAdapterItemWrapper wrapper = messageArray
 									.get(i);
 							MessageBodyView bodyView = (MessageBodyView) wrapper
@@ -2556,18 +2578,6 @@ public class ConversationP2PTextActivity extends Activity implements
 							Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 						}
 						break;
-					}
-
-					List<VMessageAbstractItem> items = vm.getItems();
-					for (int j = 0; j < items.size(); j++) {
-						VMessageAbstractItem item = items.get(j);
-						if (uuid.equals(item.getUuid())) {
-							if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE)
-								item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-							else
-								item.setState(VMessageAbstractItem.STATE_SENT_FALIED);
-							break;
-						}
 					}
 				}
 				// handler kicked event

@@ -59,7 +59,8 @@ public class CommonCreateAdapter extends BaseAdapter {
 				tag.headIcon = ((ContactUserView) convertView).getmPhotoIV();
 				tag.name = ((ContactUserView) convertView).getmUserNameTV();
 				tag.mSignature = ((ContactUserView) convertView).getmUserSignatureTV();
-			} else {
+			} 
+			else {
 				convertView = getAttendeeView(tag, user);
 			}
 			convertView.setTag(tag);
@@ -89,8 +90,9 @@ public class CommonCreateAdapter extends BaseAdapter {
 		} else
 			tag.name.setText(user.getName());
 		
-		tag.mSignature.setText(user.getSignature() == null ? "" : user
-				.getSignature());
+		if(tag.mSignature != null)
+			tag.mSignature.setText(user.getSignature() == null ? "" : user
+					.getSignature());
 	}
 
 	private View getAttendeeView(ViewTag tag, final User u) {

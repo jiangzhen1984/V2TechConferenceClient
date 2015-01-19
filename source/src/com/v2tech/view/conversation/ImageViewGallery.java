@@ -197,7 +197,6 @@ public class ImageViewGallery extends FragmentActivity {
 			bundle.putString("filePath", vm.getFilePath());
 			frg.setMessage(vm);
 			frg.setArguments(bundle);
-			// frg.setBitmap(vm.getFullQuantityBitmap());
 		}
 
 	}
