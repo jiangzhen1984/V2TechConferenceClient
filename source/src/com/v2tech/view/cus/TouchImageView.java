@@ -138,6 +138,7 @@ public class TouchImageView extends ImageView {
     public void setOnDoubleTapListener(GestureDetector.OnDoubleTapListener l) {
         doubleTapListener = l;
     }
+    
 
     @Override
     public void setImageResource(int resId) {
@@ -863,7 +864,8 @@ public class TouchImageView extends ImageView {
             //
             // indicate event was handled
             //
-            return true;
+           return true;
+    		//return false;
         }
     }
 

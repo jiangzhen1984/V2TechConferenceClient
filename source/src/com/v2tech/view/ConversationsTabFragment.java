@@ -2626,8 +2626,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							public void onClick(DialogInterface dialog,
 									int which) {
 
-								if (!((MainApplication) getActivity()
-										.getApplication()).netWordIsConnected) {
+								if (!GlobalHolder
+										.getInstance().isServerConnected()) {
 									dialog.dismiss();
 									return;
 								}

@@ -314,7 +314,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			@Override
 			public void onClick(View arg0) {
 
-				if (((MainApplication) getApplication()).netWordIsConnected) {
+				if (GlobalHolder
+						.getInstance().isServerConnected()) {
 					showDeleteContactDialog();
 				} else {
 					Toast.makeText(ContactDetail2.this, "无法连接到服务器，请确认网络连接",

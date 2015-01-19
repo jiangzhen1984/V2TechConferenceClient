@@ -168,7 +168,8 @@ public class FriendManagementActivity extends Activity {
 				@Override
 				public void onClick(View arg0) {
 
-					if (((MainApplication) getApplication()).netWordIsConnected) {
+					if (GlobalHolder
+							.getInstance().isServerConnected()) {
 						if (detailUser.getAuthtype() == 0) {
 							AddFriendHistroysHandler
 									.addOtherNoNeedAuthentication(

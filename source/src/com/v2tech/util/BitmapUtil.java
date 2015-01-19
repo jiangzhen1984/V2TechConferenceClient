@@ -16,63 +16,77 @@ import com.v2tech.R;
 
 public class BitmapUtil {
 
-    public static Context context;
-	public static Bitmap loadAvatarFromPath(String path) {
-        boolean isOwnerAvatar = true;
-		if (path == null) {
-            isOwnerAvatar = false;
-        }
-		else {
-            File f = new File(path);
-            if (!f.exists()) {
-                isOwnerAvatar = false;
-                V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , file isn't exist! path is : " + path);
-                File parent = new File(f.getParent());
-                File[] listFiles = parent.listFiles();
-                for (File file : listFiles) {
-                    V2Log.e("BitmapUtil loadAvatarFromPath --> current directory file list is : " + file.getName());
-                }
-            }
+	public static Context context;
 
-            if (f.isDirectory()) {
-                isOwnerAvatar = false;
-                V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , get a Directory! path is : " + path);
-            }
-        }
-		
+	public static Bitmap loadAvatarFromPath(String path) {
+		boolean isOwnerAvatar = true;
+		if (path == null) {
+			isOwnerAvatar = false;
+		} else {
+			File f = new File(path);
+			if (!f.exists()) {
+				isOwnerAvatar = false;
+				V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , file isn't exist! path is : "
+						+ path);
+				File parent = new File(f.getParent());
+				File[] listFiles = parent.listFiles();
+				for (File file : listFiles) {
+					V2Log.e("BitmapUtil loadAvatarFromPath --> current directory file list is : "
+							+ file.getName());
+				}
+			}
+
+			if (f.isDirectory()) {
+				isOwnerAvatar = false;
+				V2Log.e("BitmapUtil loadAvatarFromPath --> FAILED! Because parse Path , get a Directory! path is : "
+						+ path);
+			}
+		}
+
 		Bitmap tmep = null;
-		if(!TextUtils.isEmpty(path)){
+		if (!TextUtils.isEmpty(path)) {
 			BitmapFactory.Options opt = new BitmapFactory.Options();
 			tmep = BitmapFactory.decodeFile(path, opt);
 			if (tmep == null) {
-	            isOwnerAvatar = false;
+				isOwnerAvatar = false;
 				V2Log.i(" bitmap object is null");
 			}
 		}
 
-        Bitmap avatar;
-        if(isOwnerAvatar) {
-            if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
-                avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
-            } else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH) {
-                avatar = Bitmap.createScaledBitmap(tmep, 115, 115, true);
-            } else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
-                avatar = Bitmap.createScaledBitmap(tmep, 115, 115, true);
-            } else {
-                avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
-            }
-            tmep.recycle();
-            V2Log.d("decode result: width " + avatar.getWidth() + "  height:"
-                    + avatar.getHeight());
-        }
-        else{
-            if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH |
-                    GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
-                avatar = BitmapFactory.decodeResource(context.getResources() , R.drawable.avatar_big);
-            } else {
-                avatar = BitmapFactory.decodeResource(context.getResources() , R.drawable.avatar);
-            }
-        }
+		Bitmap avatar;
+		if (isOwnerAvatar) {
+			if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_HIGH) {
+				avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
+			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_MEDIUM) {
+				avatar = Bitmap.createScaledBitmap(tmep,
+						(int) (70 / 1.5 + 0.5), (int) (70 / 1.5 + 0.5), true);
+			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_LOW) {
+				avatar = Bitmap.createScaledBitmap(tmep,
+						(int) (70 / 1.5 * 0.7 + 0.5),
+						(int) (70 / 1.5 * 0.7 + 0.5), true);
+			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH) {
+				avatar = Bitmap.createScaledBitmap(tmep,
+						(int) (70 / 1.5 * 2 + 0.5), (int) (70 / 1.5 * 2 + 0.5),
+						true);
+			} else if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
+				avatar = Bitmap.createScaledBitmap(tmep, (int) (70 * 2 + 0.5),
+						(int) (70 * 2 + 0.5), true);
+			} else {
+				avatar = Bitmap.createScaledBitmap(tmep, 70, 70, true);
+			}
+			tmep.recycle();
+			V2Log.d("decode result: width " + avatar.getWidth() + "  height:"
+					+ avatar.getHeight());
+		} else {
+			if (GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XHIGH
+					| GlobalConfig.GLOBAL_DPI == DisplayMetrics.DENSITY_XXHIGH) {
+				avatar = BitmapFactory.decodeResource(context.getResources(),
+						R.drawable.avatar_big);
+			} else {
+				avatar = BitmapFactory.decodeResource(context.getResources(),
+						R.drawable.avatar);
+			}
+		}
 		return avatar;
 	}
 
@@ -80,11 +94,12 @@ public class BitmapUtil {
 		if (TextUtils.isEmpty(filePath)) {
 			throw new NullPointerException(" file is null");
 		}
-		
-		if(filePath.equals("error")){
-			return BitmapFactory.decodeResource(context.getResources(), R.drawable.ws_download_error_icon);
+
+		if (filePath.equals("error")) {
+			return BitmapFactory.decodeResource(context.getResources(),
+					R.drawable.ws_download_error_icon);
 		}
-		
+
 		File f = new File(filePath);
 		if (!f.exists()) {
 			throw new RuntimeException(" file is no exists :" + filePath);
@@ -136,8 +151,8 @@ public class BitmapUtil {
 		r[0] = options.outWidth;
 		r[1] = options.outHeight;
 	}
-	
-	public static Bitmap getSizeBitmap(Context context , String file) {
+
+	public static Bitmap getSizeBitmap(Context context, String file) {
 		if (file == null) {
 			throw new NullPointerException(" file is null");
 		}
@@ -155,7 +170,7 @@ public class BitmapUtil {
 		Bitmap bp = BitmapFactory.decodeFile(file, options);
 		return bp;
 	}
-	
+
 	public static int getBitmapRotation(String imgpath) {
 		int digree = 0;
 		ExifInterface exif = null;

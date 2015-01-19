@@ -60,8 +60,6 @@ public class MainApplication extends Application {
 	private final String DATABASE_FILENAME = "hzpy.db";
 	private boolean needCopy;
 
-	public boolean netWordIsConnected = false;
-
 	@Override
 	public void onCreate() {
 		super.onCreate();

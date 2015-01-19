@@ -26,8 +26,10 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -288,6 +290,7 @@ public class VideoDocLayout extends LinearLayout {
 			V2Log.e(" closed Doc is null");
 			return;
 		}
+
 		if (d == mCurrentDoc) {
 			mCurrentDoc = null;
 			mCurrentPage = null;
@@ -308,6 +311,7 @@ public class VideoDocLayout extends LinearLayout {
 				}
 			}
 		}
+
 		mDocs.remove(d.getId());
 	}
 
@@ -401,6 +405,28 @@ public class VideoDocLayout extends LinearLayout {
 			}
 			mDocDisplayContainer.removeAllViews();
 			TouchImageView iv = new TouchImageView(this.getContext());
+			
+			iv.setOnDoubleTapListener(new GestureDetector.OnDoubleTapListener() {
+
+				@Override
+				public boolean onSingleTapConfirmed(MotionEvent e) {
+			           Log.i("20150112 2","onClick");
+					return false;
+				}
+
+				@Override
+				public boolean onDoubleTapEvent(MotionEvent e) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+
+				@Override
+				public boolean onDoubleTap(MotionEvent e) {
+					// TODO Auto-generated method stub
+					return false;
+				}
+			});
+
 			// Merge bitmap
 			// iv.setImageResource(R.drawable.conversation_files_button);
 			mDocDisplayContainer.addView(iv, new FrameLayout.LayoutParams(

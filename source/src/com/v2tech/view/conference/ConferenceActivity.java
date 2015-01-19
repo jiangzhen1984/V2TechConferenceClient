@@ -714,6 +714,9 @@ public class ConferenceActivity extends Activity {
 		return mMessageContainer;
 	}
 
+	
+	
+	
 	private View initAttendeeContainer() {
 		if (mAttendeeContainer == null) {
 			mAttendeeContainer = new VideoAttendeeListLayout(conf, this);
@@ -721,7 +724,7 @@ public class ConferenceActivity extends Activity {
 
 			mAttendeeContainer.bringToFront();
 			mAttendeeContainer.setListener(subViewListener);
-
+			
 			// Initialize speaking
 			if (currentAttendee.isSpeaking()) {
 

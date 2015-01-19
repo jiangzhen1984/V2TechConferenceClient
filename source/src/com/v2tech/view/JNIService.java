@@ -307,12 +307,6 @@ public class JNIService extends Service implements
 
 	private void broadcastNetworkState(NetworkStateCode code) {
 
-		if (code != NetworkStateCode.CONNECTED) {
-			((MainApplication) getApplication()).netWordIsConnected = false;
-		} else {
-			((MainApplication) getApplication()).netWordIsConnected = true;
-		}
-
 		Intent i = new Intent();
 		i.setAction(JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		i.addCategory(JNI_BROADCAST_CATEGROY);
