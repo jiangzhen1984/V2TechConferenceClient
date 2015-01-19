@@ -323,10 +323,19 @@ public class GroupListView extends ListView {
 				}
 			}
 		}
+		
+		List<Group> childGroup = group.getChildGroup();
+		for (Group child : childGroup) {
+			ItemData childGroupItem = getItem(child);
+			if(childGroupItem.isChecked()){
+				count = count + 1;
+			}
+		}
 
 		ItemData item = mItemMap.get(group.getmGId());
 		if (item != null) {
-			if (count == list.size() && list.size() != 0)
+			int allCount = list.size() + group.getChildGroup().size();
+			if (count == allCount && allCount != 0)
 				item.setChecked(true);
 			else
 				item.setChecked(false);

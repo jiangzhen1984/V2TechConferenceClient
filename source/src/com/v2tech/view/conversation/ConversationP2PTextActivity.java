@@ -2195,7 +2195,6 @@ public class ConversationP2PTextActivity extends Activity implements
 		judgeShouldShowTime(m);
 		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
 		mv.setCallback(listener);
-		setMessageBodyViewBelongId(mv);
 		VMessageAdater adater = new VMessageAdater(m);
 		adater.setView(mv);
 		messageArray.add(adater);
@@ -2207,12 +2206,12 @@ public class ConversationP2PTextActivity extends Activity implements
 		return true;
 	}
 
-	private void setMessageBodyViewBelongId(MessageBodyView mv) {
-		if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
-			mv.setCurrentBelongID(remoteChatUserID);
-		else
-			mv.setCurrentBelongID(remoteGroupID);
-	}
+//	private void setMessageBodyViewBelongId(MessageBodyView mv) {
+//		if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
+//			mv.setCurrentBelongID(remoteChatUserID);
+//		else
+//			mv.setCurrentBelongID(remoteGroupID);
+//	}
 
 	private boolean removeMessage(VMessage vm) {
 		if (vm == null) {
@@ -2293,6 +2292,16 @@ public class ConversationP2PTextActivity extends Activity implements
 					MessageBodyView mv = (MessageBodyView) common.getView();
 					if (mv != null) {
 						mv.updateView(vfi);
+					}
+				}
+			} else if(vm.getAudioItems().size() > 0){
+				VMessageAudioItem item = vm.getAudioItems().get(0);
+				V2Log.e("test", "item uuid : " + item.getUuid());
+				if (item.getUuid().equals(uuid)) {
+					CommonAdapterItemWrapper common = messageArray.get(i);
+					MessageBodyView mv = (MessageBodyView) common.getView();
+					if (mv != null) {
+						mv.updateSendingFlag(false);
 					}
 				}
 			}
@@ -2389,29 +2398,6 @@ public class ConversationP2PTextActivity extends Activity implements
 
 	};
 
-	private CommonAdapter.ViewConvertListener mConvertListener = new CommonAdapter.ViewConvertListener() {
-
-		@Override
-		public View converView(CommonAdapterItemWrapper wr, View convertView,
-				ViewGroup vg) {
-			if (wr == null) {
-				return null;
-			}
-			VMessage vm = (VMessage) wr.getItemObject();
-			if (convertView == null) {
-				MessageBodyView mv = new MessageBodyView(mContext, vm,
-						vm.isShowTime());
-				mv.setCallback(listener);
-				setMessageBodyViewBelongId(mv);
-				convertView = mv;
-			} else {
-				((MessageBodyView) convertView).updateView(vm);
-			}
-			((VMessageAdater) wr).setView(convertView);
-			return convertView;
-		}
-	};
-
 	private BitmapManager.BitmapChangedListener avatarChangedListener = new BitmapManager.BitmapChangedListener() {
 
 		@Override
@@ -2476,21 +2462,26 @@ public class ConversationP2PTextActivity extends Activity implements
 		public View getView(int pos, View convertView, ViewGroup v) {
 			if (pos >= messageArray.size())
 				return convertView;
-			CommonAdapterItemWrapper wrapper = messageArray.get(pos);
-			if (wrapper.getView() == null) {
-				VMessage vm = (VMessage) wrapper.getItemObject();
-				List<VMessageFileItem> fileItems = vm.getFileItems();
-				if (fileItems != null) {
-
-					adapterFileIcon(fileItems);
-				}
-				MessageBodyView mv = new MessageBodyView(mContext, vm,
+			
+			MessageBodyView mv = null;
+			VMessageAdater adater = (VMessageAdater) messageArray.get(pos);
+			VMessage vm = (VMessage) messageArray.get(pos).getItemObject();
+			if (convertView == null) {
+				mv = new MessageBodyView(mContext, vm,
 						vm.isShowTime());
 				mv.setCallback(listener);
-				setMessageBodyViewBelongId(mv);
-				((VMessageAdater) wrapper).setView(mv);
+				convertView = mv;
+			} else {
+				mv = (MessageBodyView) convertView;
 			}
-			return wrapper.getView();
+
+			mv.updateView(vm);
+			adater.setView(mv);;
+			List<VMessageFileItem> fileItems = vm.getFileItems();
+			if (fileItems != null) {
+				adapterFileIcon(fileItems);
+			}
+			return convertView;
 		}
 	}
 
@@ -2983,6 +2974,8 @@ public class ConversationP2PTextActivity extends Activity implements
 
 		switch (type) {
 		case ADD_FILE:
+			if(messageArray == null)
+				messageArray = new ArrayList<CommonAdapter.CommonAdapterItemWrapper>();
 			addMessageToContainer(vm);
 			isScrollButtom = true;
 			break;

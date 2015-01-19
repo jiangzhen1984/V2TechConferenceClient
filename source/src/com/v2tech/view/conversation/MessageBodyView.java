@@ -108,11 +108,13 @@ public class MessageBodyView extends LinearLayout {
 
 	private RotateAnimation anima;
 	private MessageBodyType bodyType;
-	private long currentBelongID;
 
 	public MessageBodyView(Context context, VMessage m, boolean isShowTime) {
 		super(context);
+		initMessageBody(context, m, isShowTime);
+	}
 
+	public void initMessageBody(Context context, VMessage m, boolean isShowTime) {
 		if (m == null) {
 			V2Log.e(TAG, "Given VMessage Object is null!");
 			return;
@@ -187,9 +189,10 @@ public class MessageBodyView extends LinearLayout {
 			if (bodyType == MessageBodyType.GROUP_TYPE) {
 				name = (TextView) rootView
 						.findViewById(R.id.message_body_person_name_left);
-				if (fromUser != null){
-					boolean friend = GlobalHolder.getInstance().isFriend(fromUser);
-					if(friend && !TextUtils.isEmpty(fromUser.getNickName())){
+				if (fromUser != null) {
+					boolean friend = GlobalHolder.getInstance().isFriend(
+							fromUser);
+					if (friend && !TextUtils.isEmpty(fromUser.getNickName())) {
 						name.setText(fromUser.getNickName());
 					} else {
 						name.setText(fromUser.getName());
@@ -307,11 +310,6 @@ public class MessageBodyView extends LinearLayout {
 				.findViewById(R.id.contact_message_pop_up_item_delete);
 		pwDeleteTV.setOnClickListener(mDeleteButtonListener);
 	}
-	
-	public void setCurrentBelongID(long currentBelongID) {
-		this.currentBelongID = currentBelongID;
-	}
-
 
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -510,8 +508,8 @@ public class MessageBodyView extends LinearLayout {
 				.findViewById(R.id.message_body_file_item_file_name);
 		fileName.setText(item.getFileName());
 
-		fileIcon.setBackgroundResource(FileUitls.adapterFileIcon(item.getFileType()));
-		
+		fileIcon.setBackgroundResource(FileUitls.adapterFileIcon(item
+				.getFileType()));
 
 		TextView fileSize = (TextView) fileRootView
 				.findViewById(R.id.message_body_file_item_file_size);
@@ -707,7 +705,9 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	public void updateView(VMessageFileItem vfi) {
-		if (vfi == null || !vfi.getUuid().equals(mMsg.getFileItems().get(0).getUuid())) {
+		if (vfi == null ||
+				mMsg.getFileItems().size() < 0 ||
+				!vfi.getUuid().equals(mMsg.getFileItems().get(0).getUuid())) {
 			return;
 		}
 
@@ -746,36 +746,37 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_file_item_progress_speed);
 			final View iv = rootView
 					.findViewById(R.id.message_body_file_item_progress_state);
-			final android.view.ViewGroup.LayoutParams params = iv.getLayoutParams();
+			final android.view.ViewGroup.LayoutParams params = iv
+					.getLayoutParams();
 			FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress
 					.get(vfi.getUuid());
-			if(bean != null){
+			if (bean != null) {
 				vfi.setDownloadedSize(bean.currentLoadSize);
 			}
-			//设置 已下载/文件大小 显示状态
+			// 设置 已下载/文件大小 显示状态
 			progress.setText(vfi.getDownloadSizeStr() + "/"
 					+ vfi.getFileSizeStr());
-			//设置速度
-			if(vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING ||
-					vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING ){
+			// 设置速度
+			if (vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING
+					|| vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING) {
 				speed.setText("0kb");
 			} else {
-				if(bean != null){
-					V2Log.e(TAG, "lastLoadTime : " + bean.lastLoadTime + " lastLoadSize : " + bean.lastLoadSize
-							 + " currentLoadSize : " + bean.currentLoadSize);
+				if (bean != null) {
+					V2Log.e(TAG, "lastLoadTime : " + bean.lastLoadTime
+							+ " lastLoadSize : " + bean.lastLoadSize
+							+ " currentLoadSize : " + bean.currentLoadSize);
 					lastUpdateTime = bean.lastLoadTime;
 					vfi.setDownloadedSize(bean.currentLoadSize);
 					long sec = (System.currentTimeMillis() - lastUpdateTime);
 					long size = vfi.getDownloadedSize() - bean.lastLoadSize;
 					vfi.setSpeed((size / sec) * 1000);
 					speed.setText(vfi.getSpeedStr());
-				}
-				else{
+				} else {
 					lastUpdateTime = System.currentTimeMillis();
 					speed.setText("0kb");
 				}
 			}
-			//设置进度
+			// 设置进度
 			final float percent = (float) ((double) vfi.getDownloadedSize() / (double) vfi
 					.getFileSize());
 			final ViewGroup progressC = (ViewGroup) rootView
@@ -949,9 +950,9 @@ public class MessageBodyView extends LinearLayout {
 
 			if (callback != null) {
 				if (mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_CROWD) {
-					if (item.getState() == VMessageAbstractItem.STATE_FILE_SENDING ||
-							item.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING ||
-							item.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED)
+					if (item.getState() == VMessageAbstractItem.STATE_FILE_SENDING
+							|| item.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING
+							|| item.getState() == VMessageAbstractItem.STATE_FILE_SENT_FALIED)
 						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_UPLOING_ACTIVITY);
 					else
 						callback.onCrowdFileMessageClicked(CrowdFileActivityType.CROWD_FILE_ACTIVITY);
@@ -961,14 +962,18 @@ public class MessageBodyView extends LinearLayout {
 					} else {
 						if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
 							long key;
-							if(mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER)
+							if (mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER)
 								key = mMsg.getToUser().getmUserId();
 							else
 								key = mMsg.getGroupId();
-							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalConstants.FILE_TRANS_DOWNLOADING, 
-									getContext(), true, key, "MessageBodyView fileMessageItemClickListener");
-							if(!flag)
-								return ;
+							boolean flag = GlobalHolder
+									.getInstance()
+									.changeGlobleTransFileMember(
+											V2GlobalConstants.FILE_TRANS_DOWNLOADING,
+											getContext(), true, key,
+											"MessageBodyView fileMessageItemClickListener");
+							if (!flag)
+								return;
 							callback.requestDownloadFile(view, item.getVm(),
 									item);
 							item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
@@ -1068,19 +1073,23 @@ public class MessageBodyView extends LinearLayout {
 						if (mMsg.getItems().size() > 0
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
 							long key;
-							if(mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER)
+							if (mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER)
 								key = mMsg.getToUser().getmUserId();
 							else
 								key = mMsg.getGroupId();
-							boolean flag = GlobalHolder.getInstance().changeGlobleTransFileMember(V2GlobalConstants.FILE_TRANS_SENDING, 
-									getContext(), true, key, "MessageBodyView mResendButtonListener");
-							if(!flag)
-								return ;
+							boolean flag = GlobalHolder
+									.getInstance()
+									.changeGlobleTransFileMember(
+											V2GlobalConstants.FILE_TRANS_SENDING,
+											getContext(), true, key,
+											"MessageBodyView mResendButtonListener");
+							if (!flag)
+								return;
 						}
-						
+
 						failedIcon.setVisibility(View.INVISIBLE);
 						callback.reSendMessageClicked(mMsg);
-						
+
 						if (mMsg.getItems().size() > 0
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
 							VMessageFileItem fileItem = (VMessageFileItem) mMsg
@@ -1177,6 +1186,14 @@ public class MessageBodyView extends LinearLayout {
 				VMessageFileItem vfi);
 
 		public void requestStopOtherAudio(VMessage vm);
+	}
+
+	public VMessage getmMsg() {
+		return mMsg;
+	}
+
+	public void setmMsg(VMessage mMsg) {
+		this.mMsg = mMsg;
 	}
 }
 

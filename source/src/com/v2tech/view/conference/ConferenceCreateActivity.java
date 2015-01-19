@@ -245,18 +245,6 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 		this.registerReceiver(receiver, intentFilter);
 	}
 
-	private void addAttendee(User u) {
-		mAttendeeList.add(u);
-		mAttendeeArrayList.add(u);
-		mAdapter.notifyDataSetChanged();
-	}
-
-	private void removeAttendee(User u) {
-		mAttendeeList.remove(u);
-		mAttendeeArrayList.remove(u);
-		mAdapter.notifyDataSetChanged();
-	}
-
 	private void updateUserToAttendList(User u, int op) {
 		if (u == null) {
 			return;
@@ -285,30 +273,6 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 					OP_ADD_ALL_GROUP_USER, 0, preGroup).sendToTarget();
 		}
 
-	}
-
-	private void selectGroup(Group selectGroup, boolean addOrRemove) {
-		if(addOrRemove){
-			mAttendeeList.clear();
-			mAttendeeArrayList.clear();
-		}
-			
-		List<Group> subGroups = selectGroup.getChildGroup();
-		for (int i = 0; i < subGroups.size(); i++) {
-			selectGroup(subGroups.get(i), addOrRemove);
-		}
-		List<User> list = selectGroup.getUsers();
-		for (int i = 0; i < list.size(); i++) {
-			User u = list.get(i);
-			if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
-				continue;
-			}
-			if (addOrRemove) {
-				addAttendee(u);
-			} else {
-				removeAttendee(u);
-			}
-		}
 	}
 
 	class LocalBroadcastReceiver extends BroadcastReceiver {

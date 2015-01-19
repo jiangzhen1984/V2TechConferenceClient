@@ -291,6 +291,7 @@ public class MessageLoader {
 						date));
 				current.setUUID(imageID);
 				item = new VMessageImageItem(current , imageID , imagePath , 0);
+				imageItems.add(current);
 			}
 			return imageItems;
 		} catch (Exception e) {

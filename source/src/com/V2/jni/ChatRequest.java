@@ -254,10 +254,10 @@ public class ChatRequest {
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nFromUserID: "
 				+ nFromUserID + " | nToUserID: " + nToUserID + " | mediaType: "
 				+ mediaType + " | sSeqID: " + sSeqID + " | nResult: " + nResult);
-		if (callback != null) {
-			 callback.OnSendChatResult(new SendingResultJNIObjectInd(sSeqID,
-			 SendingResultJNIObjectInd.Result.fromInt(nResult), nResult));
-		}
+//		if (callback != null) {
+//			 callback.OnSendChatResult(new SendingResultJNIObjectInd(sSeqID,
+//			 SendingResultJNIObjectInd.Result.fromInt(nResult), nResult));
+//		}
 	}
 	
 	

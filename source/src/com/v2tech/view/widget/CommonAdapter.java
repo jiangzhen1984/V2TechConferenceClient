@@ -9,40 +9,42 @@ import android.widget.BaseAdapter;
 /**
  * Use to wrap simple adapter for ListView
  * 
- * <ul>Use {@link ViewConvertListener} to wrap construct view object.</ul>
- * <ul>Use {@link CommonAdapterItemWrapper} to wrap List object. </ul>
+ * <ul>
+ * Use {@link ViewConvertListener} to wrap construct view object.
+ * </ul>
+ * <ul>
+ * Use {@link CommonAdapterItemWrapper} to wrap List object.
+ * </ul>
+ * 
  * @author jiangzhen
- *
+ * 
  */
 public class CommonAdapter extends BaseAdapter {
 
-	
 	private List<CommonAdapterItemWrapper> dataset;
-	
+
 	private ViewConvertListener listener;
-	
-	private int  batchCount;
-	
+
+	private int batchCount;
+
 	public interface CommonAdapterItemWrapper {
 		public Object getItemObject();
+
 		public long getItemLongId();
+
 		public View getView();
 	}
-	
+
 	public interface ViewConvertListener {
-		public View converView(CommonAdapterItemWrapper wr, View view, ViewGroup vg);
+		public View converView(CommonAdapterItemWrapper wr, View view,
+				ViewGroup vg);
 	}
-	
-	
-	
-	
+
 	public CommonAdapter(List<CommonAdapterItemWrapper> dataset,
 			ViewConvertListener listener) {
 		this(dataset, listener, 1);
 	}
-	
-	
-	
+
 	public CommonAdapter(List<CommonAdapterItemWrapper> dataset,
 			ViewConvertListener listener, int viewCount) {
 		super();
@@ -53,8 +55,6 @@ public class CommonAdapter extends BaseAdapter {
 			throw new NullPointerException(" parameters can not be null");
 		}
 	}
-	
-	
 
 	@Override
 	public int getCount() {
@@ -70,7 +70,7 @@ public class CommonAdapter extends BaseAdapter {
 	public long getItemId(int pos) {
 		return dataset.get(pos).getItemLongId();
 	}
-	
+
 	public int getViewTypeCount() {
 		return batchCount;
 	}

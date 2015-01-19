@@ -491,19 +491,6 @@ public class User implements Comparable<User> {
 			return this.abbra.compareTo(another.abbra);
 		}
 		
-		//保证状态排序是对的
-		if ((this.mStatus == Status.HIDDEN || this.mStatus == Status.OFFLINE)
-				&& (another.getmStatus() != Status.HIDDEN || another
-						.getmStatus() != Status.OFFLINE)) {
-			return 1;
-		}
-
-		if ((this.mStatus != Status.HIDDEN || this.mStatus != Status.OFFLINE)
-				&& (another.getmStatus() == Status.HIDDEN || another
-						.getmStatus() == Status.OFFLINE)) {
-			return -1;
-		}
-		
 		if (this.mStatus == Status.ONLINE || this.mStatus == Status.LEAVE
 				|| this.mStatus == Status.DO_NOT_DISTURB
 				|| this.mStatus == Status.BUSY) {

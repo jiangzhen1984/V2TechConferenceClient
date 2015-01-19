@@ -293,42 +293,16 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 		}
 	}
 
-	private void removeAttendee(User u) {
-		mAttendeeList.remove(u);
-		mAttendeeArrayList.remove(u);
-		mAdapter.notifyDataSetChanged();
-	}
 
-	private void addAttendee(User u) {
+	@Override
+	protected void addAttendee(User u) {
 		if (u.isCurrentLoggedInUser()) {
 			return;
 		}
-		boolean ret = mAttendeeList.add(u);
-		if (!ret) {
-			return;
-		}
-
-		mAttendeeArrayList.add(u);
-		mAdapter.notifyDataSetChanged();
-	}
-
-	private void selectGroup(Group selectGroup, boolean addOrRemove) {
-		List<Group> subGroups = selectGroup.getChildGroup();
-		for (int i = 0; i < subGroups.size(); i++) {
-			selectGroup(subGroups.get(i), addOrRemove);
-		}
-		List<User> list = selectGroup.getUsers();
-		for (int i = 0; i < list.size(); i++) {
-			if (addOrRemove) {
-				addAttendee(list.get(i));
-			} else {
-				removeAttendee(list.get(i));
-			}
-		}
+		super.addAttendee(u);
 	}
 
 	private ProgressDialog mCreateWaitingDialog;
-
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
 
 		@Override

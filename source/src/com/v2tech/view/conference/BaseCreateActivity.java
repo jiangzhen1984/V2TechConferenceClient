@@ -18,7 +18,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListAdapter;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.v2tech.R;
@@ -29,6 +28,7 @@ import com.v2tech.view.adapter.CommonCreateAdapter;
 import com.v2tech.view.cus.SearchEditText;
 import com.v2tech.view.widget.GroupListView;
 import com.v2tech.view.widget.GroupListView.ItemData;
+import com.v2tech.vo.Group;
 import com.v2tech.vo.NetworkStateCode;
 import com.v2tech.vo.User;
 
@@ -162,6 +162,39 @@ public abstract class BaseCreateActivity extends Activity {
 		intentFilter
 				.addAction(JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION);
 		this.registerReceiver(localBroadcast, intentFilter);
+	}
+	
+	protected void addAttendee(User u) {
+		if(!mAttendeeList.contains(u))
+			mAttendeeList.add(u);
+		if(!mAttendeeArrayList.contains(u))
+			mAttendeeArrayList.add(u);
+		mAdapter.notifyDataSetChanged();
+	}
+
+	protected void removeAttendee(User u) {
+		mAttendeeList.remove(u);
+		mAttendeeArrayList.remove(u);
+		mAdapter.notifyDataSetChanged();
+	}
+	
+	protected void selectGroup(Group selectGroup, boolean addOrRemove) {
+		List<Group> subGroups = selectGroup.getChildGroup();
+		for (int i = 0; i < subGroups.size(); i++) {
+			selectGroup(subGroups.get(i), addOrRemove);
+		}
+		List<User> list = selectGroup.getUsers();
+		for (int i = 0; i < list.size(); i++) {
+			User u = list.get(i);
+			if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
+				continue;
+			}
+			if (addOrRemove) {
+				addAttendee(u);
+			} else {
+				removeAttendee(u);
+			}
+		}
 	}
 
 	protected abstract void init();

@@ -58,6 +58,7 @@ public class CommonCreateAdapter extends BaseAdapter {
 				convertView = new ContactUserView(mContext, user, false);
 				tag.headIcon = ((ContactUserView) convertView).getmPhotoIV();
 				tag.name = ((ContactUserView) convertView).getmUserNameTV();
+				tag.mSignature = ((ContactUserView) convertView).getmUserSignatureTV();
 			} else {
 				convertView = getAttendeeView(tag, user);
 			}
@@ -87,6 +88,9 @@ public class CommonCreateAdapter extends BaseAdapter {
 				tag.name.setText(user.getName());
 		} else
 			tag.name.setText(user.getName());
+		
+		tag.mSignature.setText(user.getSignature() == null ? "" : user
+				.getSignature());
 	}
 
 	private View getAttendeeView(ViewTag tag, final User u) {
@@ -123,5 +127,6 @@ public class CommonCreateAdapter extends BaseAdapter {
 	class ViewTag {
 		ImageView headIcon;
 		TextView name;
+		TextView mSignature;
 	}
 }

@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.v2tech.R;
 import com.v2tech.db.provider.SearchContentProvider;
+import com.v2tech.service.GlobalHolder;
 import com.v2tech.util.Notificator;
 import com.v2tech.view.conversation.MessageLoader;
 import com.v2tech.view.receiver.HeadSetPlugReceiver;
@@ -455,11 +456,18 @@ public class MainActivity extends FragmentActivity implements
 				requestQuit();
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(action)) {
+				V2Log.d("CONNECT", "MainActivity Receiver Broadcast ! Globle Connection State is : " + GlobalHolder
+						.getInstance().isServerConnected());
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
+				V2Log.d("CONNECT", "MainActivity Receiver Broadcast ! receiver Connection State is : " + code.name());
+				V2Log.d("CONNECT", "--------------------------------------------------------------------");
 				if (titleBar != null) {
 					titleBar.updateConnectState(code);
+				} else {
+					V2Log.d("CONNECT", "TitleBar is null !");
 				}
+				V2Log.d("CONNECT", "--------------------------------------------------------------------");
 			}
 		}
 	}

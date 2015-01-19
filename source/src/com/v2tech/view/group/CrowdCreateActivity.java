@@ -325,40 +325,14 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 
 	}
 
-	private void removeAttendee(User u) {
-		mAttendeeList.remove(u);
-		mAttendeeArrayList.remove(u);
-		mAdapter.notifyDataSetChanged();
-	}
-
-	private void addAttendee(User u) {
+	@Override
+	protected void addAttendee(User u) {
 		if (u.isCurrentLoggedInUser()) {
 			return;
 		}
-		boolean ret = mAttendeeList.add(u);
-		if (!ret) {
-			return;
-		}
-
-		mAttendeeArrayList.add(u);
-		mAdapter.notifyDataSetChanged();
+		super.addAttendee(u);
 	}
-
-	private void selectGroup(Group selectGroup, boolean addOrRemove) {
-		List<Group> subGroups = selectGroup.getChildGroup();
-		for (int i = 0; i < subGroups.size(); i++) {
-			selectGroup(subGroups.get(i), addOrRemove);
-		}
-		List<User> list = selectGroup.getUsers();
-		for (int i = 0; i < list.size(); i++) {
-			if (addOrRemove) {
-				addAttendee(list.get(i));
-			} else {
-				removeAttendee(list.get(i));
-			}
-		}
-	}
-
+	
 	private void saveQualication(User user) {
 
 		if (crowd == null)

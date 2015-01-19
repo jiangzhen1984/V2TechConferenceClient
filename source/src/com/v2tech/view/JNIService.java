@@ -419,7 +419,6 @@ public class JNIService extends Service implements
 					List<User> lu = User.fromXml(go.xml);
 					Group group = GlobalHolder.getInstance().findGroupById(
 							go.gId);
-					User creator = group.getOwnerUser();
 					for (User tu : lu) {
 						User existU = GlobalHolder.getInstance().putUser(
 								tu.getmUserId(), tu);
@@ -627,11 +626,15 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnConnectResponseCallback(int nResult) {
-			V2Log.d(TAG, "Receive Connection State is : " + NetworkStateCode.fromInt(nResult).name());
+			V2Log.d("CONNECT", "--------------------------------------------------------------------");
+			V2Log.d("CONNECT", "Receive Connection State is : " + nResult + " -- name is : " + 
+					NetworkStateCode.fromInt(nResult).name());
 			GlobalHolder
 					.getInstance()
 					.setServerConnection(
 							NetworkStateCode.fromInt(nResult) == NetworkStateCode.CONNECTED);
+			V2Log.d("CONNECT", "GlobleHolder Connection State is : " + GlobalHolder
+					.getInstance().isServerConnected());
 			broadcastNetworkState(NetworkStateCode.fromInt(nResult));
 		}
 

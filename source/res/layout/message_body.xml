@@ -197,7 +197,6 @@
                             android:layout_width="@dimen/message_body_failed_size"
                             android:layout_height="@dimen/message_body_failed_size"
                             android:layout_centerVertical="true"
-                            android:layout_toRightOf="@+id/message_body_failed_item_right"
                             android:src="@drawable/spin_black_70"
                             android:visibility="gone" />
                     </RelativeLayout>

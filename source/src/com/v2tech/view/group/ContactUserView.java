@@ -168,6 +168,7 @@ public class ContactUserView extends LinearLayout {
 		return mUserNameTV;
 	}
 
-	
-	
+	public TextView getmUserSignatureTV() {
+		return mUserSignatureTV;
+	}
 }

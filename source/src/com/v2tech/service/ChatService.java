@@ -217,7 +217,10 @@ public class ChatService extends DeviceService {
 						msg.getToUser() == null ? 0 : msg.getToUser()
 								.getmUserId(), msg.getUUID(), msg.toXml(),
 						msg.getTextContent().length());
-
+				V2Log.d(TAG, "OnSendChat ChatService---> eGroupType :"+ msg.getMsgCode() 
+                		+ " | nGroupID: " + msg.getGroupId()
+                		+ " | sSeqID: " + msg.getUUID()
+                		+ " | sendContent: " + msg.getTextContent());
 				// send image message
 				List<VMessageImageItem> imageItems = msg.getImageItems();
 				for (int i = 0 ; imageItems != null && i < imageItems.size() ; i++) {
@@ -229,8 +232,9 @@ public class ChatService extends DeviceService {
 							msg.getToUser() == null ? 0 : msg.getToUser()
 									.getmUserId(), 2, item.getUuid(),
 							item.getFilePath(), 0);
-                    V2Log.d(TAG, "sendVMessageImageBinary ---> eGroupType :"+ msg.getMsgCode() 
+                    V2Log.d(TAG, "OnSendBinary ChatService---> eGroupType :"+ msg.getMsgCode() 
                     		+ " | nGroupID: " + msg.getGroupId()
+                    		+ " | MessageID: " + msg.getUUID()
                     		+ " | sSeqID: " + item.getUuid());
 				}
 
@@ -244,8 +248,9 @@ public class ChatService extends DeviceService {
 									.getmUserId(), 3,
 							audioList.get(i).getUuid(),
 							audioList.get(i).getAudioFilePath(), 0);
-                    V2Log.d(TAG, "sendVMessageAudioBinary ---> eGroupType :"+ msg.getMsgCode() 
+                    V2Log.d(TAG, "OnSendBinary ChatService---> eGroupType :"+ msg.getMsgCode() 
                     		+ " | nGroupID: " + msg.getGroupId()
+                    		+ " | MessageID: " + msg.getUUID()
                     		+ " | sSeqID: " + audioList.get(i).getUuid());
 				}
 			}
