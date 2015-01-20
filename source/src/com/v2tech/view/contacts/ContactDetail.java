@@ -131,8 +131,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private Date bir;
 	private String fromPlace;
 	private boolean mVideoCallButtonEnable = true;
-	
+
 	private String remoteNickName;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -153,7 +154,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			remoteNickName = this.getIntent().getStringExtra("remoteNickName");
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
-			tvTitle.setText("个人资料");
+			tvTitle.setText(R.string.contactDetail_titlebar_title_text);
 		}
 
 		fromPlace = this.getIntent().getStringExtra("fromPlace");
@@ -217,7 +218,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 							Toast.LENGTH_SHORT).show();
 					return;
 				}
-				
+
 				Intent intent = new Intent(ContactDetail.this,
 						AuthenticationActivity.class);
 				intent.putExtra("remoteUserID", ContactDetail.this.getIntent()
@@ -251,7 +252,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
 				tvAuthenticationState.setVisibility(View.GONE);
-				tvTitle.setText("个人资料");
+				tvTitle.setText(R.string.contactDetail_titlebar_title_text);
 				llAuthenticationMessageLayout.setVisibility(View.GONE);
 				mItemsContainer.setVisibility(View.VISIBLE);
 				break;
@@ -259,7 +260,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				bAccess.setVisibility(View.VISIBLE);
 				bRefuse.setVisibility(View.VISIBLE);
 				tvAuthenticationState.setVisibility(View.GONE);
-				tvTitle.setText("好友申请");
+				tvTitle.setText(R.string.contactDetail_titlebar_title_text1);
 				llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
 				mItemsContainer.setVisibility(View.GONE);
 				break;
@@ -267,8 +268,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
 				tvAuthenticationState.setVisibility(View.VISIBLE);
-				tvAuthenticationState.setText("已同意该申请");
-				tvTitle.setText("好友申请");
+				tvAuthenticationState
+						.setText(R.string.contactDetail_AuthenticationState_allowed_apply);
+				tvTitle.setText(R.string.contactDetail_titlebar_title_text1);
 				llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
 				mItemsContainer.setVisibility(View.VISIBLE);
 				break;
@@ -276,8 +278,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
 				tvAuthenticationState.setVisibility(View.VISIBLE);
-				tvAuthenticationState.setText("已拒绝该申请");
-				tvTitle.setText("好友申请");
+				tvAuthenticationState
+						.setText(R.string.contactDetail_AuthenticationState_refused_apply);
+				tvTitle.setText(R.string.contactDetail_titlebar_title_text1);
 				llAuthenticationMessageLayout.setVisibility(View.VISIBLE);
 				mItemsContainer.setVisibility(View.GONE);
 				break;
@@ -288,14 +291,15 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				mCompanyTitleTV.setVisibility(View.VISIBLE);
 				mMoreDetailButton.setVisibility(View.VISIBLE);
 				llAuthenticationMessageLayout.setVisibility(View.GONE);
-				tvTitle.setText("个人资料");
+				tvTitle.setText(R.string.contactDetail_titlebar_title_text);
 				break;
 			case 6:// 6被拒绝
 				bAccess.setVisibility(View.GONE);
 				bRefuse.setVisibility(View.GONE);
 				tvAuthenticationState.setVisibility(View.VISIBLE);
-				tvAuthenticationState.setText("拒绝你的好友申请");
-				tvTitle.setText("验证通知");
+				tvAuthenticationState
+						.setText(R.string.contactDetail_AuthenticationState_refused_your_apply);
+				tvTitle.setText(R.string.contactDetail_titlebar_title_text2);
 				((View) tvAuthenticationMessage.getParent())
 						.setVisibility(View.VISIBLE);
 				mItemsContainer.setVisibility(View.GONE);
@@ -330,14 +334,14 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	@Override
 	public void onBackPressed() {
 		if (!GlobalHolder.getInstance().isServerConnected() && isUpdating) {
-			Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
-		}
-		else{
+			Toast.makeText(mContext, R.string.error_local_connect_to_server,
+					Toast.LENGTH_SHORT).show();
+		} else {
 			isUpdating = false;
 			Message m = Message.obtain(lh, UPDATE_USER_INFO);
 			lh.sendMessage(m);
 		}
-		
+
 		Intent intent = new Intent();
 		setResult(1000, intent);
 		super.onBackPressed();
@@ -414,10 +418,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			}
 			break;
 		case START_AUTHENTICATION_ACTIVITY:
-			if(data != null){
-				boolean isReturnAuth = data.getBooleanExtra("isReturnAuth", false);
-				if(isReturnAuth){
-					Intent i = new Intent(mContext, MessageAuthenticationActivity.class);
+			if (data != null) {
+				boolean isReturnAuth = data.getBooleanExtra("isReturnAuth",
+						false);
+				if (isReturnAuth) {
+					Intent i = new Intent(mContext,
+							MessageAuthenticationActivity.class);
 					i.putExtra("remoteUserID", mUid);
 					setResult(5, i);
 					finish();
@@ -487,7 +493,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
 
-		if(TextUtils.isEmpty(u.getName()) && !TextUtils.isEmpty(remoteNickName)){
+		if (TextUtils.isEmpty(u.getName())
+				&& !TextUtils.isEmpty(remoteNickName)) {
 			mNameTitleIV.setText(remoteNickName);
 		} else {
 			mNameTitleIV.setText(u.getName());
@@ -601,12 +608,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 	private void startVoiceCall() {
 		if (!GlobalHolder.getInstance().isServerConnected()) {
-			Toast.makeText(mContext,
-					R.string.error_local_connect_to_server,
+			Toast.makeText(mContext, R.string.error_local_connect_to_server,
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
-		
+
 		// Update global audio state
 		GlobalHolder.getInstance().setAudioState(true, mUid);
 		Intent iv = new Intent();
@@ -742,7 +748,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		@Override
 		public void afterTextChanged(Editable ed) {
-			if(!TextUtils.isEmpty(ed.toString()))
+			if (!TextUtils.isEmpty(ed.toString()))
 				isUpdating = true;
 		}
 
@@ -774,7 +780,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 			if (offline || localOffLine) {
 				if (isPad) {
-					Toast.makeText(getApplicationContext(), "对方目前不在线，无法语音通话",
+					Toast.makeText(
+							getApplicationContext(),
+							R.string.contactDetail_toast_text_notOnlineCanNotVoice,
 							Toast.LENGTH_SHORT).show();
 				} else {
 					if (phoneEmpty && mobileEmpty) {
@@ -873,7 +881,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			
+
 			if (mVideoCallButtonEnable) {
 				mVideoCallButtonEnable = false;
 				startVideoCall();
@@ -912,8 +920,9 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				startActivityForResult(intent, FILE_SELECT_CODE);
 			} else {
 
-				Toast.makeText(mContext, "当前网络不可用，请稍候再试。", Toast.LENGTH_SHORT)
-						.show();
+				Toast.makeText(mContext,
+						R.string.common_networkIsDisconnection_retryPlease,
+						Toast.LENGTH_SHORT).show();
 			}
 		}
 	};

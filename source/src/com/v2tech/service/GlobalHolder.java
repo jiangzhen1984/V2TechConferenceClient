@@ -56,7 +56,7 @@ public class GlobalHolder {
 	
 	public List<AddFriendHistorieNode> addFriendHistorieList=new ArrayList<AddFriendHistorieNode>();
 
-	private Map<Long, Set<UserDeviceConfig>> mUserDeviceList = new HashMap<Long, Set<UserDeviceConfig>>();
+	private Map<Long, List<UserDeviceConfig>> mUserDeviceList = new HashMap<Long, List<UserDeviceConfig>>();
 
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
 
@@ -489,7 +489,7 @@ public class GlobalHolder {
 	 * @return list of user device
 	 */
 	public List<UserDeviceConfig> getAttendeeDevice(long uid) {
-		Set<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
+		List <UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
 		if (list == null) {
 			return null;
 		}
@@ -499,7 +499,7 @@ public class GlobalHolder {
 	
 	
 	public UserDeviceConfig getUserDefaultDevice(long uid) {
-		Set<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
+		List<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
 		if (list == null) {
 			return null;
 		}
@@ -524,13 +524,14 @@ public class GlobalHolder {
 	 */
 	public void updateUserDevice(long id, List<UserDeviceConfig> udcList) {
 		Long key = Long.valueOf(id);
-		Set<UserDeviceConfig> list = mUserDeviceList.get(key);
+		List<UserDeviceConfig> list = mUserDeviceList.get(key);
 		if (list != null) {
 			list.clear();
 		} else {
-			list = new HashSet<UserDeviceConfig>();
+			list = new ArrayList<UserDeviceConfig>();
 			mUserDeviceList.put(key, list);
 		}
+		
 		list.addAll(udcList);
 	}
 

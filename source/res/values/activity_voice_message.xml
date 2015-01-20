@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <dimen name="ws_voiceDetail_adapater_margin_small">8dp</dimen>
-    <dimen name="ws_voiceDetail_adapater_margin_middle">15dp</dimen>
-    <dimen name="ws_voiceDetail_adapter_text_size_middle">16sp</dimen>
-</resources>

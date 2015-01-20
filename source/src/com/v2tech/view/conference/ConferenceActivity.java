@@ -451,10 +451,10 @@ public class ConferenceActivity extends Activity {
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
 
-//		mContentLayoutMain.measure(View.MeasureSpec.EXACTLY,
-//				View.MeasureSpec.EXACTLY);
-//		this.mContentWidth = -1;
-//		this.mContentHeight = -1;
+		// mContentLayoutMain.measure(View.MeasureSpec.EXACTLY,
+		// View.MeasureSpec.EXACTLY);
+		// this.mContentWidth = -1;
+		// this.mContentHeight = -1;
 	}
 
 	private void initBroadcastReceiver() {
@@ -714,9 +714,6 @@ public class ConferenceActivity extends Activity {
 		return mMessageContainer;
 	}
 
-	
-	
-	
 	private View initAttendeeContainer() {
 		if (mAttendeeContainer == null) {
 			mAttendeeContainer = new VideoAttendeeListLayout(conf, this);
@@ -724,7 +721,7 @@ public class ConferenceActivity extends Activity {
 
 			mAttendeeContainer.bringToFront();
 			mAttendeeContainer.setListener(subViewListener);
-			
+
 			// Initialize speaking
 			if (currentAttendee.isSpeaking()) {
 
@@ -779,7 +776,7 @@ public class ConferenceActivity extends Activity {
 		}
 		return mDocContainer;
 	}
-	
+
 	private View initInvitionContainer() {
 		if (mInvitionContainer == null) {
 			mInvitionContainer = new VideoInvitionAttendeeLayout(this, conf);
@@ -818,12 +815,12 @@ public class ConferenceActivity extends Activity {
 				mContentHeight = mContentLayoutMain.getHeight();
 			}
 
-//			if (activityFromStop) {
-//				mContentWidth = mSaveWidth;
-//				activityFromStop = false;
-//			} else {
-//				mSaveWidth = mContentWidth;
-//			}
+			// if (activityFromStop) {
+			// mContentWidth = mSaveWidth;
+			// activityFromStop = false;
+			// } else {
+			// mSaveWidth = mContentWidth;
+			// }
 
 			int flag = getSubViewWindowState();
 			// If sub window request full screen
@@ -834,10 +831,9 @@ public class ConferenceActivity extends Activity {
 			}
 
 			height = mContentHeight;
-			
-			Log.i("2014014 1","mContentWidth = "+mContentWidth);
-			Log.i("2014014 1","marginLeft = "+marginLeft);
-			
+
+			Log.i("2014014 1", "mContentWidth = " + mContentWidth);
+			Log.i("2014014 1", "marginLeft = " + marginLeft);
 
 			if (fl == null) {
 				fl = new FrameLayout.LayoutParams(width, height);
@@ -1609,13 +1605,13 @@ public class ConferenceActivity extends Activity {
 					finish();
 				}
 
-			} else if(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO
-					.equals(intent.getAction())){
+			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO
+					.equals(intent.getAction())) {
 				long uid = intent.getLongExtra("uid", -1);
 				Iterator<Attendee> iterator = mAttendeeList.iterator();
-				while(iterator.hasNext()){
+				while (iterator.hasNext()) {
 					Attendee next = iterator.next();
-					if(next.getAttId() == uid){
+					if (next.getAttId() == uid) {
 						next.setUser(GlobalHolder.getInstance().getUser(uid));
 						if (mAttendeeContainer != null) {
 							mAttendeeContainer.updateDisplay();
@@ -1623,7 +1619,7 @@ public class ConferenceActivity extends Activity {
 						break;
 					}
 				}
-				
+
 			} else if (JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION
 					.equals(intent.getAction())) {
 
@@ -2011,8 +2007,9 @@ public class ConferenceActivity extends Activity {
 					REQUEST_OPEN_OR_CLOSE_DEVICE,
 					0,
 					0,
-					new UserDeviceConfig(V2GlobalConstants.GROUP_TYPE_CONFERENCE,
-							conf.getId(), GlobalHolder.getInstance()
+					new UserDeviceConfig(
+							V2GlobalConstants.GROUP_TYPE_CONFERENCE, conf
+									.getId(), GlobalHolder.getInstance()
 									.getCurrentUserId(), "", null))
 					.sendToTarget();
 		} catch (Exception e) {
@@ -2033,10 +2030,9 @@ public class ConferenceActivity extends Activity {
 				REQUEST_OPEN_OR_CLOSE_DEVICE,
 				1,
 				0,
-				new UserDeviceConfig(V2GlobalConstants.GROUP_TYPE_CONFERENCE, conf
-						.getId(),
-						GlobalHolder.getInstance().getCurrentUserId(), "", null))
-				.sendToTarget();
+				new UserDeviceConfig(V2GlobalConstants.GROUP_TYPE_CONFERENCE,
+						conf.getId(), GlobalHolder.getInstance()
+								.getCurrentUserId(), "", null)).sendToTarget();
 	}
 
 	private void adjustVideoLayout() {
@@ -2465,7 +2461,7 @@ public class ConferenceActivity extends Activity {
 		att.setJoined(false);
 		att.setSpeakingState(false);
 		att.setLectureState(Attendee.LECTURE_STATE_NOT);
-		
+
 		// adjust layout if we closed video
 		if (layoutChanged) {
 			adjustVideoLayout();
@@ -3368,10 +3364,12 @@ public class ConferenceActivity extends Activity {
 		}
 
 		@Override
-		public void requestInvitation(Conference conf, List<User> attendUsers , boolean isNotify) {
+		public void requestInvitation(Conference conf, List<User> attendUsers,
+				boolean isNotify) {
 			if (attendUsers == null || attendUsers.size() <= 0) {
-				if(isNotify){
-					Toast.makeText(mContext, R.string.warning_no_attendee_selected,
+				if (isNotify) {
+					Toast.makeText(mContext,
+							R.string.warning_no_attendee_selected,
 							Toast.LENGTH_SHORT).show();
 					return;
 				}
@@ -3380,8 +3378,13 @@ public class ConferenceActivity extends Activity {
 			cb.inviteAttendee(conf, attendUsers, null);
 			// Hide invitation layout
 			mMenuInviteAttendeeButton.performClick();
-			//用该函数隐藏，会有按钮背景色异常的问题
-//			showOrHideSubWindow(initInvitionContainer());
+			// 用该函数隐藏，会有按钮背景色异常的问题
+			// showOrHideSubWindow(initInvitionContainer());
+		}
+
+		@Override
+		public void requestShareDocClose(View v) {
+			cb.closeShareDoc(conf, mCurrentLecturerActivateDocId);
 		}
 	}
 
@@ -3534,14 +3537,14 @@ public class ConferenceActivity extends Activity {
 						mAttendeeList.add(at);
 						mFastAttendeeList.add(at);
 					} else {
-//						if (TextUtils.isEmpty(at.getAttName())) {
-//							User user = GlobalHolder.getInstance().getUser(
-//									at.getAttId());
-//							at.setUser(user);
-//							V2Log.d(TAG,
-//									"Successful receiver the 参会人加入的回调 , but get newst user object "
-//											+ "from GlobleHolder is null!");
-//						}
+						// if (TextUtils.isEmpty(at.getAttName())) {
+						// User user = GlobalHolder.getInstance().getUser(
+						// at.getAttId());
+						// at.setUser(user);
+						// V2Log.d(TAG,
+						// "Successful receiver the 参会人加入的回调 , but get newst user object "
+						// + "from GlobleHolder is null!");
+						// }
 					}
 
 					V2Log.d(TAG, "Successful receiver the 参会人加入的回调");
@@ -3553,7 +3556,7 @@ public class ConferenceActivity extends Activity {
 						mFastAttendeeList.remove(at);
 						mAttendeeList.remove(at);
 					}
-					
+
 					doHandleUserExited(at);
 
 					User user = null;

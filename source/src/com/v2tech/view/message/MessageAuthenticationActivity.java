@@ -212,7 +212,7 @@ public class MessageAuthenticationActivity extends Activity {
 		progressbar.setPadding(5, 5, 5, 5);// left, top, right, bottom
 
 		TextView tv_wait = new TextView(MessageAuthenticationActivity.this);// 定义一个TextView
-		tv_wait.setText("正在动态加载……");
+		tv_wait.setText(R.string.common_loading);
 		tv_wait.setTextSize(20f);
 		tv_wait.setPadding(20, 0, 0, 0);
 
@@ -320,7 +320,7 @@ public class MessageAuthenticationActivity extends Activity {
 					public void onItemClick(AdapterView<?> parent, View view,
 							int position, long id) {
 						if (isFriendAuthentication) {
-							
+
 							if (isFriendInDeleteMode) {
 								Toast.makeText(
 										mContext,
@@ -328,7 +328,7 @@ public class MessageAuthenticationActivity extends Activity {
 										Toast.LENGTH_SHORT).show();
 								return;
 							}
-							
+
 							FriendMAData data = friendMADataList.get(position);
 							// 点击后跳转
 
@@ -649,13 +649,13 @@ public class MessageAuthenticationActivity extends Activity {
 						}
 					}
 
-					if (!isFresh){
+					if (!isFresh) {
 						changeMessageAuthenticationListView();
 						V2Log.e(TAG,
 								"Update QualificationState failed ... because no search it in mMessageList "
 										+ "id is : " + id);
 					}
-				} else{
+				} else {
 					changeMessageAuthenticationListView();
 					V2Log.e(TAG,
 							"Update QualificationState failed ... because id is -1");
@@ -928,7 +928,8 @@ public class MessageAuthenticationActivity extends Activity {
 			// 我加别人：允许认识人：4你们已成为了好友，需要验证：5等待对方验证，4被同意（你们已成为了好友），6拒绝了你为好友
 			switch (data.state) {
 			case 0:
-				viewTag.tvAuthenticationMessage.setText("已添加您为好友");
+				viewTag.tvAuthenticationMessage
+						.setText(R.string.messageAuthenticationActivity_message_addedYouAsFriend);
 				viewTag.bAccess.setVisibility(View.GONE);
 				viewTag.tvAccessOrNo.setVisibility(View.GONE);
 				break;
@@ -943,32 +944,38 @@ public class MessageAuthenticationActivity extends Activity {
 						.setText(data.authenticationMessage);
 				viewTag.bAccess.setVisibility(View.GONE);
 				viewTag.tvAccessOrNo.setVisibility(View.VISIBLE);
-				viewTag.tvAccessOrNo.setText("已同意");
+				viewTag.tvAccessOrNo
+						.setText(R.string.messageAuthenticationActivity_message_allowed);
 				break;
 			case 3:
 				viewTag.tvAuthenticationMessage
 						.setText(data.authenticationMessage);
 				viewTag.bAccess.setVisibility(View.GONE);
 				viewTag.tvAccessOrNo.setVisibility(View.VISIBLE);
-				viewTag.tvAccessOrNo.setText("已拒绝");
+				viewTag.tvAccessOrNo
+						.setText(R.string.messageAuthenticationActivity_message_refused);
 				break;
 			case 4:// 你们已成为了好友
-				viewTag.tvAuthenticationMessage.setText("你们已成为了好友");
+				viewTag.tvAuthenticationMessage
+						.setText(R.string.messageAuthenticationActivity_message_youBecomeFriend);
 				viewTag.bAccess.setVisibility(View.GONE);
 				viewTag.tvAccessOrNo.setVisibility(View.GONE);
 				break;
 			case 5:// 等待对方验证
-				viewTag.tvAuthenticationMessage.setText("等待对方验证");
+				viewTag.tvAuthenticationMessage
+						.setText(R.string.messageAuthenticationActivity_message_waitingForOtherAuthentication);
 				viewTag.bAccess.setVisibility(View.GONE);
 				viewTag.tvAccessOrNo.setVisibility(View.GONE);
 				break;
 			case 6:// 6拒绝了你为好友
-				viewTag.tvAuthenticationMessage.setText("拒绝了你的好友申请");
+				viewTag.tvAuthenticationMessage
+						.setText(R.string.messageAuthenticationActivity_message_refuseYourFriendRequests);
 				viewTag.bAccess.setVisibility(View.GONE);
 				viewTag.tvAccessOrNo.setVisibility(View.GONE);
 				break;
 			default:
-				viewTag.tvAuthenticationMessage.setText("你们已成为了好友");
+				viewTag.tvAuthenticationMessage
+						.setText(R.string.messageAuthenticationActivity_message_youBecomeFriend);
 				viewTag.bAccess.setVisibility(View.GONE);
 				viewTag.tvAccessOrNo.setVisibility(View.GONE);
 				break;
@@ -1370,7 +1377,7 @@ public class MessageAuthenticationActivity extends Activity {
 							Toast.LENGTH_SHORT).show();
 					return;
 				}
-				
+
 				AcceptedButtonTag tag = (AcceptedButtonTag) v.getTag();
 				VMessageQualification msg = (VMessageQualification) tag.wrapper.obj;
 				waitingQualification = tag.wrapper;
@@ -1393,7 +1400,8 @@ public class MessageAuthenticationActivity extends Activity {
 
 						updateViewItem(tag.wrapper, tag.item);
 						msg.setReadState(ReadState.READ);
-						VerificationProvider.updateCrowdQualicationMessage(null , msg , false);
+						VerificationProvider.updateCrowdQualicationMessage(
+								null, msg, false);
 						// startCrowdInvitationDetail(msg);
 					} else {
 
@@ -1416,8 +1424,8 @@ public class MessageAuthenticationActivity extends Activity {
 							msg.setQualState(QualificationState.ACCEPTED);
 							msg.setReadState(ReadState.READ);
 							updateViewItem(tag.wrapper, tag.item);
-							VerificationProvider
-									.updateCrowdQualicationMessage(null , msg , false);
+							VerificationProvider.updateCrowdQualicationMessage(
+									null, msg, false);
 						} else {
 							crowdService.acceptApplication(
 									vqac.getCrowdGroup(), vqac.getApplicant(),
@@ -1478,32 +1486,34 @@ public class MessageAuthenticationActivity extends Activity {
 		public void onReceive(Context arg0, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
 					.equals(intent.getAction())) {
-				if(currentRadioType == PROMPT_TYPE_GROUP){
+				if (currentRadioType == PROMPT_TYPE_GROUP) {
 					long msgId = intent.getLongExtra("msgId", 0);
-					if(msgId == 0)
-						return ;
-					
+					if (msgId == 0)
+						return;
+
 					VMessageQualification msg = VerificationProvider
 							.queryCrowdQualMessageById(msgId);
-					
-					if(msg == null)
-						return ;
-					
+
+					if (msg == null)
+						return;
+
 					for (int i = 0; i < mMessageList.size(); i++) {
-						VMessageQualification temp = (VMessageQualification) mMessageList.get(i).obj;
-						if(temp.getId() == msg.getId()){
+						VMessageQualification temp = (VMessageQualification) mMessageList
+								.get(i).obj;
+						if (temp.getId() == msg.getId()) {
 							mMessageList.remove(i);
 							break;
 						}
-						
+
 					}
-					
-					mMessageList.add(0 , new ListItemWrapper(msg));
-					if(groupAdapter != null){
+
+					mMessageList.add(0, new ListItemWrapper(msg));
+					if (groupAdapter != null) {
 						groupAdapter.notifyDataSetChanged();
 					}
 					msg.setReadState(ReadState.READ);
-					VerificationProvider.updateCrowdQualicationMessage(null , msg , false);
+					VerificationProvider.updateCrowdQualicationMessage(null,
+							msg, false);
 				} else {
 					// 当用户在当前界面时，就不显示红点了
 					if (currentRadioType != PROMPT_TYPE_GROUP)
@@ -1562,7 +1572,7 @@ public class MessageAuthenticationActivity extends Activity {
 
 				if (location != -1) {
 					mMessageList.remove(location);
-					if(groupAdapter != null)
+					if (groupAdapter != null)
 						groupAdapter.notifyDataSetChanged();
 					V2Log.e(TAG,
 							"Remove the crowd qualification message successful! crowd id is : "
@@ -1584,9 +1594,9 @@ public class MessageAuthenticationActivity extends Activity {
 					groupAdapter.notifyDataSetChanged();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED
 					.equals(intent.getAction())) {
-				if(currentRadioType != PROMPT_TYPE_GROUP)
-					return ;
-				
+				if (currentRadioType != PROMPT_TYPE_GROUP)
+					return;
+
 				GroupUserObject obj = (GroupUserObject) intent.getExtras().get(
 						"obj");
 
@@ -1595,15 +1605,20 @@ public class MessageAuthenticationActivity extends Activity {
 							"JNI_BROADCAST_GROUP_USER_REMOVED --> Update Conversation failed that the user removed ... given GroupUserObject is null");
 					return;
 				}
-				
-				for (int i = 0 ; i < mMessageList.size() ; i++) {
+
+				for (int i = 0; i < mMessageList.size(); i++) {
 					ListItemWrapper wrapper = mMessageList.get(i);
 					VMessageQualification message = (VMessageQualification) wrapper.obj;
-					if (message.getmCrowdGroup().getmGId() == obj.getmGroupId() &&
-							(message.getType() == Type.CROWD_APPLICATION && ((VMessageQualificationApplicationCrowd)message).getApplicant().getmUserId() == obj.getmUserId() ||
-							message.getType() == Type.CROWD_INVITATION && ((VMessageQualificationInvitationCrowd)message).getInvitationUser().getmUserId() == obj.getmUserId())) {
+					if (message.getmCrowdGroup().getmGId() == obj.getmGroupId()
+							&& (message.getType() == Type.CROWD_APPLICATION
+									&& ((VMessageQualificationApplicationCrowd) message)
+											.getApplicant().getmUserId() == obj
+											.getmUserId() || message.getType() == Type.CROWD_INVITATION
+									&& ((VMessageQualificationInvitationCrowd) message)
+											.getInvitationUser().getmUserId() == obj
+											.getmUserId())) {
 						mMessageList.remove(i);
-						if(groupAdapter != null){
+						if (groupAdapter != null) {
 							groupAdapter.notifyDataSetChanged();
 						}
 					}
@@ -1659,7 +1674,9 @@ public class MessageAuthenticationActivity extends Activity {
 					handleAcceptDone(Type.CROWD_INVITATION, crowd.getmGId(),
 							crowd.getOwnerUser().getmUserId());
 				} else {
-					Toast.makeText(mContext, "连接服务器超时！", 0).show();
+					Toast.makeText(mContext,
+							R.string.common_networkConnection_timeout, 0)
+							.show();
 				}
 				break;
 			case ACCEPT_APPLY_DONE:
@@ -1670,7 +1687,9 @@ public class MessageAuthenticationActivity extends Activity {
 					handleAcceptDone(Type.CROWD_APPLICATION, obj.getGroupID(),
 							obj.getUserID());
 				} else {
-					Toast.makeText(mContext, "连接服务器超时！", 0).show();
+					Toast.makeText(mContext,
+							R.string.common_networkConnection_timeout, 0)
+							.show();
 				}
 				break;
 			}

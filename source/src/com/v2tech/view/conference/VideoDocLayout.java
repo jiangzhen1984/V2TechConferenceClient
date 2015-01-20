@@ -1,7 +1,6 @@
 package com.v2tech.view.conference;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
-import android.media.ExifInterface;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
@@ -99,6 +97,35 @@ public class VideoDocLayout extends LinearLayout {
 
 	Context mContext = null;
 
+	private ImageView mShareDocCloseButton;
+
+	private GestureDetector.OnDoubleTapListener touchImageViewListener = new GestureDetector.OnDoubleTapListener() {
+
+		@Override
+		public boolean onSingleTapConfirmed(MotionEvent e) {
+			if (mSyncStatus) {
+				if (mShareDocCloseButton.getVisibility() == View.VISIBLE) {
+					mShareDocCloseButton.setVisibility(View.GONE);
+				} else {
+					mShareDocCloseButton.setVisibility(View.VISIBLE);
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public boolean onDoubleTapEvent(MotionEvent e) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public boolean onDoubleTap(MotionEvent e) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+	};
+
 	public interface DocListener {
 		public void updateDoc(V2Doc doc, V2Doc.Page p);
 
@@ -111,6 +138,8 @@ public class VideoDocLayout extends LinearLayout {
 		public void requestDocViewRestore(View v);
 
 		public void requestShareImageDoc(View v);
+
+		public void requestShareDocClose(View v);
 
 	};
 
@@ -148,6 +177,15 @@ public class VideoDocLayout extends LinearLayout {
 		mDocPageNumberTV = (TextView) view
 				.findViewById(R.id.video_doc_navgator);
 		mDocTitleView = (TextView) view.findViewById(R.id.video_doc_title);
+		mShareDocCloseButton = (ImageView) view
+				.findViewById(R.id.share_doc_close_button);
+		mShareDocCloseButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				onShareDocCloseButtonClick(v);
+			}
+		});
+
 		mPrePageButton = (ImageView) view
 				.findViewById(R.id.video_doc_pre_button);
 		mPrePageButton.setOnClickListener(pageChangeListener);
@@ -170,6 +208,14 @@ public class VideoDocLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
 		rootView = this;
+	}
+
+	private void onShareDocCloseButtonClick(View v) {
+		Log.i("20150119 1", "onShareDocCloseButtonClick()");
+		v.setVisibility(View.GONE);
+		// 关闭当前文档
+		listener.requestShareDocClose(v);
+
 	}
 
 	@Override
@@ -405,27 +451,7 @@ public class VideoDocLayout extends LinearLayout {
 			}
 			mDocDisplayContainer.removeAllViews();
 			TouchImageView iv = new TouchImageView(this.getContext());
-			
-			iv.setOnDoubleTapListener(new GestureDetector.OnDoubleTapListener() {
-
-				@Override
-				public boolean onSingleTapConfirmed(MotionEvent e) {
-			           Log.i("20150112 2","onClick");
-					return false;
-				}
-
-				@Override
-				public boolean onDoubleTapEvent(MotionEvent e) {
-					// TODO Auto-generated method stub
-					return false;
-				}
-
-				@Override
-				public boolean onDoubleTap(MotionEvent e) {
-					// TODO Auto-generated method stub
-					return false;
-				}
-			});
+			iv.setOnDoubleTapListener(touchImageViewListener);
 
 			// Merge bitmap
 			// iv.setImageResource(R.drawable.conversation_files_button);
@@ -537,6 +563,7 @@ public class VideoDocLayout extends LinearLayout {
 				}
 				mDocDisplayContainer.removeAllViews();
 				TouchImageView iv = new TouchImageView(this.getContext());
+				iv.setOnDoubleTapListener(touchImageViewListener);
 				// Merge bitmap
 				mImageViewBitmap = mergeBitmapToImage(mBackgroundBitMap,
 						mShapeBitmap);
@@ -572,6 +599,7 @@ public class VideoDocLayout extends LinearLayout {
 				}
 				mDocDisplayContainer.removeAllViews();
 				TouchImageView iv = new TouchImageView(this.getContext());
+				iv.setOnDoubleTapListener(touchImageViewListener);
 				// Merge bitmap
 				// iv.setImageResource(R.drawable.conversation_files_button);
 				mDocDisplayContainer.addView(iv, new FrameLayout.LayoutParams(
@@ -591,6 +619,7 @@ public class VideoDocLayout extends LinearLayout {
 			}
 			mDocDisplayContainer.removeAllViews();
 			TouchImageView iv = new TouchImageView(this.getContext());
+			iv.setOnDoubleTapListener(touchImageViewListener);
 			// Merge bitmap
 			// iv.setImageResource(R.drawable.conversation_files_button);
 			mDocDisplayContainer.addView(iv, new FrameLayout.LayoutParams(

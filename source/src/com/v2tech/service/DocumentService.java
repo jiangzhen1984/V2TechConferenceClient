@@ -203,7 +203,7 @@ public class DocumentService extends AbstractHandler {
 		WBRequest.getInstance().ActivePage(currentUserId, doc.getId(),
 				doc.getActivatePage().getNo(), 0, isNotify);
 	}
-
+	
 	@Override
 	public void clearCalledBack() {
 		WBRequest.getInstance().removeCallback(cb);

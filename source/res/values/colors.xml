@@ -1,11 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="in_meeting_title_bar_bg">#229dd6</color>
+    <color name="in_meeting_group_list_bg">#ffffff</color>
+    <color name="in_meeting_widget_separation_line">#f2f2f2</color>
+    <color name="in_meeting_setting_bg">#ffffff</color>
+    <color name="in_meeting_quit_window_inner_bg">#ffffff</color>
+    <color name="in_meeting_quit_window_separation">#cad2d9</color>
+    <color name="in_meeting_quit_window_title_bg">#ebf3f7</color>
+    <color name="in_meeting_doc_list_separation">#cad2d9</color>
+    <color name="in_meeting_doc_list_activited_doc_bg">#ebf3f7</color>
+    <color name="logo_background">#ffffff</color>
+    <color name="setting_outer_bg">#b8c9d4</color>
+    <color name="setting_inner_bg">#ffffff</color>
+    <color name="setting_separation">#f2f2f2</color>
+    <color name="contacts_user_view_under_line">#dbdbdb</color>
+    <color name="contacts_user_view_bg">#f0f0f0</color>
+    <color name="contacts_user_group_bg">#f5f5f5</color>
+    <color name="contacts_user_detail_item_bg">#ffffff</color>
+    <color name="contacts_user_detail_text_color">#0099ff</color>
+    <color name="message_panel_bg">#ffffff</color>
+    <color name="confs_title_bg">#ffffff</color>
+    <color name="confs_panel_bg">#363636</color>
+    <color name="confs_search_bar_bg">#eff0f2</color>
+    <color name="confs_group_list_bg">#ffffff</color>
+    <color name="confs_common_bg">#eff0f3</color>
+    <color name="confs_group_widget_separation_line">#f2f2f2</color>
     <color name="conference_message_list_view_item_text1_color">#000000</color>
 
     <!-- 弹出菜单文本颜色 -->
     <color name="common_menu_text_color_gray_123">#7b7b7b</color>
-    
     <color name="common_return_button_color">#057aff</color>
     <color name="common_confirm_button_color">#057aff</color>
     <color name="common_black">#000000</color>

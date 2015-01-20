@@ -248,10 +248,19 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				.findViewById(R.id.video_attendee_device_camera_icon);
 
 		if (wr.sortFlag != FIRST_DEVICE_FLAG) {
-			nameTV.setText("     "
-					+ getContext().getText(
-							R.string.confs_user_video_device_item)
-					+ wr.sortFlag);
+			UserDeviceConfig udc = wr.getUserDeviceConfig();
+			if (udc != null) {
+				String deviceID = udc.getDeviceID();
+				String deciceName = null;
+				if (deviceID != null) {
+					int start = deviceID.indexOf(':');
+					int end = deviceID.indexOf('_');
+					deciceName = deviceID.substring(start + 1, end);
+				}
+				nameTV.setText("     " + deciceName);
+			} else {
+				nameTV.setText("     ");
+			}
 		} else {
 			if (wr.a.getUser() != null) {
 				if (wr.a.getUser().isRapidInitiation()) {
@@ -1091,6 +1100,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			this.sortFlag = sortFlag;
 		}
 
+		public UserDeviceConfig getUserDeviceConfig() {
+			return this.udc;
+		}
+
 		@Override
 		public int compareTo(Wrapper wr) {
 
@@ -1239,7 +1252,15 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		private int calledByCompareTo(Wrapper wr) {
 			int ret = this.a.compareTo(wr.a);
 			if (ret == 0) {
-				return this.sortFlag;
+				if (this.sortFlag < wr.sortFlag) {
+					return -1;
+				}
+				if (this.sortFlag > wr.sortFlag) {
+					return 0;
+				} else {
+					return 1;
+				}
+
 			} else {
 				if (this.a.isJoined()) {
 					return -1;

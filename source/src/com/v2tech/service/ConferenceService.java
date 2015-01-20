@@ -430,6 +430,7 @@ public class ConferenceService extends DeviceService {
 			}
 			return;
 		}
+
 		GroupRequest.getInstance().groupCreateDocShare(
 				GroupType.CONFERENCE.intValue(), conf.getId(), file, 0, false);
 
@@ -438,6 +439,17 @@ public class ConferenceService extends DeviceService {
 					RequestPermissionResponse.Result.SUCCESS);
 			sendResult(listener, jniRes);
 		}
+	}
+
+	public void closeShareDoc(Conference conf, String szMediaID) {
+		if (conf == null || szMediaID == null) {
+			return;
+		}
+		GroupRequest.getInstance().groupDestroyWBoard(/*
+													 * GroupType.CONFERENCE.intValue
+													 * (),
+													 */conf.getId(), szMediaID);
+
 	}
 
 	/**

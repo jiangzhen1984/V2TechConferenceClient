@@ -300,6 +300,7 @@ public class UserDeviceConfig {
 			int start = xmlData.indexOf("defaultid='");
 			int end = xmlData.indexOf("'", start + 11);
 			defaultId = xmlData.substring(start + 11, end);
+			
 			NodeList videol = doc.getElementsByTagName("video");
 			for (int t = 0; t < videol.getLength(); t++) {
 				Element video = (Element) videol.item(t);

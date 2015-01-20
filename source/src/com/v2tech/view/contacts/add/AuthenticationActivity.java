@@ -60,14 +60,14 @@ public class AuthenticationActivity extends Activity {
 		if ((startedCause != null)
 				&& startedCause.equals("refuse_friend_authentication")) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-			tvLeft.setText("返回");
-			tvTitle.setText("拒绝理由");
-			etInput.setHint("请输入拒绝理由");
+			tvLeft.setText(R.string.authenticationActivity_titlebar_back);
+			tvTitle.setText(R.string.authenticationActivity_titlebar_title);
+			etInput.setHint(R.string.authenticationActivity_objection_hint);
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
-			tvLeft.setText("个人资料");
-			tvTitle.setText("身份验证");
-			etInput.setHint("请输入验证信息");
+			tvLeft.setText(R.string.authenticationActivity_titlebar_back1);
+			tvTitle.setText(R.string.authenticationActivity_titlebar_title1);
+			etInput.setHint(R.string.authenticationActivity_authentication_info_hint);
 
 		}
 		detailUser = GlobalHolder.getInstance().getUser(mUid);

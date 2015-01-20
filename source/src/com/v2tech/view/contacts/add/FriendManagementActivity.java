@@ -64,38 +64,38 @@ public class FriendManagementActivity extends Activity {
 
 		setContentView(R.layout.activity_contact_add_friend_management);
 		findViewById(R.id.layout).setOnTouchListener(new OnTouchListener() {
-			
+
 			@Override
 			public boolean onTouch(View v, MotionEvent event) {
 				hindSoftInput(v);
 				return false;
 			}
 		});
-		
-		
-		
-		
+
 		startedCause = this.getIntent().getStringExtra("cause");
 		connectView();
 		bindViewEvent();
 		if ((startedCause != null)
 				&& startedCause.equals("access_friend_authentication")) {
 			mUid = this.getIntent().getLongExtra("remoteUserID", 0);
-			tvRightTextView.setText("完成");
-			tvBack.setText("返回");
+			tvRightTextView
+					.setText(R.string.friendManagementActivity_titlebar_right_text);
+			tvBack.setText(R.string.friendManagementActivity_titlebar_left_text);
 		} else if ((startedCause != null)
 				&& startedCause.equals("ContactDetail2")) {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 			verificationInfo = this.getIntent().getStringExtra(
 					"verificationInfo");
-			tvRightTextView.setText("发送");
-			tvBack.setText("个人资料");
+			tvRightTextView
+					.setText(R.string.friendManagementActivity_titlebar_right_text1);
+			tvBack.setText(R.string.friendManagementActivity_titlebar_left_text1);
 		} else {
 			mUid = this.getIntent().getLongExtra("uid", 0);
 			verificationInfo = this.getIntent().getStringExtra(
 					"verificationInfo");
-			tvRightTextView.setText("发送");
-			tvBack.setText("身份验证");
+			tvRightTextView
+					.setText(R.string.friendManagementActivity_titlebar_right_text1);
+			tvBack.setText(R.string.friendManagementActivity_titlebar_left_text2);
 		}
 
 		detailUser = GlobalHolder.getInstance().getUser(mUid);
@@ -110,7 +110,7 @@ public class FriendManagementActivity extends Activity {
 			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		}
 	}
-	
+
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -168,8 +168,7 @@ public class FriendManagementActivity extends Activity {
 				@Override
 				public void onClick(View arg0) {
 
-					if (GlobalHolder
-							.getInstance().isServerConnected()) {
+					if (GlobalHolder.getInstance().isServerConnected()) {
 						if (detailUser.getAuthtype() == 0) {
 							AddFriendHistroysHandler
 									.addOtherNoNeedAuthentication(
@@ -186,22 +185,28 @@ public class FriendManagementActivity extends Activity {
 									selectGroupID, ""), detailUser,
 									verificationInfo, commentNameET.getText()
 											.toString());
-							Toast.makeText(FriendManagementActivity.this,
-									"您的好友申请发送成功", Toast.LENGTH_SHORT).show();
-							
+							Toast.makeText(
+									FriendManagementActivity.this,
+									R.string.friendManagementActivity_toast_text_applySentSuccess,
+									Toast.LENGTH_SHORT).show();
+
 							Intent i = new Intent();
 							i.setAction(PublicIntent.BROADCAST_ADD_OTHER_FRIEND_WAITING_NOTIFICATION);
 							i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 							sendBroadcast(i);
-							
+
 						} else if (detailUser.getAuthtype() == 2) {
 							// 不让任何人加为好
-							Toast.makeText(FriendManagementActivity.this,
-									"对方不允许加为好友", Toast.LENGTH_SHORT).show();
+							Toast.makeText(
+									FriendManagementActivity.this,
+									R.string.friendManagementActivity_toast_text_reduseAddAsFriend,
+									Toast.LENGTH_SHORT).show();
 						}
 					} else {
-						Toast.makeText(FriendManagementActivity.this,
-								"您的好友申请发送失败", Toast.LENGTH_SHORT).show();
+						Toast.makeText(
+								FriendManagementActivity.this,
+								R.string.friendManagementActivity_toast_text_applySentFail,
+								Toast.LENGTH_SHORT).show();
 					}
 
 					// 实现越级跳
