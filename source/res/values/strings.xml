@@ -260,12 +260,6 @@
     <string name="group_invitation_title">添加成员</string>
     <string name="group_upload_hint_text">上传已完成</string>
 
-    <string-array name="crowd_rules">
-        <item>允许任何人</item>
-        <item>需要验证</item>
-        <item>不允许任何人</item>
-    </string-array>
-
     <!-- activity_login -->
     <!-- Strings related to login -->
     <string name="prompt_email">邮箱</string>
@@ -413,7 +407,12 @@
     <string name="crowd_files_in_deletion_failed">请先先退出删除模式!</string>
     <string name="crowd_message_deletion_mode_quit_required">请先先退出删除模式!</string>
 
-    <!-- =================Discussion board============================ -->
+    <!-- string array -->
+    <string name="crowd_rules_item_allows_anybody">允许任何人</string>
+    <string name="crowd_rules_item_allows_need_authentication">需要验证</string>
+    <string name="crowd_rules_item_donot_allows_anybody">不允许任何人</string>
+
+    <!-- Discussion board -->
     <string name="discussion_create_invitation_title">添加成员</string>
     <string name="discussion_create_activity_title">创建讨论组</string>
     <string name="discussion_board_detail_settings">聊天设置</string>

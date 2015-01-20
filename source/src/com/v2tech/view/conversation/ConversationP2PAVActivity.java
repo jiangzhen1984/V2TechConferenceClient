@@ -208,10 +208,10 @@ public class ConversationP2PAVActivity extends Activity implements
 			Log.i(TAG, "蓝牙是连接的");
 		}
 
-		if (!uad.isIncoming() && uad.isAudioType()) {//如果是播出并且是音频
+		if (!uad.isIncoming() && uad.isAudioType()) {// 如果是播出并且是音频
 			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 			headsetAndBluetoothHeadsetHandle(true);
-		}else{
+		} else {
 			audioManager.setMode(AudioManager.MODE_NORMAL);
 		}
 
@@ -251,10 +251,10 @@ public class ConversationP2PAVActivity extends Activity implements
 			}
 			// start time out monitor
 			mLocalHandler.postDelayed(timeOutMonitor, 1000 * 60);
-			
-//			if (uad.isIncoming() && !uad.isConnected()) {
-				playRingToneIncoming();
-//			}
+
+			// if (uad.isIncoming() && !uad.isConnected()) {
+			playRingToneIncoming();
+			// }
 		} else {
 			currentVideoBean.readSatate = AudioVideoMessageBean.STATE_READED;
 			currentVideoBean.formUserID = GlobalHolder.getInstance()
@@ -689,7 +689,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			audioSpeakerButton
 					.setBackgroundResource(R.drawable.conversation_framgent_gray_button_bg_pressed);
 		}
-		
+
 		View audioHangUpButton = findViewById(R.id.conversation_fragment_connected_hang_up_button);
 		if (audioHangUpButton != null) {
 			audioHangUpButton.setEnabled(false);
@@ -983,7 +983,7 @@ public class ConversationP2PAVActivity extends Activity implements
 					.findViewById(R.id.fragment_conversation_quit_dialog_content))
 					.setText(R.string.conversation_quit_dialog_audio_text);
 		}
-		
+
 		dialog.findViewById(R.id.fragment_conversation_IMWCancelButton)
 				.setOnClickListener(new OnClickListener() {
 
@@ -1149,11 +1149,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	private void exchangeRemoteVideoAndLocalVideo() {
 		if (testFlag) {
 			testFlag = false;
-			
-			Log.e("????????", "pause playout start");
 			chatService.requestPausePlayout(uad.getUdc());
-			Log.e("????????", "pause playout end");
-			
 			bigWindowVideoLayout.removeViewInLayout(mRemoteSurface);
 			smallWindowVideoLayout.removeViewInLayout(mLocalSurface);
 
@@ -1183,11 +1179,8 @@ public class ConversationP2PAVActivity extends Activity implements
 			mReverseCameraButton1.setVisibility(View.VISIBLE);
 		} else {
 			testFlag = true;
-			
-			Log.e("????????", "pause playout start");
 			chatService.requestPausePlayout(uad.getUdc());
-			Log.e("????????", "pause playout end");
-			
+
 			bigWindowVideoLayout.removeViewInLayout(mLocalSurface);
 			smallWindowVideoLayout.removeViewInLayout(mRemoteSurface);
 			smallWindowVideoLayout.removeViewInLayout(mReverseCameraButton);
@@ -1671,6 +1664,8 @@ public class ConversationP2PAVActivity extends Activity implements
 			if (!isOpenedRemote && uad.isConnected()) {
 				openRemoteVideo();
 			}
+
+			chatService.requestResumePlayout(uad.getUdc());
 		}
 
 		@Override

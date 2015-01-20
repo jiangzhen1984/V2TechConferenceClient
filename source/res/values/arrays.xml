@@ -71,4 +71,10 @@
         <item>.vdx</item>
     </array>
 
+    <string-array name="crowd_rules">
+        <item>@string/crowd_rules_item_allows_anybody</item>
+        <item>@string/crowd_rules_item_allows_need_authentication</item>
+        <item>@string/crowd_rules_item_donot_allows_anybody</item>
+    </string-array>
+
 </resources>
