@@ -25,8 +25,8 @@ import android.text.TextUtils;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
-import com.v2tech.vo.User;
-import com.v2tech.vo.V2GlobalConstants;
+import com.bizcom.vc.application.V2GlobalConstants;
+import com.bizcom.vo.User;
 
 public class XmlAttributeExtractor {
 

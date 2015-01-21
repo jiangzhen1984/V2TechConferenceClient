@@ -3,7 +3,7 @@ package com.V2.jni.ind;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.v2tech.util.FileUitls;
+import com.bizcom.util.FileUitls;
 
 public class FileJNIObject extends JNIObjectInd implements Parcelable {
 

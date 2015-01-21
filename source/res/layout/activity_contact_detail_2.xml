@@ -53,7 +53,7 @@
                     android:text="TextView"
                     android:textColor="@color/activiy_contact_detail_item_color"
                     android:textSize="@dimen/common_item_text_size" />
-                <com.v2tech.view.widget.MarqueeTextView
+                <com.bizcom.vc.widget.MarqueeTextView
                     android:id="@+id/contact_user_detail_user_signature_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

@@ -10,7 +10,8 @@ import android.util.Log;
 
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
-import com.v2tech.vo.V2GlobalConstants;
+import com.bizcom.vc.application.V2GlobalConstants;
+import com.bizcom.vc.application.V2GlobalEnum;
 
 public class VideoRequest {
 

@@ -89,7 +89,7 @@
                     android:singleLine="true"
                     android:text="TextView"
                     android:textColor="@color/common_black" />
-                <com.v2tech.view.widget.MarqueeTextView
+                <com.bizcom.vc.widget.MarqueeTextView
                     android:id="@+id/crowd_applicant_signature"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

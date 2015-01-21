@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
-import com.v2tech.vo.V2GlobalConstants;
+import com.bizcom.vc.application.V2GlobalConstants;
 
 public class V2Group {
 

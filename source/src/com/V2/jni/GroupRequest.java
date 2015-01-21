@@ -13,7 +13,7 @@ import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
-import com.v2tech.vo.V2GlobalConstants;
+import com.bizcom.vc.application.V2GlobalConstants;
 
 public class GroupRequest {
 

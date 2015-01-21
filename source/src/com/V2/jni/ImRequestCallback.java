@@ -21,7 +21,7 @@ public interface ImRequestCallback {
 	 * @param nResult  0: succeed,  1: failed
 	 * @param serverTime 
 	 * @param sDBID : Server id
-	 * @see com.v2tech.service.jni.JNIResponse.Result
+	 * @see com.bizcom.request.jni.JNIResponse.Result
 	 */
 	public void OnLoginCallback(long nUserID, int nStatus, int nResult , long serverTime , String sDBID);
 	
@@ -62,7 +62,7 @@ public interface ImRequestCallback {
 	 * @param nStatus  1 is online, 0 is offline
 	 * @param szStatusDesc
 	 * 
-	 * @see com.v2tech.vo.User.Status
+	 * @see com.bizcom.vo.User.Status
 	 */
 	public void OnUserStatusUpdatedCallback(long nUserID, int nType, int nStatus, String szStatusDesc);
 	
