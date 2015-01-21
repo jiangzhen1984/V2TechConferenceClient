@@ -61,7 +61,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="10dp" >
-        <com.v2tech.view.cus.PasteEditText
+        <com.bizcom.vc.widget.cus.PasteEditText
             android:id="@+id/video_msg_chatting_layout_msg_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

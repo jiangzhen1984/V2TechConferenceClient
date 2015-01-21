@@ -24,7 +24,7 @@ public interface GroupRequestCallback {
 	 * @param list
 	 *            group list
 	 * 
-	 * @see com.v2tech.vo.Group#GroupType
+	 * @see com.bizcom.vo.Group#GroupType
 	 */
 	public void OnGetGroupInfoCallback(int groupType, List<V2Group> list);
 
@@ -41,10 +41,10 @@ public interface GroupRequestCallback {
 	 *            <ul>
 	 *            <br>
 	 *            <li>1: contact type
-	 *            {@link com.v2tech.vo.Group.GroupType#FRIGROUP}<br>
+	 *            {@link com.bizcom.vo.Group.GroupType#FRIGROUP}<br>
 	 *            </li>
 	 *            <li>4: conference type
-	 *            {@link com.v2tech.vo.Group.GroupType#CONFERENCE}<br>
+	 *            {@link com.bizcom.vo.Group.GroupType#CONFERENCE}<br>
 	 *            </li>
 	 *            </ul>
 	 * @param nGroupID

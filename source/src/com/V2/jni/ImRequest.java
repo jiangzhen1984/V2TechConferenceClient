@@ -203,7 +203,7 @@ public class ImRequest {
 	 *            </ul>
 	 * @param szStatusDesc
 	 * 
-	 * @see com.v2tech.vo.User.Status
+	 * @see com.bizcom.vo.User.Status
 	 * @see ImRequestCallback#OnUserStatusUpdatedCallback(long, int, int,
 	 *      String)
 	 */

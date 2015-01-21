@@ -71,14 +71,14 @@
                 android:background="#cdcdcf"
                 android:orientation="vertical" >
             </LinearLayout>
-            <com.v2tech.view.widget.GroupListView
+            <com.bizcom.vc.widget.GroupListView
                 android:id="@+id/discussion_board_create_contacts_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="#ffffff"
                 android:divider="@null"
                 android:focusable="false" >
-            </com.v2tech.view.widget.GroupListView>
+            </com.bizcom.vc.widget.GroupListView>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/iscussion_board_create_scroll_view_ly"
@@ -92,12 +92,12 @@
                 android:background="#cdcdcf"
                 android:orientation="vertical" >
             </LinearLayout>
-            <com.v2tech.view.widget.HorizontalListView
+            <com.bizcom.vc.widget.HorizontalListView
                 android:id="@+id/discussion_board_create_list_view"
                 android:layout_width="match_parent"
                 android:layout_height="80dp"
                 android:tag="horizontal" >
-            </com.v2tech.view.widget.HorizontalListView>
+            </com.bizcom.vc.widget.HorizontalListView>
         </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

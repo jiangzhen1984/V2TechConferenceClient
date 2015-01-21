@@ -14,7 +14,7 @@ import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
-import com.v2tech.util.GlobalConfig;
+import com.bizcom.vc.application.GlobalConfig;
 
 public class ConfRequest {
 

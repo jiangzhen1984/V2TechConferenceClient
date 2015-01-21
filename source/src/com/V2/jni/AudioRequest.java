@@ -9,6 +9,7 @@ import android.util.Log;
 
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.util.V2Log;
+import com.bizcom.vc.application.V2GlobalEnum;
 
 public class AudioRequest {
 

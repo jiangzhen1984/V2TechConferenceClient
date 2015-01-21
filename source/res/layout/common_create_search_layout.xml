@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@color/confs_search_bar_bg" >
 
-    <com.v2tech.view.cus.SearchEditText
+    <com.bizcom.vc.widget.cus.SearchEditText
         android:id="@+id/ws_common_create_search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
