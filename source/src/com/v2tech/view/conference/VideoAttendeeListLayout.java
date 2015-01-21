@@ -258,27 +258,33 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					deciceName = deviceID.substring(start + 1, end);
 				}
 				nameTV.setText("     " + deciceName);
+
 			} else {
 				nameTV.setText("     ");
+				Log.i("20150121 1", "长空");
 			}
 		} else {
-			if (wr.a.getUser() != null) {
-				if (wr.a.getUser().isRapidInitiation()) {
-					nameTV.setText("<" + wr.a.getAttName() + ">");
+			User aUser = null;
+			if (wr.a != null) {
+				aUser = wr.a.getUser();
+			}
+
+			if (aUser != null) {
+				if (aUser.isRapidInitiation()) {
+					nameTV.setText("<" + aUser.getName() + ">");
 				} else {
-					nameTV.setText(wr.a.getAttName());
+					nameTV.setText(aUser.getName());
+					if (aUser.getName() == null) {
+						Log.i("20150121 1", "null");
+					}
 				}
 			} else {
-				nameTV.setText(wr.a.getAttName());
+				nameTV.setText("");
+				Log.i("20150121 1", "空");
 			}
 		}
 
 		if (wr.udc != null) {
-
-			Log.i("20141220 2",
-					"updateView() wr.udc.id =" + wr.udc.getDeviceID()
-							+ " wr.udc.isShowing =" + wr.udc.isShowing());
-
 			if (!wr.udc.isShowing()) {
 				view.setBackgroundColor(Color.WHITE);
 			} else {
