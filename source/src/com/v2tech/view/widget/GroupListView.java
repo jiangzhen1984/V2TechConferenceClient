@@ -399,7 +399,7 @@ public class GroupListView extends ListView {
 				if (((GroupItemData) item).isExpanded) {
 					// Calculate group end position
 					int startPos = calculateAddGroupStartIndex(group);
-					int endPos = calculateGroupEnd(group, startPos);
+					int endPos = calculateAddGroupEndIndex(group, startPos);
 
 					int pos = calculateIndex(startPos, endPos - 1, user,
 							user.getmStatus());
@@ -760,6 +760,11 @@ public class GroupListView extends ListView {
 		groupEnd += getExpandGroupSize(group.getChildGroup());
 		return groupEnd;
 	}
+	
+	public int calculateAddGroupEndIndex(Group group , int startIndex){
+		int groupEnd = startIndex + group.getUsers().size();
+		return groupEnd - 1;
+	}
 
 	public int calculateGroupStartIndex(Group group) {
 		GroupItemData item = (GroupItemData) getItem(group);
@@ -776,7 +781,7 @@ public class GroupListView extends ListView {
 		GroupItemData item = (GroupItemData) getItem(group);
 		int itemStartPos = getGroupItemPos(item);
 		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
-		return startPos;
+		return startPos + 1;
 	}
 
 	public int getExpandGroupSize(List<Group> groups) {
