@@ -337,9 +337,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			Toast.makeText(mContext, R.string.error_local_connect_to_server,
 					Toast.LENGTH_SHORT).show();
 		} else {
-			isUpdating = false;
-			Message m = Message.obtain(lh, UPDATE_USER_INFO);
-			lh.sendMessage(m);
+			if(isUpdating){
+				isUpdating = false;
+				Message m = Message.obtain(lh, UPDATE_USER_INFO);
+				lh.sendMessage(m);
+			}
 		}
 
 		Intent intent = new Intent();
@@ -1069,17 +1071,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			case UPDATE_USER_INFO_DONE:
 				JNIResponse ponse = (JNIResponse) msg.obj;
 				if (ponse.getResult() == JNIResponse.Result.SUCCESS) {
-					Intent intent = new Intent();
-					intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
-					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-					intent.putExtra("modifiedUser", u.getmUserId());
-					sendBroadcast(intent);
+					V2Log.e("ContactDetail --> ",
+							"update login User info SUCCESS!...");
 				} else {
-					V2Log.e("ContactDetail",
-							"Update User Name or Comment Name Failed... error code : "
-									+ ponse.getResult().value()
-									+ " error name is : "
-									+ ponse.getResult().name());
+					V2Log.e("ContactDetail --> ",
+							"update login User info FAILED!...");
 				}
 				break;
 			}
@@ -1091,7 +1087,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			myBroadcastReceiver = new MyBroadcastReceiver();
 			IntentFilter intentFilter = new IntentFilter();
 			intentFilter
-					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
+					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			registerReceiver(myBroadcastReceiver, intentFilter);
 		}
@@ -1112,7 +1108,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		public void onReceive(Context arg0, Intent arg1) {
 
 			if (arg1.getAction().equals(
-					JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE)) {
+					JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO)) {
 				long uid = arg1.getLongExtra("uid", -1);
 				if (uid == -1) {
 					return;

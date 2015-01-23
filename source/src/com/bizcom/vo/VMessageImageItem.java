@@ -1,7 +1,6 @@
 package com.bizcom.vo;
 
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,8 +10,6 @@ import java.util.UUID;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
-import android.text.TextUtils;
-import android.util.DisplayMetrics;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.util.BitmapUtil;
@@ -177,7 +174,6 @@ public class VMessageImageItem extends VMessageAbstractItem{
 			mFullQualityBitmap = BitmapFactory.decodeFile(this.filePath,
 						options);
 		}
-
 		return mFullQualityBitmap;
 	}
 

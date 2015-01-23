@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ImRequestCallbackAdapter;
 import com.V2.jni.V2ClientType;
+import com.V2.jni.ind.V2User;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.bizcom.request.jni.JNIResponse;
@@ -134,5 +135,14 @@ public class UserService extends AbstractHandler {
 			handler.dispatchMessage(m);
 		}
 
+		@Override
+		public void OnUpdateBaseInfoCallback(V2User user) {
+			if(user.uid != GlobalHolder.getInstance().getCurrentUserId())
+				return ;
+			Message m = Message
+					.obtain(handler, JNI_REQUEST_UPDAE_USER,
+							new JNIResponse(JNIResponse.Result.SUCCESS));
+			handler.dispatchMessage(m);
+		}
 	}
 }

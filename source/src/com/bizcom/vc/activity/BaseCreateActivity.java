@@ -50,6 +50,8 @@ public abstract class BaseCreateActivity extends Activity {
 	protected Context mContext;
 
 	protected int createType;
+	
+	protected State mState = State.DONE;
 
 	protected int landLayout = PAD_LAYOUT;
 
@@ -306,5 +308,9 @@ public abstract class BaseCreateActivity extends Activity {
 				}
 			}
 		}
+	}
+	
+	public enum State {
+		DONE, CREATEING
 	}
 }

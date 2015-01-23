@@ -173,6 +173,9 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 						.addAction(PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
 				intentFilter
 						.addAction(PublicIntent.BROADCAST_CONTACT_GROUP_UPDATED_NOTIFICATION);
+			} else {
+				intentFilter
+					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO);
 			}
 		}
 		return intentFilter;
@@ -309,6 +312,12 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 					return;
 				}
 
+				Message.obtain(mHandler, UPDATE_USER_SIGN, uid).sendToTarget();
+			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO
+					.equals(intent.getAction())){
+				long uid = intent.getLongExtra("uid", -1);
+				if(uid == -1 || uid != GlobalHolder.getInstance().getCurrentUserId())
+					return ;
 				Message.obtain(mHandler, UPDATE_USER_SIGN, uid).sendToTarget();
 			}
 		}

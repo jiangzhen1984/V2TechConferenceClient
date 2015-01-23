@@ -1,5 +1,4 @@
 package com.bizcom.vc.widget;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,6 +34,8 @@ import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.Group;
 import com.bizcom.vo.User;
 import com.v2tech.R;
+
+
 
 /**
  * Group List view wrapper.<br>
@@ -401,23 +402,30 @@ public class GroupListView extends ListView {
 					int startPos = calculateAddGroupStartIndex(group);
 					int endPos = calculateAddGroupEndIndex(group, startPos);
 
-					int pos = calculateIndex(startPos, endPos - 1, user,
+					int pos = calculateIndex(startPos, endPos, user,
 							user.getmStatus());
 					//计算出的位置pos，是指的是被添加的item与该pos的item对比之后break的结果
 					int replaceItem = pos;
-					Log.i(TAG, "计算插入位置 : " + pos);
+					Log.i(TAG, "组名 = " + group.getName() + " 组开始位置 = "
+							+ startPos + " ，组结束位置  = " + endPos + " 计算位置 = "
+							+ pos);
 					if (pos != -1) {
 						ItemData userItem = this.getItem(group, user);
 						User insertUser = ((User) userItem.getObject());
 						insertUser.updateStatus(user.getmStatus());
 						
-						ItemData itemData = mFilterList.get(replaceItem);
-						if(itemData instanceof UserItemData){
-							User replacedUser = ((User) itemData.getObject());
-							int result = replacedUser.compareTo(insertUser);
-							if(result < 0)
-								pos++;
-						} 
+						//当只有一个默认好友分组，并且分组中没人成员，则第一次添加好友，会出现角标越界
+						if(replaceItem < mFilterList.size()){
+							ItemData itemData = mFilterList.get(replaceItem);
+							if(itemData instanceof UserItemData){
+								User replacedUser = ((User) itemData.getObject());
+								if(group.getUsers().contains(replacedUser)){
+									int result = replacedUser.compareTo(insertUser);
+									if(result < 0)
+										pos++;
+								}
+							} 
+						}
 						
 						Log.i(TAG, "组名 = " + group.getName() + " 组开始位置 = "
 								+ startPos + " ，组结束位置  = " + endPos + " ,插入位置 = "
@@ -437,7 +445,6 @@ public class GroupListView extends ListView {
 
 			}
 		}
-
 		adapter.notifyDataSetChanged();
 	}
 
@@ -842,7 +849,7 @@ public class GroupListView extends ListView {
 		if (start == mFilterList.size() && end == mFilterList.size()) {
 			return start;
 		} else if (start == end) {
-			return end + 1;
+			return end;
 		} 
 		
 		while (start <= end) {

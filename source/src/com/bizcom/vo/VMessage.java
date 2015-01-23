@@ -256,7 +256,6 @@ public class VMessage {
 	}
 
 	public String getStringDate() {
-
 		if (mDate != null) {
 			return DateUtil.getStringDate(mDate.getTime());
 		}
@@ -273,21 +272,6 @@ public class VMessage {
 
 	public List<VMessageAbstractItem> getItems() {
 		return this.itemList;
-	}
-
-	public String getAllTextContent() {
-		StringBuilder sb = new StringBuilder();
-		for (VMessageAbstractItem item : itemList) {
-			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
-				if (item.isNewLine() && sb.length() != 0) {
-					sb.append("\n");
-				}
-				sb.append(((VMessageTextItem) item).getText());
-			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
-				sb.append("[表情]");
-			}
-		}
-		return sb.toString();
 	}
 
 	public String getTextContent() {

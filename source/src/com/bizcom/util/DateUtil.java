@@ -6,6 +6,8 @@ import java.util.Date;
 
 import android.text.format.DateUtils;
 
+import com.v2tech.R;
+
 public class DateUtil {
 
 	/**
@@ -31,7 +33,10 @@ public class DateUtil {
 		int days = cale.get(Calendar.DAY_OF_MONTH);
 		int currentCaleDays = currentCale.get(Calendar.DAY_OF_MONTH);
 		if (currentCaleDays - 1 == days) {
-			return "昨天  " + getShortDate(longDate);
+			// need get context
+			return FileUitls.context.getResources().getString(
+					R.string.common_date_yesterday)
+					+ getShortDate(longDate);
 		}
 
 		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -64,7 +69,7 @@ public class DateUtil {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return format.format(date.getTime());
 	}
-	
+
 	/**
 	 * get the time format , like HH:mm:ss
 	 * 

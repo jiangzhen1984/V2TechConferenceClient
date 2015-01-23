@@ -286,7 +286,7 @@ public class ImRequest {
 	 */
 	private void OnModifyCommentName(long nUserId, String sCommmentName) {
 		V2Log.d("ImRequest UI --> OnModifyCommentName:: " + "nUserId:"
-				+ nUserId + "  sCommmentName" + sCommmentName);
+				+ nUserId + "  sCommmentName : " + sCommmentName);
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {

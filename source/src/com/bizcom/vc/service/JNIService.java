@@ -131,7 +131,6 @@ public class JNIService extends Service implements
 	 * key avatar : #UserAvatarObject
 	 */
 	public static final String JNI_BROADCAST_USER_AVATAR_CHANGED_NOTIFICATION = "com.v2tech.jni.broadcast.user_avatar_notification";
-	public static final String JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE = "com.v2tech.jni.broadcast.user_update_sigature";
 	public static final String JNI_BROADCAST_USER_UPDATE_BASE_INFO = "com.v2tech.jni.broadcast.user_update_base_info";
 	public static final String JNI_BROADCAST_GROUP_NOTIFICATION = "com.v2tech.jni.broadcast.group_geted";
 	public static final String JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION = "com.v2tech.jni.broadcast.group_user_updated";
@@ -1052,7 +1051,6 @@ public class JNIService extends Service implements
 							|| GlobalHolder.getInstance().isInAudioCall()
 							|| GlobalHolder.getInstance().isInVideoCall()) {
 						Intent intent = new Intent(mContext, MainActivity.class);
-						// intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 						intent.putExtra("initFragment", 3);
 						Notificator
@@ -1875,16 +1873,6 @@ public class JNIService extends Service implements
 				String szXmlText) {
 			User toUser = GlobalHolder.getInstance().getUser(nToUserID);
 			User fromUser = GlobalHolder.getInstance().getUser(nFromUserID);
-			if (toUser == null) {
-				V2Log.w("No valid user object for receive message " + toUser
-						+ "  " + fromUser);
-				toUser = new User(nToUserID);
-			}
-			if (fromUser == null) {
-				V2Log.w("No valid user object for receive message " + toUser
-						+ "  " + fromUser);
-				fromUser = new User(nFromUserID);
-			}
 
 			String uuid = XmlParser.parseForMessageUUID(szXmlText);
 
@@ -2220,8 +2208,8 @@ public class JNIService extends Service implements
 					intent.putExtra("transType", transType);
 					sendBroadcast(intent);
 				} else {
-					V2Log.e(TAG, "OnFileTransError updates failed , id : "
-							+ szFileID);
+//					V2Log.e(TAG, "OnFileTransError updates failed , id : "
+//							+ szFileID);
 				}
 				fileItem = null;
 			}

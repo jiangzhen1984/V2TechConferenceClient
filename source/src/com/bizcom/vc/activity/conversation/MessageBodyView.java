@@ -345,6 +345,7 @@ public class MessageBodyView extends LinearLayout {
 		TextView et = new TextView(this.getContext());
 		et.setOnClickListener(messageClickListener);
 		et.setBackgroundColor(Color.TRANSPARENT);
+		et.setTextColor(Color.BLACK);
 		et.setOnLongClickListener(messageLongClickListener);
 		et.setOnTouchListener(touchListener);
 		et.setSelected(false);

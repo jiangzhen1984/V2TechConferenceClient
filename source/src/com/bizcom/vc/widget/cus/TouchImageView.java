@@ -1,4 +1,5 @@
 package com.bizcom.vc.widget.cus;
+import java.io.IOException;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -6,6 +7,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -30,7 +32,8 @@ import android.widget.ImageView;
 import android.widget.OverScroller;
 import android.widget.Scroller;
 
-import com.bizcom.vc.application.GlobalConfig;
+import com.V2.jni.util.V2Log;
+import com.bizcom.util.BitmapUtil;
 
 public class TouchImageView extends ImageView {
 
@@ -924,50 +927,46 @@ public class TouchImageView extends ImageView {
         		animateToZoomBoundary = true;
         	}
         	
-        	int currentBmWidth = (int) getImageWidth();
-			int currentBmHeight = (int) getImageHeight();
-			if (lastScaleWidth < currentBmWidth || lastScaleHeight < currentBmHeight) {
-				lastScaleWidth = currentBmWidth;
-				lastScaleHeight = currentBmHeight;
-				if (!startDecode) {
-					new Thread(new Runnable() {
-
-						@Override
-						public void run() {
-							startDecode = true;
-							BitmapFactory.Options options = new BitmapFactory.Options();
-							options.inJustDecodeBounds = true;
-							options.inPreferredConfig = Config.RGB_565;
-							options.inDither = true;
-							BitmapFactory.decodeFile(filePath, options);
-							options.inJustDecodeBounds = false;
-							int widthScale = options.outWidth / lastScaleWidth;
-							int heightScale = options.outHeight
-									/ lastScaleHeight;
-							if (widthScale >= heightScale
-									&& options.outWidth > lastScaleWidth)
-								options.inSampleSize = widthScale;
-							else if (heightScale > widthScale
-									&& options.outHeight > lastScaleHeight)
-								options.inSampleSize = heightScale;
-							Bitmap bm = BitmapFactory.decodeFile(filePath,
-									options);
-
-							if (bm.getWidth() > GlobalConfig.BITMAP_MAX_SIZE
-									|| bm.getHeight() > GlobalConfig.BITMAP_MAX_SIZE) {
-								bm = Bitmap.createScaledBitmap(
-										bm,
-										bm.getWidth() > GlobalConfig.BITMAP_MAX_SIZE ? GlobalConfig.BITMAP_MAX_SIZE
-												: bm.getWidth(),
-										bm.getHeight() > GlobalConfig.BITMAP_MAX_SIZE ? GlobalConfig.BITMAP_MAX_SIZE
-												: bm.getHeight(), true);
-							}
-							Message.obtain(mHandler, SCALE_OPT, bm)
-									.sendToTarget();
-						}
-					}).start();
-				}
-			}
+//        	int currentBmWidth = (int) getImageWidth();
+//			int currentBmHeight = (int) getImageHeight();
+////			if ((lastScaleWidth < GlobalConfig.BITMAP_MAX_SIZE && 
+////					lastScaleHeight < GlobalConfig.BITMAP_MAX_SIZE) && 
+////					(lastScaleWidth < currentBmWidth || lastScaleHeight < currentBmHeight)) {
+//				if (lastScaleWidth < currentBmWidth || lastScaleHeight < currentBmHeight) {
+//				lastScaleWidth = currentBmWidth;
+//				lastScaleHeight = currentBmHeight;
+//				if (!startDecode) {
+//					new Thread(new Runnable() {
+//
+//						@Override
+//						public void run() {
+//							startDecode = true;
+//							BitmapFactory.Options options = new BitmapFactory.Options();
+//							options.inJustDecodeBounds = true;
+//							BitmapFactory.decodeFile(filePath, options);
+//							options.inJustDecodeBounds = false;
+//							options.inPreferredConfig = Config.ARGB_8888;
+//							options.inDither = true;
+//							options.inSampleSize = BitmapUtil.calculateSampleSize(options.outWidth, options.outHeight,
+//									(int) getImageWidth(),
+//									(int) getImageHeight());
+//							V2Log.e(DEBUG, " ----------------------- ");
+//							Bitmap unscaledBitmap = BitmapFactory.decodeFile(filePath, options);
+//							Bitmap scaledBitmap = BitmapUtil.createScaledBitmap(unscaledBitmap, 
+//									(int) getImageWidth(),
+//									(int) getImageHeight());
+//							V2Log.e(DEBUG, "current width size is : " + (int) getImageWidth());
+//							V2Log.e(DEBUG, "current height size is : " + (int) getImageHeight());
+//							V2Log.e(DEBUG, "create scaledBitmap size is : " + scaledBitmap.getWidth());
+//							V2Log.e(DEBUG, "create scaledBitmap size is : " + scaledBitmap.getHeight());
+//							V2Log.e(DEBUG, "options scale size is : " + options.inSampleSize);
+//							V2Log.e(DEBUG, " ----------------------- ");
+//							Message.obtain(mHandler, SCALE_OPT, scaledBitmap)
+//									.sendToTarget();
+//						}
+//					}).start();
+//				}
+//			}
         	
         	if (animateToZoomBoundary) {
 	        	DoubleTapZoom doubleTap = new DoubleTapZoom(targetZoom, viewWidth / 2, viewHeight / 2, true);

@@ -7,6 +7,7 @@
     <string name="common_networkIsDisconnection_retryPlease">当前网络不可用，请稍候再试。</string>
     <string name="common_networkConnection_timeout">连接服务器超时！</string>
     <string name="common_loading">正在加载&#8230;</string>
+    <string name="common_date_yesterday">昨天</string>
 
     <!-- MessageAuthenticationActivity -->
     <string name="messageAuthenticationActivity_message_youBecomeFriend">你们已成为了好友</string>
@@ -506,6 +507,7 @@
     <string name="receive_image_notification">发送图片!</string>
     <string name="receive_voice_notification">发送语音!</string>
     <string name="receive_file_notification">发送文件!</string>
+    <string name="receive_face_notification">[表情]</string>
     <string name="tab_contact_name">好友</string>
     <string name="tab_org_name">组织</string>
     <string name="tab_group_name">群组</string>

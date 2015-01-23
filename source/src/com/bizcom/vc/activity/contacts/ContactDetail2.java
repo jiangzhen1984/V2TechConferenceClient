@@ -28,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.request.BitmapManager;
@@ -40,7 +41,6 @@ import com.bizcom.vc.activity.MainActivity;
 import com.bizcom.vc.activity.contacts.add.AuthenticationActivity;
 import com.bizcom.vc.activity.contacts.add.FriendManagementActivity;
 import com.bizcom.vc.application.GlobalHolder;
-import com.bizcom.vc.application.MainApplication;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.service.JNIService;
@@ -48,8 +48,8 @@ import com.bizcom.vc.widget.MarqueeTextView;
 import com.bizcom.vo.ContactGroup;
 import com.bizcom.vo.Conversation;
 import com.bizcom.vo.Group;
-import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
+import com.bizcom.vo.User;
 import com.v2tech.R;
 
 public class ContactDetail2 extends Activity implements OnTouchListener {
@@ -104,8 +104,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private View mUpdateContactGroupButton;
 	private View mDeleteContactButton;
 
-	private boolean isUpdating;
-	private User currentUser;
 	private boolean isRelation;
 	private Group belongs;
 
@@ -164,7 +162,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
 				R.animator.alpha_from_1_to_0);
 
-		currentUser = GlobalHolder.getInstance().getCurrentUser();
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
 				GroupType.CONTACT.intValue());
 		for (Group group : friendGroup) {
@@ -217,9 +214,11 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
 		}
 		else{
-			isNeedUpdate = false;
-			Message m = Message.obtain(lh, UPDATE_USER_INFO);
-			lh.sendMessage(m);
+			if(isNeedUpdate){
+				isNeedUpdate = false;
+				Message m = Message.obtain(lh, UPDATE_USER_INFO);
+				lh.sendMessage(m);
+			}
 		}
 		super.onBackPressed();
 	}
@@ -589,12 +588,17 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 						UPDATE_USER_INFO_DONE, null));
 				break;
 			case UPDATE_USER_INFO_DONE:
-				// if (mContext != null) {
-				// Toast.makeText(mContext,
-				// R.string.contacts_user_detail_nick_name_updated,
-				// Toast.LENGTH_SHORT).show();
-				// }
-				isUpdating = false;
+				JNIResponse userRes = (JNIResponse) msg.obj;
+				if (userRes.getResult() == JNIResponse.Result.SUCCESS) {
+					V2Log.d("ContactDetail2 --> update user info SUCCESS! user name is : " + u.getName());
+					Intent intent = new Intent();
+					intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					intent.putExtra("modifiedUser", u.getmUserId());
+					sendBroadcast(intent);
+				} else {
+					V2Log.d("ContactDetail2 --> update user info TIME_OUT! user name is : " + u.getName());
+				}
 				break;
 			case DELETE_CONTACT_USER:
 				ProgressUtils.showNormalWithHintProgress(mContext, false);
@@ -653,8 +657,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			myBroadcastReceiver = new MyBroadcastReceiver();
 			IntentFilter intentFilter = new IntentFilter();
 			intentFilter
-					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE);
-			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -678,16 +680,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		public void onReceive(Context arg0, Intent arg1) {
 			String action = arg1.getAction();
 			if (action
-					.equals(JNIService.JNI_BROADCAST_USER_UPDATE_NAME_OR_SIGNATURE)) {
-				long uid = arg1.getLongExtra("uid", -1);
-				if (uid == -1) {
-					return;
-				}
-				if (uid == u.getmUserId()) {
-					showUserInfo();
-				}
-
-			} else if (action
 					.equals(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION)) {
 				long uid = arg1.getLongExtra("uid", -1);
 				if (uid == -1) {

@@ -106,9 +106,11 @@ import com.bizcom.vo.Group;
 import com.bizcom.vo.OrgGroup;
 import com.bizcom.vo.User;
 import com.bizcom.vo.VMessage;
+import com.bizcom.vo.VMessageAbstractItem;
 import com.bizcom.vo.VMessageQualification;
 import com.bizcom.vo.VMessageQualificationApplicationCrowd;
 import com.bizcom.vo.VMessageQualificationInvitationCrowd;
+import com.bizcom.vo.VMessageTextItem;
 import com.bizcom.vo.VideoBean;
 import com.bizcom.vo.ConversationFirendAuthenticationData.VerificationMessageType;
 import com.bizcom.vo.Group.GroupType;
@@ -1773,18 +1775,33 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	 */
 	private void removeConversation(long conversationID,
 			boolean isDeleteVerification) {
-		boolean flag = false;
 		for (int i = 0; i < mItemList.size(); i++) {
 			Conversation temp = mItemList.get(i).cov;
 			if (temp.getExtId() == conversationID) {
 				ScrollItem removeItem = mItemList.get(i);
+				//update readState
 				removeItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
 				updateUnreadConversation(removeItem);
-
-				flag = mItemList.remove(removeItem);
+				//remove item
+				ScrollItem removed = mItemList.remove(i);
+				if (removed == null)
+					V2Log.e(TAG, "Delete Conversation Failed...id is : "
+							+ conversationID);
+				
 				if (mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER) {
-					if (temp.getType() != Conversation.TYPE_VOICE_MESSAGE
-							&& temp.getType() != Conversation.TYPE_VERIFICATION_MESSAGE) {
+					if(temp.getType() == Conversation.TYPE_VERIFICATION_MESSAGE){
+						// -1 mean delete all messages
+						int friend = VerificationProvider
+								.deleteFriendVerificationMessage(-1);
+						int group = VerificationProvider
+								.deleteCrowdVerificationMessage(-1, -1);
+						if (friend + group > 0) {
+							V2Log.e(TAG,
+									"Successfully delete verification , update conversaton!");
+						}
+					} else if(temp.getType() == Conversation.TYPE_VOICE_MESSAGE){
+						MessageLoader.deleteVoiceMessage(-1);
+					} else {
 						// delete conversation
 						ConversationProvider.deleteConversation(mContext, temp);
 						// delete messages
@@ -1801,40 +1818,13 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 								" Successfully remove contact conversation , id is : "
 										+ conversationID);
 					}
-
-					if (temp.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
-						// -1 mean delete all messages
-						int friend = VerificationProvider
-								.deleteFriendVerificationMessage(-1);
-						int group = VerificationProvider
-								.deleteCrowdVerificationMessage(-1, -1);
-						if (friend + group > 0) {
-							V2Log.e(TAG,
-									"Successfully delete verification , update conversaton!");
-						}
-					}
-
-					if (temp.getType() == Conversation.TYPE_VOICE_MESSAGE) {
-						MessageLoader.deleteVoiceMessage(-1);
-					}
 				}
-				// Now , Department conversation is not show in crowd interface.
-				// else if (mCurrentTabFlag == V2GlobalEnum.GROUP_TYPE_CROWD) {
-				// For delete Department Conversation in Crowd Interface
-				// ConversationProvider.deleteConversation(mContext,
-				// conversation);
-				// V2Log.d(TAG,
-				// " Successfully remove crowd conversation , id is : " + id);
-				// }
+				//clear all system notification
 				Notificator.cancelSystemNotification(getActivity(),
 						PublicIntent.MESSAGE_NOTIFICATION_ID);
 				break;
 			}
 		}
-
-		if (!flag)
-			V2Log.e(TAG, "Delete Conversation Failed...id is : "
-					+ conversationID);
 
 		if (mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER
 				&& isDeleteVerification) {
@@ -1842,7 +1832,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 		sortAndUpdate();
 	}
-
+	
 	private void removeVerificationMessage(long id) {
 		// clear the crowd group all verification database messges
 		int friend = VerificationProvider.deleteFriendVerificationMessage(id);
@@ -1881,7 +1871,18 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			content = mContext.getResources().getString(
 					R.string.receive_file_notification);
 		} else {
-			content = vm.getAllTextContent();
+			StringBuilder sb = new StringBuilder();
+			for (VMessageAbstractItem item : vm.getItems()) {
+				if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
+					if (item.isNewLine() && sb.length() != 0) {
+						sb.append("\n");
+					}
+					sb.append(((VMessageTextItem) item).getText());
+				} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
+					sb.append(mContext.getResources().getString(R.string.receive_face_notification));
+				}
+			}
+			content = sb.toString();
 		}
 		Intent resultIntent = new Intent(
 				PublicIntent.START_CONVERSACTION_ACTIVITY);
@@ -3154,7 +3155,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(intent.getAction())) {
 				long confId = intent.getLongExtra("gid", 0);
 				// Remove conference conversation from list
-				removeConversation(confId, false);
+				removeConversation(confId , false);
 				// This broadcast is sent after create conference successfully
 			} else if (PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION
 					.equals(intent.getAction())) {

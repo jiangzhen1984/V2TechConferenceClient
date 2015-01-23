@@ -82,11 +82,13 @@ public class ConferenceMessageBodyView extends LinearLayout{
 	}
 
 	private void initData() {
+		senderTV.setTextColor(Color.BLUE);
 		senderTV.setText(this.mMsg.getFromUser().getName() + "  "
 				+ DateUtil.getStringDate(mMsg.getDate().getTime()));
 
 		TextView et = new TextView(this.getContext());
 		et.setBackgroundColor(Color.TRANSPARENT);
+		et.setTextColor(Color.BLACK);
 		et.setSelected(false);
 		et.setClickable(true);
 		et.setOnClickListener(new OnClickListener() {

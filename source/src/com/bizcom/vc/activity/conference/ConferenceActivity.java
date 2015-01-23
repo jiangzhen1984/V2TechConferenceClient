@@ -454,7 +454,7 @@ public class ConferenceActivity extends Activity {
 //			isMoveTaskBack = false;
 //		}
 //		isMoveTaskBack = true;
-		moveTaskToBack(true);
+//		moveTaskToBack(true);
 	}
 
 	private void initBroadcastReceiver() {

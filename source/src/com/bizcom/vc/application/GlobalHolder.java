@@ -3,7 +3,6 @@ package com.bizcom.vc.application;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,19 +18,18 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.bizcom.request.BitmapManager;
-import com.bizcom.request.BitmapManager.BitmapChangedListener;
 import com.bizcom.vo.AddFriendHistorieNode;
 import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.ContactGroup;
 import com.bizcom.vo.CrowdGroup;
+import com.bizcom.vo.CrowdGroup.AuthType;
 import com.bizcom.vo.DiscussionGroup;
 import com.bizcom.vo.FileDownLoadBean;
 import com.bizcom.vo.Group;
+import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.OrgGroup;
 import com.bizcom.vo.User;
 import com.bizcom.vo.UserDeviceConfig;
-import com.bizcom.vo.CrowdGroup.AuthType;
-import com.bizcom.vo.Group.GroupType;
 
 public class GlobalHolder {
 

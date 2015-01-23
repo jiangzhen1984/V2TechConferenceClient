@@ -130,12 +130,20 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
+		
+		if(mState == State.CREATEING) {
+			Toast.makeText(mContext, "已经在创建中！",
+					Toast.LENGTH_SHORT).show();
+			return ;
+		}
+		mState = State.CREATEING;
 
 		final String title = mConfTitleET.getText().toString().trim();
 		if (title == null || title.length() == 0) {
 			mConfTitleET
 					.setError(getString(R.string.error_conf_title_required));
 			mConfTitleET.requestFocus();
+			mState = State.DONE;
 			return;
 		}
 
@@ -144,6 +152,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 			mConfStartTimeET
 					.setError(getString(R.string.error_conf_start_time_required));
 			mConfStartTimeET.requestFocus();
+			mState = State.DONE;
 			return;
 		}
 
@@ -156,6 +165,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 			mConfStartTimeET
 					.setError(getString(R.string.error_conf_start_time_format_failed));
 			mConfStartTimeET.requestFocus();
+			mState = State.DONE;
 			return;
 		}
 
@@ -163,6 +173,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 			mConfStartTimeET
 					.setError(getString(R.string.error_conf_do_not_permit_create_piror_conf));
 			mConfStartTimeET.requestFocus();
+			mState = State.DONE;
 			return;
 		}
 
@@ -177,6 +188,8 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 				conf = new Conference(title, startTimeStr, null, userList);
 				Message.obtain(mLocalHandler, END_CREATE_OPERATOR)
 						.sendToTarget();
+				cs.createConference(conf, new MessageListener(mLocalHandler,
+						CREATE_CONFERENC_RESP, conf));
 			}
 		}).start();
 	}
@@ -370,6 +383,8 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 						&& mCreateWaitingDialog.isShowing()) {
 					mCreateWaitingDialog.dismiss();
 				}
+				
+				mState = State.DONE;
 
 				JNIResponse rccr = (JNIResponse) msg.obj;
 				Conference conference = (Conference) rccr.callerObject;
@@ -422,15 +437,6 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 				if (mWaitingDialog != null && mWaitingDialog.isShowing()) {
 					mWaitingDialog.dismiss();
 				}
-				break;
-			case END_CREATE_OPERATOR:
-				if (mCreateWaitingDialog != null
-						&& mCreateWaitingDialog.isShowing()) {
-					mCreateWaitingDialog.dismiss();
-				}
-
-				cs.createConference(conf, new MessageListener(mLocalHandler,
-						CREATE_CONFERENC_RESP, conf));
 				break;
 			}
 		}
