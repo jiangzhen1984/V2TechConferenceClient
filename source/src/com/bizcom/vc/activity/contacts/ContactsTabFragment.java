@@ -47,7 +47,7 @@ import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
-public class ContactsTabFragment extends Fragment {
+public class ContactsTabFragment extends Fragment implements TextWatcher {
 	public static final String TAG = "ContactsTabFragment";
 	private static final int FILL_CONTACTS_GROUP = 2;
 	private static final int UPDATE_GROUP_STATUS = 4;
@@ -232,6 +232,30 @@ public class ContactsTabFragment extends Fragment {
 
 	}
 
+	@Override
+	public void afterTextChanged(Editable s) {
+		if (mContactsContainer == null) {
+			return;
+		}
+		String str = s.toString();
+		if (TextUtils.isEmpty(str)) {
+			mContactsContainer.clearTextFilter();
+		} else {
+			mContactsContainer.setFilterText(str);
+		}
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+	}
+
 	private class MyBitmapChangedListener implements
 			BitmapManager.BitmapChangedListener {
 
@@ -378,10 +402,11 @@ public class ContactsTabFragment extends Fragment {
 
 				Message.obtain(mHandler, UPDATE_USER_SIGN, uid).sendToTarget();
 			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO
-					.equals(intent.getAction())){
+					.equals(intent.getAction())) {
 				long uid = intent.getLongExtra("uid", -1);
-				if(uid == -1 || uid != GlobalHolder.getInstance().getCurrentUserId())
-					return ;
+				if (uid == -1
+						|| uid != GlobalHolder.getInstance().getCurrentUserId())
+					return;
 				Message.obtain(mHandler, UPDATE_USER_SIGN, uid).sendToTarget();
 			}
 		}

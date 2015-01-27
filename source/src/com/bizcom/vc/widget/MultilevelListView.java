@@ -1,4 +1,5 @@
 package com.bizcom.vc.widget;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -34,8 +35,6 @@ import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.Group;
 import com.bizcom.vo.User;
 import com.v2tech.R;
-
-
 
 /**
  * Group List view wrapper.<br>
@@ -152,7 +151,7 @@ public class MultilevelListView extends ListView {
 		this.setOnItemLongClickListener(mItemLongClickListener);
 		this.setOnScrollListener(mLocalScrollListener);
 	}
-	
+
 	public void initCreateMode() {
 		setShowedCheckedBox(true);
 		setTextFilterEnabled(true);
@@ -225,7 +224,7 @@ public class MultilevelListView extends ListView {
 	 * @param us
 	 */
 	public void updateUserStatus(User user, User.Status us) {
-//		boolean sort = false;
+		// boolean sort = false;
 		for (int i = 0; i < mShowItemDataList.size(); i++) {
 			ItemData item = mShowItemDataList.get(i);
 			if (item instanceof GroupItemData
@@ -233,10 +232,12 @@ public class MultilevelListView extends ListView {
 				Group temp = ((GroupItemData) item).mGroup;
 				int start = calculateGroupStartIndex(temp);
 				int end = calculateGroupEnd(temp, i);
-				int pos = updateUserPosition(((GroupItemData) item), start, end,
-						user, us);
-				V2Log.d("GroupListView", user.getmUserId() + " the user "+ user.getName() +" add pos is : " + pos +
-						" state is : " + us.name() + " start : " + start + " - end : " + end);
+				int pos = updateUserPosition(((GroupItemData) item), start,
+						end, user, us);
+				V2Log.d("GroupListView", user.getmUserId() + " the user "
+						+ user.getName() + " add pos is : " + pos
+						+ " state is : " + us.name() + " start : " + start
+						+ " - end : " + end);
 			}
 		}
 		// Should always update status, because group need update statist
@@ -256,11 +257,11 @@ public class MultilevelListView extends ListView {
 		if (u == null) {
 			throw new NullPointerException("user is null");
 		}
-		
+
 		updateCheckItemWithoutNotification(u, flag);
 		adapter.notifyDataSetChanged();
 	}
-	
+
 	/**
 	 * Update all group's checked status of item
 	 * 
@@ -275,10 +276,10 @@ public class MultilevelListView extends ListView {
 		GroupItemData targetItem = (GroupItemData) getItem(group);
 		for (Group temp : mGroupList) {
 			checkBelongGroupAllChecked(temp, temp.getUsers());
-			if(!flag){
+			if (!flag) {
 				GroupItemData tempItem = (GroupItemData) getItem(temp);
-				if(tempItem.getLevel() < targetItem.getLevel() &&
-						temp.getChildGroup().contains(group)){
+				if (tempItem.getLevel() < targetItem.getLevel()
+						&& temp.getChildGroup().contains(group)) {
 					tempItem.setChecked(false);
 				}
 			}
@@ -324,11 +325,11 @@ public class MultilevelListView extends ListView {
 				}
 			}
 		}
-		
+
 		List<Group> childGroup = group.getChildGroup();
 		for (Group child : childGroup) {
 			ItemData childGroupItem = getItem(child);
-			if(childGroupItem.isChecked()){
+			if (childGroupItem.isChecked()) {
 				count = count + 1;
 			}
 		}
@@ -404,7 +405,7 @@ public class MultilevelListView extends ListView {
 
 					int pos = calculateIndex(startPos, endPos, user,
 							user.getmStatus());
-					//计算出的位置pos，是指的是被添加的item与该pos的item对比之后break的结果
+					// 计算出的位置pos，是指的是被添加的item与该pos的item对比之后break的结果
 					int replaceItem = pos;
 					Log.i(TAG, "组名 = " + group.getName() + " 组开始位置 = "
 							+ startPos + " ，组结束位置  = " + endPos + " 计算位置 = "
@@ -413,25 +414,28 @@ public class MultilevelListView extends ListView {
 						ItemData userItem = this.getItem(group, user);
 						User insertUser = ((User) userItem.getObject());
 						insertUser.updateStatus(user.getmStatus());
-						
-						//当只有一个默认好友分组，并且分组中没人成员，则第一次添加好友，会出现角标越界
-						if(replaceItem < mFilterList.size()){
-							ItemData itemData = mFilterList.get(replaceItem);
-							if(itemData instanceof UserItemData){
-								User replacedUser = ((User) itemData.getObject());
-								if(group.getUsers().contains(replacedUser)){
-									int result = replacedUser.compareTo(insertUser);
-									if(result < 0)
+
+						// 当只有一个默认好友分组，并且分组中没人成员，则第一次添加好友，会出现角标越界
+						if (replaceItem < mShowItemDataList.size()) {
+							ItemData itemData = mShowItemDataList
+									.get(replaceItem);
+							if (itemData instanceof UserItemData) {
+								User replacedUser = ((User) itemData
+										.getObject());
+								if (group.getUsers().contains(replacedUser)) {
+									int result = replacedUser
+											.compareTo(insertUser);
+									if (result < 0)
 										pos++;
 								}
-							} 
+							}
 						}
-						
+
 						Log.i(TAG, "组名 = " + group.getName() + " 组开始位置 = "
-								+ startPos + " ，组结束位置  = " + endPos + " ,插入位置 = "
-								+ pos);
-						
-						if(pos >= mShowItemDataList.size()){
+								+ startPos + " ，组结束位置  = " + endPos
+								+ " ,插入位置 = " + pos);
+
+						if (pos >= mShowItemDataList.size()) {
 							mShowItemDataList.add(userItem);
 						} else {
 							if (pos == 0 && mShowItemDataList.size() == 1)
@@ -548,7 +552,7 @@ public class MultilevelListView extends ListView {
 				GroupItemData groupItem = (GroupItemData) getItem(g);
 				if (!groupItem.isExpanded) {
 					int pos = getGroupItemPos(groupItem);
-					if (pos != -1){
+					if (pos != -1) {
 						groupItem.isExpanded = true;
 						expand(groupItem, pos);
 					}
@@ -597,7 +601,7 @@ public class MultilevelListView extends ListView {
 	private void updateCheckItemWithoutNotification(User u, boolean flag) {
 		Set<ItemData> itemDataSet = mUserItemListMap.get(u.getmUserId());
 		if (itemDataSet == null || itemDataSet.size() <= 0) {
-			if(itemDataSet == null)
+			if (itemDataSet == null)
 				itemDataSet = new HashSet<MultilevelListView.ItemData>();
 			Set<Group> belongsGroup = u.getBelongsGroup();
 			Iterator<Group> iterator = belongsGroup.iterator();
@@ -647,16 +651,16 @@ public class MultilevelListView extends ListView {
 	 * @param newSt
 	 * @return
 	 */
-	private int updateUserPosition(GroupItemData gitem, int gstart,
-			int gend, User user, User.Status newSt) {
-		if(gend >= mShowItemDataList.size())
+	private int updateUserPosition(GroupItemData gitem, int gstart, int gend,
+			User user, User.Status newSt) {
+		if (gend >= mShowItemDataList.size())
 			gend = mShowItemDataList.size() - 1;
 		int pos = -1;
 		int start = gstart;
 		int end = gend;
 
-			
-		while (start < end && end < mShowItemDataList.size() && mShowItemDataList.size() > start) {
+		while (start < end && end < mShowItemDataList.size()
+				&& mShowItemDataList.size() > start) {
 			ItemData item = mShowItemDataList.get(start);
 			ItemData endItem = mShowItemDataList.get(end);
 
@@ -713,9 +717,9 @@ public class MultilevelListView extends ListView {
 			Group currentGroup = (Group) gitem.getObject();
 			int startPos = calculateGroupStartIndex(currentGroup);
 			int endPos = gend;
-//			int startPos = gstart;
-//			 end = gend - 1;
-//			int endPos = gend;
+			// int startPos = gstart;
+			// end = gend - 1;
+			// int endPos = gend;
 
 			// remove current status
 			ItemData origin = mShowItemDataList.remove(pos);
@@ -732,7 +736,7 @@ public class MultilevelListView extends ListView {
 		}
 		return pos;
 	}
-	
+
 	/**
 	 * Calculate end index of current group
 	 * 
@@ -767,8 +771,8 @@ public class MultilevelListView extends ListView {
 		groupEnd += getExpandGroupSize(group.getChildGroup());
 		return groupEnd;
 	}
-	
-	public int calculateAddGroupEndIndex(Group group , int startIndex){
+
+	public int calculateAddGroupEndIndex(Group group, int startIndex) {
 		int groupEnd = startIndex + group.getUsers().size();
 		return groupEnd - 1;
 	}
@@ -783,7 +787,7 @@ public class MultilevelListView extends ListView {
 		int startPos = itemStartPos + getExpandGroupSize(group.getChildGroup());
 		return startPos + 1;
 	}
-	
+
 	public int calculateAddGroupStartIndex(Group group) {
 		GroupItemData item = (GroupItemData) getItem(group);
 		int itemStartPos = getGroupItemPos(item);
@@ -841,37 +845,39 @@ public class MultilevelListView extends ListView {
 	 */
 	private int calculateIndex(int start, int end, User user, User.Status ust) {
 		int pos = -1;
-		if (start < 0 || start > mShowItemDataList.size() || end > mShowItemDataList.size()) {
+		if (start < 0 || start > mShowItemDataList.size()
+				|| end > mShowItemDataList.size()) {
 			return -1;
 		}
 
 		// If start equal list size, return position of end group
-		if (start == mShowItemDataList.size() && end == mShowItemDataList.size()) {
+		if (start == mShowItemDataList.size()
+				&& end == mShowItemDataList.size()) {
 			return start;
 		} else if (start == end) {
 			return end;
-		} 
-		
+		}
+
 		while (start <= end) {
 			pos = start;
-			if (start == mShowItemDataList.size()){
+			if (start == mShowItemDataList.size()) {
 				ItemData lastItem = mShowItemDataList.get(start - 1);
 				User lastUser = (User) ((UserItemData) lastItem).getObject();
-				boolean result = compareUserSort(user , lastUser , ust);
-				if(result){
+				boolean result = compareUserSort(user, lastUser, ust);
+				if (result) {
 					pos = pos - 1;
 				}
 				break;
 			}
-			
+
 			ItemData item = mShowItemDataList.get(start++);
 			if (item instanceof GroupItemData) {
 				continue;
 			}
 			User u = (User) ((UserItemData) item).getObject();
 			// if item is current user, always sort after current user
-			boolean result = compareUserSort(user , u , ust);
-			if(result)
+			boolean result = compareUserSort(user, u, ust);
+			if (result)
 				break;
 			else
 				continue;
@@ -879,22 +885,25 @@ public class MultilevelListView extends ListView {
 
 		return pos;
 	}
-	
+
 	/**
 	 * continue is false , break is true
+	 * 
 	 * @param comparedUser
 	 * @param beComparedUser
 	 * @param compUserStus
 	 * @return
 	 */
-	private boolean compareUserSort(User comparedUser , User beComparedUser , User.Status compUserStus){
+	private boolean compareUserSort(User comparedUser, User beComparedUser,
+			User.Status compUserStus) {
 		if (beComparedUser == null
 				|| beComparedUser.getmUserId() == GlobalHolder.getInstance()
 						.getCurrentUserId()) {
 			return false;
 		}
 
-		if (compUserStus == User.Status.ONLINE || compUserStus == User.Status.BUSY
+		if (compUserStus == User.Status.ONLINE
+				|| compUserStus == User.Status.BUSY
 				|| compUserStus == User.Status.DO_NOT_DISTURB
 				|| compUserStus == User.Status.LEAVE) {
 			if ((beComparedUser.getmStatus() == User.Status.ONLINE
@@ -906,8 +915,10 @@ public class MultilevelListView extends ListView {
 			} else {
 				return true;
 			}
-		} else if (compUserStus == User.Status.OFFLINE || compUserStus == User.Status.HIDDEN) {
-			if ((beComparedUser.getmStatus() == User.Status.OFFLINE || beComparedUser.getmStatus() == User.Status.HIDDEN)
+		} else if (compUserStus == User.Status.OFFLINE
+				|| compUserStus == User.Status.HIDDEN) {
+			if ((beComparedUser.getmStatus() == User.Status.OFFLINE || beComparedUser
+					.getmStatus() == User.Status.HIDDEN)
 					&& comparedUser.compareTo(beComparedUser) > 0) {
 				return false;
 			} else if (beComparedUser.getmStatus() != User.Status.OFFLINE
@@ -1488,17 +1499,18 @@ public class MultilevelListView extends ListView {
 
 		@Override
 		public int compareTo(ItemData another) {
-			if(another == null || another.getObject() == null)
+			if (another == null || another.getObject() == null)
 				return -1;
-			
+
 			if (another instanceof UserItemData) {
 				User anotherUser = (User) another.getObject();
-				boolean result = compareUserSort(anotherUser, mUser, anotherUser.getmStatus());
-				if(result)
+				boolean result = compareUserSort(anotherUser, mUser,
+						anotherUser.getmStatus());
+				if (result)
 					return 1;
-				else 
+				else
 					return -1;
-			} else 
+			} else
 				return 1;
 		}
 
@@ -1636,12 +1648,13 @@ public class MultilevelListView extends ListView {
 		private void updateUserItem() {
 			User u = ((User) ((UserItemData) mItem).getObject());
 			u = GlobalHolder.getInstance().getUser(u.getmUserId());
-//			if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
-//				if (TextUtils.isEmpty(u.getName()))
-//					throw new RuntimeException(
-//							"所有用户信息已获取完毕，但该用户空名：id is --> "
-//									+ u.getmUserId());
-//			}
+			// if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded())
+			// {
+			// if (TextUtils.isEmpty(u.getName()))
+			// throw new RuntimeException(
+			// "所有用户信息已获取完毕，但该用户空名：id is --> "
+			// + u.getmUserId());
+			// }
 
 			ImageView mPhotoIV = (ImageView) mRoot.findViewById(R.id.user_img);
 			if (u.getAvatarBitmap() != null) {
@@ -1649,7 +1662,7 @@ public class MultilevelListView extends ListView {
 			} else {
 				mPhotoIV.setImageResource(R.drawable.avatar);
 			}
-			
+
 			TextView mUserNameTV = (TextView) mRoot
 					.findViewById(R.id.user_name);
 			boolean isFriend = GlobalHolder.getInstance().isFriend(u);
@@ -1667,17 +1680,17 @@ public class MultilevelListView extends ListView {
 					.findViewById(R.id.user_signature);
 			mUserSignatureTV.setText(u.getSignature() == null ? "" : u
 					.getSignature());
-//			mUserSignatureTV.setSingleLine(true);
-//			mUserSignatureTV.setEllipsize(TruncateAt.END);
-			
+			// mUserSignatureTV.setSingleLine(true);
+			// mUserSignatureTV.setEllipsize(TruncateAt.END);
+
 			updateUserStatus(u.getDeviceType(), u.getmStatus());
-			
+
 			if (mCBFlag) {
 				mCb = (CheckBox) mRoot.findViewById(R.id.user_check_view);
 				mCb.setVisibility(View.VISIBLE);
 				mCb.setChecked(mItem.isChecked());
 				mCb.setOnClickListener(mCheckBoxListener);
-				
+
 			} else {
 				mRoot.findViewById(R.id.user_check_view).setVisibility(
 						View.GONE);

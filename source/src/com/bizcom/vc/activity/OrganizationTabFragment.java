@@ -2,6 +2,7 @@ package com.bizcom.vc.activity;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,10 +13,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.bo.UserStatusObject;
@@ -30,7 +35,7 @@ import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
-public class OrganizationTabFragment extends Fragment{
+public class OrganizationTabFragment extends Fragment implements TextWatcher{
 
 	private static final int FILL_CONTACTS_GROUP = 2;
 	private static final int UPDATE_GROUP_STATUS = 4;
@@ -148,6 +153,31 @@ public class OrganizationTabFragment extends Fragment{
 		}
 		new AsyncTaskLoader().execute();
 	}
+	
+	@Override
+	public void afterTextChanged(Editable s) {
+		if (mContactsContainer == null) {
+			return;
+		}
+		String str = s.toString();
+		if (TextUtils.isEmpty(str)) {
+			mContactsContainer.clearTextFilter();
+		} else {
+			mContactsContainer.setFilterText(str);
+		}
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+	}
+	
 
 	private Object mLock = new Object();
 
