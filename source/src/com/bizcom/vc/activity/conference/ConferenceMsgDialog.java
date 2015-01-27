@@ -213,13 +213,13 @@ public class ConferenceMsgDialog extends Dialog {
 				acceptButton.setVisibility(View.GONE);
 				rejectButton.setVisibility(View.GONE);
 				state.setVisibility(View.VISIBLE);
-				state.setText("已同意");
+				state.setText(R.string.conference_state_access);
 				break;
 			case listViewItemData.STATE_REJECT:
 				acceptButton.setVisibility(View.GONE);
 				rejectButton.setVisibility(View.GONE);
 				state.setVisibility(View.VISIBLE);
-				state.setText("已拒绝");
+				state.setText(R.string.conference_state_reject);
 				break;
 			}
 

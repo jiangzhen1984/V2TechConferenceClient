@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import v2av.CaptureCapability;
 import v2av.VideoCaptureDevInfo;
@@ -450,10 +451,10 @@ public class ConferenceActivity extends Activity {
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
-//		if(isMoveTaskBack){
-//			isMoveTaskBack = false;
-//		}
-//		isMoveTaskBack = true;
+		// if(isMoveTaskBack){
+		// isMoveTaskBack = false;
+		// }
+		// isMoveTaskBack = true;
 //		moveTaskToBack(true);
 	}
 
@@ -473,7 +474,7 @@ public class ConferenceActivity extends Activity {
 		filter.addAction(JNIService.JNI_BROADCAST_USER_STATUS_NOTIFICATION);
 		filter.addAction(Intent.ACTION_USER_PRESENT);
 		filter.addAction(Intent.ACTION_HEADSET_PLUG);
-	    filter.addAction(Intent.ACTION_SCREEN_OFF);  
+		filter.addAction(Intent.ACTION_SCREEN_OFF);
 		filter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED);
 		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO);
 		filter.addAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO);
@@ -951,7 +952,8 @@ public class ConferenceActivity extends Activity {
 		if (requestCode == SUB_ACTIVITY_CODE_SHARE_DOC
 				&& resultCode != Activity.RESULT_CANCELED) {
 			if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_NOT) {
-				Toast.makeText(this, "主讲权已被取消，共享失败", Toast.LENGTH_LONG).show();
+				Toast.makeText(this, R.string.conference_toast_sharing_failed,
+						Toast.LENGTH_LONG).show();
 				return;
 			}
 			String filePath = data.getStringExtra("checkedImage");
@@ -1048,9 +1050,9 @@ public class ConferenceActivity extends Activity {
 				if (conf.getChairman() == GlobalHolder.getInstance()
 						.getCurrentUserId()
 						|| currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
-					((VideoDocLayout) content).requestShowSharedButton(true);
+					((VideoDocLayout) content).updateLectureStateGranted(true);
 				} else {
-					((VideoDocLayout) content).requestShowSharedButton(false);
+					((VideoDocLayout) content).updateLectureStateGranted(false);
 				}
 
 			} else if (v.getTag().equals("invition")) {
@@ -1366,7 +1368,8 @@ public class ConferenceActivity extends Activity {
 								showConferenceMsgDialog();
 							} else {
 								Toast.makeText(ConferenceActivity.this,
-										"您当前没有会议消息", Toast.LENGTH_SHORT).show();
+										R.string.conference_toast_no_meeting,
+										Toast.LENGTH_SHORT).show();
 							}
 						}
 
@@ -1650,7 +1653,7 @@ public class ConferenceActivity extends Activity {
 				// from VideoMsgChattingLayout 聊天打开图片
 				isMoveTaskBack = false;
 			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-				
+
 			} else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
 
 			} else if (Intent.ACTION_HEADSET_PLUG.equals(intent.getAction())) {
@@ -1910,7 +1913,7 @@ public class ConferenceActivity extends Activity {
 
 				}
 
-			} 
+			}
 		}
 	};
 
@@ -2215,10 +2218,10 @@ public class ConferenceActivity extends Activity {
 			mSettingWindow.dismiss();
 		}
 
-//		if (!isMoveTaskBack) {
-//			isMoveTaskBack = true;
-//		else
-//			moveTaskToBack(true);
+		// if (!isMoveTaskBack) {
+		// isMoveTaskBack = true;
+		// else
+		// moveTaskToBack(true);
 	}
 
 	/**
@@ -3279,7 +3282,8 @@ public class ConferenceActivity extends Activity {
 		public void OnAttendeeClicked(Attendee at, UserDeviceConfig udc) {
 
 			if (isSyn) {
-				Toast.makeText(getApplicationContext(), "主席正在同步视频",
+				Toast.makeText(getApplicationContext(),
+						R.string.conference_toast_chairman_synchronous_video,
 						Toast.LENGTH_LONG).show();
 				Log.i("20141220 3", "主席正在同步视频"
 						+ Thread.currentThread().getName());
@@ -3383,7 +3387,34 @@ public class ConferenceActivity extends Activity {
 
 		@Override
 		public void requestShareDocClose(View v) {
+			V2Doc preV2Doc=null;
+			V2Doc nextV2Doc=null;
+			boolean finded=false;
+			for (Entry<String, V2Doc> e : mDocs.entrySet()) {
+				if(finded){
+					nextV2Doc=e.getValue();
+					break;
+				}
+				if (e.getValue().getId() == mCurrentLecturerActivateDocId) {
+					finded=true;
+				}
+				preV2Doc=e.getValue();
+				
+			}
+			
+			if(nextV2Doc!=null){
+				mDocContainer.updateCurrentDoc(nextV2Doc);
+				mDocContainer.updateCurrentDoc();
+				
+			}else{
+				if(preV2Doc!=null){
+					mDocContainer.updateCurrentDoc(preV2Doc);
+					mDocContainer.updateCurrentDoc();
+				}
+			}
+			
 			cb.closeShareDoc(conf, mCurrentLecturerActivateDocId);
+			
 		}
 	}
 
@@ -3421,7 +3452,9 @@ public class ConferenceActivity extends Activity {
 						RelativeLayout.LayoutParams.MATCH_PARENT,
 						RelativeLayout.LayoutParams.MATCH_PARENT));
 				TextView tv = new TextView(mContext);
-				tv.setText(at.getAttName());
+				tv.setText(getResources().getString(
+						R.string.vo_attendee_mixed_device_mix_video)
+						+ at.getAttName());
 				int widthDP = DensityUtils.dip2px(mContext, 80);
 				tv.setMaxWidth(widthDP);
 				tv.setEllipsize(TruncateAt.END);
@@ -3717,9 +3750,9 @@ public class ConferenceActivity extends Activity {
 
 						if (mDocContainer != null) {
 							if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
-								mDocContainer.requestShowSharedButton(true);
+								mDocContainer.updateLectureStateGranted(true);
 							} else {
-								mDocContainer.requestShowSharedButton(false);
+								mDocContainer.updateLectureStateGranted(false);
 							}
 							mDocContainer
 									.updateSyncStatus(isSyn

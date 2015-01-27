@@ -38,8 +38,6 @@ import com.bizcom.request.UserService;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.util.ProgressUtils;
 import com.bizcom.vc.activity.MainActivity;
-import com.bizcom.vc.activity.contacts.add.AuthenticationActivity;
-import com.bizcom.vc.activity.contacts.add.FriendManagementActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
@@ -282,23 +280,25 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					switch (u.getAuthtype()) {
 					case 0:
 						i.setClass(ContactDetail2.this,
-								FriendManagementActivity.class);
+								InputRemarkActivity.class);
 						i.putExtra("uid", mUid);
 						i.putExtra("cause", "ContactDetail2");
 						ContactDetail2.this.startActivity(i);
 						break;
 					case 1:
 						i.setClass(ContactDetail2.this,
-								AuthenticationActivity.class);
+								InputAuthenticationActivity.class);
 						i.putExtra("uid", mUid);
 						ContactDetail2.this.startActivity(i);
 						break;
 					case 2:
-						Toast.makeText(ContactDetail2.this, "对方不允许加为好友",
+						Toast.makeText(ContactDetail2.this,
+								R.string.contacts_detail2_refused_add,
 								Toast.LENGTH_SHORT).show();
 						break;
 					default:
-						Toast.makeText(ContactDetail2.this, "对方不允许加为好友",
+						Toast.makeText(ContactDetail2.this,
+								R.string.contacts_detail2_refused_add,
 								Toast.LENGTH_SHORT).show();
 						break;
 					}
@@ -317,7 +317,9 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 						.getInstance().isServerConnected()) {
 					showDeleteContactDialog();
 				} else {
-					Toast.makeText(ContactDetail2.this, "无法连接到服务器，请确认网络连接",
+					Toast.makeText(
+							ContactDetail2.this,
+							R.string.contacts_detail2_confirm_network_connection,
 							Toast.LENGTH_SHORT).show();
 				}
 			}
@@ -544,7 +546,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		@Override
 		public void onClick(View view) {
 			Intent i = new Intent();
-			i.setClass(mContext, UpdateContactGroupActivity.class);
+			i.setClass(mContext, SelectJionGroupActivity.class);
 			i.putExtra("uid", u.getmUserId());
 			i.putExtra("gid", belongs.getmGId());
 			startActivityForResult(i, REQUEST_UPDATE_GROUP_CODE);
@@ -554,7 +556,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (requestCode == REQUEST_UPDATE_GROUP_CODE) {
-			if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_DONE) {
+			if (resultCode == SelectJionGroupActivity.SELECT_GROUP_RESPONSE_CODE_DONE) {
 				if (data != null) {
 					String selectGroupName = data.getStringExtra("groupName");
 					long selectGroupID = data.getLongExtra("groupID", 0);
@@ -567,7 +569,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 							PublicIntent.BROADCAST_REQUEST_UPDATE_CONTACTS_GROUP);
 					ContactDetail2.this.sendBroadcast(intent);
 				}
-			} else if (resultCode == UpdateContactGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL) {
+			} else if (resultCode == SelectJionGroupActivity.SELECT_GROUP_RESPONSE_CODE_CANCEL) {
 			}
 		}
 
@@ -697,7 +699,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 					}
 					isRelation = true;
 					updateContactGroup();
-					Toast.makeText(ContactDetail2.this, "添加成功",
+					Toast.makeText(ContactDetail2.this,
+							R.string.contacts_detail2_added_successfully,
 							Toast.LENGTH_SHORT).show();
 
 					// update user info

@@ -28,8 +28,8 @@ import android.widget.ListAdapter;
 import com.bizcom.vc.adapter.CreateConfOrCrowdAdapter;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.V2GlobalConstants;
-import com.bizcom.vc.widget.GroupListView;
-import com.bizcom.vc.widget.GroupListView.ItemData;
+import com.bizcom.vc.widget.MultilevelListView;
+import com.bizcom.vc.widget.MultilevelListView.ItemData;
 import com.bizcom.vo.Conference;
 import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.Group;
@@ -52,7 +52,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 	private EditText searchedTextET;
 	// private ListView mContactsContainer;
-	private GroupListView mGroupListView;
+	private MultilevelListView mGroupListView;
 	private EditText mConfTitleET;
 	private EditText mConfStartTimeET;
 	private View mInvitionButton;
@@ -88,7 +88,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.video_invition_attendee_layout, null, false);
 
-		mGroupListView = (GroupListView) view
+		mGroupListView = (MultilevelListView) view
 				.findViewById(R.id.conf_create_contacts_list);
 		mGroupListView.setShowedCheckedBox(true);
 		mGroupListView.setTextFilterEnabled(true);
@@ -208,7 +208,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 
 	};
 
-	private GroupListView.GroupListViewListener mListener = new GroupListView.GroupListViewListener() {
+	private MultilevelListView.MultilevelListViewListener mListener = new MultilevelListView.MultilevelListViewListener() {
 
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,

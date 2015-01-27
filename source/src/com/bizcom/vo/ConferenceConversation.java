@@ -1,5 +1,7 @@
 package com.bizcom.vo;
 
+import com.v2tech.R;
+
 
 
 public class ConferenceConversation extends Conversation {
@@ -29,7 +31,7 @@ public class ConferenceConversation extends Conversation {
 		if (g != null) {
 			User u = g.getOwnerUser();
 			// TODO need use localization
-			return u == null ? "" : "创建人:" + u.getName();
+			return u == null ? "" : u.getName();
 		}
 		return super.getMsg();
 	}

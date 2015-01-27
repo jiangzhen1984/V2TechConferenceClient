@@ -3,6 +3,8 @@ package com.bizcom.vo;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.v2tech.R;
+
 
 public class AttendeeMixedDevice extends Attendee {
 
@@ -58,7 +60,7 @@ public class AttendeeMixedDevice extends Attendee {
 
 	@Override
 	public String getAttName() {
-		return "混合视频  (" + mv.getWidth() + "  x " + mv.getHeight() + ")";
+		return mv.getWidth() + "  x " + mv.getHeight() + ")";
 	}
 	
 	@Override

@@ -24,8 +24,8 @@ import com.bizcom.vc.adapter.CommonCreateAdapter;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.service.JNIService;
-import com.bizcom.vc.widget.GroupListView;
-import com.bizcom.vc.widget.GroupListView.ItemData;
+import com.bizcom.vc.widget.MultilevelListView;
+import com.bizcom.vc.widget.MultilevelListView.ItemData;
 import com.bizcom.vc.widget.cus.SearchEditText;
 import com.bizcom.vo.Group;
 import com.bizcom.vo.NetworkStateCode;
@@ -63,7 +63,7 @@ public abstract class BaseCreateActivity extends Activity {
 	protected View customLayout;
 	
 	protected AdapterView<ListAdapter> mAttendeeContainer;
-	protected GroupListView mGroupListView;
+	protected MultilevelListView mGroupListView;
 	protected CommonCreateAdapter mAdapter;
 
 	protected LocalBaseReceiver localBroadcast;
@@ -87,7 +87,7 @@ public abstract class BaseCreateActivity extends Activity {
 	}
 
 	private void initBase() {
-		mGroupListView = (GroupListView) findViewById(R.id.ws_common_create_group_list_view);
+		mGroupListView = (MultilevelListView) findViewById(R.id.ws_common_create_group_list_view);
 		mGroupListView.initCreateMode();
 		mGroupListView.setListener(listViewListener);
 
@@ -260,7 +260,7 @@ public abstract class BaseCreateActivity extends Activity {
 		}
 	};
 
-	private GroupListView.GroupListViewListener listViewListener = new GroupListView.GroupListViewListener() {
+	private MultilevelListView.MultilevelListViewListener listViewListener = new MultilevelListView.MultilevelListViewListener() {
 
 		@Override
 		public void onItemClicked(AdapterView<?> parent, View view,

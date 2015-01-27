@@ -129,7 +129,9 @@ public class GroupLayout extends LinearLayout {
 			throw new RuntimeException("the invalid conversation type :"
 					+ mConv.getType());
 		}
-		mGroupOwnerTV.setText(mConv.getMsg());
+		mGroupOwnerTV.setText(getResources().getString(
+				R.string.vo_conference_crowd_conversation_creation)
+				+ mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
 	}
@@ -239,9 +241,11 @@ public class GroupLayout extends LinearLayout {
 
 		if (isFriend && !TextUtils.isEmpty(nickName)) {
 			V2Log.d(TAG, "updateName ---> Update NickName successfully!");
-			mGroupOwnerTV.setText("创建人:" + nickName);
+			mGroupOwnerTV.setText(R.string.conference_groupLayout_creation
+					+ nickName);
 		} else {
-			mGroupOwnerTV.setText("创建人:" + currentUser.getName());
+			mGroupOwnerTV.setText(R.string.conference_groupLayout_creation
+					+ currentUser.getName());
 		}
 	}
 
@@ -258,7 +262,9 @@ public class GroupLayout extends LinearLayout {
 			mConNameTV.setText(mConv.getName());
 			mGroupNameTV.setText(mConv.getName());
 		}
-		mGroupOwnerTV.setText(mConv.getMsg());
+		mGroupOwnerTV.setText(getResources().getString(
+				R.string.vo_conference_crowd_conversation_creation)
+				+ mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());
 	}
 

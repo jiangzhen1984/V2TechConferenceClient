@@ -3,7 +3,6 @@ package com.bizcom.vo;
 import com.bizcom.util.DateUtil;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vo.Group.GroupType;
-
 import java.util.Date;
 
 public class DepartmentConversation extends Conversation {
@@ -41,7 +40,7 @@ public class DepartmentConversation extends Conversation {
 			if (departmentGroup != null) {
 				User u = departmentGroup.getOwnerUser();
 				// TODO need use localization
-				return u == null ? "" : "创建人:" + u.getName();
+				return u == null ? "" :  u.getName();
 			}
 			return msg;
 		}

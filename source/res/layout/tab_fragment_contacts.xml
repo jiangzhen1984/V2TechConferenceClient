@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent" >
 
-        <com.bizcom.vc.widget.GroupListView
+        <com.bizcom.vc.widget.MultilevelListView
             android:id="@+id/contacts_container"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
@@ -19,7 +19,7 @@
             android:scrollingCache="false"
             android:cacheColorHint="#00000000"
             android:background="@color/confs_group_list_bg" >
-        </com.bizcom.vc.widget.GroupListView>
+        </com.bizcom.vc.widget.MultilevelListView>
     </RelativeLayout>
 
 </LinearLayout>

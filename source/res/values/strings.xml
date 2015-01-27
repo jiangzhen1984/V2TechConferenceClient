@@ -9,6 +9,10 @@
     <string name="common_loading">正在加载&#8230;</string>
     <string name="common_date_yesterday">昨天</string>
 
+    <!-- CrowdApplicantDetailActivity -->
+    <string name="crowdApplicantDetailActivity_additional_msg">附加消息: </string>
+    <string name="crowdApplicantDetailActivity_nothing">无</string>
+
     <!-- MessageAuthenticationActivity -->
     <string name="messageAuthenticationActivity_message_youBecomeFriend">你们已成为了好友</string>
     <string name="messageAuthenticationActivity_message_refuseYourFriendRequests">拒绝了你的好友申请</string>
@@ -207,6 +211,20 @@
     <string name="contacts_delete_net_failed"> 网络不佳，删除好友失败</string>
     <string name="contacts_delete_failed">删除好友失败</string>
     <string name="contacts_user_detail_file_selection_not_found_path">没有获取到文件路径， 请使用系统的文件选择程序!</string>
+    <string name="contacts_detail2_refused_add">对方不允许加为好友</string>
+    <string name="contacts_detail2_confirm_network_connection">无法连接到服务器，请确认网络连接</string>
+    <string name="contacts_detail2_added_successfully">添加成功</string>
+    <string name="contacts_update_group_add_friends">添加好友</string>
+    <string name="contacts_update_group_back">@string/select_file_title_entry</string>
+    <string name="contacts_voice_message_toast_select_removed">请选择要删除的对象</string>
+    <string name="contacts_voice_message_toast_reload">加载发生异常，请重新加载</string>
+    <string name="contacts_voice_message_voice">[语音] </string>
+    <string name="contacts_voice_message_video">[视频] </string>
+    <string name="contacts_voice_message_detail_get_information_failed">获取用户信息失败</string>
+
+    <!-- activity_contacts_add -->
+    <string name="contacts_authentication_complete">完成</string>
+    <string name="contacts_authentication_next">下一步</string>
     <!-- select send file -->
     <string name="select_file_title_return">上一级</string>
     <string name="select_file_title_entry">返回</string>
@@ -247,6 +265,30 @@
     <string name="conversation_quit_dialog_confirm_text">确定</string>
     <string name="conversation_quit_dialog_cancel_text">取消</string>
     <string name="conversation_no_network_notification">当前网络不可用，请稍候再试!</string>
+    <string name="conversation_select_file_chosen">已选</string>
+    <string name="conversation_select_file_send">发送(</string>
+    <string name="conversation_select_file_brackets">)</string>
+    <string name="conversation_select_file_picture">图片</string>
+    <string name="conversation_select_file_files">文件</string>
+    <string name="conversation_select_file_upload_file">上传文件</string>
+    <string name="conversation_select_file_backup">@string/group_create_cancel</string>
+    <string name="conversation_select_file_upper_level">上一级</string>
+    <string name="conversation_select_file_picture_anomaly">选择图片异常，请重新打开</string>
+    <string name="conversation_select_file_determine">@string/group_create_confirm</string>
+    <string name="conversation_select_file_empty_file">为空文件，无法发送，请重新选择。</string>
+    <string name="conversation_select_file_selected">已选0.0K</string>
+    <string name="conversation_select_file_send_out">发送( 0 )</string>
+    <string name="conversation_select_file_limit_number">上传或下载的文件最多不能超过5个</string>
+    <string name="conversation_select_file_entry_chosen">@string/conversation_select_file_chosen</string>
+    <string name="conversation_select_file_entry_send">@string/conversation_select_file_send</string>
+    <string name="conversation_select_file_entry_brackets">@string/conversation_select_file_brackets</string>
+    <string name="conversation_select_file_entry_selected">@string/conversation_select_file_selected</string>
+    <string name="conversation_select_file_entry_send_out">@string/conversation_select_file_send_out</string>
+    <string name="conversation_select_file_entry_picture">@string/conversation_select_file_picture</string>
+    <string name="conversation_select_file_entry_pictures_limited">图片大小超过了3m无法发送</string>
+    <string name="conversation_select_file_entry_picture_anomaly">@string/conversation_select_file_picture_anomaly</string>
+    <!-- activity_conversation_message_bodyView -->
+    <string name="conversation_message_bodyView_network_connection_not_availabl">网络连接不可用，请稍候再试</string>
 
     <!-- activity_group_create -->
     <string name="group_create_title">创建群组</string>
@@ -339,6 +381,33 @@
     <string name="error_in_meeting_open_video_falied">打开视频设备失败!</string>
     <string name="error_does_not_open_local_video_yet">本地视频还没有开启!</string>
 
+    <!-- acivity_conversations_tabFragment -->
+    <string name="conversation_agree_with_your_application">同意了你的申请</string>
+    <string name="conversation_deny_your_application">拒绝了你的申请</string>
+    <string name="conversation_invite_to_join">邀请你加入</string>
+    <string name="conversation_group">@string/crowd_Authentication_crowd</string>
+    <string name="conversation_refused_to_join">@string/crowd_invitation_reject_join</string>
+    <string name="conversation_agree_to_join">@string/crowd_invitation_accept_join</string>
+    <string name="conversation_application_to_join">申请加入</string>
+    <string name="conversation_attend_the_meeting">邀请你参加会议</string>
+
+    <!-- activity_conference_msgDialog -->
+    <string name="conference_state_access">已同意</string>
+    <string name="conference_state_reject">已拒绝</string>
+
+    <!-- activity_conference -->
+    <string name="conference_toast_sharing_failed">主讲权已被取消，共享失败</string>
+    <string name="conference_toast_no_meeting">您当前没有会议</string>
+    <string name="conference_toast_chairman_synchronous_video">主席正在同步视频</string>
+    <!-- activity_conference_groupLayout -->
+    <string name="conference_groupLayout_creation">创建人:</string>
+    <!-- util -->
+    <string name="util_crash_handler_toast_abnormal">很抱歉,程序出现异常,即将退出.</string>
+    <string name="util_date_yesterday">昨天</string>
+    <string name="util_file_toast_error">没有应用程序可执行此操作</string>
+    <string name="util_message_toast_error">聊天信息不能为空</string>
+    <string name="util_progress_waiting">正在处理中...请稍后</string>
+
     <!-- crowd -->
 
     <string name="crowd_return_button">返回</string>
@@ -407,7 +476,8 @@
     <string name="crowd_files_resume_uploading_failed">请先先退出删除模式!</string>
     <string name="crowd_files_in_deletion_failed">请先先退出删除模式!</string>
     <string name="crowd_message_deletion_mode_quit_required">请先先退出删除模式!</string>
-
+    <string name="crowd_applicant_detail_invited_groupMember_failure">邀请群成员失败</string>
+    <string name="crowd_invitation_person">人</string>
     <!-- string array -->
     <string name="crowd_rules_item_allows_anybody">允许任何人</string>
     <string name="crowd_rules_item_allows_need_authentication">需要验证</string>
@@ -538,5 +608,14 @@
     <string name="common_no_string">无</string>
     <string name="common_edit_text_max_length_30">30</string>
     <string name="common_edit_text_max_length_100">100</string>
-
+    <!-- application_global_holder -->
+    <string name="application_global_holder_send_or_upload">发送或上传</string>
+    <string name="application_global_holder_download">下载</string>
+    <string name="application_global_holder_limit_number">上传或下载的文件最多不能超过5个</string>
+    <!-- vo -->
+    <string name="vo_attendee_mixed_device_mix_video">混合视频  (</string>
+    <string name="vo_conference_conversation_creation">创建人:</string>
+    <string name="vo_conference_crowd_conversation_creation">@string/vo_conference_conversation_creation</string>
+    <string name="vo_conference_department_conversation_creation">@string/vo_conference_conversation_creation</string>
+    <string name="vo_vmessage_face">[表情]</string>
 </resources>

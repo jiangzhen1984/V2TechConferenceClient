@@ -197,12 +197,15 @@ public class ConversationSelectFile extends Activity {
 				mCheckedNameList.add(bean.fileName);
 				totalSize += bean.fileSize;
 			}
-			selectedFileSize.setText("已选" + getFileSize(totalSize));
-			sendButton.setText("发送(" + mCheckedList.size() + ")");
+			selectedFileSize.setText(R.string.conversation_select_file_chosen
+					+ getFileSize(totalSize));
+			sendButton.setText(R.string.conversation_select_file_send
+					+ mCheckedList.size()
+					+ R.string.conversation_select_file_brackets);
 		}
 
 		if ("image".equals(type)) {
-			titleText.setText("图片");
+			titleText.setText(R.string.conversation_select_file_picture);
 			filesList.setVisibility(View.GONE);
 			filesGrid.setVisibility(View.VISIBLE);
 			new Thread(new Runnable() {
@@ -220,7 +223,7 @@ public class ConversationSelectFile extends Activity {
 			}).start();
 
 		} else if ("file".equals(type)) {
-			titleText.setText("文件");
+			titleText.setText(R.string.conversation_select_file_files);
 			filesGrid.setVisibility(View.GONE);
 			filesList.setVisibility(View.VISIBLE);
 
@@ -229,10 +232,10 @@ public class ConversationSelectFile extends Activity {
 			filesList.setAdapter(adapter);
 		} else if("crowdFile".equals(type)){
 
-            titleText.setText("上传文件");
-            filesGrid.setVisibility(View.GONE);
-            backButton.setVisibility(View.INVISIBLE);
-            filesList.setVisibility(View.VISIBLE);
+			titleText.setText(R.string.conversation_select_file_upload_file);
+			filesGrid.setVisibility(View.GONE);
+			backButton.setVisibility(View.INVISIBLE);
+			filesList.setVisibility(View.VISIBLE);
 
             updateFileItems(mCurrentPath);
             adapter = new FileListAdapter();
@@ -273,9 +276,11 @@ public class ConversationSelectFile extends Activity {
 				if (StorageUtil.getSdcardPath()
 						.equals(mCurrentPath.substring(0,
 								mCurrentPath.lastIndexOf("/")))) {
-					backButton.setText("返回");
-					 if("crowdFile".equals(type) && backButton.getVisibility() == View.VISIBLE) 
-	                     backButton.setVisibility(View.INVISIBLE);
+					backButton
+							.setText(R.string.conversation_select_file_backup);
+					if ("crowdFile".equals(type)
+							&& backButton.getVisibility() == View.VISIBLE)
+						backButton.setVisibility(View.INVISIBLE);
 				}
 				
 				if (StorageUtil.getSdcardPath().equals(mCurrentPath)) {
@@ -333,7 +338,8 @@ public class ConversationSelectFile extends Activity {
                     if("crowdFile".equals(type) && backButton.getVisibility() == View.INVISIBLE)
                         backButton.setVisibility(View.VISIBLE);
 					FileInfoBean bean = mFolderLists.get(position);
-					backButton.setText("上一级");
+					backButton
+							.setText(R.string.conversation_select_file_upper_level);
 					mCurrentPath = bean.filePath;
 					V2Log.d(TAG, "当前文件路径：" + mCurrentPath);
 					updateFileItems(bean.filePath);
@@ -625,7 +631,9 @@ public class ConversationSelectFile extends Activity {
 
 			if (mFileLists.size() <= 0) {
 				V2Log.e(TAG, "error mFileLists size zero");
-				Toast.makeText(getApplicationContext(), "选择图片异常，请重新打开", Toast.LENGTH_SHORT).show();
+				Toast.makeText(getApplicationContext(),
+						R.string.conversation_select_file_picture_anomaly,
+						Toast.LENGTH_SHORT).show();
 				finish();
 			}
 			
@@ -758,11 +766,13 @@ public class ConversationSelectFile extends Activity {
 				.findViewById(R.id.ws_selectFile_empty_cannel);
 		Button saveButton = (Button) dialog
 				.findViewById(R.id.ws_selectFile_empty_confirm);
-		TextView fileView = (TextView) dialog.findViewById(R.id.ws_selectFile_empty_hintLayout);
-		
-		saveButton.setText("确定");
-		fileView.setText(fileName + "为空文件，无法发送，请重新选择。");
-		
+		TextView fileView = (TextView) dialog
+				.findViewById(R.id.ws_selectFile_empty_hintLayout);
+
+		saveButton.setText(R.string.conversation_select_file_determine);
+		fileView.setText(fileName
+				+ R.string.conversation_select_file_empty_file);
+
 		cancelButton.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -782,8 +792,9 @@ public class ConversationSelectFile extends Activity {
 					mCheckedList.clear();
 				if(mCheckedNameList != null)
 					mCheckedNameList.clear();
-				selectedFileSize.setText("已选0.0K");
-				sendButton.setText("发送( 0 )");
+				selectedFileSize
+						.setText(R.string.conversation_select_file_selected);
+				sendButton.setText(R.string.conversation_select_file_send_out);
 				changeSendUnable();
 				dialog.dismiss();
 				if(type.equals("image")){
@@ -930,12 +941,15 @@ public class ConversationSelectFile extends Activity {
 				transing = 0;
 				GlobalConfig.mTransingFiles.put(uid, transing);
 			}
-			
-			V2Log.d("TRANSING_FILE_SIZE" , "ConversationSelectFile notifyListChange --> ID -" + uid
-					+ " - 当前传输的文件个数：" + transing);
-			if(transing + mCheckedList.size() >= GlobalConfig.MAX_TRANS_FILE_SIZE){
-				Toast.makeText(getApplicationContext(), "上传或下载的文件最多不能超过5个", Toast.LENGTH_LONG).show();
-				return ;
+
+			V2Log.d("TRANSING_FILE_SIZE",
+					"ConversationSelectFile notifyListChange --> ID -" + uid
+							+ " - 当前传输的文件个数：" + transing);
+			if (transing + mCheckedList.size() >= GlobalConfig.MAX_TRANS_FILE_SIZE) {
+				Toast.makeText(getApplicationContext(),
+						R.string.conversation_select_file_limit_number,
+						Toast.LENGTH_LONG).show();
+				return;
 			}
 			
 			// 如果当前item没有被选中，则进一步判断一下当前mCheckedList长度是否为0，如果为0则变为可点击
@@ -949,8 +963,11 @@ public class ConversationSelectFile extends Activity {
 			mCheckedNameList.add(bean.fileName);
 			totalSize += bean.fileSize;
 		}
-		selectedFileSize.setText("已选 " + getFileSize(totalSize));
-		sendButton.setText("发送(" + mCheckedList.size() + ")");
+		selectedFileSize.setText(R.string.conversation_select_file_chosen
+				+ getFileSize(totalSize));
+		sendButton.setText(R.string.conversation_select_file_send
+				+ mCheckedList.size()
+				+ R.string.conversation_select_file_brackets);
 
 	}
 

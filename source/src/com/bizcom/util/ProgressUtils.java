@@ -42,7 +42,8 @@ public class ProgressUtils {
 	
 	public static ProgressDialog showNormalWithHintProgress(Context mContext,
 			boolean show) {
-		return showNormalWithHintProgress(mContext , "正在处理中...请稍后" , show);
+		return showNormalWithHintProgress(mContext, mContext.getResources()
+				.getString(R.string.util_progress_waiting), show);
 	}
 
 	public static ProgressDialog showNormalWithHintProgress(Context mContext, String hint ,

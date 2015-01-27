@@ -7,11 +7,11 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.widget.EditText;
 
-import com.bizcom.vc.widget.GroupListView;
+import com.bizcom.vc.widget.MultilevelListView;
 
 public class SearchEditText extends EditText {
 
-	private GroupListView mGroupListView;
+	private MultilevelListView mGroupListView;
 
 	public SearchEditText(Context context) {
 		super(context);
@@ -25,7 +25,7 @@ public class SearchEditText extends EditText {
 		super(context, attrs, defStyle);
 	}
 
-	public void addTextListener(GroupListView mGroupListView) {
+	public void addTextListener(MultilevelListView mGroupListView) {
 		this.mGroupListView = mGroupListView;
 		addTextChangedListener(textChangedListener);
 	}

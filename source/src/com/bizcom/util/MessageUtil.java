@@ -208,7 +208,8 @@ public class MessageUtil {
 			User remoteUser) {
 		String content = mMessageET.getEditableText().toString();
 		if (content == null || content.equals("")) {
-			Toast.makeText(mContext, "聊天信息不能为空", Toast.LENGTH_SHORT).show();
+			Toast.makeText(mContext, R.string.util_message_toast_error,
+					Toast.LENGTH_SHORT).show();
 			return null;
 		}
 

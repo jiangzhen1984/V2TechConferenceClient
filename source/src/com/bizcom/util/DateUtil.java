@@ -4,6 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.v2tech.R;
+
 import android.text.format.DateUtils;
 
 import com.v2tech.R;

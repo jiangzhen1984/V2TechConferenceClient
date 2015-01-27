@@ -30,6 +30,7 @@ import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.OrgGroup;
 import com.bizcom.vo.User;
 import com.bizcom.vo.UserDeviceConfig;
+import com.v2tech.R;
 
 public class GlobalHolder {
 
@@ -739,14 +740,16 @@ public class GlobalHolder {
 		Map<Long, Integer> transingCollection = getFileTypeColl(transType);
 		Integer transing = transingCollection.get(key);
 		String typeString = null;
-		if(transType == V2GlobalConstants.FILE_TRANS_SENDING)
-			typeString = "发送或上传";
+		if (transType == V2GlobalConstants.FILE_TRANS_SENDING)
+			typeString = mContext.getResources().getString(
+					R.string.application_global_holder_send_or_upload);
 		else
-			typeString = "下载";
-		if(transing == null){
-			if(isAdd){
-				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , "
-						+ "传输类型 : " + typeString + " 正在传输文件加1 , 当前数量为1");
+			typeString = mContext.getResources().getString(R.string.application_global_holder_download);
+		if (transing == null) {
+			if (isAdd) {
+				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key
+						+ " -的用户或群 , " + "传输类型 : " + typeString
+						+ " 正在传输文件加1 , 当前数量为1");
 				transing = 1;
 				transingCollection.put(key, transing);
 			}
@@ -765,7 +768,7 @@ public class GlobalHolder {
 //							else
 //								Toast.makeText(mContext, "下载文件个数已达上限，当前正在下载的文件数量已达5个",
 //										Toast.LENGTH_LONG).show();
-							Toast.makeText(mContext, "上传或下载的文件最多不能超过5个",
+							Toast.makeText(mContext, R.string.application_global_holder_limit_number,
 									Toast.LENGTH_LONG).show();
 							Looper.loop();
 						}
@@ -773,9 +776,10 @@ public class GlobalHolder {
 					return false;
 				} else {
 					transing = transing + 1;
-					V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , "
-							+ "传输类型 : " + typeString + " 正在传输文件加1 , 当前数量为: " + transing);
-					transingCollection.put(key , transing);
+					V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key
+							+ " -的用户或群 , " + "传输类型 : " + typeString
+							+ " 正在传输文件加1 , 当前数量为: " + transing);
+					transingCollection.put(key, transing);
 					return true;
 				}
 			}

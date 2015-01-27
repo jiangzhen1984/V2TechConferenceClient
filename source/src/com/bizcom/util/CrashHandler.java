@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.V2.jni.util.V2Log;
+import com.v2tech.R;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -99,7 +100,9 @@ public class CrashHandler implements UncaughtExceptionHandler {
             @Override  
             public void run() {  
                 Looper.prepare();  
-                Toast.makeText(mContext, "很抱歉,程序出现异常,即将退出.", Toast.LENGTH_LONG).show();  
+				Toast.makeText(mContext,
+						R.string.util_crash_handler_toast_abnormal,
+						Toast.LENGTH_LONG).show();
                 Looper.loop();  
             }  
         }.start();  

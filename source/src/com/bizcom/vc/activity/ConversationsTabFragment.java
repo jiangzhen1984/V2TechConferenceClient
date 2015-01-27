@@ -75,11 +75,11 @@ import com.bizcom.util.ProgressUtils;
 import com.bizcom.util.SearchUtils;
 import com.bizcom.vc.activity.conference.ConferenceActivity;
 import com.bizcom.vc.activity.conference.GroupLayout;
-import com.bizcom.vc.activity.contacts.VoiceMessageActivity;
-import com.bizcom.vc.activity.contacts.add.AddFriendHistroysHandler;
-import com.bizcom.vc.activity.conversation.ConversationP2PAVActivity;
+import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
 import com.bizcom.vc.activity.conversation.MessageLoader;
+import com.bizcom.vc.activity.conversationav.ConversationP2PAVActivity;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
+import com.bizcom.vc.activity.message.VoiceMessageActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -614,6 +614,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	/**
 	 * According populateType to fill the List Data. The data from server!
+	 * 
 	 * @param populateType
 	 * @param list
 	 */
@@ -675,9 +676,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 	/**
 	 * Add a new conversation to current list.
+	 * 
 	 * @param g
-	 * @param readState   
-	 * 		Indicate that whether the new conversaion should display the prompt!
+	 * @param readState
+	 *            Indicate that whether the new conversaion should display the
+	 *            prompt!
 	 */
 	private void addConversation(Group g, boolean readState) {
 
@@ -1385,8 +1388,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				verificationMessageItemData
 						.setReadFlag(Conversation.READ_FLAG_UNREAD);
 				if (verificationMessageItemData.getMsg() != null) {
-					updateVerificationStateBar(verificationMessageItemData
-							.getMsg().toString(),
+					updateVerificationStateBar(
+							getResources()
+									.getString(
+											R.string.vo_conference_conversation_creation)
+									+ verificationMessageItemData.getMsg()
+											.toString(),
 							VerificationMessageType.CROWD_TYPE);
 				}
 			} else {
@@ -1452,13 +1459,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 
 				if (invitation.getQualState() == QualificationState.BE_ACCEPTED) {
-					content = crowdGroup.getName() + "同意了你的申请";
+					content = crowdGroup.getName()
+							+ R.string.conversation_agree_with_your_application;
 				} else if ((invitation.getQualState() == QualificationState.BE_REJECT)
 						|| (invitation.getQualState() == QualificationState.WAITING_FOR_APPLY)) {
-					content = crowdGroup.getName() + "拒绝了你的申请";
+					content = crowdGroup.getName()
+							+ R.string.conversation_deny_your_application;
 				} else {
-					content = invitationName + "邀请你加入" + crowdGroup.getName()
-							+ "群";
+					content = invitationName
+							+ R.string.conversation_invite_to_join
+							+ crowdGroup.getName()
+							+ R.string.conversation_group;
 				}
 			}
 			break;
@@ -1492,11 +1503,18 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 
 				if (apply.getQualState() == QualificationState.BE_REJECT)
-					content = applyName + "拒绝加入" + applyGroup.getName() + "群";
+					content = applyName + R.string.conversation_refused_to_join
+							+ applyGroup.getName()
+							+ R.string.conversation_group;
 				else if (apply.getQualState() == QualificationState.BE_ACCEPTED)
-					content = applyName + "同意加入" + applyGroup.getName() + "群";
+					content = applyName + R.string.conversation_agree_to_join
+							+ applyGroup.getName()
+							+ R.string.conversation_group;
 				else
-					content = applyName + "申请加入" + applyGroup.getName() + "群";
+					content = applyName
+							+ R.string.conversation_application_to_join
+							+ applyGroup.getName()
+							+ R.string.conversation_group;
 			}
 			break;
 		default:
@@ -1945,8 +1963,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		enterConference.putExtra("conf", conf);
 		enterConference.putExtra("initFragment", 3);
 		Notificator.updateSystemNotification(mContext, creator == null ? ""
-				: creator.getName(), "邀请你参加会议 " + conf.getName(), 1,
-				enterConference, PublicIntent.VIDEO_NOTIFICATION_ID);
+				: creator.getName(), R.string.conversation_attend_the_meeting
+				+ conf.getName(), 1, enterConference,
+				PublicIntent.VIDEO_NOTIFICATION_ID);
 	}
 
 	/**
@@ -2306,7 +2325,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			return;
 		}
 		synchronized (mLock) {
-			// When request join conference response, mWaitingDialog will be null
+			// When request join conference response, mWaitingDialog will be
+			// null
 			if (mWaitingDialog != null) {
 				return;
 			}
@@ -2471,14 +2491,14 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			@Override
 			public void run() {
-				if (isConference){
-					if(offLineConf.contains(newGroup.getmGId())){
+				if (isConference) {
+					if (offLineConf.contains(newGroup.getmGId())) {
 						currentGroupLayout.updateConversationNotificator(true);
 					}
 				} else {
 					currentGroupLayout.update();
 				}
-				
+
 				currentGroupLayout.updateGroupContent(newGroup);
 			}
 		});
@@ -2633,8 +2653,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							public void onClick(DialogInterface dialog,
 									int which) {
 
-								if (!GlobalHolder
-										.getInstance().isServerConnected()) {
+								if (!GlobalHolder.getInstance()
+										.isServerConnected()) {
 									dialog.dismiss();
 									return;
 								}
@@ -2742,10 +2762,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (mIsStartedSearch) {
 				return searchList.get(position).gp;
 			} else {
-				if(mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER){
+				if (mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER) {
 					Conversation cov = mItemList.get(position).cov;
-					if(cov.getType() == Conversation.TYPE_CONTACT){
-						Bitmap bp = ((ContactConversation)cov).getU().getAvatarBitmap();
+					if (cov.getType() == Conversation.TYPE_CONTACT) {
+						Bitmap bp = ((ContactConversation) cov).getU()
+								.getAvatarBitmap();
 						GroupLayout gl = (GroupLayout) mItemList.get(position).gp;
 						gl.updateIcon(bp);
 					}
@@ -3230,8 +3251,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					int groupType = intent.getIntExtra("groupType", -1);
 					long groupID = intent.getLongExtra("groupID", -1);
 					if (groupType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
-						offlineDissCov.add(intent
-								.getLongExtra("groupID", -1));
+						offlineDissCov.add(intent.getLongExtra("groupID", -1));
 						updateGroupConversation(groupType, groupID);
 					}
 				}
@@ -3488,9 +3508,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				updateVerificationConversation();
 				// 更新红点
 				if (isOtherShowPrompt) {
-					verificationItem.cov.setReadFlag(Conversation.READ_FLAG_UNREAD);
+					verificationItem.cov
+							.setReadFlag(Conversation.READ_FLAG_UNREAD);
 				} else {
-					verificationItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
+					verificationItem.cov
+							.setReadFlag(Conversation.READ_FLAG_READ);
 				}
 				isShowVerificationNotify = false;
 				updateUnreadConversation(verificationItem);

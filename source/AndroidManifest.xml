@@ -116,6 +116,7 @@
         </activity>
         <activity
             android:name="com.bizcom.vc.activity.LoginActivity"
+            android:launchMode="singleTop"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
         </activity>
@@ -147,7 +148,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.conversation.ConversationP2PTextActivity"
+            android:name="com.bizcom.vc.activity.conversation.ConversationTextActivity"
             android:configChanges="orientation|screenSize"
             android:launchMode="singleTop"
             android:parentActivityName="com.bizcom.vc.activity.StartupActivity"
@@ -166,7 +167,7 @@
                 android:value="com.bizcom.vc.StartupActivity" />
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.conversation.ConversationP2PAVActivity"
+            android:name="com.bizcom.vc.activity.conversationav.ConversationP2PAVActivity"
             android:configChanges="orientation|screenSize"
             android:launchMode="singleTop"
             android:screenOrientation="nosensor" >
@@ -243,12 +244,12 @@
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.contacts.add.AuthenticationActivity"
+            android:name="com.bizcom.vc.activity.contacts.InputAuthenticationActivity"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.contacts.add.FriendManagementActivity"
+            android:name="com.bizcom.vc.activity.contacts.InputRemarkActivity"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
@@ -290,7 +291,7 @@
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.contacts.UpdateContactGroupActivity"
+            android:name="com.bizcom.vc.activity.contacts.SelectJionGroupActivity"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
@@ -357,13 +358,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.contacts.VoiceMessageActivity"
+            android:name="com.bizcom.vc.activity.message.VoiceMessageActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.contacts.VoiceMessageDetailActivity"
+            android:name="ccom.bizcom.vc.activity.message.VoiceMessageDetailActivity"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustPan" >
         </activity>

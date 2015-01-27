@@ -84,14 +84,14 @@
         android:layout_height="fill_parent"
         android:background="#ffffff"
         android:orientation="horizontal" >
-        <com.bizcom.vc.widget.GroupListView
+        <com.bizcom.vc.widget.MultilevelListView
             android:id="@+id/discussion_board_create_contacts_list"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight=".5"
             android:divider="@null"
             android:focusable="false" >
-        </com.bizcom.vc.widget.GroupListView>
+        </com.bizcom.vc.widget.MultilevelListView>
         <LinearLayout
             android:layout_width="1dp"
             android:layout_height="match_parent"

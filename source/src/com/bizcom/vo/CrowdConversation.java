@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import com.bizcom.util.DateUtil;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.Group.GroupType;
+import com.v2tech.R;
 
 public class CrowdConversation extends Conversation {
 	
@@ -45,10 +46,10 @@ public class CrowdConversation extends Conversation {
 						group.setOwnerUser(u);
 					}
 					boolean isFriend = GlobalHolder.getInstance().isFriend(u);
-					if(isFriend)
-						return "创建人:" + u.getNickName();
+					if (isFriend)
+						return u.getNickName();
 					else
-						return "创建人:" + u.getName();
+						return u.getName();
 				}
 			}
 			return msg;

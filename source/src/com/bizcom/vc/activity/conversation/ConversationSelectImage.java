@@ -151,7 +151,7 @@ public class ConversationSelectImage extends Activity {
 
 	private void init() {
 
-		title.setText("图片");
+		title.setText(R.string.conversation_select_file_entry_picture);
 		listViews.setVisibility(View.VISIBLE);
 		gridViews.setVisibility(View.GONE);
 		finishButton.setVisibility(View.INVISIBLE);
@@ -264,11 +264,13 @@ public class ConversationSelectImage extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				int size = (int) (pictures.get(position).fileSize / (double) 1048576); 
-				if(size > 3){
-					Toast.makeText(getApplicationContext(), "图片大小超过了3m无法发送", Toast.LENGTH_SHORT).show();
-				}
-				else{
+				int size = (int) (pictures.get(position).fileSize / (double) 1048576);
+				if (size > 3) {
+					Toast.makeText(
+							getApplicationContext(),
+							R.string.conversation_select_file_entry_pictures_limited,
+							Toast.LENGTH_SHORT).show();
+				} else {
 					Intent intent = new Intent();
 					intent.putExtra("checkedImage", pictures.get(position).filePath);
 					setResult(100, intent);
@@ -402,7 +404,10 @@ public class ConversationSelectImage extends Activity {
 
 			if (pictures.size() <= 0) {
 				V2Log.e(TAG, "error mFileLists size zero");
-				Toast.makeText(getApplicationContext(), "选择图片异常，请重新打开", Toast.LENGTH_SHORT).show();
+				Toast.makeText(
+						getApplicationContext(),
+						R.string.conversation_select_file_entry_picture_anomaly,
+						Toast.LENGTH_SHORT).show();
 				finish();
 			}
 			

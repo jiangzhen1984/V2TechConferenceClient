@@ -1124,7 +1124,9 @@ public class MessageBodyView extends LinearLayout {
 					}
 				}
 			} else {
-				Toast.makeText(getContext(), "网络连接不可用，请稍候再试",
+				Toast.makeText(
+						getContext(),
+						R.string.conversation_message_bodyView_network_connection_not_availabl,
 						Toast.LENGTH_SHORT).show();
 			}
 			pw.dismiss();

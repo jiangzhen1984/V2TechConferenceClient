@@ -88,6 +88,7 @@ public class VideoDocLayout extends LinearLayout {
 	private ScrollView mDocListWindowScroller;
 
 	private boolean mSyncStatus;
+	private boolean isLectureStateGranted = false;
 
 	private V2Doc mCurrentDoc;
 
@@ -103,7 +104,7 @@ public class VideoDocLayout extends LinearLayout {
 
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
-			if (mSyncStatus) {
+			if (isLectureStateGranted) {
 				if (mShareDocCloseButton.getVisibility() == View.VISIBLE) {
 					mShareDocCloseButton.setVisibility(View.GONE);
 				} else {
@@ -634,8 +635,15 @@ public class VideoDocLayout extends LinearLayout {
 		this.listener = listener;
 	}
 
-	public void requestShowSharedButton(boolean flag) {
-		mSharedDocButton.setVisibility(flag ? View.VISIBLE : View.GONE);
+	public void updateLectureStateGranted(boolean flag) {
+		isLectureStateGranted = flag;
+		if (isLectureStateGranted) {
+			mSharedDocButton.setVisibility(View.VISIBLE);
+
+		} else {
+			mSharedDocButton.setVisibility(View.GONE);
+			mShareDocCloseButton.setVisibility(View.GONE);
+		}
 	}
 
 	/**

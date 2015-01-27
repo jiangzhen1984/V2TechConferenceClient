@@ -24,7 +24,7 @@
         android:layout_height="fill_parent"
         android:background="#ffffff"
         android:orientation="horizontal" >
-        <com.bizcom.vc.widget.GroupListView
+        <com.bizcom.vc.widget.MultilevelListView
             android:id="@+id/ws_common_create_group_list_view"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -34,7 +34,7 @@
             android:fadingEdge="none"
             android:focusable="false"
             android:scrollingCache="false" >
-        </com.bizcom.vc.widget.GroupListView>
+        </com.bizcom.vc.widget.MultilevelListView>
         <LinearLayout
             android:layout_width="1dp"
             android:layout_height="match_parent"

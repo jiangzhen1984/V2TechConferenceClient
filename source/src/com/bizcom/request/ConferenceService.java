@@ -446,10 +446,7 @@ public class ConferenceService extends DeviceService {
 		if (conf == null || szMediaID == null) {
 			return;
 		}
-		GroupRequest.getInstance().groupDestroyWBoard(/*
-													 * GroupType.CONFERENCE.intValue
-													 * (),
-													 */conf.getId(), szMediaID);
+		GroupRequest.getInstance().groupDestroyWBoard(GroupType.CONFERENCE.intValue(),conf.getId(), szMediaID);
 
 	}
 

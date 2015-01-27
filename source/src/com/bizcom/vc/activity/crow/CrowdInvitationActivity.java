@@ -450,13 +450,14 @@ public class CrowdInvitationActivity extends Activity {
 					onBackPressed();
 				else
 					isNeedFinish = true;
-			} else if(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
-					.equals(intent.getAction())){
-				CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance().
-						getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, crowd.getId());
-				if(crowdGroup != null){
-					mMembersTV.setText(String.valueOf(crowdGroup.getUsers().size())
-							+ "人");
+			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
+					.equals(intent.getAction())) {
+				CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
+						.getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD,
+								crowd.getId());
+				if (crowdGroup != null) {
+					mMembersTV.setText(String.valueOf(crowdGroup.getUsers()
+							.size()) + R.string.crowd_invitation_person);
 					mAnnounceTV.setText(crowdGroup.getAnnouncement());
 					mBriefTV.setText(crowdGroup.getBrief());
 				}
@@ -505,7 +506,7 @@ public class CrowdInvitationActivity extends Activity {
 			case UPDATE_CROWD_INFO:
 				CrowdGroup crowdGroup = (CrowdGroup) msg.obj;
 				mMembersTV.setText(String.valueOf(crowdGroup.getUsers().size())
-						+ "人");
+						+ R.string.crowd_invitation_person);
 				mAnnounceTV.setText(crowdGroup.getAnnouncement());
 				mBriefTV.setText(crowdGroup.getBrief());
 				break;

@@ -198,7 +198,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		for (int index = 0; index < atList.size(); index++) {
 			Attendee at = atList.get(index);
 			if (at.getType() != Attendee.TYPE_MIXED_VIDEO
-					&& !TextUtils.isEmpty(at.getAttName())) {
+					&& !TextUtils.isEmpty(getResources().getString(
+							R.string.vo_attendee_mixed_device_mix_video)
+							+ at.getAttName())) {
 				configAttendee(at);
 			}
 			List<UserDeviceConfig> dList = at.getmDevices();
@@ -963,7 +965,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			rl.addView(iv, rll);
 
 			TextView tv = new TextView(getContext());
-			tv.setText(wr.a.getAttName());
+			tv.setText(getResources().getString(
+					R.string.vo_attendee_mixed_device_mix_video)
+					+ wr.a.getAttName());
 			tv.setGravity(Gravity.CENTER);
 			tv.setEllipsize(TruncateAt.END);
 			tv.setMaxWidth(60);

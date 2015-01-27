@@ -26,6 +26,7 @@ import android.os.Message;
 import android.os.Parcelable;
 import android.support.v4.util.LongSparseArray;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.AudioRequest;
@@ -64,10 +65,10 @@ import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.util.Notificator;
 import com.bizcom.util.XmlParser;
 import com.bizcom.vc.activity.MainActivity;
-import com.bizcom.vc.activity.contacts.add.AddFriendHistroysHandler;
-import com.bizcom.vc.activity.conversation.ConversationP2PAVActivity;
+import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
 import com.bizcom.vc.activity.conversation.MessageBuilder;
 import com.bizcom.vc.activity.conversation.MessageLoader;
+import com.bizcom.vc.activity.conversationav.ConversationP2PAVActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.GlobalState;
@@ -1725,6 +1726,8 @@ public class JNIService extends Service implements
 			// Send sticky broadcast, make sure activity receive
 			mContext.sendStickyBroadcast(i);
 
+			Log.i("20150123 1","sendStickyBroadcast JNI_BROADCAST_VIDEO_CALL_CLOSED");
+			
 		}
 
 		private void updateVideoRecord(VideoJNIObjectInd ind) {

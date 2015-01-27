@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.provider.SearchContentProvider;
 import com.bizcom.util.Notificator;
+import com.bizcom.vc.activity.contacts.ContactsTabFragment;
 import com.bizcom.vc.activity.conversation.MessageLoader;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.MainApplication;
@@ -59,7 +60,7 @@ public class MainActivity extends FragmentActivity implements
 	private EditText searchEdit;
 	private TabHost mTabHost;
 	private ViewPager mViewPager;
-	private PagerAdapter mPagerAdapter;
+	private MyFragmentPagerAdapter mPagerAdapter;
 
 	private ConferenceListener mConfListener;
 
@@ -70,16 +71,20 @@ public class MainActivity extends FragmentActivity implements
 	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
 	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
 	private static final String TAG = "MainActivity";
+	private TabHostOnTabChangeListener mOnTabChangeListener = new TabHostOnTabChangeListener();
 
 	private TabClass[] mTabClasses = new TabClass[] {
+
+			new TabClass(PublicIntent.TAG_ORG,
+					R.drawable.selector_tab_org_button, R.string.tab_org_name,
+					R.string.tab_org_name,
+					OrganizationTabFragment.class.getName()),
+
 			new TabClass(PublicIntent.TAG_CONTACT,
 					R.drawable.selector_tab_contact_button,
 					R.string.tab_contact_name, R.string.tab_contact_name,
-
 					ContactsTabFragment.class.getName()),
-			new TabClass(PublicIntent.TAG_ORG,
-					R.drawable.selector_tab_org_button, R.string.tab_org_name,
-					R.string.tab_org_name, ContactsTabFragment.class.getName()),
+
 			new TabClass(PublicIntent.TAG_GROUP,
 					R.drawable.selector_tab_group_button,
 					R.string.tab_group_name, R.string.tab_group_name,
@@ -140,7 +145,7 @@ public class MainActivity extends FragmentActivity implements
 		// Init title bar
 		View titleBarLayout = findViewById(R.id.title_bar_ly);
 		titleBar = new TitleBar(mContext, titleBarLayout);
-		titleBar.regsiterSearchedTextListener(searchTextWatcher);
+		titleBar.regsiterSearchedTextListener(listenerOfSearchTextWatcher);
 
 		// Initialize first title name
 		titleBar.updateTitle(mTabClasses[0].mTabTitleId);
@@ -185,14 +190,13 @@ public class MainActivity extends FragmentActivity implements
 				mConfListener = (ConferenceListener) frg;
 			}
 			fragments.add(frg);
-
 		}
 
-		this.mPagerAdapter = new PagerAdapter(
+		this.mPagerAdapter = new MyFragmentPagerAdapter(
 				super.getSupportFragmentManager(), fragments);
 		this.mViewPager = (ViewPager) super.findViewById(R.id.viewpager);
 		this.mViewPager.setAdapter(this.mPagerAdapter);
-		this.mViewPager.setOnPageChangeListener(pageChangeListener);
+		this.mViewPager.setOnPageChangeListener(listenerOfPageChange);
 		this.mViewPager.setOffscreenPageLimit(5);
 		this.mViewPager.setCurrentItem(index);
 	}
@@ -211,7 +215,7 @@ public class MainActivity extends FragmentActivity implements
 			mTabHost.addTab(confTabSpec);
 		}
 
-		mTabHost.setOnTabChangedListener(tabChnageListener);
+		mTabHost.setOnTabChangedListener(mOnTabChangeListener);
 	}
 
 	private View getTabView(TabClass tcl) {
@@ -261,7 +265,7 @@ public class MainActivity extends FragmentActivity implements
 			conf = null;
 		}
 	}
-	
+
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
@@ -336,7 +340,7 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	private TextWatcher searchTextWatcher = new TextWatcher() {
+	private TextWatcher listenerOfSearchTextWatcher = new TextWatcher() {
 
 		@Override
 		public void afterTextChanged(Editable edit) {
@@ -363,8 +367,8 @@ public class MainActivity extends FragmentActivity implements
 
 	};
 
-	private TabHost.OnTabChangeListener tabChnageListener = new TabHost.OnTabChangeListener() {
-
+	private class TabHostOnTabChangeListener implements
+			TabHost.OnTabChangeListener {
 		/**
 		 * (non-Javadoc)
 		 * 
@@ -391,12 +395,11 @@ public class MainActivity extends FragmentActivity implements
 
 			mViewPager.setCurrentItem(pos);
 			titleBar.updateTitle(mTabClasses[pos].mTabTitleId);
-
 		}
 
 	};
 
-	private ViewPager.OnPageChangeListener pageChangeListener = new ViewPager.OnPageChangeListener() {
+	private ViewPager.OnPageChangeListener listenerOfPageChange = new ViewPager.OnPageChangeListener() {
 
 		@Override
 		public void onPageScrollStateChanged(int arg0) {
@@ -417,7 +420,7 @@ public class MainActivity extends FragmentActivity implements
 
 	};
 
-	public class PagerAdapter extends FragmentPagerAdapter {
+	public class MyFragmentPagerAdapter extends FragmentPagerAdapter {
 
 		private List<Fragment> fragments;
 
@@ -425,7 +428,8 @@ public class MainActivity extends FragmentActivity implements
 		 * @param fm
 		 * @param fragments
 		 */
-		public PagerAdapter(FragmentManager fm, List<Fragment> fragments) {
+		public MyFragmentPagerAdapter(FragmentManager fm,
+				List<Fragment> fragments) {
 			super(fm);
 			this.fragments = fragments;
 		}
@@ -461,18 +465,24 @@ public class MainActivity extends FragmentActivity implements
 				requestQuit();
 			} else if (JNIService.JNI_BROADCAST_CONNECT_STATE_NOTIFICATION
 					.equals(action)) {
-				V2Log.d("CONNECT", "MainActivity Receiver Broadcast ! Globle Connection State is : " + GlobalHolder
-						.getInstance().isServerConnected());
+				V2Log.d("CONNECT",
+						"MainActivity Receiver Broadcast ! Globle Connection State is : "
+								+ GlobalHolder.getInstance()
+										.isServerConnected());
 				NetworkStateCode code = (NetworkStateCode) intent.getExtras()
 						.get("state");
-				V2Log.d("CONNECT", "MainActivity Receiver Broadcast ! receiver Connection State is : " + code.name());
-				V2Log.d("CONNECT", "--------------------------------------------------------------------");
+				V2Log.d("CONNECT",
+						"MainActivity Receiver Broadcast ! receiver Connection State is : "
+								+ code.name());
+				V2Log.d("CONNECT",
+						"--------------------------------------------------------------------");
 				if (titleBar != null) {
 					titleBar.updateConnectState(code);
 				} else {
 					V2Log.d("CONNECT", "TitleBar is null !");
 				}
-				V2Log.d("CONNECT", "--------------------------------------------------------------------");
+				V2Log.d("CONNECT",
+						"--------------------------------------------------------------------");
 			}
 		}
 	}
@@ -527,12 +537,15 @@ public class MainActivity extends FragmentActivity implements
 						.loadFileMessages(-1, -1);
 				if (loadFileMessages != null) {
 					for (VMessageFileItem fileItem : loadFileMessages) {
-						V2Log.d(TAG, "Iterator VMessageFileItem -- name is : " + fileItem.getFileName() + " state : " + State.fromInt(fileItem.getState()));
+						V2Log.d(TAG,
+								"Iterator VMessageFileItem -- name is : "
+										+ fileItem.getFileName() + " state : "
+										+ State.fromInt(fileItem.getState()));
 						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
 								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING
 								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD)
 							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
-						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING 
+						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING
 								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
 							fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 						int update = MessageLoader.updateFileItemState(

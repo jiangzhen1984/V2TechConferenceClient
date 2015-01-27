@@ -51,10 +51,10 @@ import com.bizcom.request.MessageListener;
 import com.bizcom.request.BitmapManager.BitmapChangedListener;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.util.ProgressUtils;
+import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
 import com.bizcom.vc.activity.contacts.ContactDetail;
 import com.bizcom.vc.activity.contacts.ContactDetail2;
-import com.bizcom.vc.activity.contacts.add.AddFriendHistroysHandler;
-import com.bizcom.vc.activity.contacts.add.FriendManagementActivity;
+import com.bizcom.vc.activity.contacts.InputRemarkActivity;
 import com.bizcom.vc.activity.crow.CrowdApplicantDetailActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -972,7 +972,7 @@ public class MessageAuthenticationActivity extends Activity {
 				public void onClick(View arg0) {
 
 					Intent intent = new Intent(context,
-							FriendManagementActivity.class);
+							InputRemarkActivity.class);
 					intent.putExtra("remoteUserID", data.remoteUserID);
 					intent.putExtra("cause", "access_friend_authentication");
 					context.startActivity(intent);

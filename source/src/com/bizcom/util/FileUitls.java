@@ -109,7 +109,8 @@ public class FileUitls {
 		if (!TextUtils.isEmpty(filePath))
 			openFile(new File(filePath));
 		else
-			Toast.makeText(context, "没有应用程序可执行此操作", Toast.LENGTH_SHORT).show();
+			Toast.makeText(context, R.string.util_file_toast_error,
+					Toast.LENGTH_SHORT).show();
 
 	}
 
@@ -173,11 +174,11 @@ public class FileUitls {
 					intent = FileUitls.getApplicationFileIntent(file);
 					context.startActivity(intent);
 				} else
-					Toast.makeText(context, "没有应用程序可执行此操作", Toast.LENGTH_SHORT)
-							.show();
-			}
-			catch(Exception e){
-				Toast.makeText(context, "没有应用程序可执行此操作", Toast.LENGTH_SHORT).show();
+					Toast.makeText(context, R.string.util_file_toast_error,
+							Toast.LENGTH_SHORT).show();
+			} catch (Exception e) {
+				Toast.makeText(context, R.string.util_file_toast_error,
+						Toast.LENGTH_SHORT).show();
 			}
 		}
 	}

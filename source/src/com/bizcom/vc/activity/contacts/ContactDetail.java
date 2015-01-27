@@ -45,8 +45,6 @@ import com.bizcom.request.MessageListener;
 import com.bizcom.request.UserService;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.util.SPUtil;
-import com.bizcom.vc.activity.contacts.add.AuthenticationActivity;
-import com.bizcom.vc.activity.contacts.add.FriendManagementActivity;
 import com.bizcom.vc.activity.conversation.ConversationSelectFileEntry;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.application.GlobalConfig;
@@ -200,7 +198,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			@Override
 			public void onClick(View arg0) {
 				Intent intent = new Intent(ContactDetail.this,
-						FriendManagementActivity.class);
+						InputRemarkActivity.class);
 				intent.putExtra("remoteUserID", ContactDetail.this.getIntent()
 						.getLongExtra("remoteUserID", 0));
 				intent.putExtra("cause", "access_friend_authentication");
@@ -220,7 +218,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				}
 
 				Intent intent = new Intent(ContactDetail.this,
-						AuthenticationActivity.class);
+						InputAuthenticationActivity.class);
 				intent.putExtra("remoteUserID", ContactDetail.this.getIntent()
 						.getLongExtra("remoteUserID", 0));
 				intent.putExtra("cause", "refuse_friend_authentication");

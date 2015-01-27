@@ -41,7 +41,7 @@ import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.service.JNIService;
-import com.bizcom.vc.widget.GroupListView.ItemData;
+import com.bizcom.vc.widget.MultilevelListView.ItemData;
 import com.bizcom.vc.widget.cus.DateTimePicker;
 import com.bizcom.vc.widget.cus.DateTimePicker.OnDateSetListener;
 import com.bizcom.vo.Conference;
