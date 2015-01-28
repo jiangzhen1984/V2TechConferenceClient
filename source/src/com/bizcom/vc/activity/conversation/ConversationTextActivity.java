@@ -89,6 +89,7 @@ import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.listener.CommonCallBack;
+import com.bizcom.vc.listener.CommonCallBack.CommonNotifyChatInterToReplace;
 import com.bizcom.vc.listener.CommonCallBack.CommonUpdateCrowdFileStateInterface;
 import com.bizcom.vc.listener.CommonCallBack.CommonUpdateMessageBodyPopupWindowInterface;
 import com.bizcom.vc.listener.CommonCallBack.CrowdFileExeType;
@@ -115,7 +116,8 @@ import com.v2tech.R;
 
 public class ConversationTextActivity extends Activity implements
 		CommonUpdateMessageBodyPopupWindowInterface,
-		CommonUpdateCrowdFileStateInterface {
+		CommonUpdateCrowdFileStateInterface ,
+		CommonNotifyChatInterToReplace{
 
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
@@ -2762,7 +2764,6 @@ public class ConversationTextActivity extends Activity implements
 				}
 			}
 		}
-
 	}
 
 	class BackendHandler extends Handler {
@@ -3033,5 +3034,17 @@ public class ConversationTextActivity extends Activity implements
 		default:
 			break;
 		}
+	}
+
+	@Override
+	public void notifyChatInterToReplace(VMessage vm) {
+		for (int i = 0; i < messageArray.size(); i++) {
+			VMessageAdater wrapper = (VMessageAdater) messageArray.get(i);
+			VMessage replaced = (VMessage) messageArray.get(i).getItemObject();
+			if(replaced.getUUID().equals(vm.getUUID())){
+				wrapper.setVm(vm);
+				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
+			}
+		}		
 	};
 }

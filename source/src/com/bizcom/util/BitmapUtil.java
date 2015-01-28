@@ -106,7 +106,8 @@ public class BitmapUtil {
 
 		File f = new File(filePath);
 		if (!f.exists()) {
-			throw new RuntimeException(" file is no exists :" + filePath);
+			return BitmapFactory.decodeResource(context.getResources(),
+					R.drawable.ws_receive_image_wait);
 		}
 
 		BitmapFactory.Options options = new BitmapFactory.Options();

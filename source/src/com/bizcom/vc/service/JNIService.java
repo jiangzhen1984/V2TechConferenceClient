@@ -356,6 +356,7 @@ public class JNIService extends Service implements
 	private static final int JNI_OFFLINE_LOADED = 64;
 	private static final int JNI_CONFERENCE_INVITATION = 61;
 	private static final int JNI_RECEIVED_MESSAGE = 91;
+	private static final int JNI_RECEIVED_MESSAGE_BINARY_DATA = 93;
 	private static final int JNI_RECEIVED_VIDEO_INVITION = 92;
 
 	class JNICallbackHandler extends Handler {
@@ -554,6 +555,14 @@ public class JNIService extends Service implements
 					V2Log.e(TAG,
 							"Receiver new message failed ... pleace check parse xml !");
 				}
+				break;
+			case JNI_RECEIVED_MESSAGE_BINARY_DATA:
+				VMessage binaryVM = (VMessage) msg.obj;
+				List<VMessageImageItem> imageItems = binaryVM.getImageItems();
+				for (int i = 0; i < imageItems.size(); i++) {
+					MessageLoader.updateBinaryImageItem(imageItems.get(i));
+				}
+				CommonCallBack.getInstance().executeNotifyChatInterToReplace(binaryVM);
 				break;
 			case JNI_RECEIVED_VIDEO_INVITION:
 				VideoJNIObjectInd vjoi = (VideoJNIObjectInd) msg.obj;
@@ -1879,22 +1888,6 @@ public class JNIService extends Service implements
 
 			String uuid = XmlParser.parseForMessageUUID(szXmlText);
 
-			// Record image data meta
-			VMessage cache = new VMessage(eGroupType, nGroupID, fromUser,
-					toUser, uuid, new Date(nTime * 1000));
-			cache.setmXmlDatas(szXmlText);
-			XmlParser.extraImageMetaFrom(cache, szXmlText);
-			if (cache.getItems().size() > 0) {
-				synchronized (cacheImageMeta) {
-					cacheImageMeta.add(cache);
-					for (int i = 0; i < cache.getImageItems().size(); i++) {
-						String key = cache.getImageItems().get(i).getUuid();
-						cacheImageMetaSize.put(key, cache);
-					}
-					return;
-				}
-			}
-
 			// Record audio data meta
 			VMessage cacheAudio = new VMessage(eGroupType, nGroupID, fromUser,
 					toUser, uuid, new Date(nTime * 1000));
@@ -1906,17 +1899,40 @@ public class JNIService extends Service implements
 					return;
 				}
 			}
-
+			
+			VMessage cacheImage = new VMessage(eGroupType, nGroupID, fromUser,
+					toUser, uuid, new Date(nTime * 1000));
+			cacheImage.setmXmlDatas(szXmlText);
+			XmlParser.extraImageMetaFrom(cacheImage, szXmlText);
+			if(cacheImage.getItems().size() > 0) {
+				synchronized (cacheImageMeta) {
+					cacheImageMeta.add(cacheImage);
+					return ;
+				}
+			}
+			
 			VMessage vm = new VMessage(eGroupType, nGroupID, fromUser, toUser,
 					uuid, new Date(nTime * 1000));
 			vm.setmXmlDatas(szXmlText);
-
-			if (vm.getImageItems().size() > 0) {
-				synchronized (cacheImageMeta) {
-					cacheImageMeta.add(vm);
-				}
-				return;
-			}
+			
+			//TODO 此代码正在调整结构
+//			VMessage vm = null;
+//			// Record image data meta
+//			vm = new VMessage(eGroupType, nGroupID, fromUser,
+//					toUser, uuid, new Date(nTime * 1000));
+//			vm.setmXmlDatas(szXmlText);
+//			XmlParser.extraImageMetaFrom(vm, szXmlText);
+//			// 如果没有获取到image数据，则重新构建VMessage
+//			if(vm.getItems().size() > 0) {
+//				synchronized (cacheImageMeta) {
+//					cacheImageMeta.add(vm);
+//				}
+//			} else {
+//				vm = new VMessage(eGroupType, nGroupID, fromUser, toUser,
+//						uuid, new Date(nTime * 1000));
+//				vm.setmXmlDatas(szXmlText);
+//			}
+			
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
@@ -2032,9 +2048,11 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
+			//TODO 此代码正在调整结构
+//			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE_BINARY_DATA, vm)
+//			.sendToTarget();
 		}
 
 		private void handlerChatAudioCallback(int eGroupType, long nGroupID,

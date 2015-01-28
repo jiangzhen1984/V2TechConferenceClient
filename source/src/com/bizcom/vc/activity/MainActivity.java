@@ -75,15 +75,15 @@ public class MainActivity extends FragmentActivity implements
 
 	private TabClass[] mTabClasses = new TabClass[] {
 
-			new TabClass(PublicIntent.TAG_ORG,
-					R.drawable.selector_tab_org_button, R.string.tab_org_name,
-					R.string.tab_org_name,
-					OrganizationTabFragment.class.getName()),
-
 			new TabClass(PublicIntent.TAG_CONTACT,
 					R.drawable.selector_tab_contact_button,
 					R.string.tab_contact_name, R.string.tab_contact_name,
 					ContactsTabFragment.class.getName()),
+
+			new TabClass(PublicIntent.TAG_ORG,
+					R.drawable.selector_tab_org_button, R.string.tab_org_name,
+					R.string.tab_org_name,
+					OrganizationTabFragment.class.getName()),
 
 			new TabClass(PublicIntent.TAG_GROUP,
 					R.drawable.selector_tab_group_button,

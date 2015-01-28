@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.PowerManager;
 import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
@@ -446,16 +447,6 @@ public class ConferenceActivity extends Activity {
 					.replace("[]", conf.getName()));
 		}
 
-	}
-
-	@Override
-	public void onConfigurationChanged(Configuration newConfig) {
-		super.onConfigurationChanged(newConfig);
-		// if(isMoveTaskBack){
-		// isMoveTaskBack = false;
-		// }
-		// isMoveTaskBack = true;
-//		moveTaskToBack(true);
 	}
 
 	private void initBroadcastReceiver() {
@@ -2218,10 +2209,16 @@ public class ConferenceActivity extends Activity {
 			mSettingWindow.dismiss();
 		}
 
-		// if (!isMoveTaskBack) {
-		// isMoveTaskBack = true;
-		// else
-		// moveTaskToBack(true);
+		PowerManager pm = (PowerManager) mContext
+				.getSystemService(Context.POWER_SERVICE);
+		boolean isScreenOn = pm.isScreenOn();// 如果为true，则表示屏幕“亮”了，否则屏幕“暗”了。
+		if(!isScreenOn)
+			isMoveTaskBack = false;
+		
+		if (!isMoveTaskBack)
+			isMoveTaskBack = true;
+		else
+			moveTaskToBack(true);
 	}
 
 	/**
@@ -3387,34 +3384,34 @@ public class ConferenceActivity extends Activity {
 
 		@Override
 		public void requestShareDocClose(View v) {
-			V2Doc preV2Doc=null;
-			V2Doc nextV2Doc=null;
-			boolean finded=false;
+			V2Doc preV2Doc = null;
+			V2Doc nextV2Doc = null;
+			boolean finded = false;
 			for (Entry<String, V2Doc> e : mDocs.entrySet()) {
-				if(finded){
-					nextV2Doc=e.getValue();
+				if (finded) {
+					nextV2Doc = e.getValue();
 					break;
 				}
 				if (e.getValue().getId() == mCurrentLecturerActivateDocId) {
-					finded=true;
+					finded = true;
 				}
-				preV2Doc=e.getValue();
-				
+				preV2Doc = e.getValue();
+
 			}
-			
-			if(nextV2Doc!=null){
+
+			if (nextV2Doc != null) {
 				mDocContainer.updateCurrentDoc(nextV2Doc);
 				mDocContainer.updateCurrentDoc();
-				
-			}else{
-				if(preV2Doc!=null){
+
+			} else {
+				if (preV2Doc != null) {
 					mDocContainer.updateCurrentDoc(preV2Doc);
 					mDocContainer.updateCurrentDoc();
 				}
 			}
-			
+
 			cb.closeShareDoc(conf, mCurrentLecturerActivateDocId);
-			
+
 		}
 	}
 

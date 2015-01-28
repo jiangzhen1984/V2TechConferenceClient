@@ -634,7 +634,7 @@ public class MessageBodyView extends LinearLayout {
 			this.unReadIcon.setVisibility(View.VISIBLE);
 		}
 
-		MessageLoader.updateBinaryAudioState(getContext(), mMsg, item);
+		MessageLoader.updateBinaryAudioItem(item);
 	}
 
 	public void updateFailedFlag(boolean flag) {

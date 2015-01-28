@@ -86,7 +86,6 @@ public class GroupLayout extends LinearLayout {
 				mGroupIV.setImageBitmap(bm);
 			else
 				mGroupIV.setImageResource(R.drawable.avatar);
-			initNickName();
 			break;
 		case Conversation.TYPE_CONFERNECE:
 			if (((ConferenceConversation) mConv).getGroup().getOwnerUser()
@@ -95,7 +94,6 @@ public class GroupLayout extends LinearLayout {
 				mGroupIV.setImageResource(R.drawable.conference_icon);
 			else
 				mGroupIV.setImageResource(R.drawable.conference_icon_self);
-			mGroupNameTV.setText(mConv.getName());
 			break;
 		case V2GlobalConstants.GROUP_TYPE_DEPARTMENT:
 			mGroupIV.setImageResource(R.drawable.chat_group_icon);
@@ -115,24 +113,17 @@ public class GroupLayout extends LinearLayout {
 		case Conversation.TYPE_GROUP:
 			mGroupIV.setImageResource(R.drawable.chat_group_icon);
 			mGroupDateTV.setVisibility(View.INVISIBLE);
-			mGroupNameTV.setText(mConv.getName());
 			break;
 		case Conversation.TYPE_VOICE_MESSAGE:
 			mGroupIV.setImageResource(R.drawable.vs_message_voice);
-			mGroupNameTV.setText(mConv.getName());
 			break;
 		case Conversation.TYPE_VERIFICATION_MESSAGE:
 			mGroupIV.setImageResource(R.drawable.vs_message_verification);
-			mGroupNameTV.setText(mConv.getName());
 			break;
 		default:
 			throw new RuntimeException("the invalid conversation type :"
 					+ mConv.getType());
 		}
-		mGroupOwnerTV.setText(getResources().getString(
-				R.string.vo_conference_crowd_conversation_creation)
-				+ mConv.getMsg());
-		mGroupDateTV.setText(mConv.getDate());
 		addView(view);
 	}
 
@@ -218,13 +209,9 @@ public class GroupLayout extends LinearLayout {
 		}
 	}
 
-	public void updateUserContent(String content) {
-		if (mConv.getType() == V2GlobalConstants.GROUP_TYPE_USER)
-			mGroupOwnerTV.setText(content);
-	}
-
 	public void updateGroupContent(Group group) {
-		if (mConv.getType() == V2GlobalConstants.GROUP_TYPE_DISCUSSION)
+		if (mConv.getType() == V2GlobalConstants.GROUP_TYPE_DISCUSSION
+				|| group == null)
 			return;
 
 		User currentUser = null;
@@ -236,35 +223,36 @@ public class GroupLayout extends LinearLayout {
 			currentUser = conf.getGroup().getOwnerUser();
 		}
 
+		if (currentUser == null || TextUtils.isEmpty(currentUser.getName())) {
+			return;
+		}
+
+		mConNameTV.setText(group.getName());
+		mGroupNameTV.setText(group.getName());
+
 		boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
 		String nickName = currentUser.getNickName();
 
 		if (isFriend && !TextUtils.isEmpty(nickName)) {
 			V2Log.d(TAG, "updateName ---> Update NickName successfully!");
-			mGroupOwnerTV.setText(R.string.conference_groupLayout_creation
+			mGroupOwnerTV.setText(getResources().getString(
+					R.string.conference_groupLayout_creation)
 					+ nickName);
 		} else {
-			mGroupOwnerTV.setText(R.string.conference_groupLayout_creation
+			mGroupOwnerTV.setText(getResources().getString(
+					R.string.conference_groupLayout_creation)
 					+ currentUser.getName());
 		}
 	}
 
-	public void updateGroupName(String name) {
-		mConNameTV.setText(name);
-		mGroupNameTV.setText(name);
-	}
-
 	public void update() {
-
-		if (mConv.getType() == V2GlobalConstants.GROUP_TYPE_USER)
+		if (mConv.getType() == V2GlobalConstants.GROUP_TYPE_USER) {
 			initNickName();
-		else {
+		} else {
 			mConNameTV.setText(mConv.getName());
 			mGroupNameTV.setText(mConv.getName());
 		}
-		mGroupOwnerTV.setText(getResources().getString(
-				R.string.vo_conference_crowd_conversation_creation)
-				+ mConv.getMsg());
+		mGroupOwnerTV.setText(mConv.getMsg());
 		mGroupDateTV.setText(mConv.getDate());
 	}
 

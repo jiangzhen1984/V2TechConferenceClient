@@ -266,8 +266,7 @@
     <string name="conversation_quit_dialog_cancel_text">取消</string>
     <string name="conversation_no_network_notification">当前网络不可用，请稍候再试!</string>
     <string name="conversation_select_file_chosen">已选</string>
-    <string name="conversation_select_file_send">发送(</string>
-    <string name="conversation_select_file_brackets">)</string>
+    <string name="conversation_select_file_send">发送( %1$s )</string>
     <string name="conversation_select_file_picture">图片</string>
     <string name="conversation_select_file_files">文件</string>
     <string name="conversation_select_file_upload_file">上传文件</string>
@@ -281,7 +280,6 @@
     <string name="conversation_select_file_limit_number">上传或下载的文件最多不能超过5个</string>
     <string name="conversation_select_file_entry_chosen">@string/conversation_select_file_chosen</string>
     <string name="conversation_select_file_entry_send">@string/conversation_select_file_send</string>
-    <string name="conversation_select_file_entry_brackets">@string/conversation_select_file_brackets</string>
     <string name="conversation_select_file_entry_selected">@string/conversation_select_file_selected</string>
     <string name="conversation_select_file_entry_send_out">@string/conversation_select_file_send_out</string>
     <string name="conversation_select_file_entry_picture">@string/conversation_select_file_picture</string>
@@ -384,8 +382,7 @@
     <!-- acivity_conversations_tabFragment -->
     <string name="conversation_agree_with_your_application">同意了你的申请</string>
     <string name="conversation_deny_your_application">拒绝了你的申请</string>
-    <string name="conversation_invite_to_join">邀请你加入</string>
-    <string name="conversation_group">@string/crowd_Authentication_crowd</string>
+    <string name="conversation_invite_to_join">邀请你加入%1$s群</string>
     <string name="conversation_refused_to_join">@string/crowd_invitation_reject_join</string>
     <string name="conversation_agree_to_join">@string/crowd_invitation_accept_join</string>
     <string name="conversation_application_to_join">申请加入</string>

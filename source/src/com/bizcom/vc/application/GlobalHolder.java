@@ -30,6 +30,7 @@ import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.OrgGroup;
 import com.bizcom.vo.User;
 import com.bizcom.vo.UserDeviceConfig;
+import com.bizcom.vo.VMessage;
 import com.v2tech.R;
 
 public class GlobalHolder {
@@ -45,27 +46,29 @@ public class GlobalHolder {
 	private List<Group> mContactsGroup = new ArrayList<Group>();
 
 	private List<Group> mCrowdGroup = new ArrayList<Group>();
-	
+
 	private List<Group> mDiscussionBoardGroup = new ArrayList<Group>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
-	
-	public List<AddFriendHistorieNode> addFriendHistorieList=new ArrayList<AddFriendHistorieNode>();
+
+	public List<AddFriendHistorieNode> addFriendHistorieList = new ArrayList<AddFriendHistorieNode>();
 
 	private Map<Long, List<UserDeviceConfig>> mUserDeviceList = new HashMap<Long, List<UserDeviceConfig>>();
 
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
 
 	private GlobalState mState = new GlobalState();
-	
+
 	private List<String> dataBaseTableCacheName = new ArrayList<String>();
+
+	public Map<String, FileDownLoadBean> globleFileProgress = new HashMap<String, FileDownLoadBean>();
+
+	public Map<String, String> mTransingLockFiles = new HashMap<String, String>();
 	
-	public Map<String , FileDownLoadBean> globleFileProgress = new HashMap<String, FileDownLoadBean>();
-	
-	public Map<String , String> mTransingLockFiles = new HashMap<String , String>();
-	
+	public Map<String, VMessage> mWaitRecvImageCaches = new HashMap<String, VMessage>();
+
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
 			holder = new GlobalHolder();
@@ -105,16 +108,16 @@ public class GlobalHolder {
 	private Object mUserLock = new Object();
 
 	public User putUser(long id, User u) {
-		if (id <= 0  || u == null) {
+		if (id <= 0 || u == null) {
 			return null;
 		}
 		synchronized (mUserLock) {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);
 			if (cu != null) {
-				//Update user property for received user information
+				// Update user property for received user information
 				cu.updateUser(false);
-				
+
 				if (u.getAddress() != null) {
 					cu.setAddress(u.getAddress());
 				}
@@ -128,13 +131,13 @@ public class GlobalHolder {
 				if (u.getmStringBirthday() != null) {
 					cu.setmStringBirthday(u.getmStringBirthday());
 				}
-				if(u.getmEmail()!=null){
+				if (u.getmEmail() != null) {
 					cu.setEmail(u.getmEmail());
 				}
-				if(u.getFax()!=null){
+				if (u.getFax() != null) {
 					cu.setFax(u.getFax());
 				}
-				if(u.getJob()!=null){
+				if (u.getJob() != null) {
 					cu.setJob(u.getJob());
 				}
 				if (u.getMobile() != null) {
@@ -169,11 +172,13 @@ public class GlobalHolder {
 	/**
 	 * Get user object according user ID<br>
 	 * If id is negative, will return null.<br>
-	 * Otherwise user never return null. If application doesn't receive user information from server.<br>
+	 * Otherwise user never return null. If application doesn't receive user
+	 * information from server.<br>
 	 * User property is dirty {@link User#isDirty()}
+	 * 
 	 * @param userID
 	 * @param isGetUserInfo
-	 * 			if true , invoke getUserBaseInfo();
+	 *            if true , invoke getUserBaseInfo();
 	 * @return
 	 */
 	public User getUser(long userID) {
@@ -186,16 +191,15 @@ public class GlobalHolder {
 			if (tmp == null || TextUtils.isEmpty(tmp.getName())) {
 				tmp = new User(userID);
 				mUserHolder.put(key, tmp);
-				if(GlobalHolder.getInstance().getGlobalState()
-						.isGroupLoaded()){
-					//if receive this callback , the dirty change false;
+				if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
+					// if receive this callback , the dirty change false;
 					ImRequest.getInstance().getUserBaseInfo(userID);
 				}
 			}
 			return tmp;
 		}
 	}
-	
+
 	/**
 	 * Update group information according server's side push data
 	 * 
@@ -210,21 +214,23 @@ public class GlobalHolder {
 			if (cache != null) {
 				continue;
 			}
-			
-			if(vg.getName() == null)
-				V2Log.e("parse the group name is wroing...the group is :" + vg.id);
-				
+
+			if (vg.getName() == null)
+				V2Log.e("parse the group name is wroing...the group is :"
+						+ vg.id);
+
 			Group g = null;
 			if (gType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 				boolean flag = true;
 				for (Group group : mCrowdGroup) {
-					if(group.getmGId() == vg.id){
+					if (group.getmGId() == vg.id) {
 						flag = false;
 					}
 				}
-				
-				if(flag){
-					User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
+
+				if (flag) {
+					User owner = GlobalHolder.getInstance().getUser(
+							vg.owner.uid);
 					g = new CrowdGroup(vg.id, vg.getName(), owner);
 					((CrowdGroup) g).setBrief(vg.getBrief());
 					((CrowdGroup) g).setAnnouncement(vg.getAnnounce());
@@ -235,8 +241,8 @@ public class GlobalHolder {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
 				User chairMan = GlobalHolder.getInstance().getUser(
 						vg.chairMan.uid);
-				g = new ConferenceGroup(vg.id, vg.getName(), owner, vg.createTime,
-						chairMan);
+				g = new ConferenceGroup(vg.id, vg.getName(), owner,
+						vg.createTime, chairMan);
 				mConfGroup.add(g);
 			} else if (gType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
 				g = new OrgGroup(vg.id, vg.getName());
@@ -249,14 +255,13 @@ public class GlobalHolder {
 				}
 
 				mContactsGroup.add(g);
-			}  else if (gType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
+			} else if (gType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
 				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
 				g = new DiscussionGroup(vg.id, vg.getName(), owner, null);
 				mDiscussionBoardGroup.add(g);
 			} else {
 				throw new RuntimeException(" Can not support this type");
 			}
-
 
 			mGroupHolder.put(g.getmGId(), g);
 
@@ -265,7 +270,7 @@ public class GlobalHolder {
 
 	}
 
-	public void addGroupToList(int groupType , Group g) {
+	public void addGroupToList(int groupType, Group g) {
 		if (groupType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
 		} else if (groupType == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 			mConfGroup.add(g);
@@ -273,7 +278,7 @@ public class GlobalHolder {
 			this.mCrowdGroup.add(g);
 		} else if (groupType == V2GlobalConstants.GROUP_TYPE_CONTACT) {
 			this.mContactsGroup.add(g);
-		}  else if (groupType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
+		} else if (groupType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
 			this.mDiscussionBoardGroup.add(g);
 		}
 		mGroupHolder.put(Long.valueOf(g.getmGId()), g);
@@ -281,27 +286,27 @@ public class GlobalHolder {
 
 	/**
 	 * 
-	 * @param groupType 
+	 * @param groupType
 	 * @param gId
 	 * @return
 	 * 
-	 * {@see com.V2.jni.V2GlobalEnum}
+	 *         {@see com.V2.jni.V2GlobalEnum}
 	 */
 	public Group getGroupById(int groupType, long gId) {
 		return mGroupHolder.get(Long.valueOf(gId));
 	}
-	
+
 	/**
 	 * @param gId
 	 * @return
 	 * 
-	 * {@see com.V2.jni.V2GlobalEnum}
+	 *         {@see com.V2.jni.V2GlobalEnum}
 	 */
 	public Group getGroupById(long gId) {
 		return mGroupHolder.get(Long.valueOf(gId));
 	}
 
-	private void populateGroup(int groupType , Group parent, Set<V2Group> list) {
+	private void populateGroup(int groupType, Group parent, Set<V2Group> list) {
 		for (V2Group vg : list) {
 			Group cache = mGroupHolder.get(Long.valueOf(vg.id));
 
@@ -413,7 +418,7 @@ public class GlobalHolder {
 		if (g != null) {
 			g.removeUserFromGroup(uid);
 		} else {
-			
+
 		}
 	}
 
@@ -455,7 +460,7 @@ public class GlobalHolder {
 			list = mDiscussionBoardGroup;
 		}
 		mGroupHolder.remove(Long.valueOf(gid));
-		if(list != null){
+		if (list != null) {
 			for (int i = 0; i < list.size(); i++) {
 				Group g = list.get(i);
 				if (g.getmGId() == gid) {
@@ -487,15 +492,14 @@ public class GlobalHolder {
 	 * @return list of user device
 	 */
 	public List<UserDeviceConfig> getAttendeeDevice(long uid) {
-		List <UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
+		List<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
 		if (list == null) {
 			return null;
 		}
 
 		return new ArrayList<UserDeviceConfig>(list);
 	}
-	
-	
+
 	public UserDeviceConfig getUserDefaultDevice(long uid) {
 		List<UserDeviceConfig> list = mUserDeviceList.get(Long.valueOf(uid));
 		if (list == null) {
@@ -506,7 +510,7 @@ public class GlobalHolder {
 				return udc;
 			}
 		}
-		
+
 		if (list.size() > 0) {
 			V2Log.e("Not found default device, use first device !");
 			return list.iterator().next();
@@ -529,7 +533,7 @@ public class GlobalHolder {
 			list = new ArrayList<UserDeviceConfig>();
 			mUserDeviceList.put(key, list);
 		}
-		
+
 		list.addAll(udcList);
 	}
 
@@ -596,8 +600,7 @@ public class GlobalHolder {
 			this.mState.setState(st);
 		}
 	}
-	
-	
+
 	public void setServerConnection(boolean connected) {
 		synchronized (mState) {
 			int st = this.mState.getState();
@@ -609,7 +612,7 @@ public class GlobalHolder {
 			this.mState.setState(st);
 		}
 	}
-	
+
 	public void setOfflineLoaded(boolean isLoad) {
 		synchronized (mState) {
 			int st = this.mState.getState();
@@ -645,28 +648,29 @@ public class GlobalHolder {
 			return mState.isInMeeting();
 		}
 	}
-	
+
 	public boolean isServerConnected() {
 		synchronized (mState) {
 			return mState.isConnectedServer();
 		}
 	}
-	
-	public boolean isFriend(User user){
-		
+
+	public boolean isFriend(User user) {
+
 		synchronized (mState) {
-			if(user == null){
+			if (user == null) {
 				V2Log.e("GlobalHolder isFriend ---> get user is null , please check conversation user is exist");
 				return false;
 			}
-			
+
 			long currentUserID = user.getmUserId();
-			List<Group> friendGroup = GlobalHolder.getInstance().getGroup(V2GlobalConstants.GROUP_TYPE_CONTACT);
-			if(friendGroup.size() >= 0){
+			List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
+					V2GlobalConstants.GROUP_TYPE_CONTACT);
+			if (friendGroup.size() >= 0) {
 				for (Group friend : friendGroup) {
 					List<User> users = friend.getUsers();
 					for (User friendUser : users) {
-						if(currentUserID == friendUser.getmUserId()){
+						if (currentUserID == friendUser.getmUserId()) {
 							return true;
 						}
 					}
@@ -675,7 +679,7 @@ public class GlobalHolder {
 			return false;
 		}
 	}
-	
+
 	public boolean isOfflineLoaded() {
 		synchronized (mState) {
 			return mState.isOfflineLoaded();
@@ -684,14 +688,16 @@ public class GlobalHolder {
 
 	/**
 	 * Get current application state copy
+	 * 
 	 * @return
 	 */
 	public GlobalState getGlobalState() {
 		return new GlobalState(this.mState);
 	}
-	
+
 	/**
 	 * Set bluetooth headset matched or not
+	 * 
 	 * @param flag
 	 */
 	public void setBluetoothHeadset(boolean flag) {
@@ -699,8 +705,7 @@ public class GlobalHolder {
 			mState.setBluetoothHeadset(flag);
 		}
 	}
-	
-	
+
 	public void setGroupLoaded() {
 		synchronized (mState) {
 			synchronized (mState) {
@@ -709,11 +714,10 @@ public class GlobalHolder {
 			}
 		}
 	}
-	
-	
-	
+
 	/**
 	 * Set wired headset state
+	 * 
 	 * @param flag
 	 */
 	public void setWiredHeadsetState(boolean flag) {
@@ -726,7 +730,7 @@ public class GlobalHolder {
 		Long key = Long.valueOf(id);
 		return mAvatarBmHolder.get(key);
 	}
-	
+
 	public List<String> getDataBaseTableCacheName() {
 		return dataBaseTableCacheName;
 	}
@@ -734,8 +738,9 @@ public class GlobalHolder {
 	public void setDataBaseTableCacheName(List<String> dataBaseTableCacheName) {
 		this.dataBaseTableCacheName = dataBaseTableCacheName;
 	}
-	
-	public boolean changeGlobleTransFileMember(final int transType ,final Context mContext , boolean isAdd , Long key , String tag){
+
+	public boolean changeGlobleTransFileMember(final int transType,
+			final Context mContext, boolean isAdd, Long key, String tag) {
 		key = GlobalHolder.getInstance().getCurrentUserId();
 		Map<Long, Integer> transingCollection = getFileTypeColl(transType);
 		Integer transing = transingCollection.get(key);
@@ -744,7 +749,8 @@ public class GlobalHolder {
 			typeString = mContext.getResources().getString(
 					R.string.application_global_holder_send_or_upload);
 		else
-			typeString = mContext.getResources().getString(R.string.application_global_holder_download);
+			typeString = mContext.getResources().getString(
+					R.string.application_global_holder_download);
 		if (transing == null) {
 			if (isAdd) {
 				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key
@@ -755,20 +761,24 @@ public class GlobalHolder {
 			}
 			return true;
 		} else {
-			if(isAdd){
-				if(transing >= GlobalConfig.MAX_TRANS_FILE_SIZE){
+			if (isAdd) {
+				if (transing >= GlobalConfig.MAX_TRANS_FILE_SIZE) {
 					new Thread(new Runnable() {
-						
+
 						@Override
 						public void run() {
-							Looper.prepare(); 
-//							if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
-//								Toast.makeText(mContext, "发送文件个数已达上限，当前正在传输的文件数量已达5个",
-//										Toast.LENGTH_LONG).show();
-//							else
-//								Toast.makeText(mContext, "下载文件个数已达上限，当前正在下载的文件数量已达5个",
-//										Toast.LENGTH_LONG).show();
-							Toast.makeText(mContext, R.string.application_global_holder_limit_number,
+							Looper.prepare();
+							// if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
+							// Toast.makeText(mContext,
+							// "发送文件个数已达上限，当前正在传输的文件数量已达5个",
+							// Toast.LENGTH_LONG).show();
+							// else
+							// Toast.makeText(mContext,
+							// "下载文件个数已达上限，当前正在下载的文件数量已达5个",
+							// Toast.LENGTH_LONG).show();
+							Toast.makeText(
+									mContext,
+									R.string.application_global_holder_limit_number,
 									Toast.LENGTH_LONG).show();
 							Looper.loop();
 						}
@@ -782,26 +792,26 @@ public class GlobalHolder {
 					transingCollection.put(key, transing);
 					return true;
 				}
-			}
-			else{
-				if(transing == 0)
+			} else {
+				if (transing == 0)
 					return false;
 				transing = transing - 1;
-				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key + " -的用户或群 , "
-						+ "传输类型 : " + typeString + " 正在传输文件减1 , 当前数量为: " + transing);
+				V2Log.d("TRANSING_FILE_SIZE", tag + " --> ID为- " + key
+						+ " -的用户或群 , " + "传输类型 : " + typeString
+						+ " 正在传输文件减1 , 当前数量为: " + transing);
 				transingCollection.put(key, transing);
 				return true;
 			}
 		}
-		
+
 	}
-	
-	private Map<Long, Integer> getFileTypeColl(int transType){
+
+	private Map<Long, Integer> getFileTypeColl(int transType) {
 		return GlobalConfig.mTransingFiles;
-//		if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
-//			return GlobalConfig.mTransingFiles;
-//		else
-//			return GlobalConfig.mDownLoadingFiles;
+		// if(transType == V2GlobalEnum.FILE_TRANS_SENDING)
+		// return GlobalConfig.mTransingFiles;
+		// else
+		// return GlobalConfig.mDownLoadingFiles;
 	}
 
 	/**

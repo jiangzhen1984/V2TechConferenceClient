@@ -54,7 +54,6 @@ import com.v2tech.R;
 public class ConferenceCreateActivity extends BaseCreateActivity {
 
 	private static final int CREATE_CONFERENC_RESP = 4;
-	private static final int END_CREATE_OPERATOR = 5;
 	private static final int START_GROUP_SELECT = 6;
 
 	private static final int OP_ADD_ALL_GROUP_USER = 1;
@@ -108,7 +107,8 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 		mConfTitleET = (EditText) findViewById(R.id.ws_common_create_edit_name_et);
 		mConfStartTimeET = (EditText) findViewById(R.id.conference_create_conf_start_time);
 		mConfStartTimeET.setOnTouchListener(mDateTimePickerListener);
-		mConfStartTimeET.setText(DateUtil.getStandardDate(new Date(GlobalConfig.getGlobalServerTime())));
+		mConfStartTimeET.setText(DateUtil.getStandardDate(new Date(GlobalConfig
+				.getGlobalServerTime())));
 
 		new LoadContactsAT().execute();
 	}
@@ -130,30 +130,53 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
-		
-		if(mState == State.CREATEING) {
-			Toast.makeText(mContext, "已经在创建中！",
-					Toast.LENGTH_SHORT).show();
-			return ;
+
+		if (mState == State.CREATEING) {
+			return;
 		}
 		mState = State.CREATEING;
 
+		mCreateWaitingDialog = ProgressDialog.show(mContext, "", mContext
+				.getResources()
+				.getString(R.string.notification_watiing_process), true);
 		final String title = mConfTitleET.getText().toString().trim();
+		final String startTimeStr = mConfStartTimeET.getText().toString();
+		boolean strongly = ConfStrongWatch(title, startTimeStr);
+		if (strongly == false) {
+			if (mCreateWaitingDialog != null
+					&& mCreateWaitingDialog.isShowing()) {
+				mCreateWaitingDialog.dismiss();
+			}
+			mState = State.DONE;
+			return;
+		}
+
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				List<User> userList = new ArrayList<User>(mAttendeeList);
+				conf = new Conference(title, startTimeStr, null, userList);
+				cs.createConference(conf, new MessageListener(mLocalHandler,
+						CREATE_CONFERENC_RESP, conf));
+			}
+		}).start();
+	}
+
+	private boolean ConfStrongWatch(final String title,
+			final String startTimeStr) {
 		if (title == null || title.length() == 0) {
 			mConfTitleET
 					.setError(getString(R.string.error_conf_title_required));
 			mConfTitleET.requestFocus();
-			mState = State.DONE;
-			return;
+			return false;
 		}
 
-		final String startTimeStr = mConfStartTimeET.getText().toString();
 		if (startTimeStr == null || startTimeStr.length() == 0) {
 			mConfStartTimeET
 					.setError(getString(R.string.error_conf_start_time_required));
 			mConfStartTimeET.requestFocus();
-			mState = State.DONE;
-			return;
+			return false;
 		}
 
 		DateFormat sd = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINESE);
@@ -165,33 +188,16 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 			mConfStartTimeET
 					.setError(getString(R.string.error_conf_start_time_format_failed));
 			mConfStartTimeET.requestFocus();
-			mState = State.DONE;
-			return;
+			return false;
 		}
 
 		if ((new Date().getTime() / 60000) - (st.getTime() / 60000) > 10) {
 			mConfStartTimeET
 					.setError(getString(R.string.error_conf_do_not_permit_create_piror_conf));
 			mConfStartTimeET.requestFocus();
-			mState = State.DONE;
-			return;
+			return false;
 		}
-
-		mCreateWaitingDialog = ProgressDialog.show(mContext, "", mContext
-				.getResources()
-				.getString(R.string.notification_watiing_process), true);
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				List<User> userList = new ArrayList<User>(mAttendeeList);
-				conf = new Conference(title, startTimeStr, null, userList);
-				Message.obtain(mLocalHandler, END_CREATE_OPERATOR)
-						.sendToTarget();
-				cs.createConference(conf, new MessageListener(mLocalHandler,
-						CREATE_CONFERENC_RESP, conf));
-			}
-		}).start();
+		return true;
 	}
 
 	@Override
@@ -264,7 +270,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 		if (u == null) {
 			return;
 		}
-		
+
 		if (op == OP_DEL_ALL_GROUP_USER) {
 			removeAttendee(u);
 		} else if (op == OP_ADD_ALL_GROUP_USER) {
@@ -322,15 +328,15 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 								int dayOfMonth, int hour, int minute) {
 							((EditText) view).setText(year
 									+ "-"
-									+ (monthOfYear < 10 ? ("0" + monthOfYear) : monthOfYear)
+									+ (monthOfYear < 10 ? ("0" + monthOfYear)
+											: monthOfYear)
 									+ "-"
 									+ dayOfMonth
 									+ " "
 									+ (hour < 10 ? ("0" + hour) : (hour + ""))
 									+ ":"
 									+ (minute < 10 ? ("0" + minute)
-											: (minute + ""))
-									+ ":00");
+											: (minute + "")) + ":00");
 						}
 
 					});
@@ -379,13 +385,6 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case CREATE_CONFERENC_RESP:
-				if (mCreateWaitingDialog != null
-						&& mCreateWaitingDialog.isShowing()) {
-					mCreateWaitingDialog.dismiss();
-				}
-				
-				mState = State.DONE;
-
 				JNIResponse rccr = (JNIResponse) msg.obj;
 				Conference conference = (Conference) rccr.callerObject;
 				if (rccr.getResult() != JNIResponse.Result.SUCCESS) {
@@ -401,7 +400,18 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 						mErrorNotification
 								.setText(R.string.error_create_conference_failed_from_server_side);
 					}
+					mState = State.DONE;
+					if (mCreateWaitingDialog != null
+							&& mCreateWaitingDialog.isShowing()) {
+						mCreateWaitingDialog.dismiss();
+					}
 					break;
+				}
+				// 防止界面在未销户之前，用户再次点击创建按钮
+				rightButtonTV.setClickable(false);
+				if (mCreateWaitingDialog != null
+						&& mCreateWaitingDialog.isShowing()) {
+					mCreateWaitingDialog.dismiss();
 				}
 
 				Date startDate;

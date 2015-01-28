@@ -5,7 +5,6 @@ import android.text.TextUtils;
 import com.bizcom.util.DateUtil;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.Group.GroupType;
-import com.v2tech.R;
 
 public class CrowdConversation extends Conversation {
 	

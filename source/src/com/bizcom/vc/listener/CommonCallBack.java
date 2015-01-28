@@ -25,6 +25,12 @@ public class CommonCallBack {
 	private CommonUpdateMessageBodyPopupWindowInterface messageBodyPopup;
 	private CommonUpdateCrowdFileStateInterface crowdFileState;
 	private CommonNotifyCrowdDetailNewMessage notifyCrowdDetailActivity;
+	private CommonNotifyChatInterToReplace notifyChatInterToReplace;
+
+	public void setNotifyChatInterToReplace(
+			CommonNotifyChatInterToReplace notifyChatInterToReplace) {
+		this.notifyChatInterToReplace = notifyChatInterToReplace;
+	}
 
 	public void setNotifyCrowdDetailActivity(
 			CommonNotifyCrowdDetailNewMessage notifyCrowdDetailActivity) {
@@ -73,6 +79,11 @@ public class CommonCallBack {
 	public void executeNotifyCrowdDetailActivity() {
 		if (notifyCrowdDetailActivity != null)
 			notifyCrowdDetailActivity.notifyCrowdDetailNewMessage();
+	}
+	
+	public void executeNotifyChatInterToReplace(VMessage vm){
+		if (notifyChatInterToReplace != null)
+			notifyChatInterToReplace.notifyChatInterToReplace(vm);
 	}
 
 	/**
@@ -126,6 +137,16 @@ public class CommonCallBack {
 	public static interface CommonNotifyCrowdDetailNewMessage {
 
 		public void notifyCrowdDetailNewMessage();
+	}
+	
+	/**
+	 * 该回调用于，离线消息中如果有二进制数据(图片和音频)，则在收到onRecvBinary回调后，会回调聊天界面将等待的图片替换
+	 * @author Administrator
+	 *
+	 */
+	public static interface CommonNotifyChatInterToReplace {
+
+		public void notifyChatInterToReplace(VMessage vm);
 	}
 	
 	public enum CrowdFileExeType{

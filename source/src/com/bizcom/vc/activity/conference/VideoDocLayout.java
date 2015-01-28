@@ -47,6 +47,8 @@ import com.v2tech.R;
 
 public class VideoDocLayout extends LinearLayout {
 
+	private static final String TAG = "VideoDocLayout";
+
 	private View rootView;
 
 	private DocListener listener;
@@ -436,10 +438,6 @@ public class VideoDocLayout extends LinearLayout {
 		updatePageButton();
 	}
 
-	int width;
-	int height;
-	int sampl;
-
 	private void updateCurrentDocPage(V2Doc.Page p) {
 
 		if (p == null) {
@@ -513,46 +511,26 @@ public class VideoDocLayout extends LinearLayout {
 				src.right = ops.outWidth;
 				src.top = 0;
 				src.bottom = ops.outHeight;
-				width = (int) src.right;
-				height = (int) src.bottom;
-
 				ops.inJustDecodeBounds = false;
-				BitmapFactory.Options opsNew = new BitmapFactory.Options();
-				opsNew.inPurgeable = true;
-				opsNew.inInputShareable = true;
-				opsNew.inMutable = true;
 
-				if (ops.outHeight < 600 || ops.outWidth < 1080) {
-					opsNew.inSampleSize = 1;
-				} else if (ops.outHeight < 1080 || ops.outWidth < 1920) {
-					opsNew.inSampleSize = 2;
-					sampl = 2;
-				} else if (ops.outHeight > 1080 || ops.outWidth > 1920) {
-					opsNew.inSampleSize = 2;
-					sampl = 2;
-				} else {
-					opsNew.inSampleSize = 2;
-					sampl = 2;
-				}
-
-				V2Log.d("updateCurrentDocPage --> doc file path : "
+				V2Log.d(TAG , "updateCurrentDocPage --> doc file path : "
 						+ p.getFilePath());
 
 				recycleBitmap(mBackgroundBitMap);
-				mBackgroundBitMap = BitmapFactory.decodeFile(p.getFilePath(),
-						opsNew);
-
+				mBackgroundBitMap = BitmapUtil.getCompressedBitmap(p.getFilePath());
 				Matrix m = new Matrix();
 				m.postRotate(BitmapUtil.getBitmapRotation(p.getFilePath()));
 				mBackgroundBitMap = Bitmap.createBitmap(mBackgroundBitMap, 0,
 						0, mBackgroundBitMap.getWidth(),
 						mBackgroundBitMap.getHeight(), m, true);
 
-				dest.left = (src.right - opsNew.outWidth) / 2;
-				dest.right = opsNew.outWidth;
-				dest.top = (src.bottom - opsNew.outHeight) / 2;
-				dest.bottom = opsNew.outHeight;
-				matrix.postScale(opsNew.outWidth / src.right, opsNew.outHeight
+				int[] params = new int[2];
+				BitmapUtil.getFullBitmapBounds(p.getFilePath(), params);
+				dest.left = (src.right - params[0]) / 2;
+				dest.right = params[0];
+				dest.top = (src.bottom - params[1]) / 2;
+				dest.bottom = params[1];
+				matrix.postScale(params[0] / src.right, params[1]
 						/ src.bottom);
 				matrix.mapRect(dest, src);
 
@@ -1126,7 +1104,6 @@ public class VideoDocLayout extends LinearLayout {
 						TouchImageView tiv = (TouchImageView) mDocDisplayContainer
 								.getChildAt(0);
 						tiv.setZoom(tiv.getCurrentZoom());
-						// tiv.setZoom(2F);
 					}
 				}
 			} else {
@@ -1136,7 +1113,6 @@ public class VideoDocLayout extends LinearLayout {
 						TouchImageView tiv = (TouchImageView) mDocDisplayContainer
 								.getChildAt(0);
 						tiv.setZoom(tiv.getCurrentZoom());
-						// tiv.setZoom(1F);
 					}
 				}
 			}

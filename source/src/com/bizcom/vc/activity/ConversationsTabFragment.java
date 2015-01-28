@@ -71,7 +71,6 @@ import com.bizcom.request.jni.RequestEnterConfResponse;
 import com.bizcom.util.DateUtil;
 import com.bizcom.util.MessageUtil;
 import com.bizcom.util.Notificator;
-import com.bizcom.util.ProgressUtils;
 import com.bizcom.util.SearchUtils;
 import com.bizcom.vc.activity.conference.ConferenceActivity;
 import com.bizcom.vc.activity.conference.GroupLayout;
@@ -85,9 +84,9 @@ import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.listener.CommonCallBack;
+import com.bizcom.vc.listener.CommonCallBack.CommonUpdateConversationToCreate;
 import com.bizcom.vc.listener.ConferenceListener;
 import com.bizcom.vc.listener.NotificationListener;
-import com.bizcom.vc.listener.CommonCallBack.CommonUpdateConversationToCreate;
 import com.bizcom.vc.service.JNIService;
 import com.bizcom.vo.AddFriendHistorieNode;
 import com.bizcom.vo.AudioVideoMessageBean;
@@ -97,26 +96,26 @@ import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.ContactConversation;
 import com.bizcom.vo.Conversation;
 import com.bizcom.vo.ConversationFirendAuthenticationData;
+import com.bizcom.vo.ConversationFirendAuthenticationData.VerificationMessageType;
 import com.bizcom.vo.CrowdConversation;
 import com.bizcom.vo.CrowdGroup;
 import com.bizcom.vo.DepartmentConversation;
 import com.bizcom.vo.DiscussionConversation;
 import com.bizcom.vo.DiscussionGroup;
 import com.bizcom.vo.Group;
+import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.OrgGroup;
 import com.bizcom.vo.User;
 import com.bizcom.vo.VMessage;
 import com.bizcom.vo.VMessageAbstractItem;
 import com.bizcom.vo.VMessageQualification;
+import com.bizcom.vo.VMessageQualification.QualificationState;
+import com.bizcom.vo.VMessageQualification.ReadState;
+import com.bizcom.vo.VMessageQualification.Type;
 import com.bizcom.vo.VMessageQualificationApplicationCrowd;
 import com.bizcom.vo.VMessageQualificationInvitationCrowd;
 import com.bizcom.vo.VMessageTextItem;
 import com.bizcom.vo.VideoBean;
-import com.bizcom.vo.ConversationFirendAuthenticationData.VerificationMessageType;
-import com.bizcom.vo.Group.GroupType;
-import com.bizcom.vo.VMessageQualification.QualificationState;
-import com.bizcom.vo.VMessageQualification.ReadState;
-import com.bizcom.vo.VMessageQualification.Type;
 import com.v2tech.R;
 
 public class ConversationsTabFragment extends Fragment implements TextWatcher,
@@ -729,14 +728,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			 * 除了个人Conversation布局，其他组类Conversation布局默认可能不会显示时间，或者内容
 			 * 所以这里需要将布局改变为个人的Conversation布局
 			 */
-			if (cov.getType() == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
-				if (mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER) {
+			if(mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER) {
+				if (cov.getType() == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
 					gp.updateDiscussionLayout(true);
-					gp.update();
 				} else {
-					gp.updateDiscussionLayout(false);
+					gp.updateCrowdLayout();
 				}
 				gp.update();
+			} else {
+				gp.updateGroupContent(g);
 			}
 
 			ScrollItem newItem = new ScrollItem(cov, gp);
@@ -911,7 +911,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			}
 
 			GroupLayout layout = new GroupLayout(mContext, cov);
-			layout.update();
 			// 需要调用updateGroupContent
 			Group fillGroup = null;
 			if (cov.getType() == V2GlobalConstants.GROUP_TYPE_CROWD) {
@@ -947,8 +946,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private void initVoiceItem() {
 		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE,
 				Conversation.SPECIFIC_VOICE_ID);
-		voiceMessageItem.setName("通话消息");
+		voiceMessageItem.setName(res.getString(R.string.specificItem_voice_title));
 		voiceLayout = new GroupLayout(mContext, voiceMessageItem);
+		voiceLayout.update();
 		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
 		voiceItem = new ScrollItem(voiceMessageItem, voiceLayout);
 	}
@@ -960,9 +960,10 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		verificationMessageItemData = new ConversationFirendAuthenticationData(
 				Conversation.TYPE_VERIFICATION_MESSAGE,
 				Conversation.SPECIFIC_VERIFICATION_ID);
-		verificationMessageItemData.setName("验证消息");
+		verificationMessageItemData.setName(res.getString(R.string.group_create_group_qualification));
 		verificationMessageItemLayout = new GroupLayout(mContext,
 				verificationMessageItemData);
+		verificationMessageItemLayout.update();
 		verificationMessageItemData.setReadFlag(Conversation.READ_FLAG_READ);
 		verificationItem = new ScrollItem(verificationMessageItemData,
 				verificationMessageItemLayout);
@@ -1460,16 +1461,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 				if (invitation.getQualState() == QualificationState.BE_ACCEPTED) {
 					content = crowdGroup.getName()
-							+ R.string.conversation_agree_with_your_application;
+							+ res.getString(R.string.conversation_agree_with_your_application);
 				} else if ((invitation.getQualState() == QualificationState.BE_REJECT)
 						|| (invitation.getQualState() == QualificationState.WAITING_FOR_APPLY)) {
 					content = crowdGroup.getName()
-							+ R.string.conversation_deny_your_application;
+							+ res.getString(R.string.conversation_deny_your_application);
 				} else {
 					content = invitationName
-							+ R.string.conversation_invite_to_join
-							+ crowdGroup.getName()
-							+ R.string.conversation_group;
+							+ String.format(res.getString(R.string.conversation_invite_to_join), 
+							crowdGroup.getName());
 				}
 			}
 			break;
@@ -1503,18 +1503,15 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 
 				if (apply.getQualState() == QualificationState.BE_REJECT)
-					content = applyName + R.string.conversation_refused_to_join
-							+ applyGroup.getName()
-							+ R.string.conversation_group;
+					content = applyName + String.format(res.getString(R.string.conversation_refused_to_join), 
+							applyGroup.getName());
 				else if (apply.getQualState() == QualificationState.BE_ACCEPTED)
-					content = applyName + R.string.conversation_agree_to_join
-							+ applyGroup.getName()
-							+ R.string.conversation_group;
+					content = applyName + String.format(res.getString(R.string.conversation_agree_to_join), 
+							applyGroup.getName());
 				else
 					content = applyName
-							+ R.string.conversation_application_to_join
-							+ applyGroup.getName()
-							+ R.string.conversation_group;
+							+ String.format(res.getString(R.string.conversation_agree_to_join), 
+									applyGroup.getName());
 			}
 			break;
 		default:
@@ -1647,7 +1644,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							public void run() {
 								g.setOwnerUser(u);
 								currentGroupLayout.updateGroupContent(g);
-								currentGroupLayout.updateGroupName(g.getName());
 							}
 						});
 					} else if (mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER) {
@@ -1667,7 +1663,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 												mContext,
 												V2GlobalConstants.GROUP_TYPE_CROWD,
 												crowd.getExtId());
-								crowd.setName(newGroup.getName());
 								updateGroupInfo(currentGroupLayout, crowd, vm);
 							}
 						}

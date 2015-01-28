@@ -197,11 +197,10 @@ public class ConversationSelectFile extends Activity {
 				mCheckedNameList.add(bean.fileName);
 				totalSize += bean.fileSize;
 			}
-			selectedFileSize.setText(R.string.conversation_select_file_chosen
+			selectedFileSize.setText(getResources().getString(R.string.conversation_select_file_chosen)
 					+ getFileSize(totalSize));
-			sendButton.setText(R.string.conversation_select_file_send
-					+ mCheckedList.size()
-					+ R.string.conversation_select_file_brackets);
+			sendButton.setText(String.format(getResources().getString(R.string.conversation_select_file_send),
+					mCheckedList.size()));
 		}
 
 		if ("image".equals(type)) {
@@ -963,11 +962,10 @@ public class ConversationSelectFile extends Activity {
 			mCheckedNameList.add(bean.fileName);
 			totalSize += bean.fileSize;
 		}
-		selectedFileSize.setText(R.string.conversation_select_file_chosen
+		selectedFileSize.setText(getResources().getString(R.string.conversation_select_file_chosen)
 				+ getFileSize(totalSize));
-		sendButton.setText(R.string.conversation_select_file_send
-				+ mCheckedList.size()
-				+ R.string.conversation_select_file_brackets);
+		sendButton.setText(String.format(getResources().getString(R.string.conversation_select_file_send),
+				mCheckedList.size()));
 
 	}
 

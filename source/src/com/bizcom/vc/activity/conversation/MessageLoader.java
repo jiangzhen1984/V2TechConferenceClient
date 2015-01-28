@@ -1275,13 +1275,11 @@ public class MessageLoader {
 	 * @param audioItem
 	 * @return
 	 */
-	public static int updateBinaryAudioState(Context context, VMessage vm,
-			VMessageAudioItem audioItem) {
+	public static int updateBinaryAudioItem(VMessageAudioItem audioItem) {
 
 		if (audioItem == null)
 			return -1;
 
-		DataBaseContext mContext = new DataBaseContext(context);
 		ContentValues values = new ContentValues();
 		values.put(
 				ContentDescriptor.HistoriesAudios.Cols.HISTORY_AUDIO_READ_STATE,
@@ -1291,6 +1289,31 @@ public class MessageLoader {
 		String[] selectionArgs = new String[] { audioItem.getUuid() };
 		return mContext.getContentResolver().update(
 				ContentDescriptor.HistoriesAudios.CONTENT_URI, values, where,
+				selectionArgs);
+	}
+
+	/**
+	 * update the given image message filePath...
+	 * 
+	 * @param context
+	 * @param vm
+	 * @param audioItem
+	 * @return
+	 */
+	public static int updateBinaryImageItem(VMessageImageItem imageItem) {
+
+		if (imageItem == null)
+			return -1;
+
+		ContentValues values = new ContentValues();
+		values.put(
+				ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_PATH,
+				imageItem.getFilePath());
+		String where = ContentDescriptor.HistoriesGraphic.Cols.HISTORY_GRAPHIC_ID
+				+ "= ?";
+		String[] selectionArgs = new String[] { imageItem.getUuid() };
+		return mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesGraphic.CONTENT_URI, values, where,
 				selectionArgs);
 	}
 

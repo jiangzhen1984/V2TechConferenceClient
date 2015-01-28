@@ -403,9 +403,9 @@
     <string name="crowd_invitation_invalid_notes">已失效</string>
     <string name="crowd_invitation_reject_button_name">Decline</string>
     <string name="crowd_invitation_reject_button_done">Done</string>
-    <string name="crowd_invitation_apply_join">申请加入</string>
-    <string name="crowd_invitation_accept_join">同意加入</string>
-    <string name="crowd_invitation_reject_join">拒绝加入</string>
+    <string name="crowd_invitation_apply_join">申请加入%1$s群</string>
+    <string name="crowd_invitation_accept_join">同意加入%1$s群</string>
+    <string name="crowd_invitation_reject_join">拒绝加入%1$s群</string>
     <string name="crowd_applicant_invite_title">群验证消息</string>
     <string name="crowd_invitation_titile">群邀请</string>
     <string name="crowd_invitation_accept_notes">已同意该邀请</string>
