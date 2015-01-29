@@ -69,9 +69,9 @@ import com.bizcom.vo.VMessageImageItem;
  * 
  */
 public class ChatService extends DeviceService {
-	
+
 	private static final String TAG = "ChatService";
-	
+
 	private AudioRequestCallback callback;
 
 	private VideoRequestCallback videoCallback;
@@ -81,7 +81,7 @@ public class ChatService extends DeviceService {
 	private MessageListener mCaller;
 
 	private Handler thread;
-	
+
 	private HandlerThread backEndThread;
 
 	private static final int KEY_CANCELLED_LISTNER = 1;
@@ -179,8 +179,9 @@ public class ChatService extends DeviceService {
 		unRegisterListener(KEY_P2P_CALL_RESPONSE, h, what, obj);
 
 	}
-	
-	public void registerP2PRecordResponseListener(Handler h, int what, Object obj) {
+
+	public void registerP2PRecordResponseListener(Handler h, int what,
+			Object obj) {
 		registerListener(KEY_P2P_RECORD_CALL_RESPONSE, h, what, obj);
 	}
 
@@ -197,7 +198,8 @@ public class ChatService extends DeviceService {
 	 */
 	public void sendVMessage(final VMessage msg, final MessageListener caller) {
 		if (msg == null) {
-			V2Log.e(TAG , "Send Message fail ! Because VMessage Object is null ! please check!");
+			V2Log.e(TAG,
+					"Send Message fail ! Because VMessage Object is null ! please check!");
 			return;
 		}
 		thread.post(new Runnable() {
@@ -217,13 +219,15 @@ public class ChatService extends DeviceService {
 						msg.getToUser() == null ? 0 : msg.getToUser()
 								.getmUserId(), msg.getUUID(), msg.toXml(),
 						msg.getTextContent().length());
-				V2Log.d(TAG, "OnSendChat ChatService---> eGroupType :"+ msg.getMsgCode() 
-                		+ " | nGroupID: " + msg.getGroupId()
-                		+ " | sSeqID: " + msg.getUUID()
-                		+ " | sendContent: " + msg.getTextContent());
+				V2Log.d(TAG,
+						"OnSendChat ChatService---> eGroupType :"
+								+ msg.getMsgCode() + " | nGroupID: "
+								+ msg.getGroupId() + " | sSeqID: "
+								+ msg.getUUID() + " | sendContent: "
+								+ msg.getTextContent());
 				// send image message
 				List<VMessageImageItem> imageItems = msg.getImageItems();
-				for (int i = 0 ; imageItems != null && i < imageItems.size() ; i++) {
+				for (int i = 0; imageItems != null && i < imageItems.size(); i++) {
 					VMessageImageItem item = imageItems.get(i);
 					// byte[] data = item.loadImageData();
 					ChatRequest.getInstance().sendBinaryMessage(
@@ -232,10 +236,12 @@ public class ChatService extends DeviceService {
 							msg.getToUser() == null ? 0 : msg.getToUser()
 									.getmUserId(), 2, item.getUuid(),
 							item.getFilePath(), 0);
-                    V2Log.d(TAG, "OnSendBinary ChatService---> eGroupType :"+ msg.getMsgCode() 
-                    		+ " | nGroupID: " + msg.getGroupId()
-                    		+ " | MessageID: " + msg.getUUID()
-                    		+ " | sSeqID: " + item.getUuid());
+					V2Log.d(TAG,
+							"OnSendBinary ChatService---> eGroupType :"
+									+ msg.getMsgCode() + " | nGroupID: "
+									+ msg.getGroupId() + " | MessageID: "
+									+ msg.getUUID() + " | sSeqID: "
+									+ item.getUuid());
 				}
 
 				// send aduio message
@@ -248,10 +254,12 @@ public class ChatService extends DeviceService {
 									.getmUserId(), 3,
 							audioList.get(i).getUuid(),
 							audioList.get(i).getAudioFilePath(), 0);
-                    V2Log.d(TAG, "OnSendBinary ChatService---> eGroupType :"+ msg.getMsgCode() 
-                    		+ " | nGroupID: " + msg.getGroupId()
-                    		+ " | MessageID: " + msg.getUUID()
-                    		+ " | sSeqID: " + audioList.get(i).getUuid());
+					V2Log.d(TAG,
+							"OnSendBinary ChatService---> eGroupType :"
+									+ msg.getMsgCode() + " | nGroupID: "
+									+ msg.getGroupId() + " | MessageID: "
+									+ msg.getUUID() + " | sSeqID: "
+									+ audioList.get(i).getUuid());
 				}
 			}
 		});
@@ -265,13 +273,14 @@ public class ChatService extends DeviceService {
 						RequestChatServiceResponse.Result.INCORRECT_PAR);
 				sendResult(caller, resp);
 			} else {
-				V2Log.e(TAG , "Incorrect parameters");
+				V2Log.e(TAG, "Incorrect parameters");
 			}
 			return;
 		}
 
 		for (VMessageFileItem item : items) {
-			String xml = EscapedcharactersProcessing.convertAmp(item.toXmlItem());
+			String xml = EscapedcharactersProcessing.convertAmp(item
+					.toXmlItem());
 			if (vm.getToUser() == null) {
 				GroupRequest.getInstance().groupUploadFile(vm.getMsgCode(),
 						vm.getGroupId(), xml);
@@ -325,8 +334,10 @@ public class ChatService extends DeviceService {
 			FileRequest.getInstance().cancelRecvFile(vfi.getUuid());
 			break;
 		case OPERATION_START_DOWNLOAD:
-//			if(vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED)
-//				FileRequest.getInstance().httpDownloadFile(url, sfileid, filePath, encrypttype);
+			// if(vfi.getState() ==
+			// VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED)
+			// FileRequest.getInstance().httpDownloadFile(url, sfileid,
+			// filePath, encrypttype);
 			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
 					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
 		default:
@@ -348,12 +359,12 @@ public class ChatService extends DeviceService {
 	 */
 	public void inviteUserChat(UserChattingObject ud, MessageListener caller) {
 		JNIResponse resp = null;
-//		if (mCaller != null) {
-//			V2Log.e(" audio call is on going");
-//			resp = new RequestChatServiceResponse(
-//					RequestChatServiceResponse.Result.INCORRECT_PAR);
-//		}
-		
+		// if (mCaller != null) {
+		// V2Log.e(" audio call is on going");
+		// resp = new RequestChatServiceResponse(
+		// RequestChatServiceResponse.Result.INCORRECT_PAR);
+		// }
+
 		if (ud == null) {
 			resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
@@ -393,7 +404,7 @@ public class ChatService extends DeviceService {
 	 * @param ud
 	 * @param caller
 	 */
-	public void cancelChattingCall(UserChattingObject ud, MessageListener caller) {
+	public void closeChat(UserChattingObject ud, MessageListener caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
@@ -526,12 +537,12 @@ public class ChatService extends DeviceService {
 			AudioRequest.getInstance().PausePlayout();
 		}
 	}
-	
-	public void startAudioRecord(String fileID){
+
+	public void startAudioRecord(String fileID) {
 		AudioRequest.getInstance().RecordFile(fileID);
 	}
-	
-	public void stopAudioRecord(String fileID){
+
+	public void stopAudioRecord(String fileID) {
 		AudioRequest.getInstance().StopRecord(fileID);
 	}
 
@@ -627,6 +638,7 @@ public class ChatService extends DeviceService {
 
 		@Override
 		public void OnAudioChatClosed(AudioJNIObjectInd ind) {
+
 			notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
 			// Clean cache
 			mCaller = null;
@@ -634,12 +646,14 @@ public class ChatService extends DeviceService {
 
 		@Override
 		public void OnRecordStart(AudioJNIObjectInd ind) {
-			notifyListener(KEY_P2P_RECORD_CALL_RESPONSE, ind.getResult(), V2GlobalConstants.RECORD_TYPE_START, ind.getSzSessionID());
+			notifyListener(KEY_P2P_RECORD_CALL_RESPONSE, ind.getResult(),
+					V2GlobalConstants.RECORD_TYPE_START, ind.getSzSessionID());
 		}
 
 		@Override
 		public void OnRecordStop(AudioJNIObjectInd ind) {
-			notifyListener(KEY_P2P_RECORD_CALL_RESPONSE, ind.getResult(), V2GlobalConstants.RECORD_TYPE_STOP, ind.getSzSessionID());
+			notifyListener(KEY_P2P_RECORD_CALL_RESPONSE, ind.getResult(),
+					V2GlobalConstants.RECORD_TYPE_STOP, ind.getSzSessionID());
 		}
 	}
 
@@ -669,27 +683,27 @@ public class ChatService extends DeviceService {
 							FileTransStatusIndication.IND_TYPE_PROGRESS_END));
 		}
 
-//		@Override
-//		public void OnFileDownloadError(String szFileID, int errorCode,
-//				int nTransType) {
-//			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-//					new FileDownLoadErrorIndication(szFileID, errorCode,
-//							nTransType));
-//		}
+		// @Override
+		// public void OnFileDownloadError(String szFileID, int errorCode,
+		// int nTransType) {
+		// notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+		// new FileDownLoadErrorIndication(szFileID, errorCode,
+		// nTransType));
+		// }
 
-//		@Override
-//		public void OnFileTransError(String szFileID, int errorCode,
-//				int nTransType) {
-//			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-//					new FileTransErrorIndication(szFileID, errorCode,
-//							nTransType));
-//		}
-//
-//		@Override
-//		public void OnFileTransCancel(String szFileID) {
-//			notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
-//					new FileTransCannelIndication(szFileID));
-//		}
+		// @Override
+		// public void OnFileTransError(String szFileID, int errorCode,
+		// int nTransType) {
+		// notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+		// new FileTransErrorIndication(szFileID, errorCode,
+		// nTransType));
+		// }
+		//
+		// @Override
+		// public void OnFileTransCancel(String szFileID) {
+		// notifyListener(KEY_FILE_TRANS_STATUS_NOTIFICATION_LISTNER, 0, 0,
+		// new FileTransCannelIndication(szFileID));
+		// }
 	}
 
 }

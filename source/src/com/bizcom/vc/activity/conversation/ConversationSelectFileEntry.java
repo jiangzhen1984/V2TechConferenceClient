@@ -114,8 +114,11 @@ public class ConversationSelectFileEntry extends Activity implements
 				selectedFileSize
 						.setText(getResources().getString(R.string.conversation_select_file_entry_chosen)
 								+ getFileSize(totalSize));
-				sendButton.setText(String.format(getResources().getString(R.string.conversation_select_file_send),
-						mCheckedList.size()));
+				sendButton.setText(String.format(
+						getResources().getString(
+								R.string.conversation_select_file_entry_send),
+						 mCheckedList.size()));
+
 			} else if (mCheckedList != null && mCheckedList.size() == 0) {
 				lastSize = 0;
 				sendButton.setClickable(false);

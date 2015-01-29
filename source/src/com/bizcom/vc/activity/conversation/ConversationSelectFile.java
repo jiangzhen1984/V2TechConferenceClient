@@ -112,7 +112,7 @@ public class ConversationSelectFile extends Activity {
 					holder.fileIcon.setImageBitmap(bt);
 					bitmapMapping.put(bt, holder);
 				} else {
-					startLoadBitmap(holder, fb , position);
+					startLoadBitmap(holder, fb, position);
 				}
 				break;
 			case REMOVE_BITMAP:
@@ -121,11 +121,11 @@ public class ConversationSelectFile extends Activity {
 				if (cach != null) {
 					cach.fileIcon.setImageResource(R.drawable.ic_launcher);
 				}
-				
-				if (!bitmap.isRecycled()) {  
+
+				if (!bitmap.isRecycled()) {
 					bitmap.recycle();
 					bitmap = null;
-				} 
+				}
 				break;
 			default:
 				break;
@@ -135,10 +135,15 @@ public class ConversationSelectFile extends Activity {
 	private LinearLayout loading;
 	private ExecutorService service;
 	protected int isLoading;
-	private String[][] selectArgs = {{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/png"} ,
-			{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/jpeg"} ,
-			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/png"} ,
-			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/jpeg"}};
+	private String[][] selectArgs = {
+			{ String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI),
+					"image/png" },
+			{ String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI),
+					"image/jpeg" },
+			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
+					"image/png" },
+			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
+					"image/jpeg" } };
 	private Context mContext;
 
 	@Override
@@ -181,7 +186,7 @@ public class ConversationSelectFile extends Activity {
 		// 获取Intent携带的数据
 		Intent intent = getIntent();
 		mCheckedList = intent.getParcelableArrayListExtra("checkedFiles");
-		if(mCheckedList == null)
+		if (mCheckedList == null)
 			mCheckedList = new ArrayList<FileInfoBean>();
 		type = intent.getStringExtra("type");
 		uid = getIntent().getLongExtra("uid", -1);
@@ -199,8 +204,11 @@ public class ConversationSelectFile extends Activity {
 			}
 			selectedFileSize.setText(getResources().getString(R.string.conversation_select_file_chosen)
 					+ getFileSize(totalSize));
-			sendButton.setText(String.format(getResources().getString(R.string.conversation_select_file_send),
-					mCheckedList.size()));
+			sendButton.setText(String.format(
+				getResources()
+						.getString(R.string.conversation_select_file_send),
+				mCheckedList.size()));
+
 		}
 
 		if ("image".equals(type)) {
@@ -213,8 +221,9 @@ public class ConversationSelectFile extends Activity {
 				public void run() {
 					loading.setVisibility(View.VISIBLE);
 					for (int i = 0; i < selectArgs.length; i++) {
-						
-						getAllImages(Uri.parse(selectArgs[i][0]) , selectArgs[i][1]);
+
+						getAllImages(Uri.parse(selectArgs[i][0]),
+								selectArgs[i][1]);
 					}
 					handler.sendEmptyMessage(SCAN_SDCARD);
 
@@ -229,17 +238,17 @@ public class ConversationSelectFile extends Activity {
 			updateFileItems(mCurrentPath);
 			adapter = new FileListAdapter();
 			filesList.setAdapter(adapter);
-		} else if("crowdFile".equals(type)){
+		} else if ("crowdFile".equals(type)) {
 
 			titleText.setText(R.string.conversation_select_file_upload_file);
 			filesGrid.setVisibility(View.GONE);
 			backButton.setVisibility(View.INVISIBLE);
 			filesList.setVisibility(View.VISIBLE);
 
-            updateFileItems(mCurrentPath);
-            adapter = new FileListAdapter();
-            filesList.setAdapter(adapter);
-        }
+			updateFileItems(mCurrentPath);
+			adapter = new FileListAdapter();
+			filesList.setAdapter(adapter);
+		}
 
 	}
 
@@ -270,7 +279,7 @@ public class ConversationSelectFile extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				
+
 				V2Log.d(TAG, "当前文件路径：" + mCurrentPath);
 				if (StorageUtil.getSdcardPath()
 						.equals(mCurrentPath.substring(0,
@@ -281,12 +290,12 @@ public class ConversationSelectFile extends Activity {
 							&& backButton.getVisibility() == View.VISIBLE)
 						backButton.setVisibility(View.INVISIBLE);
 				}
-				
+
 				if (StorageUtil.getSdcardPath().equals(mCurrentPath)) {
-                    // 如果已经是顶级路径，则结束掉当前界面
-                    reutrnResult(1);
-                    return;
-                }
+					// 如果已经是顶级路径，则结束掉当前界面
+					reutrnResult(1);
+					return;
+				}
 				File file = new File(mCurrentPath);
 				mCurrentPath = file.getParent();
 				updateFileItems(file.getParent());
@@ -299,13 +308,15 @@ public class ConversationSelectFile extends Activity {
 
 			@Override
 			public void onClick(View v) {
-				
+
 				if (!GlobalHolder.getInstance().isServerConnected()) {
-					Toast.makeText(mContext, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
-					return ;
+					Toast.makeText(mContext,
+							R.string.error_local_connect_to_server,
+							Toast.LENGTH_SHORT).show();
+					return;
 				}
-				
-				if(!isSended)
+
+				if (!isSended)
 					reutrnResult(3);
 				else
 					V2Log.e(TAG, "已经开始发送，不能再点了");
@@ -334,8 +345,9 @@ public class ConversationSelectFile extends Activity {
 
 				} else { // position小于文件夹集合mFolderLists的长度，则就是文件夹
 
-                    if("crowdFile".equals(type) && backButton.getVisibility() == View.INVISIBLE)
-                        backButton.setVisibility(View.VISIBLE);
+					if ("crowdFile".equals(type)
+							&& backButton.getVisibility() == View.INVISIBLE)
+						backButton.setVisibility(View.VISIBLE);
 					FileInfoBean bean = mFolderLists.get(position);
 					backButton
 							.setText(R.string.conversation_select_file_upper_level);
@@ -353,7 +365,7 @@ public class ConversationSelectFile extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				
+
 				notifyListChange(view, position);
 				imageAdapter.notifyDataSetChanged();
 			}
@@ -384,12 +396,12 @@ public class ConversationSelectFile extends Activity {
 	 * @description:通过contentprovider获得sd卡上的图片
 	 * @return:void
 	 */
-	private void getAllImages(Uri uri , String select) {
+	private void getAllImages(Uri uri, String select) {
 
 		if (mFileLists == null) {
 			mFileLists = new ArrayList<FileInfoBean>();
-		} 
-		
+		}
+
 		// 获取ContentResolver
 		ContentResolver contentResolver = getContentResolver();
 		// 查询的字段
@@ -399,7 +411,7 @@ public class ConversationSelectFile extends Activity {
 		// 条件
 		String selection = MediaStore.Images.Media.MIME_TYPE + "=?";
 		// 条件值(這裡的参数不是图片的格式，而是标准，所有不要改动)
-		String[] selectionArgs = {select};
+		String[] selectionArgs = { select };
 		// 排序
 		String sortOrder = MediaStore.Images.Media.DATE_MODIFIED + " desc";
 		// 查询sd卡上的图片
@@ -435,16 +447,15 @@ public class ConversationSelectFile extends Activity {
 	 */
 	private void updateFileItems(String path) {
 
-		if (mFileLists == null) 
+		if (mFileLists == null)
 			mFileLists = new ArrayList<FileInfoBean>();
 		else
 			mFileLists.clear();
-				
-		if(mFolderLists == null)
+
+		if (mFolderLists == null)
 			mFolderLists = new ArrayList<FileInfoBean>();
 		else
 			mFolderLists.clear();
-		
 
 		File[] files = folderScan(path);
 		if (files == null) {
@@ -553,7 +564,7 @@ public class ConversationSelectFile extends Activity {
 
 			if (position >= mFolderLists.size()) {
 				int check = position - mFolderLists.size();
-				if(check > mFileLists.size())
+				if (check > mFileLists.size())
 					return convertView;
 				if (mFileLists.get(check).isCheck == ITEM_CHECKED) {
 					holder.fileCheck.setChecked(true);
@@ -598,8 +609,7 @@ public class ConversationSelectFile extends Activity {
 		}
 
 		@Override
-		public View getView(int position, View convertView,
-				ViewGroup parent) {
+		public View getView(int position, View convertView, ViewGroup parent) {
 
 			final ViewHolder holder;
 			if (convertView == null) {
@@ -635,27 +645,26 @@ public class ConversationSelectFile extends Activity {
 						Toast.LENGTH_SHORT).show();
 				finish();
 			}
-			
+
 			FileInfoBean fb = mFileLists.get(position);
-			if(TextUtils.isEmpty(fb.fileName)){
-				if(TextUtils.isEmpty(fb.filePath)){
+			if (TextUtils.isEmpty(fb.fileName)) {
+				if (TextUtils.isEmpty(fb.filePath)) {
 					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
 					V2Log.e(TAG, "error that this file name is vaild!");
 					return convertView;
-				}
-				else{
-					fb.fileName = fb.filePath.substring(fb.filePath.lastIndexOf("/") + 1);
+				} else {
+					fb.fileName = fb.filePath.substring(fb.filePath
+							.lastIndexOf("/") + 1);
 				}
 			}
-			
+
 			Bitmap bit = bitmapLru.get(fb.fileName);
 			if (bit == null || bit.isRecycled()) {
 
-				if (isLoading != SCROLL_STATE_TOUCH_SCROLL && isLoading != 1){
+				if (isLoading != SCROLL_STATE_TOUCH_SCROLL && isLoading != 1) {
 					// 开始加载图片
-					startLoadBitmap(holder, fb , position);
-				}
-				else
+					startLoadBitmap(holder, fb, position);
+				} else
 					// 加载中显示的图片
 					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
 
@@ -676,7 +685,8 @@ public class ConversationSelectFile extends Activity {
 		}
 	}
 
-	public void startLoadBitmap(final ViewHolder holder, final FileInfoBean fb , final int position) {
+	public void startLoadBitmap(final ViewHolder holder, final FileInfoBean fb,
+			final int position) {
 		service.execute(new Runnable() {
 
 			@Override
@@ -686,23 +696,25 @@ public class ConversationSelectFile extends Activity {
 
 					Bitmap bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
 					if (fb.fileName == null && bitmap != null) {
-						if (!bitmap.isRecycled()) {  
+						if (!bitmap.isRecycled()) {
 							bitmap.recycle();
 							bitmap = null;
-						} 
+						}
 						return;
 					}
-					
-					if(bitmap == null || bitmap.isRecycled()){
-						V2Log.e(TAG, "get null when loading "+fb.fileName+" picture.");
+
+					if (bitmap == null || bitmap.isRecycled()) {
+						V2Log.e(TAG, "get null when loading " + fb.fileName
+								+ " picture.");
 						mFileLists.remove(position);
 						Message.obtain(handler, UPDATE_REMOVE).sendToTarget();
-						return ;
+						return;
 					}
 
 					bitmapLru.put(fb.fileName, bitmap);
 					Message.obtain(handler, UPDATE_BITMAP,
-							new Object[] { holder, bitmap, fb , position}).sendToTarget();
+							new Object[] { holder, bitmap, fb, position })
+							.sendToTarget();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -721,10 +733,10 @@ public class ConversationSelectFile extends Activity {
 
 	private void reutrnResult(int resultCode) {
 		isSended = true;
-		if(resultCode == 3){
+		if (resultCode == 3) {
 			boolean flag = checkEmptyFile();
-			if(!flag)
-				return ;
+			if (!flag)
+				return;
 		}
 		Intent intent = new Intent();
 		intent.putParcelableArrayListExtra("checkedFiles", mCheckedList);
@@ -737,14 +749,14 @@ public class ConversationSelectFile extends Activity {
 		}
 		onBackPressed();
 	}
-	
-	private boolean checkEmptyFile(){
-		
+
+	private boolean checkEmptyFile() {
+
 		for (int i = 0; i < mCheckedList.size(); i++) {
-			
+
 			FileInfoBean fileInfoBean = mCheckedList.get(i);
-			if(fileInfoBean.fileSize <= 0){
-				
+			if (fileInfoBean.fileSize <= 0) {
+
 				CreateHintDialog(fileInfoBean.fileName);
 				return false;
 			}
@@ -753,14 +765,14 @@ public class ConversationSelectFile extends Activity {
 	}
 
 	private void CreateHintDialog(String fileName) {
-		
+
 		if (mDialog != null) {
 			mDialog.show();
 			return;
 		}
-		
+
 		final Dialog dialog = new Dialog(this, R.style.IpSettingDialog);
-		dialog.setContentView(R.layout.activity_selectfile_emptydialog);	
+		dialog.setContentView(R.layout.activity_selectfile_emptydialog);
 		Button cancelButton = (Button) dialog
 				.findViewById(R.id.ws_selectFile_empty_cannel);
 		Button saveButton = (Button) dialog
@@ -773,43 +785,42 @@ public class ConversationSelectFile extends Activity {
 				+ R.string.conversation_select_file_empty_file);
 
 		cancelButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
 				isSended = false;
 				dialog.dismiss();
 			}
 		});
-		
+
 		saveButton.setOnClickListener(new OnClickListener() {
-			
+
 			@Override
 			public void onClick(View v) {
-				
+
 				isSended = false;
-				if(mCheckedList != null)
+				if (mCheckedList != null)
 					mCheckedList.clear();
-				if(mCheckedNameList != null)
+				if (mCheckedNameList != null)
 					mCheckedNameList.clear();
 				selectedFileSize
 						.setText(R.string.conversation_select_file_selected);
 				sendButton.setText(R.string.conversation_select_file_send_out);
 				changeSendUnable();
 				dialog.dismiss();
-				if(type.equals("image")){
+				if (type.equals("image")) {
 					for (FileInfoBean bean : mFileLists) {
-						if(bean.isCheck == ITEM_CHECKED)
+						if (bean.isCheck == ITEM_CHECKED)
 							bean.isCheck = ITEM_UNCHECKED;
 					}
 					imageAdapter.notifyDataSetChanged();
-				}
-				else{
+				} else {
 					updateFileItems(mCurrentPath);
 					adapter.notifyDataSetChanged();
 				}
 			}
 		});
-		
+
 		mDialog = dialog;
 		mDialog.show();
 	}
@@ -921,7 +932,7 @@ public class ConversationSelectFile extends Activity {
 
 		// 判断当前item被选择的状态
 		if (button.isChecked()) {
-			
+
 			button.setChecked(false);
 			bean.isCheck = ITEM_UNCHECKED;
 			for (int i = 0; i < mCheckedList.size(); i++) {
@@ -935,8 +946,9 @@ public class ConversationSelectFile extends Activity {
 				changeSendUnable();
 			}
 		} else {
-			Integer transing = GlobalConfig.mTransingFiles.get(GlobalHolder.getInstance().getCurrentUserId());
-			if(transing == null){
+			Integer transing = GlobalConfig.mTransingFiles.get(GlobalHolder
+					.getInstance().getCurrentUserId());
+			if (transing == null) {
 				transing = 0;
 				GlobalConfig.mTransingFiles.put(uid, transing);
 			}
@@ -950,7 +962,7 @@ public class ConversationSelectFile extends Activity {
 						Toast.LENGTH_LONG).show();
 				return;
 			}
-			
+
 			// 如果当前item没有被选中，则进一步判断一下当前mCheckedList长度是否为0，如果为0则变为可点击
 			if (mCheckedList.size() == 0) {
 
@@ -962,9 +974,12 @@ public class ConversationSelectFile extends Activity {
 			mCheckedNameList.add(bean.fileName);
 			totalSize += bean.fileSize;
 		}
-		selectedFileSize.setText(getResources().getString(R.string.conversation_select_file_chosen)
+		selectedFileSize.setText(getResources().getString(
+				R.string.conversation_select_file_chosen)
 				+ getFileSize(totalSize));
-		sendButton.setText(String.format(getResources().getString(R.string.conversation_select_file_send),
+		sendButton.setText(String.format(
+				getResources()
+						.getString(R.string.conversation_select_file_send),
 				mCheckedList.size()));
 
 	}

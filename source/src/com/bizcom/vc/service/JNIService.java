@@ -429,7 +429,7 @@ public class JNIService extends Service implements
 							ImRequest.getInstance().getUserBaseInfo(
 									existU.getmUserId());
 						}
-						
+
 						if (existU.getmUserId() == GlobalHolder.getInstance()
 								.getCurrentUserId()) {
 							// Update logged user object.
@@ -444,15 +444,17 @@ public class JNIService extends Service implements
 							existU.setDeviceType(User.DeviceType
 									.fromInt(userStatusObject.getDeviceType()));
 						}
-						
+
 						if (group == null) {
-							V2Log.e(TAG , "didn't find group information  " + go.gId);
+							V2Log.e(TAG, "didn't find group information  "
+									+ go.gId);
 						} else {
 							group.addUserToGroup(existU);
 						}
 					}
-					V2Log.w(TAG , "The Group -" + go.gId + "- users info have update over! "
-							+ " type is : " + go.gType + "- user size is : " + lu.size());
+					V2Log.w(TAG, "The Group -" + go.gId
+							+ "- users info have update over! " + " type is : "
+							+ go.gType + "- user size is : " + lu.size());
 					if (!noNeedBroadcast) {
 						V2Log.d(TAG,
 								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
@@ -631,15 +633,17 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnConnectResponseCallback(int nResult) {
-			V2Log.d("CONNECT", "--------------------------------------------------------------------");
-			V2Log.d("CONNECT", "Receive Connection State is : " + nResult + " -- name is : " + 
-					NetworkStateCode.fromInt(nResult).name());
+			V2Log.d("CONNECT",
+					"--------------------------------------------------------------------");
+			V2Log.d("CONNECT", "Receive Connection State is : " + nResult
+					+ " -- name is : "
+					+ NetworkStateCode.fromInt(nResult).name());
 			GlobalHolder
 					.getInstance()
 					.setServerConnection(
 							NetworkStateCode.fromInt(nResult) == NetworkStateCode.CONNECTED);
-			V2Log.d("CONNECT", "GlobleHolder Connection State is : " + GlobalHolder
-					.getInstance().isServerConnected());
+			V2Log.d("CONNECT", "GlobleHolder Connection State is : "
+					+ GlobalHolder.getInstance().isServerConnected());
 			broadcastNetworkState(NetworkStateCode.fromInt(nResult));
 		}
 
@@ -1088,9 +1092,12 @@ public class JNIService extends Service implements
 				sendBroadcast(i, null);
 
 			} else if (groupType == GroupType.DISCUSSION.intValue()) {
-				GlobalHolder.getInstance().removeGroup(
-						GroupType.fromInt(V2GlobalConstants.GROUP_TYPE_DISCUSSION),
-						nGroupID);
+				GlobalHolder
+						.getInstance()
+						.removeGroup(
+								GroupType
+										.fromInt(V2GlobalConstants.GROUP_TYPE_DISCUSSION),
+								nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -1133,9 +1140,12 @@ public class JNIService extends Service implements
 				sendBroadcast(i);
 			} else if (groupType == GroupType.DISCUSSION.intValue()
 					&& GlobalHolder.getInstance().getCurrentUserId() == nUserID) {
-				GlobalHolder.getInstance().removeGroup(
-						GroupType.fromInt(V2GlobalConstants.GROUP_TYPE_DISCUSSION),
-						nGroupID);
+				GlobalHolder
+						.getInstance()
+						.removeGroup(
+								GroupType
+										.fromInt(V2GlobalConstants.GROUP_TYPE_DISCUSSION),
+								nGroupID);
 				Intent i = new Intent();
 				i.setAction(PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION);
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
@@ -1374,12 +1384,14 @@ public class JNIService extends Service implements
 				intent.addCategory(JNI_BROADCAST_CATEGROY);
 				sendOrderedBroadcast(intent, null);
 			} else if (gType == GroupType.CHATING) {
-				
+
 				Group isExist = GlobalHolder.getInstance().getGroupById(
 						V2GlobalConstants.GROUP_TYPE_CROWD, obj.groupID);
-				if(isExist == null){
-					V2Log.e(TAG, "The Crowd Group already no exist! group id is : " + obj.groupID);
-					return ;
+				if (isExist == null) {
+					V2Log.e(TAG,
+							"The Crowd Group already no exist! group id is : "
+									+ obj.groupID);
+					return;
 				}
 				long waitMessageExist = VerificationProvider
 						.queryCrowdInviteWaitingQualMessageById(obj.userID);
@@ -1622,6 +1634,7 @@ public class JNIService extends Service implements
 			iv.putExtra("voice", true);
 			iv.putExtra("sessionID", ind.getSzSessionID());
 			mContext.startActivity(iv);
+			GlobalHolder.getInstance().setP2pAVNeedStickyBraodcast(true);
 
 		}
 
@@ -1655,6 +1668,19 @@ public class JNIService extends Service implements
 			intent.putExtra("hasUnread", true);
 			intent.putExtra("remoteID", currentVideoBean.remoteUserID);
 			sendBroadcast(intent);
+		}
+
+		@Override
+		public void OnAudioChatClosed(AudioJNIObjectInd ind) {
+			super.OnAudioChatClosed(ind);
+			if (GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast()) {
+				Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("fromUserId", ind.getFromUserId());
+				i.putExtra("groupId", ind.getGroupId());
+				// Send sticky broadcast, make sure activity receive
+				mContext.sendStickyBroadcast(i);
+			}
 		}
 	}
 
@@ -1698,6 +1724,7 @@ public class JNIService extends Service implements
 
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_VIDEO_INVITION, ind)
 					.sendToTarget();
+			GlobalHolder.getInstance().setP2pAVNeedStickyBraodcast(true);
 		}
 
 		@Override
@@ -1723,20 +1750,20 @@ public class JNIService extends Service implements
 		 */
 		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
 			super.OnVideoChatClosed(ind);
-			if (GlobalHolder.getInstance().isInMeeting()
-					|| GlobalHolder.getInstance().isInAudioCall()
-					|| GlobalHolder.getInstance().isInVideoCall()) {
-				return;
-			}
-			Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
-			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			i.putExtra("fromUserId", ind.getFromUserId());
-			i.putExtra("groupId", ind.getGroupId());
-			// Send sticky broadcast, make sure activity receive
-			mContext.sendStickyBroadcast(i);
-
-			Log.i("20150123 1","sendStickyBroadcast JNI_BROADCAST_VIDEO_CALL_CLOSED");
-			
+			// if (GlobalHolder.getInstance().isInMeeting()
+			// || GlobalHolder.getInstance().isInAudioCall()
+			// || GlobalHolder.getInstance().isInVideoCall()) {
+			// Log.i("20150128 1","OnVideoChatClosed return");
+			// return;
+			// }
+			if (GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast()) {
+				Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("fromUserId", ind.getFromUserId());
+				i.putExtra("groupId", ind.getGroupId());
+				// Send sticky broadcast, make sure activity receive
+				mContext.sendStickyBroadcast(i);
+			} 
 		}
 
 		private void updateVideoRecord(VideoJNIObjectInd ind) {
@@ -1948,8 +1975,8 @@ public class JNIService extends Service implements
 						nToUserID, nTime, messageId, binaryPath);
 				break;
 			case BINARY_TYPE_AUDIO:
-				 handlerChatAudioCallback(eGroupType, nGroupID, nFromUserID,
-						 nToUserID, nTime, messageId, binaryPath);
+				handlerChatAudioCallback(eGroupType, nGroupID, nFromUserID,
+						nToUserID, nTime, messageId, binaryPath);
 				break;
 			default:
 				break;
@@ -1968,7 +1995,7 @@ public class JNIService extends Service implements
 								+ ContentDescriptor.HistoriesMessage.NAME);
 				return;
 			}
-			
+
 			List<VMessage> messages = MessageLoader.queryMessage(
 					ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_ID
 							+ "= ? ", new String[] { ind.getUuid() }, null);
@@ -1983,7 +2010,7 @@ public class JNIService extends Service implements
 					state = VMessageAbstractItem.STATE_SENT_SUCCESS;
 					fileState = VMessageAbstractItem.STATE_FILE_SENT;
 				}
-				
+
 				vm.setState(state);
 				List<VMessageAbstractItem> items = vm.getItems();
 				for (VMessageAbstractItem item : items) {
@@ -2004,7 +2031,7 @@ public class JNIService extends Service implements
 				i.putExtra("uuid", ind.getUuid());
 				i.putExtra("errorCode", ind.getErrorCode());
 				sendBroadcast(i);
-			} 
+			}
 		}
 
 		private void handlerChatPictureCallback(int eGroupType, long nGroupID,
@@ -2185,20 +2212,21 @@ public class JNIService extends Service implements
 				int nTransType) {
 			if (!szFileID.contains("AVATAR")) {
 				VMessage vm = cacheImageMetaSize.get(szFileID);
-				if(vm != null && vm.getImageItems().size() == 1){
+				if (vm != null && vm.getImageItems().size() == 1) {
 					VMessageImageItem image = vm.getImageItems().get(0);
 					if (image.getUuid().equals(szFileID)) {
 						cacheImageMetaSize.remove(image.getUuid());
 						cacheImageMeta.remove(vm);
 						image.setFilePath("error");
 						vm.setmXmlDatas(vm.toXml());
-						V2Log.e(TAG, "the image -" + szFileID + "- trans error!");
+						V2Log.e(TAG, "the image -" + szFileID
+								+ "- trans error!");
 						vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
-						Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
-								.sendToTarget();
+						Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE,
+								vm).sendToTarget();
 					}
 				}
-				
+
 				mark.remove(szFileID);
 				GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
 				VMessageFileItem fileItem = MessageLoader
@@ -2229,8 +2257,8 @@ public class JNIService extends Service implements
 					intent.putExtra("transType", transType);
 					sendBroadcast(intent);
 				} else {
-//					V2Log.e(TAG, "OnFileTransError updates failed , id : "
-//							+ szFileID);
+					// V2Log.e(TAG, "OnFileTransError updates failed , id : "
+					// + szFileID);
 				}
 				fileItem = null;
 			}

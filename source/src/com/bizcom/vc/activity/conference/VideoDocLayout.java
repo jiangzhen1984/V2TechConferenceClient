@@ -48,86 +48,44 @@ import com.v2tech.R;
 public class VideoDocLayout extends LinearLayout {
 
 	private static final String TAG = "VideoDocLayout";
-
-	private View rootView;
-
-	private DocListener listener;
-
-	private Map<String, V2Doc> mDocs;
-
-	/**
-	 * Use to draw image backgroud
-	 */
-	private Bitmap mBackgroundBitMap;
-
-	/**
-	 * Use to draw all shapes
-	 */
-	private Bitmap mShapeBitmap;
-
-	/**
-	 * Use to show in image view
-	 */
-	private Bitmap mImageViewBitmap;
-
-	private Matrix matrix;
-
 	private FrameLayout mDocDisplayContainer;
-
 	private TextView mDocPageNumberTV;
 	private TextView mDocTitleView;
-
 	private ImageView mPrePageButton;
-
 	private ImageView mNextPageButton;
 	private PopupWindow mDocListWindow;
 	private LinearLayout mDocListView;
-	private View mShowDocListButton;
-	private View mRequestFixedPosButton;
-	private ImageView mRequestUpdateSizeButton;
-	private View mSharedDocButton;
-
+	private View mDocListButton;
+	private View mFixedPosButton;
+	private ImageView mUpdateSizeButton;
+	private View mShareDocButton;
 	private ScrollView mDocListWindowScroller;
+	private ImageView mShareDocCloseButton;
+	private ShareDocCloseButtonOnClickListener mShareDocCloseButtonOnClickListener = new ShareDocCloseButtonOnClickListener();
+	private OnClickListener mTurnPageButtonOnClickListener = new TurnPageButtonOnClickListener();
+	private OnClickListener mDocListButtonOnClickListener = new DocListButtonOnClickListener();
+	private OnClickListener mFixedPosButtonOnClickListener = new FixedPosButtonOnClickListener();
+	private OnClickListener mShareDocButtonOnClickListener = new ShareDocButtonOnClickListener();
+	private OnClickListener mUpdateSizeButtonOnClickListener = new UpdateSizeButtonOnClickListener();
+	private OnClickListener mDocListItemOnClickListener = new DocListItemOnClickListener();
+	private GestureDetector.OnDoubleTapListener mTouchImageViewGestureDetectorListener = new TouchImageViewGestureDetectorListener();
 
+	private View rootView;
+	private DocListener listener;
+	private Map<String, V2Doc> mDocs;
+	// Use to draw image backgroud
+	private Bitmap mBackgroundBitMap;
+	// Use to draw all shapes
+	private Bitmap mShapeBitmap;
+	// Use to show in image view
+	private Bitmap mImageViewBitmap;
+	private Matrix matrix;
 	private boolean mSyncStatus;
 	private boolean isLectureStateGranted = false;
-
 	private V2Doc mCurrentDoc;
-
 	private V2Doc.Page mCurrentPage;
-
 	private Handler mTimeHanlder = new Handler();
-
-	Context mContext = null;
-
-	private ImageView mShareDocCloseButton;
-
-	private GestureDetector.OnDoubleTapListener touchImageViewListener = new GestureDetector.OnDoubleTapListener() {
-
-		@Override
-		public boolean onSingleTapConfirmed(MotionEvent e) {
-			if (isLectureStateGranted) {
-				if (mShareDocCloseButton.getVisibility() == View.VISIBLE) {
-					mShareDocCloseButton.setVisibility(View.GONE);
-				} else {
-					mShareDocCloseButton.setVisibility(View.VISIBLE);
-				}
-			}
-			return false;
-		}
-
-		@Override
-		public boolean onDoubleTapEvent(MotionEvent e) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-
-		@Override
-		public boolean onDoubleTap(MotionEvent e) {
-			// TODO Auto-generated method stub
-			return false;
-		}
-	};
+	private Context mContext = null;
 
 	public interface DocListener {
 		public void updateDoc(V2Doc doc, V2Doc.Page p);
@@ -182,29 +140,25 @@ public class VideoDocLayout extends LinearLayout {
 		mDocTitleView = (TextView) view.findViewById(R.id.video_doc_title);
 		mShareDocCloseButton = (ImageView) view
 				.findViewById(R.id.share_doc_close_button);
-		mShareDocCloseButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				onShareDocCloseButtonClick(v);
-			}
-		});
+		mShareDocCloseButton
+				.setOnClickListener(mShareDocCloseButtonOnClickListener);
 
 		mPrePageButton = (ImageView) view
 				.findViewById(R.id.video_doc_pre_button);
-		mPrePageButton.setOnClickListener(pageChangeListener);
+		mPrePageButton.setOnClickListener(mTurnPageButtonOnClickListener);
 		mNextPageButton = (ImageView) view
 				.findViewById(R.id.video_doc_next_button);
-		mNextPageButton.setOnClickListener(pageChangeListener);
-		mShowDocListButton = view.findViewById(R.id.video_doc_list_button);
-		mShowDocListButton.setOnClickListener(showDocListListener);
-		mRequestFixedPosButton = view.findViewById(R.id.video_doc_pin_button);
-		mRequestFixedPosButton.setOnClickListener(mRequestFixedListener);
-		mRequestUpdateSizeButton = (ImageView) view
+		mNextPageButton.setOnClickListener(mTurnPageButtonOnClickListener);
+		mDocListButton = view.findViewById(R.id.video_doc_list_button);
+		mDocListButton.setOnClickListener(mDocListButtonOnClickListener);
+		mFixedPosButton = view.findViewById(R.id.video_doc_pin_button);
+		mFixedPosButton.setOnClickListener(mFixedPosButtonOnClickListener);
+		mUpdateSizeButton = (ImageView) view
 				.findViewById(R.id.video_doc_screen_button);
-		mRequestUpdateSizeButton.setOnClickListener(mUpdateSizeListener);
+		mUpdateSizeButton.setOnClickListener(mUpdateSizeButtonOnClickListener);
 
-		mSharedDocButton = view.findViewById(R.id.video_doc_share_button);
-		mSharedDocButton.setOnClickListener(mShareDocButtonListener);
+		mShareDocButton = view.findViewById(R.id.video_doc_share_button);
+		mShareDocButton.setOnClickListener(mShareDocButtonOnClickListener);
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
@@ -213,87 +167,10 @@ public class VideoDocLayout extends LinearLayout {
 		rootView = this;
 	}
 
-	private void onShareDocCloseButtonClick(View v) {
-		Log.i("20150119 1", "onShareDocCloseButtonClick()");
-		v.setVisibility(View.GONE);
-		// 关闭当前文档
-		listener.requestShareDocClose(v);
-
-	}
-
 	@Override
 	protected void onDetachedFromWindow() {
 		super.onDetachedFromWindow();
 		cleanCache();
-	}
-
-	private void showDocListPopWindow(View anchor) {
-		if (mDocs.isEmpty()) {
-			// TODO prompt doc list is empty
-			return;
-		}
-		if (mDocListWindow == null) {
-			LayoutInflater inflater = (LayoutInflater) this.getContext()
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View view = inflater.inflate(R.layout.video_doc_list_layout, null);
-
-			mDocListWindowScroller = (ScrollView) view
-					.findViewById(R.id.video_doc_list_container_scroller);
-			mDocListWindow = new PopupWindow(view,
-					(int) (rootView.getWidth() * 0.5),
-					(int) (rootView.getHeight() * 0.5));
-			mDocListWindow.setBackgroundDrawable(new ColorDrawable(
-					Color.TRANSPARENT));
-			mDocListWindow.setFocusable(true);
-			mDocListWindow.setTouchable(true);
-			mDocListWindow.setOutsideTouchable(true);
-			mDocListWindow.setOnDismissListener(new OnDismissListener() {
-				@Override
-				public void onDismiss() {
-					mDocListWindow.dismiss();
-				}
-
-			});
-
-			mDocListView = (LinearLayout) view
-					.findViewById(R.id.video_doc_list_container);
-			View currActivateView = null;
-			for (Entry<String, V2Doc> e : mDocs.entrySet()) {
-				View v = addDocNameViewToDocListView(e.getValue());
-				if (e.getValue() == mCurrentDoc) {
-					currActivateView = v;
-				}
-			}
-
-			view.measure(mDocDisplayContainer.getMeasuredWidth(),
-					mDocDisplayContainer.getMeasuredHeight());
-			mDocListWindowScroller.measure(View.MeasureSpec.UNSPECIFIED,
-					View.MeasureSpec.UNSPECIFIED);
-			mDocListView.measure(View.MeasureSpec.UNSPECIFIED,
-					View.MeasureSpec.UNSPECIFIED);
-			if (currActivateView != null) {
-				currActivateView.measure(View.MeasureSpec.EXACTLY,
-						View.MeasureSpec.EXACTLY);
-				mDocListWindowScroller.computeScroll();
-				mDocListWindowScroller
-						.scrollTo(0, currActivateView.getBottom());
-			}
-		}
-		if (mDocListWindow.isShowing()) {
-			mDocListWindow.dismiss();
-		} else {
-			int[] l = new int[2];
-			anchor.getLocationInWindow(l);
-
-			mDocListWindow.getContentView().measure(
-					mDocDisplayContainer.getMeasuredWidth(),
-					mDocDisplayContainer.getMeasuredHeight());
-
-			mDocListWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, l[0],
-					l[1] - mDocListWindow.getHeight());
-
-			moveToShowedTab();
-		}
 	}
 
 	private View addDocNameViewToDocListView(V2Doc v2Doc) {
@@ -323,7 +200,7 @@ public class VideoDocLayout extends LinearLayout {
 		mDocListView.addView(separatedLine, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
-		docNameView.setOnClickListener(docListViewListener);
+		docNameView.setOnClickListener(mDocListItemOnClickListener);
 		return docNameView;
 
 	}
@@ -450,7 +327,7 @@ public class VideoDocLayout extends LinearLayout {
 			}
 			mDocDisplayContainer.removeAllViews();
 			TouchImageView iv = new TouchImageView(this.getContext());
-			iv.setOnDoubleTapListener(touchImageViewListener);
+			iv.setOnDoubleTapListener(mTouchImageViewGestureDetectorListener);
 
 			// Merge bitmap
 			// iv.setImageResource(R.drawable.conversation_files_button);
@@ -542,7 +419,7 @@ public class VideoDocLayout extends LinearLayout {
 				}
 				mDocDisplayContainer.removeAllViews();
 				TouchImageView iv = new TouchImageView(this.getContext());
-				iv.setOnDoubleTapListener(touchImageViewListener);
+				iv.setOnDoubleTapListener(mTouchImageViewGestureDetectorListener);
 				// Merge bitmap
 				mImageViewBitmap = mergeBitmapToImage(mBackgroundBitMap,
 						mShapeBitmap);
@@ -578,7 +455,7 @@ public class VideoDocLayout extends LinearLayout {
 				}
 				mDocDisplayContainer.removeAllViews();
 				TouchImageView iv = new TouchImageView(this.getContext());
-				iv.setOnDoubleTapListener(touchImageViewListener);
+				iv.setOnDoubleTapListener(mTouchImageViewGestureDetectorListener);
 				// Merge bitmap
 				// iv.setImageResource(R.drawable.conversation_files_button);
 				mDocDisplayContainer.addView(iv, new FrameLayout.LayoutParams(
@@ -598,7 +475,7 @@ public class VideoDocLayout extends LinearLayout {
 			}
 			mDocDisplayContainer.removeAllViews();
 			TouchImageView iv = new TouchImageView(this.getContext());
-			iv.setOnDoubleTapListener(touchImageViewListener);
+			iv.setOnDoubleTapListener(mTouchImageViewGestureDetectorListener);
 			// Merge bitmap
 			// iv.setImageResource(R.drawable.conversation_files_button);
 			mDocDisplayContainer.addView(iv, new FrameLayout.LayoutParams(
@@ -616,10 +493,9 @@ public class VideoDocLayout extends LinearLayout {
 	public void updateLectureStateGranted(boolean flag) {
 		isLectureStateGranted = flag;
 		if (isLectureStateGranted) {
-			mSharedDocButton.setVisibility(View.VISIBLE);
-
+			mShareDocButton.setVisibility(View.VISIBLE);
 		} else {
-			mSharedDocButton.setVisibility(View.GONE);
+			mShareDocButton.setVisibility(View.GONE);
 			mShareDocCloseButton.setVisibility(View.GONE);
 		}
 	}
@@ -705,7 +581,7 @@ public class VideoDocLayout extends LinearLayout {
 	 */
 	public void requestFloatLayout() {
 		// Ignore same state
-		if ("float".equals(mRequestFixedPosButton.getTag())) {
+		if ("float".equals(mFixedPosButton.getTag())) {
 			return;
 		}
 
@@ -713,7 +589,7 @@ public class VideoDocLayout extends LinearLayout {
 			this.listener.requestDocViewFloatLayout(rootView);
 		}
 
-		mRequestFixedPosButton.setTag("float");
+		mFixedPosButton.setTag("float");
 	}
 
 	/**
@@ -722,7 +598,7 @@ public class VideoDocLayout extends LinearLayout {
 	 */
 	public void requestFixedLayout() {
 		// Ignore same state
-		if ("fix".equals(mRequestFixedPosButton.getTag())) {
+		if ("fix".equals(mFixedPosButton.getTag())) {
 			return;
 		}
 
@@ -730,7 +606,7 @@ public class VideoDocLayout extends LinearLayout {
 			this.listener.requestDocViewFixedLayout(rootView);
 		}
 
-		mRequestFixedPosButton.setTag("fix");
+		mFixedPosButton.setTag("fix");
 	}
 
 	/**
@@ -742,12 +618,12 @@ public class VideoDocLayout extends LinearLayout {
 			this.listener.requestDocViewRestore(rootView);
 		}
 		// Ignore same state
-		if (mRequestUpdateSizeButton.equals("fullscreen")) {
+		if (mUpdateSizeButton.equals("fullscreen")) {
 			return;
 		}
 		// restore image
-		mRequestUpdateSizeButton.setTag("fullscreen");
-		mRequestUpdateSizeButton
+		mUpdateSizeButton.setTag("fullscreen");
+		mUpdateSizeButton
 				.setImageResource(R.drawable.video_doc_full_screen_button_selector);
 	}
 
@@ -822,8 +698,8 @@ public class VideoDocLayout extends LinearLayout {
 					.setImageResource(R.drawable.video_doc_left_arrow_gray);
 			mNextPageButton
 					.setImageResource(R.drawable.video_doc_right_arrow_gray);
-			mShowDocListButton.setEnabled(false);
-			((ImageView) mShowDocListButton)
+			mDocListButton.setEnabled(false);
+			((ImageView) mDocListButton)
 					.setImageResource(R.drawable.video_show_doc_button_gray);
 			if (mDocListWindow != null && mDocListWindow.isShowing()) {
 				mDocListWindow.dismiss();
@@ -833,8 +709,8 @@ public class VideoDocLayout extends LinearLayout {
 
 		} else {
 			updatePageButton();
-			mShowDocListButton.setEnabled(true);
-			((ImageView) mShowDocListButton)
+			mDocListButton.setEnabled(true);
+			((ImageView) mDocListButton)
 					.setImageResource(R.drawable.video_show_doc_button_selector);
 			mNextPageButton.setEnabled(true);
 			mPrePageButton.setEnabled(true);
@@ -937,10 +813,48 @@ public class VideoDocLayout extends LinearLayout {
 	}
 
 	public boolean isFullScreenSize() {
-		return "fullscreen".equals(mRequestUpdateSizeButton.getTag());
+		return "fullscreen".equals(mUpdateSizeButton.getTag());
 	}
 
-	private OnClickListener pageChangeListener = new OnClickListener() {
+	private class ShareDocCloseButtonOnClickListener implements OnClickListener {
+		@Override
+		public void onClick(View v) {
+			Log.i("20150119 1", "onShareDocCloseButtonClick()");
+			v.setVisibility(View.GONE);
+			// 关闭当前文档
+			listener.requestShareDocClose(v);
+		}
+	}
+
+	private class TouchImageViewGestureDetectorListener implements
+			GestureDetector.OnDoubleTapListener {
+
+		@Override
+		public boolean onSingleTapConfirmed(MotionEvent e) {
+			if (isLectureStateGranted) {
+				if (mShareDocCloseButton.getVisibility() == View.VISIBLE) {
+					mShareDocCloseButton.setVisibility(View.GONE);
+				} else {
+					mShareDocCloseButton.setVisibility(View.VISIBLE);
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public boolean onDoubleTapEvent(MotionEvent e) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+
+		@Override
+		public boolean onDoubleTap(MotionEvent e) {
+			// TODO Auto-generated method stub
+			return false;
+		}
+	}
+
+	private class TurnPageButtonOnClickListener implements OnClickListener {
 
 		@Override
 		public void onClick(View view) {
@@ -949,8 +863,13 @@ public class VideoDocLayout extends LinearLayout {
 				return;
 			}
 			if (view == mNextPageButton) {
-				((ConferenceActivity) mContext)
-						.setCurrentAttendeeTurnedpage(true);
+				if (!isLectureStateGranted) {
+					((ConferenceActivity) mContext)
+							.setNeedToFollowThePage(true);
+				} else {
+					((ConferenceActivity) mContext)
+							.setNeedToFollowThePage(false);
+				}
 				if (mCurrentDoc.getActivatePageNo() < mCurrentDoc.getPageSize()) {
 					mCurrentDoc.setActivatePageNo(mCurrentDoc
 							.getActivatePageNo() + 1);
@@ -961,8 +880,13 @@ public class VideoDocLayout extends LinearLayout {
 					}
 				}
 			} else if (view == mPrePageButton) {
-				((ConferenceActivity) mContext)
-						.setCurrentAttendeeTurnedpage(true);
+				if (!isLectureStateGranted) {
+					((ConferenceActivity) mContext)
+							.setNeedToFollowThePage(true);
+				} else {
+					((ConferenceActivity) mContext)
+							.setNeedToFollowThePage(false);
+				}
 				if (mCurrentDoc.getActivatePageNo() > 1) {
 					mCurrentDoc.setActivatePageNo(mCurrentDoc
 							.getActivatePageNo() - 1);
@@ -979,16 +903,87 @@ public class VideoDocLayout extends LinearLayout {
 
 	};
 
-	private OnClickListener showDocListListener = new OnClickListener() {
+	private class DocListButtonOnClickListener implements OnClickListener {
 
 		@Override
 		public void onClick(View view) {
 			showDocListPopWindow(view);
 		}
 
+		private void showDocListPopWindow(View anchor) {
+			if (mDocs.isEmpty()) {
+				// TODO prompt doc list is empty
+				return;
+			}
+			if (mDocListWindow == null) {
+				LayoutInflater inflater = (LayoutInflater) VideoDocLayout.this
+						.getContext().getSystemService(
+								Context.LAYOUT_INFLATER_SERVICE);
+				View view = inflater.inflate(R.layout.video_doc_list_layout,
+						null);
+
+				mDocListWindowScroller = (ScrollView) view
+						.findViewById(R.id.video_doc_list_container_scroller);
+				mDocListWindow = new PopupWindow(view,
+						(int) (rootView.getWidth() * 0.5),
+						(int) (rootView.getHeight() * 0.5));
+				mDocListWindow.setBackgroundDrawable(new ColorDrawable(
+						Color.TRANSPARENT));
+				mDocListWindow.setFocusable(true);
+				mDocListWindow.setTouchable(true);
+				mDocListWindow.setOutsideTouchable(true);
+				mDocListWindow.setOnDismissListener(new OnDismissListener() {
+					@Override
+					public void onDismiss() {
+						mDocListWindow.dismiss();
+					}
+
+				});
+
+				mDocListView = (LinearLayout) view
+						.findViewById(R.id.video_doc_list_container);
+				View currActivateView = null;
+				for (Entry<String, V2Doc> e : mDocs.entrySet()) {
+					View v = addDocNameViewToDocListView(e.getValue());
+					if (e.getValue() == mCurrentDoc) {
+						currActivateView = v;
+					}
+				}
+
+				view.measure(mDocDisplayContainer.getMeasuredWidth(),
+						mDocDisplayContainer.getMeasuredHeight());
+				mDocListWindowScroller.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+				mDocListView.measure(View.MeasureSpec.UNSPECIFIED,
+						View.MeasureSpec.UNSPECIFIED);
+				if (currActivateView != null) {
+					currActivateView.measure(View.MeasureSpec.EXACTLY,
+							View.MeasureSpec.EXACTLY);
+					mDocListWindowScroller.computeScroll();
+					mDocListWindowScroller.scrollTo(0,
+							currActivateView.getBottom());
+				}
+			}
+			if (mDocListWindow.isShowing()) {
+				mDocListWindow.dismiss();
+			} else {
+				int[] l = new int[2];
+				anchor.getLocationInWindow(l);
+
+				mDocListWindow.getContentView().measure(
+						mDocDisplayContainer.getMeasuredWidth(),
+						mDocDisplayContainer.getMeasuredHeight());
+
+				mDocListWindow.showAtLocation(anchor, Gravity.NO_GRAVITY, l[0],
+						l[1] - mDocListWindow.getHeight());
+
+				moveToShowedTab();
+			}
+		}
+
 	};
 
-	private OnClickListener docListViewListener = new OnClickListener() {
+	private class DocListItemOnClickListener implements OnClickListener {
 
 		@Override
 		public void onClick(View v) {
@@ -1049,7 +1044,7 @@ public class VideoDocLayout extends LinearLayout {
 
 	};
 
-	private OnClickListener mRequestFixedListener = new OnClickListener() {
+	private class FixedPosButtonOnClickListener implements OnClickListener {
 
 		@Override
 		public void onClick(View view) {
@@ -1073,7 +1068,7 @@ public class VideoDocLayout extends LinearLayout {
 
 	};
 
-	private OnClickListener mShareDocButtonListener = new OnClickListener() {
+	private class ShareDocButtonOnClickListener implements OnClickListener {
 
 		@Override
 		public void onClick(View view) {
@@ -1083,17 +1078,17 @@ public class VideoDocLayout extends LinearLayout {
 		}
 	};
 
-	private OnClickListener mUpdateSizeListener = new OnClickListener() {
+	private class UpdateSizeButtonOnClickListener implements OnClickListener {
 
 		@Override
 		public void onClick(View view) {
 			if (view.getTag().equals("fullscreen")) {
 				view.setTag("restorescreen");
-				mRequestUpdateSizeButton
+				mUpdateSizeButton
 						.setImageResource(R.drawable.video_doc_full_screen_button_selector);
 			} else {
 				view.setTag("fullscreen");
-				mRequestUpdateSizeButton
+				mUpdateSizeButton
 						.setImageResource(R.drawable.video_doc_restore_screen_button_selector);
 			}
 

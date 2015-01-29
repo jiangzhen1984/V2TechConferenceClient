@@ -12,6 +12,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.ImRequest;
@@ -66,8 +67,17 @@ public class GlobalHolder {
 	public Map<String, FileDownLoadBean> globleFileProgress = new HashMap<String, FileDownLoadBean>();
 
 	public Map<String, String> mTransingLockFiles = new HashMap<String, String>();
-	
-	public Map<String, VMessage> mWaitRecvImageCaches = new HashMap<String, VMessage>();
+
+
+	private volatile boolean p2pAVNeedStickyBraodcast = false;
+
+	public boolean isP2pAVNeedStickyBraodcast() {
+		return p2pAVNeedStickyBraodcast;
+	}
+
+	public void setP2pAVNeedStickyBraodcast(boolean p2pAVNeedStickyBraodcast) {
+		this.p2pAVNeedStickyBraodcast = p2pAVNeedStickyBraodcast;
+	}
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {

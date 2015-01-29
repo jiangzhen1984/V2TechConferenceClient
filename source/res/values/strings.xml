@@ -266,8 +266,7 @@
     <string name="conversation_quit_dialog_cancel_text">取消</string>
     <string name="conversation_no_network_notification">当前网络不可用，请稍候再试!</string>
     <string name="conversation_select_file_chosen">已选</string>
-    <string name="conversation_select_file_send">发送( %1$s )</string>
-    <string name="conversation_select_file_picture">图片</string>
+    <string name="conversation_select_file_send">发送(%1$d)图片</string>
     <string name="conversation_select_file_files">文件</string>
     <string name="conversation_select_file_upload_file">上传文件</string>
     <string name="conversation_select_file_backup">@string/group_create_cancel</string>
@@ -282,6 +281,7 @@
     <string name="conversation_select_file_entry_send">@string/conversation_select_file_send</string>
     <string name="conversation_select_file_entry_selected">@string/conversation_select_file_selected</string>
     <string name="conversation_select_file_entry_send_out">@string/conversation_select_file_send_out</string>
+    <string name="conversation_select_file_picture">图片</string>
     <string name="conversation_select_file_entry_picture">@string/conversation_select_file_picture</string>
     <string name="conversation_select_file_entry_pictures_limited">图片大小超过了3m无法发送</string>
     <string name="conversation_select_file_entry_picture_anomaly">@string/conversation_select_file_picture_anomaly</string>
@@ -615,4 +615,4 @@
     <string name="vo_conference_crowd_conversation_creation">@string/vo_conference_conversation_creation</string>
     <string name="vo_conference_department_conversation_creation">@string/vo_conference_conversation_creation</string>
     <string name="vo_vmessage_face">[表情]</string>
-</resources>
+</resources>

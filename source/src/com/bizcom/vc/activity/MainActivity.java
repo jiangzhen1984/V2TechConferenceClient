@@ -84,7 +84,6 @@ public class MainActivity extends FragmentActivity implements
 					R.drawable.selector_tab_org_button, R.string.tab_org_name,
 					R.string.tab_org_name,
 					OrganizationTabFragment.class.getName()),
-
 			new TabClass(PublicIntent.TAG_GROUP,
 					R.drawable.selector_tab_group_button,
 					R.string.tab_group_name, R.string.tab_group_name,
