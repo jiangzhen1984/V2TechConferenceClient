@@ -44,7 +44,7 @@ public class VideoCaptureDevInfo {
 		mCapParams.fps = fps;
 		mCapParams.format = format;
 	}
-	
+
 	public void SetCapParams(int width, int height) {
 		mCapParams.width = width;
 		mCapParams.height = height;
@@ -181,9 +181,9 @@ public class VideoCaptureDevInfo {
 		// Populate the deviceList with available cameras and their
 		// capabilities.
 		Camera camera = null;
-		try {
-			// From Android 2.3 and onwards
-			for (int i = 0; i < Camera.getNumberOfCameras(); ++i) {
+		// From Android 2.3 and onwards
+		for (int i = 0; i < Camera.getNumberOfCameras(); ++i) {
+			try {
 				VideoCaptureDevice newDevice = new VideoCaptureDevice();
 				// Set first camera
 				if (this.mDefaultDevName == null
@@ -218,14 +218,17 @@ public class VideoCaptureDevInfo {
 				camera.release();
 				camera = null;
 				deviceList.add(newDevice);
+			} catch (Exception ex) {
+				Log.e(TAG,
+						"Failed to init VideoCaptureDeviceInfo ex"
+								+ ex.getLocalizedMessage());
 			}
+		}
 
-			// VerifyCapabilities();
-		} catch (Exception ex) {
-			Log.e(TAG,
-					"Failed to init VideoCaptureDeviceInfo ex"
-							+ ex.getLocalizedMessage());
-			return -1;
+		if (Camera.getNumberOfCameras() > 0
+				&& (this.mDefaultDevName == null || this.mDefaultDevName
+						.equals(""))) {
+			this.mDefaultDevName = deviceList.get(0).deviceUniqueName;
 		}
 
 		return 0;
