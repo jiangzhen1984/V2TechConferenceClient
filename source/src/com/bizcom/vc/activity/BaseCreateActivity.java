@@ -6,20 +6,25 @@ import java.util.List;
 import java.util.Set;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.CheckBox;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
+import com.bizcom.util.ProgressUtils;
 import com.bizcom.vc.adapter.CommonCreateAdapter;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -43,6 +48,7 @@ public abstract class BaseCreateActivity extends Activity {
 	protected static final int CREATE_LAYOUT_TYPE_CONFERENCE = 0x001;
 	protected static final int CREATE_LAYOUT_TYPE_CROWD = 0x002;
 	protected static final int CREATE_LAYOUT_TYPE_DISCUSSION = 0x004;
+	protected static final int SELECT_GROUP_END = 0x005;
 
 	protected static final int PAD_LAYOUT = 1;
 	protected static final int PHONE_LAYOUT = 0;
@@ -71,6 +77,8 @@ public abstract class BaseCreateActivity extends Activity {
 	// Used to save current selected user
 	protected Set<User> mAttendeeList = new HashSet<User>();
 	protected List<User> mAttendeeArrayList = new ArrayList<User>();
+	
+	private ProgressDialog mWaitingDialog;
 
 	protected void initCreateType(int createType) {
 		this.createType = createType;
@@ -197,6 +205,21 @@ public abstract class BaseCreateActivity extends Activity {
 				removeAttendee(u);
 			}
 		}
+	}
+	
+	protected void startSelectGroup(Handler mLocalHandler , final CheckBox cb, final Group selectedGroup) {
+		mWaitingDialog = ProgressDialog.show(mContext, "", mContext
+				.getResources()
+				.getString(R.string.notification_watiing_process), true);
+		mLocalHandler.post(new Runnable() {
+			
+			@Override
+			public void run() {
+				selectGroup(selectedGroup, cb.isChecked());
+				mGroupListView.updateCheckItem(selectedGroup, cb.isChecked());
+				mWaitingDialog.dismiss();
+			}
+		});
 	}
 
 	protected abstract void init();

@@ -103,7 +103,7 @@
                             android:layout_centerVertical="true"
                             android:layout_toRightOf="@+id/message_body_video_item_second_left"
                             android:src="@drawable/message_sent_failed_icon"
-                            android:visibility="visible" />
+                            android:visibility="gone" />
 
                         <ImageView
                             android:id="@+id/message_body_unread_icon_left"
@@ -112,7 +112,7 @@
                             android:layout_centerVertical="true"
                             android:layout_toRightOf="@+id/message_body_video_item_second_left"
                             android:src="@drawable/voice_message_unread_icon"
-                            android:visibility="visible" />
+                            android:visibility="gone" />
 
                         <ImageView
                             android:id="@+id/message_body_sending_icon_left"

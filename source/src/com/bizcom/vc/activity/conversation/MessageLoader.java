@@ -176,7 +176,7 @@ public class MessageLoader {
 
 		String selection = ContentDescriptor.HistoriesMessage.Cols.ID + "=? ";
 		String[] args = new String[] { msgId + "" };
-		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
+		String order = ContentDescriptor.HistoriesMessage.Cols.ID
 				+ " desc limit 1 offset 0 ";
 		List<VMessage> list = queryMessage(selection, args, order);
 		if (list != null && list.size() > 0) {
@@ -919,19 +919,6 @@ public class MessageLoader {
 				loadImageMessageById(vm, mContext);
 				loadAudioMessageById(vm, mContext);
 				loadFileMessageById(vm, mContext);
-				// boolean flag = loadFileMessageById(vm, mContext);
-				// if (flag && vm.getMsgCode() == V2GlobalEnum.GROUP_TYPE_CROWD)
-				// {
-				// VMessageFileItem fileItem = vm.getFileItems().get(0);
-				// if (fileItem.getState() ==
-				// VMessageAbstractItem.STATE_FILE_SENT) {
-				// if (vm.getFromUser() != null
-				// && vm.getFromUser().getmUserId() == GlobalHolder
-				// .getInstance().getCurrentUserId()) {
-				// continue;
-				// }
-				// }
-				// }
 				vimList.add(vm);
 			}
 			return vimList;

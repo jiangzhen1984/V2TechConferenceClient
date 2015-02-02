@@ -81,15 +81,7 @@ public class CommonCreateAdapter extends BaseAdapter {
 			tag.headIcon.setImageResource(R.drawable.avatar);
 		}
 
-		boolean isFriend = GlobalHolder.getInstance().isFriend(user);
-		if (isFriend) {
-			if (!TextUtils.isEmpty(user.getNickName()))
-				tag.name.setText(user.getNickName());
-			else
-				tag.name.setText(user.getName());
-		} else
-			tag.name.setText(user.getName());
-		
+		tag.name.setText(user.getName());
 		if(tag.mSignature != null)
 			tag.mSignature.setText(user.getSignature() == null ? "" : user
 					.getSignature());

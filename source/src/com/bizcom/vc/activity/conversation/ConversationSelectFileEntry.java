@@ -109,15 +109,18 @@ public class ConversationSelectFileEntry extends Activity implements
 				for (FileInfoBean bean : mCheckedList) {
 
 					totalSize += bean.fileSize;
-				} sendButton.setText(String.format(getResources().getString(R.string.conversation_select_file_send),
+				}
+				sendButton.setText(String.format(
+						getResources().getString(
+								R.string.conversation_select_file_send),
 						mCheckedList.size()));
-				selectedFileSize
-						.setText(getResources().getString(R.string.conversation_select_file_entry_chosen)
-								+ getFileSize(totalSize));
+				selectedFileSize.setText(getResources().getString(
+						R.string.conversation_select_file_entry_chosen)
+						+ getFileSize(totalSize));
 				sendButton.setText(String.format(
 						getResources().getString(
 								R.string.conversation_select_file_entry_send),
-						 mCheckedList.size()));
+						mCheckedList.size()));
 
 			} else if (mCheckedList != null && mCheckedList.size() == 0) {
 				lastSize = 0;

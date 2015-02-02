@@ -36,4 +36,10 @@
         <attr name="android:fadingEdgeLength" />
     </declare-styleable>
 
+    <declare-styleable name="SubsamplingScaleImageView">
+        <attr name="src" format="reference"/>
+        <attr name="assetName" format="string"/>
+        <attr name="panEnabled" format="boolean"/>
+        <attr name="zoomEnabled" format="boolean"/>
+    </declare-styleable>
 </resources>

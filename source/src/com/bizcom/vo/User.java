@@ -28,6 +28,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
+import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -174,9 +175,17 @@ public class User implements Comparable<User> {
 	public void setmResult(NetworkStateCode mResult) {
 		this.mResult = mResult;
 	}
+	
+	public String getRealName(){
+		return mName;
+	}
 
 	public String getName() {
-		return mName;
+		boolean isFriend = GlobalHolder.getInstance().isFriend(this);
+		if(isFriend && !TextUtils.isEmpty(mNickName))
+			return mNickName;
+		else
+			return mName;
 	}
 
 	public void setName(String mName) {

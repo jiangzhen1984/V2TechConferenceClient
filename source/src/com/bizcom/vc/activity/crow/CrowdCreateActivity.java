@@ -41,11 +41,11 @@ import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.service.JNIService;
 import com.bizcom.vc.widget.MultilevelListView.ItemData;
 import com.bizcom.vo.CrowdGroup;
+import com.bizcom.vo.CrowdGroup.AuthType;
 import com.bizcom.vo.Group;
+import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.User;
 import com.bizcom.vo.VMessageQualificationApplicationCrowd;
-import com.bizcom.vo.CrowdGroup.AuthType;
-import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
 /**
@@ -59,15 +59,10 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 
 	private static final int CREATE_GROUP_MESSAGE = 4;
 	private static final int UPDATE_CROWD_RESPONSE = 5;
-	private static final int START_GROUP_SELECT = 6;
 	private static final int END_CREATE_OPERATOR = 9;
-	
+
 	private static final int SEND_SERVER_TYPE_INVITE = 10;
 	private static final int SEND_SERVER_TYPE_CREATE = 11;
-	
-
-	private static final int OP_ADD_ALL_GROUP_USER = 1;
-	private static final int OP_DEL_ALL_GROUP_USER = 0;
 
 	private LocalHandler mLocalHandler = new LocalHandler();
 
@@ -188,7 +183,7 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 				for (int i = 0; i < removeUsers.size(); i++) {
 					mAttendeeList.remove(removeUsers.get(i));
 				}
-				
+
 				mCreateWaitingDialog = ProgressDialog.show(
 						mContext,
 						"",
@@ -218,14 +213,15 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 			sendServer(SEND_SERVER_TYPE_CREATE);
 		}
 	}
-	
-	private void sendServer(final int type){
+
+	private void sendServer(final int type) {
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				List<User> userList = new ArrayList<User>(mAttendeeList);
-				Message msg = Message.obtain(mLocalHandler, END_CREATE_OPERATOR , userList);
+				Message msg = Message.obtain(mLocalHandler,
+						END_CREATE_OPERATOR, userList);
 				msg.arg1 = type;
 				msg.sendToTarget();
 				for (User user : userList) {
@@ -274,13 +270,7 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 				mGroupListView.checkBelongGroupAllChecked(group, users);
 			}
 		} else if (obj instanceof Group) {
-			Message.obtain(
-					mLocalHandler,
-					START_GROUP_SELECT,
-					cb.isChecked() ? OP_ADD_ALL_GROUP_USER
-							: OP_DEL_ALL_GROUP_USER, 0, (Group) obj)
-					.sendToTarget();
-			mGroupListView.updateCheckItem((Group) obj, cb.isChecked());
+			startSelectGroup(mLocalHandler, cb, (Group) obj);
 		}
 	}
 
@@ -332,7 +322,7 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 		}
 		super.addAttendee(u);
 	}
-	
+
 	private void saveQualication(User user) {
 
 		if (crowd == null)
@@ -446,29 +436,9 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 			}
 				break;
 			case UPDATE_CROWD_RESPONSE:
-				// Do not add user to list because user doesn't accept
-				// invitation yet
-
-				// if (crowd.getAuthType() == AuthType.ALLOW_ALL) {
-				// crowd.addUserToGroup(mUserList);
-				// }
 				// finish current activity
 				finish();
 				break;
-
-			case START_GROUP_SELECT: {
-				mWaitingDialog = ProgressDialog.show(
-						mContext,
-						"",
-						mContext.getResources().getString(
-								R.string.notification_watiing_process), true);
-				selectGroup((Group) msg.obj,
-						msg.arg1 == OP_ADD_ALL_GROUP_USER ? true : false);
-				if (mWaitingDialog != null && mWaitingDialog.isShowing()) {
-					mWaitingDialog.dismiss();
-				}
-				break;
-			}
 			case END_CREATE_OPERATOR:
 				if (mCreateWaitingDialog != null
 						&& mCreateWaitingDialog.isShowing()) {
@@ -477,8 +447,9 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 
 				List<User> userList = (List<User>) msg.obj;
 				int opType = msg.arg1;
-				if(opType == SEND_SERVER_TYPE_CREATE){
-					// Do not add userList to crowd, because this just invitation.
+				if (opType == SEND_SERVER_TYPE_CREATE) {
+					// Do not add userList to crowd, because this just
+					// invitation.
 					cg.createCrowdGroup(crowd, userList, new MessageListener(
 							mLocalHandler, CREATE_GROUP_MESSAGE, crowd));
 				} else {

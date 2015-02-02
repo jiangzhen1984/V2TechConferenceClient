@@ -497,7 +497,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 				&& !TextUtils.isEmpty(remoteNickName)) {
 			mNameTitleIV.setText(remoteNickName);
 		} else {
-			mNameTitleIV.setText(u.getName());
+			mNameTitleIV.setText(u.getRealName());
 		}
 
 		// for self

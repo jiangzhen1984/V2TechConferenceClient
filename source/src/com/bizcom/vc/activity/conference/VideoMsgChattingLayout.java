@@ -3,6 +3,7 @@ package com.bizcom.vc.activity.conference;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.app.Activity;
 import android.content.Context;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -16,16 +17,17 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.bizcom.util.MessageUtil;
-import com.bizcom.vc.activity.conference.ConferenceMessageBodyView.ActionListener;
 import com.bizcom.vc.adapter.CommonAdapter;
-import com.bizcom.vc.adapter.VMessageAdater;
 import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemWrapper;
+import com.bizcom.vc.adapter.VMessageAdater;
+import com.bizcom.vc.listener.CommonCallBack;
+import com.bizcom.vc.listener.CommonCallBack.CommonNotifyChatInterToReplace;
 import com.bizcom.vc.widget.cus.PasteEditText;
 import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.VMessage;
 import com.v2tech.R;
 
-public class VideoMsgChattingLayout extends LinearLayout {
+public class VideoMsgChattingLayout extends LinearLayout implements CommonNotifyChatInterToReplace{
 
 	private ConferenceGroup conf;
 	private View rootView;
@@ -37,7 +39,6 @@ public class VideoMsgChattingLayout extends LinearLayout {
 	private List<CommonAdapterItemWrapper> messageArray;
 	private CommonAdapter adapter;
 	private Context mContext;
-	private ActionListener actionLisener;
 	
 	public interface ChattingListener {
 		public void requestSendMsg(VMessage vm);
@@ -54,6 +55,7 @@ public class VideoMsgChattingLayout extends LinearLayout {
 		setListeners();
 		this.conf = conf;
 		mContext = context;
+		CommonCallBack.getInstance().setNotifyChatInterToReplace(this);
 	}
 
 	public View getmSendButton() {
@@ -232,4 +234,24 @@ public class VideoMsgChattingLayout extends LinearLayout {
 			return convertView;
 		}
 	};
+
+
+
+	@Override
+	public void notifyChatInterToReplace(final VMessage vm) {
+		for (int i = 0; i < messageArray.size(); i++) {
+			final VMessageAdater wrapper = (VMessageAdater) messageArray.get(i);
+			VMessage replaced = (VMessage) wrapper.getItemObject();
+			if(replaced.getUUID().equals(vm.getUUID())){
+				replaced.setImageItems(vm.getImageItems());
+				((Activity)mContext).runOnUiThread(new Runnable() {
+					
+					@Override
+					public void run() {
+						adapter.notifyDataSetChanged();
+					}
+				});
+			}
+		}		
+	}
 }

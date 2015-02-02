@@ -174,7 +174,7 @@ public class ChatRequest {
 		V2Log.d("ChatRequest UI", "OnRecvChatText ---> eGroupType :"
 				+ eGroupType + " | nGroupID: " + nGroupID + " | nFromUserID: "
 				+ nFromUserID + " | nToUserID: " + nToUserID + " | nTime: "
-				+ nTime + " | szSeqID: " + szSeqID);
+				+ nTime + " | szSeqID: " + szSeqID + " | szXmlText: " + szXmlText);
 		if (callback != null) {
 			 callback.OnRecvChatTextCallback(eGroupType, nGroupID, nFromUserID,
 						 nToUserID, nTime, szSeqID, szXmlText);

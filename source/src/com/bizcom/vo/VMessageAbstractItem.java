@@ -58,8 +58,9 @@ public abstract class VMessageAbstractItem {
 	
 	protected String uuid;
 
-	public VMessageAbstractItem(VMessage vm) {
+	public VMessageAbstractItem(VMessage vm , int ItemType) {
 		super();
+		this.type = ItemType;
 		this.vm = vm;
 		this.vm.addItem(this);
 	}

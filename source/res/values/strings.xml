@@ -266,7 +266,7 @@
     <string name="conversation_quit_dialog_cancel_text">取消</string>
     <string name="conversation_no_network_notification">当前网络不可用，请稍候再试!</string>
     <string name="conversation_select_file_chosen">已选</string>
-    <string name="conversation_select_file_send">发送(%1$d)图片</string>
+    <string name="conversation_select_file_send">发送(%1$d)</string>
     <string name="conversation_select_file_files">文件</string>
     <string name="conversation_select_file_upload_file">上传文件</string>
     <string name="conversation_select_file_backup">@string/group_create_cancel</string>

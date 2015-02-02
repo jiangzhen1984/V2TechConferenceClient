@@ -229,6 +229,7 @@ public class GroupLayout extends LinearLayout {
 
 		mConNameTV.setText(group.getName());
 		mGroupNameTV.setText(group.getName());
+		mGroupDateTV.setText(group.getStrCreateDate());
 
 		boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
 		String nickName = currentUser.getNickName();

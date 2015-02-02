@@ -493,7 +493,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		@Override
 		public void afterTextChanged(Editable ed) {
-			if(!TextUtils.isEmpty(ed.toString()) && !ed.toString().equals(u.getName()))
+			if(!ed.toString().equals(u.getName()))
 				isNeedUpdate = true;
 		}
 

@@ -1160,12 +1160,7 @@ public class MessageAuthenticationActivity extends Activity {
 				if (vqic.getInvitationUser() != null) {
 					String name;
 					User user = vqic.getInvitationUser();
-					boolean isFriend = GlobalHolder.getInstance()
-							.isFriend(user);
-					if (isFriend && !TextUtils.isEmpty(user.getNickName()))
-						name = user.getNickName();
-					else
-						name = user.getName();
+					name = user.getName();
 					item.mContentTV
 							.setText(name
 									+ mContext
@@ -1182,15 +1177,7 @@ public class MessageAuthenticationActivity extends Activity {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
 
-				boolean isFriend = GlobalHolder.getInstance().isFriend(
-						vqac.getApplicant());
-				if (isFriend
-						&& !TextUtils
-								.isEmpty(vqac.getApplicant().getNickName()))
-					item.mNameTV.setText(vqac.getApplicant().getNickName());
-				else
-					item.mNameTV.setText(vqac.getApplicant().getName());
-
+				item.mNameTV.setText(vqac.getApplicant().getName());
 				updateApplyMessageView(item, vqac);
 			}
 

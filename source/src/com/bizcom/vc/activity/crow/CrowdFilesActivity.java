@@ -737,12 +737,13 @@ public class CrowdFilesActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			if (isInDeleteMode) {
-				// set cancel button text to upload text
+//				// set cancel button text to upload text
 				mShowUploadedFileButton
 						.setText(R.string.crowd_files_title_upload);
-				isInDeleteMode = false;
-				suspendOrResumeDownloadingFiles(false);
-				adapter.notifyDataSetChanged();
+				onBackPressed();
+//				isInDeleteMode = false;
+//				suspendOrResumeDownloadingFiles(false);
+//				adapter.notifyDataSetChanged();
 			} else {
 				Intent intent = new Intent(mContext,
 						ConversationSelectFile.class);
@@ -1363,7 +1364,6 @@ public class CrowdFilesActivity extends Activity {
 					case REMOVED:
 						item.mFailedIcon.setVisibility(View.VISIBLE);
 						break;
-					case DOWNLOADED:
 					case UPLOADED:
 						item.mFileText.setVisibility(View.VISIBLE);
 						break;

@@ -2,6 +2,7 @@ package com.bizcom.vc.widget;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +35,7 @@ import com.bizcom.util.SearchUtils;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.Group;
 import com.bizcom.vo.User;
+import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
 /**
@@ -310,25 +312,18 @@ public class MultilevelListView extends ListView {
 	 * @param group
 	 * @param list
 	 */
-	public void checkBelongGroupAllChecked(Group group, List<User> list) {
+	public ItemData checkBelongGroupAllChecked(Group group, List<User> list) {
 		int count = 0;
 		for (User u : list) {
-			Set<ItemData> items = mUserItemListMap.get(u.getmUserId());
-			if (items == null || items.size() <= 0) {
-				continue;
-			}
-
-			for (ItemData item : items) {
-				if (item.isChecked()) {
-					count = count + 1;
-					break;
-				}
+			ItemData item = getItem(group , u);
+			if (item.isChecked()) {
+				count = count + 1;
 			}
 		}
 
 		List<Group> childGroup = group.getChildGroup();
 		for (Group child : childGroup) {
-			ItemData childGroupItem = getItem(child);
+			ItemData childGroupItem = checkBelongGroupAllChecked(child , child.getUsers());
 			if (childGroupItem.isChecked()) {
 				count = count + 1;
 			}
@@ -343,6 +338,7 @@ public class MultilevelListView extends ListView {
 				item.setChecked(false);
 		}
 		adapter.notifyDataSetChanged();
+		return item;
 	}
 
 	/**
@@ -540,16 +536,29 @@ public class MultilevelListView extends ListView {
 	 * @param userList
 	 */
 	public void selectUser(List<User> userList) {
-		if (userList == null) {
-			return;
-		}
+		LongSparseArray<Group> temp = new LongSparseArray<Group>();
 		for (User user : userList) {
 			Set<Group> groupList = user.getBelongsGroup();
 			for (Group g : groupList) {
+				if(g.getGroupType() == GroupType.CHATING ||
+						g.getGroupType() == GroupType.DISCUSSION ||
+						g.getGroupType() == GroupType.CONFERENCE)
+					continue;
+				
 				ItemData item = getItem(g, user);
 				item.setChecked(true);
-
-				GroupItemData groupItem = (GroupItemData) getItem(g);
+				
+				Group group = temp.get(g.getmGId());
+				if(group == null)
+					temp.put(g.getmGId(), g);
+			}
+		}
+		
+		for (int i = 0; i < mGroupList.size(); i++) {
+			Group group = mGroupList.get(i);
+			if(temp.get(group.getmGId()) != null){
+				temp.remove(group.getmGId());
+				GroupItemData groupItem = (GroupItemData) getItem(group);
 				if (!groupItem.isExpanded) {
 					int pos = getGroupItemPos(groupItem);
 					if (pos != -1) {
@@ -559,6 +568,24 @@ public class MultilevelListView extends ListView {
 				}
 			}
 		}
+		
+		for (int i = 0; i < temp.size(); i++) {
+			Group group = temp.valueAt(i);
+			GroupItemData groupItem = (GroupItemData) getItem(group);
+			if (!groupItem.isExpanded) {
+				int pos = getGroupItemPos(groupItem);
+				if (pos != -1) {
+					groupItem.isExpanded = true;
+					expand(groupItem, pos);
+				}
+			}
+		}
+		
+		for (int i = 0; i < mGroupList.size(); i++) {
+			Group group = mGroupList.get(i);
+			checkBelongGroupAllChecked(group, group.getUsers());
+		}
+		
 		adapter.notifyDataSetChanged();
 	}
 
@@ -585,10 +612,6 @@ public class MultilevelListView extends ListView {
 	 */
 	public void updateUser(User user) {
 		// FIXME optimze for avatar
-		adapter.notifyDataSetChanged();
-	}
-
-	public void updateDisplay() {
 		adapter.notifyDataSetChanged();
 	}
 
@@ -1648,13 +1671,6 @@ public class MultilevelListView extends ListView {
 		private void updateUserItem() {
 			User u = ((User) ((UserItemData) mItem).getObject());
 			u = GlobalHolder.getInstance().getUser(u.getmUserId());
-			// if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded())
-			// {
-			// if (TextUtils.isEmpty(u.getName()))
-			// throw new RuntimeException(
-			// "所有用户信息已获取完毕，但该用户空名：id is --> "
-			// + u.getmUserId());
-			// }
 
 			ImageView mPhotoIV = (ImageView) mRoot.findViewById(R.id.user_img);
 			if (u.getAvatarBitmap() != null) {
@@ -1665,16 +1681,7 @@ public class MultilevelListView extends ListView {
 
 			TextView mUserNameTV = (TextView) mRoot
 					.findViewById(R.id.user_name);
-			boolean isFriend = GlobalHolder.getInstance().isFriend(u);
-			if (isFriend) {
-				if (!TextUtils.isEmpty(u.getNickName()))
-					mUserNameTV.setText(u.getNickName());
-				else {
-					mUserNameTV.setText(u.getName());
-				}
-			} else {
-				mUserNameTV.setText(u.getName());
-			}
+			mUserNameTV.setText(u.getName());
 
 			TextView mUserSignatureTV = (TextView) mRoot
 					.findViewById(R.id.user_signature);

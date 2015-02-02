@@ -81,9 +81,7 @@ import com.bizcom.vc.activity.ConversationsTabFragment;
 import com.bizcom.vc.activity.contacts.ContactDetail;
 import com.bizcom.vc.activity.crow.CrowdDetailActivity;
 import com.bizcom.vc.activity.crow.CrowdFilesActivity.CrowdFileActivityType;
-import com.bizcom.vc.adapter.CommonAdapter;
 import com.bizcom.vc.adapter.VMessageAdater;
-import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemWrapper;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -100,6 +98,7 @@ import com.bizcom.vo.CrowdGroup;
 import com.bizcom.vo.DiscussionGroup;
 import com.bizcom.vo.FileInfoBean;
 import com.bizcom.vo.Group;
+import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.NetworkStateCode;
 import com.bizcom.vo.OrgGroup;
 import com.bizcom.vo.User;
@@ -108,16 +107,14 @@ import com.bizcom.vo.VMessage;
 import com.bizcom.vo.VMessageAbstractItem;
 import com.bizcom.vo.VMessageAudioItem;
 import com.bizcom.vo.VMessageFileItem;
+import com.bizcom.vo.VMessageFileItem.FileType;
 import com.bizcom.vo.VMessageImageItem;
 import com.bizcom.vo.VMessageLinkTextItem;
-import com.bizcom.vo.Group.GroupType;
-import com.bizcom.vo.VMessageFileItem.FileType;
 import com.v2tech.R;
 
 public class ConversationTextActivity extends Activity implements
 		CommonUpdateMessageBodyPopupWindowInterface,
-		CommonUpdateCrowdFileStateInterface ,
-		CommonNotifyChatInterToReplace{
+		CommonUpdateCrowdFileStateInterface, CommonNotifyChatInterToReplace {
 
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
@@ -137,7 +134,7 @@ public class ConversationTextActivity extends Activity implements
 	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
 	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
 
-	private static final String TAG = "ConversationP2PTextActivity";
+	private static final String TAG = "ConversationTextActivity";
 
 	/**
 	 * for activity result
@@ -212,7 +209,7 @@ public class ConversationTextActivity extends Activity implements
 
 	private MessageAdapter adapter;
 
-	private List<CommonAdapterItemWrapper> messageArray;
+	private List<VMessage> messageArray;
 
 	private boolean isStopped;
 
@@ -280,6 +277,7 @@ public class ConversationTextActivity extends Activity implements
 
 		CommonCallBack.getInstance().setMessageBodyPopup(this);
 		CommonCallBack.getInstance().setCrowdFileState(this);
+		CommonCallBack.getInstance().setNotifyChatInterToReplace(this);
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				avatarChangedListener);
@@ -341,7 +339,7 @@ public class ConversationTextActivity extends Activity implements
 	 */
 	private void initModuleAndListener() {
 		messageAllID = new SparseArray<VMessage>();
-		messageArray = new ArrayList<CommonAdapterItemWrapper>();
+		messageArray = new ArrayList<VMessage>();
 
 		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
 		adapter = new MessageAdapter();
@@ -1184,8 +1182,7 @@ public class ConversationTextActivity extends Activity implements
 		if (playingAudioMessage == null)
 			return false;
 		for (int i = 0; i < messageArray.size(); i++) {
-			CommonAdapterItemWrapper wrapper = messageArray.get(i);
-			VMessage vm = (VMessage) wrapper.getItemObject();
+			VMessage vm = messageArray.get(i);
 			if (vm.getUUID().equals(playingAudioMessage.getUUID())) {
 				found = true;
 				continue;
@@ -1193,28 +1190,20 @@ public class ConversationTextActivity extends Activity implements
 
 			if (found) {
 				List<VMessageAudioItem> items = vm.getAudioItems();
-				if (items.size() > 0
-						&& items.get(0).getReadState() == VMessageAbstractItem.STATE_UNREAD) {
-					V2Log.d(TAG, "start palying next aduio item , id is : "
-							+ vm.getId() + "and index in collections is : " + i
-							+ " collections size is : " + messageArray.size());
+				if (items.size() > 0) {
 					VMessageAudioItem audio = items.get(0);
-					if (i != 0)
-						mMessagesContainer.setSelection(i);
-					MessageBodyView foundView = (MessageBodyView) wrapper
-							.getView();
-					if (foundView == null) {
+					if (audio.getReadState() == VMessageAbstractItem.STATE_UNREAD) {
 						V2Log.d(TAG,
-								"palying next aduio item failed , view is null , id is : "
-										+ vm.getId());
-						MessageBodyView bodyView = new MessageBodyView(this,
-								vm, vm.isShowTime());
-						foundView = bodyView;
-						((VMessageAdater) wrapper).setView(bodyView);
+								"start palying next aduio item , id is : "
+										+ vm.getId()
+										+ "and index in collections is : " + i
+										+ " collections size is : "
+										+ messageArray.size());
+						if (i != 0)
+							mMessagesContainer.setSelection(i);
+						listener.requestPlayAudio(vm, audio);
+						return true;
 					}
-					listener.requestPlayAudio(foundView, vm, audio);
-					foundView.updateUnreadFlag(false, audio);
-					return true;
 				}
 			}
 		}
@@ -1428,28 +1417,28 @@ public class ConversationTextActivity extends Activity implements
 		}
 	}
 
-	private void cleanRangeBitmapCache(int before, int after) {
-		int size = messageArray.size();
-		if (size < after && before < 0) {
-			return;
-		}
-
-		while (--before >= 0) {
-			VMessageAdater ItemWrapper = (VMessageAdater) messageArray
-					.get(before);
-			VMessage vm = (VMessage) ItemWrapper.getItemObject();
-			ItemWrapper.setView(null);
-			vm.recycleAllImageMessage();
-		}
-
-		while (++after < size) {
-			VMessageAdater ItemWrapper = (VMessageAdater) messageArray
-					.get(after);
-			VMessage vm = (VMessage) ItemWrapper.getItemObject();
-			ItemWrapper.setView(null);
-			vm.recycleAllImageMessage();
-		}
-	}
+	// private void cleanRangeBitmapCache(int before, int after) {
+	// int size = messageArray.size();
+	// if (size < after && before < 0) {
+	// return;
+	// }
+	//
+	// while (--before >= 0) {
+	// VMessageAdater ItemWrapper = (VMessageAdater) messageArray
+	// .get(before);
+	// VMessage vm = (VMessage) ItemWrapper.getItemObject();
+	// ItemWrapper.setView(null);
+	// vm.recycleAllImageMessage();
+	// }
+	//
+	// while (++after < size) {
+	// VMessageAdater ItemWrapper = (VMessageAdater) messageArray
+	// .get(after);
+	// VMessage vm = (VMessage) ItemWrapper.getItemObject();
+	// ItemWrapper.setView(null);
+	// vm.recycleAllImageMessage();
+	// }
+	// }
 
 	private void startVoiceCall() {
 		if (!GlobalHolder.getInstance().isServerConnected()) {
@@ -1801,15 +1790,14 @@ public class ConversationTextActivity extends Activity implements
 		// // Save message
 		vm.setmXmlDatas(vm.toXml());
 		vm.setState(VMessageAbstractItem.STATE_NORMAL);
-		vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
+		vm.isBeginSendingAnima = true;
 
 		MessageBuilder.saveMessage(this, vm);
 		MessageBuilder.saveFileVMessage(this, vm);
 		MessageBuilder.saveBinaryVMessage(this, vm);
 
-		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		addMessageToContainer(vm);
-
+		Message.obtain(lh, SEND_MESSAGE, vm).sendToTarget();
 		// 如果从个人资料界面发送消息，需要回调界面创建该会话
 		if (isFirstCall) {
 			V2Log.d(TAG,
@@ -1829,7 +1817,9 @@ public class ConversationTextActivity extends Activity implements
 			public void run() {
 				offset++;
 				judgeShouldShowTime(msg);
-				messageArray.add(new VMessageAdater(msg));
+				if(msg.getFileItems().size() > 0)
+					msg.isBeginSendingAnima = false;
+				messageArray.add(msg);
 				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 				scrollToBottom();
 			}
@@ -1869,10 +1859,10 @@ public class ConversationTextActivity extends Activity implements
 				LastFistItemOffset = (v == null) ? 0 : v.getTop();
 				// Do not clean image message state when loading message
 			} else {
-				if (lastFirst != first) {
-					cleanRangeBitmapCache(first - 5, first + allVisibleCount
-							+ BATCH_COUNT);
-				}
+				// if (lastFirst != first) {
+				// cleanRangeBitmapCache(first - 5, first + allVisibleCount
+				// + BATCH_COUNT);
+				// }
 			}
 			// Calculate scrolled direction
 			isUPScroll = first < lastFirst;
@@ -1933,19 +1923,16 @@ public class ConversationTextActivity extends Activity implements
 		};
 
 		@Override
-		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai) {
+		public void requestPlayAudio(VMessage vm, VMessageAudioItem vai) {
 			if (vai != null && vai.getAudioFilePath() != null) {
 				playingAudioMessage = vm;
 				for (int i = 0; i < messageArray.size(); i++) {
-					CommonAdapterItemWrapper wrapper = messageArray.get(i);
-					VMessage tempVm = (VMessage) wrapper.getItemObject();
+					VMessage tempVm = messageArray.get(i);
 					if (tempVm.getUUID().equals(playingAudioMessage.getUUID())) {
 						vai.setPlaying(true);
 						tempVm.getAudioItems()
 								.get(0)
 								.setReadState(VMessageAbstractItem.STATE_READED);
-						playingAudioBodyView = (MessageBodyView) wrapper
-								.getView();
 					}
 				}
 				V2Log.i(TAG, "start play , currentPlayingAudio id is : "
@@ -2116,10 +2103,26 @@ public class ConversationTextActivity extends Activity implements
 
 		List<VMessage> array = null;
 		switch (currentConversationViewType) {
-		case V2GlobalConstants.GROUP_TYPE_USER:
+		case V2GlobalConstants.GROUP_TYPE_USER: {
 			array = MessageLoader.loadMessageByPage(mContext,
 					Conversation.TYPE_CONTACT, currentLoginUserID,
 					remoteChatUserID, BATCH_COUNT, offset);
+			for (int i = 0; i < array.size(); i++) {
+				if (array.get(i).getFileItems().size() > 0) {
+					VMessageFileItem vMessageFileItem = array.get(i)
+							.getFileItems().get(0);
+					File check = new File(vMessageFileItem.getFilePath());
+					if (!check.isFile()
+							&& !check.exists()
+							&& vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED) {
+						vMessageFileItem
+								.setState(VMessageAbstractItem.STATE_FILE_UNDOWNLOAD);
+						MessageLoader.updateFileItemState(mContext,
+								vMessageFileItem);
+					}
+				}
+			}
+		}
 			break;
 		case V2GlobalConstants.GROUP_TYPE_CROWD:
 			array = MessageLoader
@@ -2204,7 +2207,7 @@ public class ConversationTextActivity extends Activity implements
 		mv.setCallback(listener);
 		VMessageAdater adater = new VMessageAdater(m);
 		adater.setView(mv);
-		messageArray.add(adater);
+		messageArray.add(m);
 		if (!isStopped)
 			this.scrollToBottom();
 		else
@@ -2225,11 +2228,8 @@ public class ConversationTextActivity extends Activity implements
 			return false;
 		}
 		for (int i = 0; i < messageArray.size(); i++) {
-			VMessageAdater va = (VMessageAdater) messageArray.get(i);
-			VMessage message = (VMessage) va.getItemObject();
+			VMessage message = messageArray.get(i);
 			if (vm.getId() == message.getId()) {
-				if (message.getImageItems().size() >= 0)
-					va.setView(null);
 				deleteMessage(message, i);
 				return true;
 			} else {
@@ -2256,7 +2256,7 @@ public class ConversationTextActivity extends Activity implements
 				messageArray.size());
 		if (messagePages != null && messagePages.size() > 0
 				&& messageAllID.get((int) messagePages.get(0).getId()) == null) {
-			messageArray.add(0, new VMessageAdater(messagePages.get(0)));
+			messageArray.add(0, messagePages.get(0));
 		}
 		V2Log.d(TAG, "现在集合长度：" + messageArray.size());
 	}
@@ -2278,7 +2278,7 @@ public class ConversationTextActivity extends Activity implements
 	private void updateFileProgressView(String uuid, long tranedSize,
 			int progressType) {
 		for (int i = 0; i < messageArray.size(); i++) {
-			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
+			VMessage vm = messageArray.get(i);
 			if (vm.getFileItems().size() > 0) {
 				VMessageFileItem item = vm.getFileItems().get(0);
 				if (item.getUuid().equals(uuid)) {
@@ -2294,20 +2294,13 @@ public class ConversationTextActivity extends Activity implements
 					}
 
 					vfi.setDownloadedSize(tranedSize);
-					CommonAdapterItemWrapper common = messageArray.get(i);
-					MessageBodyView mv = (MessageBodyView) common.getView();
-					if (mv != null) {
-						mv.updateView(vfi);
-					}
+					vm.isUpdateFileState = true;
+					Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 				}
 			} else if (vm.getAudioItems().size() > 0) {
 				VMessageAudioItem item = vm.getAudioItems().get(0);
 				if (item.getUuid().equals(uuid)) {
-					CommonAdapterItemWrapper common = messageArray.get(i);
-					MessageBodyView mv = (MessageBodyView) common.getView();
-					if (mv != null) {
-						mv.updateSendingFlag(false);
-					}
+					Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 				}
 			}
 		}
@@ -2326,7 +2319,7 @@ public class ConversationTextActivity extends Activity implements
 		}
 
 		for (int i = 0; i < messageArray.size(); i++) {
-			VMessage vm = (VMessage) messageArray.get(i).getItemObject();
+			VMessage vm = messageArray.get(i);
 			if (vm.getFileItems().size() > 0) {
 				List<VMessageFileItem> fileItems = vm.getFileItems();
 				for (int j = 0; j < fileItems.size(); j++) {
@@ -2343,14 +2336,11 @@ public class ConversationTextActivity extends Activity implements
 					default:
 						break;
 					}
-					MessageBodyView view = (MessageBodyView) messageArray
-							.get(i).getView();
-					if (!isStopped && view != null)
-						view.updateView(item);
+					if (!isStopped)
+						Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 				}
 			}
 		}
-		Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 	}
 
 	private OnTouchListener mHiddenOnTouchListener = new OnTouchListener() {
@@ -2410,24 +2400,14 @@ public class ConversationTextActivity extends Activity implements
 			if (user == null) {
 				return;
 			}
-			// if (user.getmUserId() == local.getmUserId()
-			// || (remote != null && user.getmUserId() == remote
-			// .getmUserId())) {
+
 			for (int i = 0; i < messageArray.size(); i++) {
-				MessageBodyView mdv = (MessageBodyView) messageArray.get(i)
-						.getView();
-				// TODO need to figure out why it will be null
-				// when re-connect network.
-				if (mdv == null) {
-					continue;
-				}
-				VMessage vm = mdv.getMsg();
-				if (vm.getFromUser().getmUserId() == user.getmUserId()) {
-					mdv.updateAvatar(bm);
+				VMessage vMessage = messageArray.get(i);
+				if(vMessage.getFromUser() != null && vMessage.getFromUser().getmUserId() == user.getmUserId()){
+					vMessage.isUpdateAvatar = true;
 				}
 			}
-			// }
-
+			Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 		}
 
 	};
@@ -2455,36 +2435,30 @@ public class ConversationTextActivity extends Activity implements
 
 		@Override
 		public Object getItem(int pos) {
-			return messageArray.get(pos).getItemObject();
+			return messageArray.get(pos);
 		}
 
 		@Override
 		public long getItemId(int pos) {
-			return messageArray.get(pos).getItemObject().hashCode();
+			return 0;
 		}
 
 		@Override
 		public View getView(int pos, View convertView, ViewGroup v) {
-			if (pos >= messageArray.size())
-				return convertView;
-
 			MessageBodyView mv = null;
-			VMessageAdater adater = (VMessageAdater) messageArray.get(pos);
-			VMessage vm = (VMessage) messageArray.get(pos).getItemObject();
+			VMessage vm = messageArray.get(pos);
 			if (convertView == null) {
 				mv = new MessageBodyView(mContext, vm, vm.isShowTime());
 				mv.setCallback(listener);
 				convertView = mv;
 			} else {
 				mv = (MessageBodyView) convertView;
-			}
-
-			mv.updateView(vm);
-			adater.setView(mv);
-			;
-			List<VMessageFileItem> fileItems = vm.getFileItems();
-			if (fileItems != null) {
-				adapterFileIcon(fileItems);
+				mv.updateView(vm);
+//				vm.isUpdateFileState = true;
+				List<VMessageFileItem> fileItems = vm.getFileItems();
+				if (fileItems.size() > 0) {
+					adapterFileIcon(fileItems);
+				}
 			}
 			return convertView;
 		}
@@ -2514,7 +2488,7 @@ public class ConversationTextActivity extends Activity implements
 				// 用于onNewIntent判断是否需要重新加载界面聊天数据，以及是否阻断广播 , true 后台
 				boolean isAppBack = GlobalConfig
 						.isApplicationBackground(mContext);
-				if (isReLoading) {
+				if (isReLoading && !isLoading) {
 					boolean result = queryAndAddMessage((int) intent
 							.getExtras().getLong("mid"));
 					if (result) {
@@ -2532,23 +2506,17 @@ public class ConversationTextActivity extends Activity implements
 				int result = intent.getExtras().getInt("errorCode");
 				String uuid = intent.getExtras().getString("uuid");
 				for (int i = 0; i < messageArray.size(); i++) {
-					VMessage vm = (VMessage) messageArray.get(i)
-							.getItemObject();
+					VMessage vm = messageArray.get(i);
 					if (vm.getUUID().equals(uuid)) {
-						MessageBodyView mdv = ((MessageBodyView) messageArray
-								.get(i).getView());
-						if (mdv != null) {
-							mdv.updateSendingFlag(false);
-							if (result == SEND_MESSAGE_SUCCESS)
-								mdv.updateFailedFlag(false);
-							else
-								mdv.updateFailedFlag(true);
-						}
-
-						if (result == SEND_MESSAGE_SUCCESS)
+						vm.isBeginSendingAnima = false;
+						if (result == SEND_MESSAGE_SUCCESS){
 							vm.setState(VMessageAbstractItem.STATE_SENT_SUCCESS);
-						else
+							vm.isShowFailed = false;
+						}
+						else{
+							vm.isShowFailed = true;
 							vm.setState(VMessageAbstractItem.STATE_SENT_FALIED);
+						}
 
 						List<VMessageAbstractItem> items = vm.getItems();
 						for (int j = 0; j < items.size(); j++) {
@@ -2556,14 +2524,14 @@ public class ConversationTextActivity extends Activity implements
 							if (uuid.equals(item.getUuid())) {
 								if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
 									if (result == SEND_MESSAGE_SUCCESS)
-										vm.setState(VMessageAbstractItem.STATE_FILE_SENT);
+										item.setState(VMessageAbstractItem.STATE_FILE_SENT);
 									else
-										vm.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+										item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 								} else {
 									if (result == SEND_MESSAGE_SUCCESS)
-										vm.setState(VMessageAbstractItem.STATE_SENT_SUCCESS);
+										item.setState(VMessageAbstractItem.STATE_SENT_SUCCESS);
 									else
-										vm.setState(VMessageAbstractItem.STATE_SENT_FALIED);
+										item.setState(VMessageAbstractItem.STATE_SENT_FALIED);
 								}
 								break;
 							}
@@ -2571,17 +2539,13 @@ public class ConversationTextActivity extends Activity implements
 
 						if (vm.isResendMessage()
 								&& result == SEND_MESSAGE_SUCCESS) {
-							CommonAdapterItemWrapper wrapper = messageArray
-									.get(i);
-							MessageBodyView bodyView = (MessageBodyView) wrapper
-									.getView();
-							if (bodyView != null)
-								bodyView.updateDate();
-							messageArray.remove(wrapper);
-							messageArray.add(wrapper);
+							VMessage rsendVm = messageArray.get(i);
+							rsendVm.isUpdateDate = true;
+							messageArray.remove(rsendVm);
+							messageArray.add(rsendVm);
 							scrollToBottom();
-							Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 						}
+						Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 						break;
 					}
 				}
@@ -2652,24 +2616,18 @@ public class ConversationTextActivity extends Activity implements
 				String fileID = intent.getStringExtra("fileID");
 				int exeType = intent.getIntExtra("exeType", -1);
 				for (int i = 0; i < messageArray.size(); i++) {
-					CommonAdapterItemWrapper wrapper = messageArray.get(i);
-					VMessage tempVm = (VMessage) wrapper.getItemObject();
+					VMessage tempVm = messageArray.get(i);
 					if (tempVm.getFileItems().size() > 0) {
 						VMessageFileItem vMessageFileItem = tempVm
 								.getFileItems().get(0);
 						if (vMessageFileItem.getUuid().equals(fileID)) {
-							MessageBodyView bodyView = (MessageBodyView) wrapper
-									.getView();
 							if (exeType == VMessageAbstractItem.STATE_FILE_SENDING)
 								vMessageFileItem
 										.setState(VMessageAbstractItem.STATE_FILE_SENDING);
 							else
 								vMessageFileItem
 										.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-							if (bodyView != null) {
-								bodyView.updateFailedFlag(false);
-								bodyView.updateView(vMessageFileItem);
-							}
+							tempVm.isShowFailed = false;
 							isScrollButtom = true;
 							break;
 						}
@@ -2684,8 +2642,7 @@ public class ConversationTextActivity extends Activity implements
 					return;
 
 				for (int i = 0; i < messageArray.size(); i++) {
-					VMessage vm = (VMessage) messageArray.get(i)
-							.getItemObject();
+					VMessage vm = (VMessage) messageArray.get(i);
 					if (vm.getFileItems().size() > 0) {
 						VMessageFileItem vfi = vm.getFileItems().get(0);
 						if (vfi.getUuid().equals(fileID)) {
@@ -2701,10 +2658,6 @@ public class ConversationTextActivity extends Activity implements
 							default:
 								break;
 							}
-							MessageBodyView view = (MessageBodyView) messageArray
-									.get(i).getView();
-							if (!isStopped && view != null)
-								view.updateView(vfi);
 							break;
 						}
 					}
@@ -2716,8 +2669,7 @@ public class ConversationTextActivity extends Activity implements
 						.get("state");
 				if (code != NetworkStateCode.CONNECTED) {
 					for (int i = 0; i < messageArray.size(); i++) {
-						CommonAdapterItemWrapper wrapper = messageArray.get(i);
-						VMessage tempVm = (VMessage) wrapper.getItemObject();
+						VMessage tempVm = messageArray.get(i);
 						if (tempVm.getFileItems().size() > 0) {
 							VMessageFileItem vMessageFileItem = tempVm
 									.getFileItems().get(0);
@@ -2732,12 +2684,7 @@ public class ConversationTextActivity extends Activity implements
 								vMessageFileItem
 										.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
 							}
-
-							MessageBodyView bodyView = (MessageBodyView) wrapper
-									.getView();
-							if (bodyView != null) {
-								bodyView.updateView(vMessageFileItem);
-							}
+							Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 						}
 					}
 				}
@@ -2786,7 +2733,7 @@ public class ConversationTextActivity extends Activity implements
 				V2Log.d(TAG, "此次加载的消息数量:" + loadSize);
 
 				if (loadSize > 0 && messageArray == null) {
-					messageArray = new ArrayList<CommonAdapterItemWrapper>();
+					messageArray = new ArrayList<VMessage>();
 				}
 
 				if (loadSize > 0 && messageAllID == null) {
@@ -2834,8 +2781,7 @@ public class ConversationTextActivity extends Activity implements
 						}
 					}
 					messageAllID.append((int) vm.getId(), vm);
-					VMessageAdater adater = new VMessageAdater(vm);
-					messageArray.add(0, adater);
+					messageArray.add(0, vm);
 				}
 				V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
 				LastFistItem = LastFistItem + loadSize;
@@ -2989,19 +2935,17 @@ public class ConversationTextActivity extends Activity implements
 		switch (type) {
 		case ADD_FILE:
 			if (messageArray == null)
-				messageArray = new ArrayList<CommonAdapter.CommonAdapterItemWrapper>();
+				messageArray = new ArrayList<VMessage>();
 			addMessageToContainer(vm);
 			isScrollButtom = true;
 			break;
 		case DELETE_FILE:
 			if (vm != null) {
 				for (int i = 0; i < messageArray.size(); i++) {
-					VMessageAdater va = (VMessageAdater) messageArray.get(i);
-					VMessage message = (VMessage) va.getItemObject();
+					VMessage message = messageArray.get(i);
 					if (message.getFileItems().size() > 0
 							&& message.getFileItems().get(0).getUuid()
 									.equals(fileID)) {
-						va.setView(null);
 						deleteMessage(message, i);
 						break;
 					} else {
@@ -3014,22 +2958,18 @@ public class ConversationTextActivity extends Activity implements
 			break;
 		case UPDATE_FILE:
 			for (int i = 0; i < messageArray.size(); i++) {
-				CommonAdapterItemWrapper wrapper = messageArray.get(i);
-				VMessage tempVm = (VMessage) wrapper.getItemObject();
+				VMessage tempVm = messageArray.get(i);
 				if (tempVm.getFileItems().size() > 0) {
 					VMessageFileItem vMessageFileItem = tempVm.getFileItems()
 							.get(0);
 					if (vMessageFileItem.getUuid().equals(fileID)) {
 						VMessageFileItem transItem = vm.getFileItems().get(0);
 						vMessageFileItem.setState(transItem.getState());
-						MessageBodyView bodyView = (MessageBodyView) wrapper
-								.getView();
-						if (bodyView != null)
-							bodyView.updateView(transItem);
 						break;
 					}
 				}
 			}
+			Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 			break;
 		default:
 			break;
@@ -3037,14 +2977,17 @@ public class ConversationTextActivity extends Activity implements
 	}
 
 	@Override
-	public void notifyChatInterToReplace(VMessage vm) {
+	public void notifyChatInterToReplace(final VMessage vm) {
+
+		V2Log.e(TAG, "Recevice Binary data from server , and replaced wait");
 		for (int i = 0; i < messageArray.size(); i++) {
-			VMessageAdater wrapper = (VMessageAdater) messageArray.get(i);
-			VMessage replaced = (VMessage) messageArray.get(i).getItemObject();
-			if(replaced.getUUID().equals(vm.getUUID())){
-				wrapper.setVm(vm);
+			VMessage replaced = messageArray.get(i);
+			if (replaced.getUUID().equals(vm.getUUID())) {
+				replaced.setImageItems(vm.getImageItems());
 				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
+				break;
 			}
-		}		
+		}
+
 	};
 }

@@ -85,6 +85,8 @@ public class MessageBodyView extends LinearLayout {
 	 */
 	private boolean isShowTime;
 
+	private boolean isSending;
+
 	private LinearLayout mLocalMessageContainter;
 
 	private LinearLayout mRemoteMessageContainter;
@@ -122,34 +124,36 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		this.mMsg = m;
-		if (mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER) {
-			this.bodyType = MessageBodyType.SINGLE_USER_TYPE;
-			rootView = LayoutInflater.from(context).inflate(
-					R.layout.message_body, null, false);
-		} else {
-			this.bodyType = MessageBodyType.GROUP_TYPE;
-			rootView = LayoutInflater.from(context).inflate(
-					R.layout.crowd_message_body, null, false);
-		}
 		this.isShowTime = isShowTime;
 		this.localHandler = new Handler();
-		
+
 		initView();
-		initData();
+		populateMessage();
 		initPopupWindow();
-		
-		if (isShowTime && mMsg.getDate() != null) {
-			timeTV.setText(mMsg.getStringDate());
+
+		if (mMsg.isBeginSendingAnima) {
+			updateSendingAnima(true);
 		} else {
-			timeTV.setVisibility(View.GONE);
+			updateSendingAnima(false);
 		}
 	}
 
 	private void initView() {
-		if (rootView == null) {
-			V2Log.e(" root view is Null can not initialize");
-			return;
+		removeAllViews();
+		if (mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER) {
+			this.bodyType = MessageBodyType.SINGLE_USER_TYPE;
+			rootView = LayoutInflater.from(getContext()).inflate(
+					R.layout.message_body, null, false);
+		} else {
+			this.bodyType = MessageBodyType.GROUP_TYPE;
+			rootView = LayoutInflater.from(getContext()).inflate(
+					R.layout.crowd_message_body, null, false);
 		}
+
+		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		this.addView(rootView, ll);
 
 		anima = new RotateAnimation(0f, 360f, Animation.RELATIVE_TO_SELF, 0.5f,
 				Animation.RELATIVE_TO_SELF, 0.5f);
@@ -162,13 +166,6 @@ public class MessageBodyView extends LinearLayout {
 				.findViewById(R.id.message_body_left_user_ly);
 		mRemoteMessageContainter = (LinearLayout) rootView
 				.findViewById(R.id.message_body_remote_ly);
-		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		this.addView(rootView, ll);
-	}
-
-	private void initData() {
 
 		if (!mMsg.isLocal()) {
 			mHeadIcon = (ImageView) rootView
@@ -192,15 +189,13 @@ public class MessageBodyView extends LinearLayout {
 				name = (TextView) rootView
 						.findViewById(R.id.message_body_person_name_left);
 				if (fromUser != null) {
-					boolean friend = GlobalHolder.getInstance().isFriend(
-							fromUser);
-					if (friend && !TextUtils.isEmpty(fromUser.getNickName())) {
-						name.setText(fromUser.getNickName());
-					} else {
-						name.setText(fromUser.getName());
-					}
+					name.setText(fromUser.getName());
 				}
 			}
+
+			if (mMsg.getAudioItems().size() > 0)
+				updateSendingAnima(true);
+
 		} else {
 			mHeadIcon = (ImageView) rootView
 					.findViewById(R.id.conversation_message_body_icon_right);
@@ -226,6 +221,9 @@ public class MessageBodyView extends LinearLayout {
 				if (localUser != null)
 					name.setText(localUser.getName());
 			}
+
+			if (mMsg.getFileItems().size() <= 0)
+				updateSendingAnima(true);
 		}
 
 		failedIcon.setVisibility(View.INVISIBLE);
@@ -234,12 +232,6 @@ public class MessageBodyView extends LinearLayout {
 		sendingIcon.setVisibility(View.GONE);
 		mArrowIV.bringToFront();
 
-		// 执行发送时动画播放
-		if (mMsg.getState() == VMessageAbstractItem.STATE_NORMAL
-				& mMsg.getFileItems().size() <= 0) {
-			updateSendingFlag(true);
-		}
-		
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
 			User fromUser = GlobalHolder.getInstance().getUser(
 					mMsg.getFromUser().getmUserId());
@@ -252,14 +244,94 @@ public class MessageBodyView extends LinearLayout {
 			}
 		}
 
-		if (mMsg.getFromUser() != null
-				&& mMsg.getFromUser().getAvatarBitmap() != null) {
-			mHeadIcon.setImageBitmap(mMsg.getFromUser().getAvatarBitmap());
+		if (isShowTime && mMsg.getDate() != null) {
+			timeTV.setText(mMsg.getStringDate());
+		} else {
+			timeTV.setVisibility(View.GONE);
 		}
 
+		if (mMsg.getFromUser() != null) {
+			mHeadIcon.setImageBitmap(mMsg.getFromUser().getAvatarBitmap());
+		}
+		mContentContainer.setTag(this.mMsg);
 		initListener();
-		populateMessage();
+	}
 
+	public void initTextView() {
+		TextView contentView = new TextView(getContext());
+		contentView.setOnClickListener(messageClickListener);
+		contentView.setBackgroundColor(Color.TRANSPARENT);
+		contentView.setTextColor(Color.BLACK);
+		contentView.setOnLongClickListener(messageLongClickListener);
+		contentView.setOnTouchListener(touchListener);
+		contentView.setSelected(false);
+
+		List<VMessageAbstractItem> items = mMsg.getItems();
+		if (mMsg.isAutoReply()) {
+			contentView.append(getResources().getString(
+					R.string.contact_message_auto_reply));
+		}
+
+		for (int i = 0; items != null && i < items.size(); i++) {
+			VMessageAbstractItem item = items.get(i);
+			// Add new layout for new line
+			if (item.isNewLine() && contentView.length() != 0
+					&& !mMsg.isAutoReply()) {
+				contentView.append("\n");
+			}
+
+			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
+				contentView.append(((VMessageTextItem) item).getText());
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
+				Drawable dr = this
+						.getResources()
+						.getDrawable(
+								GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem) item)
+										.getIndex()]);
+				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
+						dr.getIntrinsicHeight());
+
+				contentView.append(".");
+
+				SpannableStringBuilder builder = new SpannableStringBuilder(
+						contentView.getText());
+				ImageSpan is = new ImageSpan(dr);
+				builder.setSpan(is, contentView.getText().length() - 1,
+						contentView.getText().length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				contentView.setText(builder);
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
+				messageType = MESSAGE_TYPE_NON_TEXT;
+				Drawable dr = new BitmapDrawable(this.getContext()
+						.getResources(),
+						((VMessageImageItem) item).getCompressedBitmap());
+				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
+						dr.getIntrinsicHeight());
+				contentView.append(".");
+				SpannableStringBuilder builder = new SpannableStringBuilder(
+						contentView.getText());
+				ImageSpan is = new ImageSpan(dr);
+				builder.setSpan(is, contentView.getText().length() - 1,
+						contentView.getText().length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				contentView.setText(builder);
+				// AudioItem only has one item
+			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
+				String linkText = ((VMessageLinkTextItem) item).getText();
+				SpannableStringBuilder style = new SpannableStringBuilder(
+						((VMessageLinkTextItem) item).getText());
+				style.setSpan(new ForegroundColorSpan(Color.BLUE), 0,
+						linkText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				style.setSpan(new UnderlineSpan(), 0, linkText.length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				contentView.append(style);
+			}
+		}
+
+		LinearLayout.LayoutParams contentLayout = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		mContentContainer.addView(contentView, contentLayout);
 	}
 
 	private void initListener() {
@@ -340,85 +412,11 @@ public class MessageBodyView extends LinearLayout {
 
 		if (mMsg.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
 			failedIcon.setVisibility(View.VISIBLE);
+		} else {
+			failedIcon.setVisibility(View.GONE);
 		}
 
-		TextView et = new TextView(this.getContext());
-		et.setOnClickListener(messageClickListener);
-		et.setBackgroundColor(Color.TRANSPARENT);
-		et.setTextColor(Color.BLACK);
-		et.setOnLongClickListener(messageLongClickListener);
-		et.setOnTouchListener(touchListener);
-		et.setSelected(false);
-		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.MATCH_PARENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		mContentContainer.addView(et, ll);
-		List<VMessageAbstractItem> items = mMsg.getItems();
-		if (mMsg.isAutoReply()) {
-			et.append(getResources().getString(
-					R.string.contact_message_auto_reply));
-		}
-
-		for (int i = 0; items != null && i < items.size(); i++) {
-			VMessageAbstractItem item = items.get(i);
-			// Add new layout for new line
-			if (item.isNewLine() && et.length() != 0 && !mMsg.isAutoReply()) {
-				et.append("\n");
-			}
-
-			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
-				et.append(((VMessageTextItem) item).getText());
-			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
-				Drawable dr = this
-						.getResources()
-						.getDrawable(
-								GlobalConfig.GLOBAL_FACE_ARRAY[((VMessageFaceItem) item)
-										.getIndex()]);
-				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
-						dr.getIntrinsicHeight());
-
-				et.append(".");
-
-				SpannableStringBuilder builder = new SpannableStringBuilder(
-						et.getText());
-				ImageSpan is = new ImageSpan(dr);
-				builder.setSpan(is, et.getText().length() - 1, et.getText()
-						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				et.setText(builder);
-			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
-				messageType = MESSAGE_TYPE_NON_TEXT;
-				Drawable dr = new BitmapDrawable(this.getContext()
-						.getResources(),
-						((VMessageImageItem) item).getCompressedBitmap());
-				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
-						dr.getIntrinsicHeight());
-				et.append(".");
-				SpannableStringBuilder builder = new SpannableStringBuilder(
-						et.getText());
-				ImageSpan is = new ImageSpan(dr);
-				builder.setSpan(is, et.getText().length() - 1, et.getText()
-						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				et.setText(builder);
-				// AudioItem only has one item
-			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
-				String linkText = ((VMessageLinkTextItem) item).getText();
-				SpannableStringBuilder style = new SpannableStringBuilder(
-						((VMessageLinkTextItem) item).getText());
-				style.setSpan(new ForegroundColorSpan(Color.BLUE), 0,
-						linkText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				style.setSpan(new UnderlineSpan(), 0, linkText.length(),
-						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				et.append(style);
-			}
-
-			if (item.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
-				failedIcon.setVisibility(View.VISIBLE);
-			}
-
-		}
-
-		mContentContainer.setTag(this.mMsg);
-
+		initTextView();
 	}
 
 	/**
@@ -428,7 +426,8 @@ public class MessageBodyView extends LinearLayout {
 	 */
 	private void populateAudioMessage(List<VMessageAudioItem> audioItems) {
 		final VMessageAudioItem item = audioItems.get(0);
-		if (item.getReadState() == VMessageAbstractItem.STATE_UNREAD)
+		if (item.getReadState() == VMessageAbstractItem.STATE_UNREAD
+				&& !isSending)
 			unReadIcon.setVisibility(View.VISIBLE);
 		else
 			unReadIcon.setVisibility(View.INVISIBLE);
@@ -480,12 +479,12 @@ public class MessageBodyView extends LinearLayout {
 
 			@Override
 			public void onClick(View view) {
-				if (item != null) {
+				if (item != null && !TextUtils.isEmpty(item.getAudioFilePath())) {
 					if (item.isPlaying()) {
 						callback.requestStopAudio(view, mMsg, item);
 					} else {
 						callback.requestStopOtherAudio(mMsg);
-						callback.requestPlayAudio(view, mMsg, item);
+						callback.requestPlayAudio(mMsg, item);
 						updateUnreadFlag(false, item);
 					}
 				}
@@ -645,13 +644,15 @@ public class MessageBodyView extends LinearLayout {
 		}
 	}
 
-	public void updateSendingFlag(boolean flag) {
-		if (!flag) {
+	public void updateSendingAnima(boolean isBegin) {
+		if (!isBegin) {
 			sendingIcon.setVisibility(View.GONE);
 			sendingIcon.clearAnimation();
+			isSending = false;
 		} else {
 			sendingIcon.setVisibility(View.VISIBLE);
 			sendingIcon.startAnimation(anima);
+			isSending = true;
 		}
 	}
 
@@ -687,18 +688,45 @@ public class MessageBodyView extends LinearLayout {
 			V2Log.e("Can't not update data vm is null");
 			return;
 		}
-		if (this.mMsg == vm) {
+
+		String olderUuid = this.mMsg.getUUID();
+		this.mMsg = vm;
+		if (!olderUuid.equals(vm.getUUID())) {
+			initView();
+		}
+
+		if (mMsg.isBeginSendingAnima) {
+			updateSendingAnima(true);
+		} else {
+			updateSendingAnima(false);
+		}
+
+		if (mMsg.isUpdateAvatar)
+			updateAvatar(mMsg.getFromUser().getAvatarBitmap());
+
+		if (mMsg.isShowFailed) {
+			updateFailedFlag(true);
+		} else {
+			updateFailedFlag(false);
+		}
+
+		if (mMsg.isUpdateDate) {
+			updateDate();
+		}
+
+		mContentContainer.removeAllViews();
+		populateMessage();
+	}
+
+	public void updateView(VMessageFileItem vfi) {
+		if (vfi == null || mMsg.getFileItems().size() < 0
+				|| !vfi.getUuid().equals(mMsg.getFileItems().get(0).getUuid())) {
 			return;
 		}
-		if (mContentContainer != null) {
-			mContentContainer.removeAllViews();
-		}
-		this.mMsg = vm;
-		initData();
-		if (mMsg.getState() == VMessageAbstractItem.STATE_SENT_FALIED) {
-			updateFailedFlag(true);
-		} else 
-			updateFailedFlag(false);
+
+		View fileRootView = mContentContainer.getChildAt(0);
+		updateFileItemView(vfi, fileRootView);
+
 	}
 
 	public void updateDate() {
@@ -709,18 +737,6 @@ public class MessageBodyView extends LinearLayout {
 		} else {
 			timeTV.setVisibility(View.GONE);
 		}
-	}
-
-	public void updateView(VMessageFileItem vfi) {
-		if (vfi == null ||
-				mMsg.getFileItems().size() < 0 ||
-				!vfi.getUuid().equals(mMsg.getFileItems().get(0).getUuid())) {
-			return;
-		}
-
-		View fileRootView = mContentContainer.getChildAt(0);
-		updateFileItemView(vfi, fileRootView);
-
 	}
 
 	/**
@@ -949,6 +965,10 @@ public class MessageBodyView extends LinearLayout {
 		mHeadIcon.setImageBitmap(bmp);
 	}
 
+	public boolean isSending() {
+		return isSending;
+	}
+
 	private OnClickListener fileMessageItemClickListener = new OnClickListener() {
 
 		@Override
@@ -981,9 +1001,17 @@ public class MessageBodyView extends LinearLayout {
 											"MessageBodyView fileMessageItemClickListener");
 							if (!flag)
 								return;
-							callback.requestDownloadFile(view, item.getVm(),
-									item);
-							item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+
+							if (GlobalHolder.getInstance().mFailedFiles
+									.contains(item.getUuid())) {
+								item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+								GlobalHolder.getInstance().mFailedFiles
+										.remove(item.getUuid());
+							} else {
+								callback.requestDownloadFile(view,
+										item.getVm(), item);
+								item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);
+							}
 						} else if (item.getState() == VMessageFileItem.STATE_FILE_SENDING) {
 							callback.requestPauseTransFile(view, item.getVm(),
 									item);
@@ -1028,7 +1056,7 @@ public class MessageBodyView extends LinearLayout {
 					if (audioItem.isPlaying()) {
 						callback.requestStopAudio(anchor, mMsg, audioItem);
 					} else {
-						callback.requestPlayAudio(anchor, mMsg, audioItem);
+						callback.requestPlayAudio(mMsg, audioItem);
 						audioItem.setPlaying(true);
 					}
 					return;
@@ -1175,7 +1203,7 @@ public class MessageBodyView extends LinearLayout {
 
 		public void requestDelMessage(VMessage v);
 
-		public void requestPlayAudio(View v, VMessage vm, VMessageAudioItem vai);
+		public void requestPlayAudio(VMessage vm, VMessageAudioItem vai);
 
 		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai);
 

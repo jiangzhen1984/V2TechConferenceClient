@@ -206,9 +206,10 @@ public class JNIService extends Service implements
 
 	private Context mContext;
 
-	private HashMap<String, VMessage> cacheImageMetaSize = new HashMap<String, VMessage>();
 	private List<VMessage> cacheImageMeta = new ArrayList<VMessage>();
 	private List<VMessage> cacheAudioMeta = new ArrayList<VMessage>();
+	private List<VMessage> messageQueue = new ArrayList<VMessage>();
+	private HashMap<String, String[]> cacheErrorBinaryMeta = new HashMap<String, String[]>();
 
 	// ////////////////////////////////////////
 
@@ -399,7 +400,7 @@ public class JNIService extends Service implements
 					if (msg.arg1 == V2GlobalConstants.GROUP_TYPE_DEPARTMENT
 							&& !noNeedBroadcast) {
 						V2Log.d(TAG,
-								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
+								"ConversationTabFragment no builed successfully! Need to delay sending , type is "
 										+ msg.arg1);
 						delayBroadcast.add(msg.arg1);
 					} else {
@@ -457,7 +458,7 @@ public class JNIService extends Service implements
 							+ go.gType + "- user size is : " + lu.size());
 					if (!noNeedBroadcast) {
 						V2Log.d(TAG,
-								"ConversationTabFragment no builed successfully! Need to delay sending , type is ："
+								"ConversationTabFragment no builed successfully! Need to delay sending , type is "
 										+ msg.arg1);
 						delayUserBroadcast.add(go);
 					} else {
@@ -476,7 +477,7 @@ public class JNIService extends Service implements
 				V2Log.e(TAG, "The All Group Infos Loaded !");
 				if (!noNeedBroadcast) {
 					V2Log.d(TAG,
-							"ConversationTabFragment no builed successfully! Need to delay sending , type is ：JNI_GROUP_LOADED");
+							"ConversationTabFragment no builed successfully! Need to delay sending , type is 锛欽NI_GROUP_LOADED");
 					delayBroadcast.add(JNI_GROUP_LOADED);
 				} else {
 					Intent loaded = new Intent();
@@ -490,7 +491,7 @@ public class JNIService extends Service implements
 				V2Log.e(TAG, "OFFLINE MESSAGE LOAD : " + isOfflineEnd);
 				if (!noNeedBroadcast) {
 					V2Log.d(TAG,
-							"ConversationTabFragment no builed successfully! Need to delay sending , type is ：JNI_OFFLINE_LOADED");
+							"ConversationTabFragment no builed successfully! Need to delay sending , type is 锛欽NI_OFFLINE_LOADED");
 					delayBroadcast.add(JNI_OFFLINE_LOADED);
 				} else {
 					Intent i = new Intent();
@@ -530,12 +531,12 @@ public class JNIService extends Service implements
 				break;
 			case JNI_RECEIVED_MESSAGE:
 				VMessage vm = (VMessage) msg.obj;
+				vm.setReadState(VMessageAbstractItem.STATE_UNREAD);
 				if (vm != null) {
 					String action = null;
 					vm.setReadState(VMessageAbstractItem.STATE_UNREAD);
 					MessageBuilder.saveBinaryVMessage(mContext, vm);
 					MessageBuilder.saveFileVMessage(mContext, vm);
-					MessageBuilder.saveMessage(mContext, vm);
 
 					if (vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
@@ -553,18 +554,23 @@ public class JNIService extends Service implements
 					// Send ordered broadcast, make sure conversationview
 					// receive message first
 					mContext.sendOrderedBroadcast(ii, null);
-				} else {
-					V2Log.e(TAG,
-							"Receiver new message failed ... pleace check parse xml !");
 				}
 				break;
 			case JNI_RECEIVED_MESSAGE_BINARY_DATA:
 				VMessage binaryVM = (VMessage) msg.obj;
-				List<VMessageImageItem> imageItems = binaryVM.getImageItems();
-				for (int i = 0; i < imageItems.size(); i++) {
-					MessageLoader.updateBinaryImageItem(imageItems.get(i));
+				int receiveState = msg.arg1;
+				if (receiveState == 1) {
+					MessageLoader.updateBinaryAudioItem(binaryVM.getAudioItems().get(0));
 				}
-				CommonCallBack.getInstance().executeNotifyChatInterToReplace(binaryVM);
+				
+				if(binaryVM.getImageItems().size() > 0){
+					List<VMessageImageItem> imageItems = binaryVM.getImageItems();
+					for (int i = 0; i < imageItems.size(); i++) {
+						MessageLoader.updateBinaryImageItem(imageItems.get(i));
+					}
+				} 
+				CommonCallBack.getInstance().executeNotifyChatInterToReplace(
+						binaryVM);
 				break;
 			case JNI_RECEIVED_VIDEO_INVITION:
 				VideoJNIObjectInd vjoi = (VideoJNIObjectInd) msg.obj;
@@ -753,7 +759,7 @@ public class JNIService extends Service implements
 			}
 
 			if (group.type == GroupType.CONFERENCE.intValue()) {
-				// 此处不处理，处理在ConferenceService
+				// 姝ゅ涓嶅鐞嗭紝澶勭悊鍦–onferenceService
 			} else if (group.type == GroupType.CHATING.intValue()) {
 				CrowdGroup cg = (CrowdGroup) GlobalHolder.getInstance()
 						.getGroupById(group.id);
@@ -921,16 +927,16 @@ public class JNIService extends Service implements
 				VMessageQualification.Type type, CrowdGroup g, User user,
 				String reason) {
 			VMessageQualification crowdMsg = null;
-			// 群申请
+			// 缇ょ敵璇�
 			if (type == Type.CROWD_APPLICATION) {
 				crowdMsg = VerificationProvider
 						.queryCrowdApplyQualMessageByUserId(g.getmGId(),
 								user.getmUserId());
-			} else { // 群邀请
+			} else { // 缇ら個璇�
 				crowdMsg = VerificationProvider.queryCrowdQualMessageByCrowdId(
 						user, g);
 			}
-			// 如果从数据库查出该条记录，则只需要更新时间和状态
+			// 濡傛灉浠庢暟鎹簱鏌ュ嚭璇ユ潯璁板綍锛屽垯鍙渶瑕佹洿鏂版椂闂村拰鐘舵�
 			if (crowdMsg != null) {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
 					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
@@ -1020,7 +1026,7 @@ public class JNIService extends Service implements
 			if (!vUser.isDirty()) {
 				AddFriendHistroysHandler.addMeNeedAuthentication(
 						getApplicationContext(), vUser, additInfo);
-			} else { // 组织外的用户
+			} else { // 缁勭粐澶栫殑鐢ㄦ埛
 				isOutORG = true;
 				User newUser = convertUser(user);
 				GlobalHolder.getInstance().putUser(newUser.getmUserId(),
@@ -1115,11 +1121,11 @@ public class JNIService extends Service implements
 
 			if (groupType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT
 					&& nUserID == GlobalHolder.getInstance().getCurrentUserId()) {
-				// TODO 说明已被管理系统删除，需要给用户提示并退出程序
+				// TODO 璇存槑宸茶绠＄悊绯荤粺鍒犻櫎锛岄渶瑕佺粰鐢ㄦ埛鎻愮ず骞堕�鍑虹▼搴�
 			}
 
 			if (groupType == GroupType.CONTACT.intValue()) {
-				// 如果是好友组，好友关系被别人移除，传来的groupId为0
+				// 濡傛灉鏄ソ鍙嬬粍锛屽ソ鍙嬪叧绯昏鍒汉绉婚櫎锛屼紶鏉ョ殑groupId涓�
 				Set<Group> groupSet = GlobalHolder.getInstance()
 						.getUser(nUserID).getBelongsGroup();
 				for (Group gg : groupSet) {
@@ -1175,7 +1181,7 @@ public class JNIService extends Service implements
 			// Group group = groupList.get(i);
 			//
 			// Log.i("20141201 2",
-			// group.getName() + "(人数):"
+			// group.getName() + "(浜烘暟):"
 			// + String.valueOf(group.getUserCount()));
 			// }
 			// }
@@ -1209,7 +1215,7 @@ public class JNIService extends Service implements
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
 					long waitMessageExist = VerificationProvider
 							.queryCrowdInviteWaitingQualMessageById(user.uid);
-					// 如果在本地数据库没有查到缓存记录，说明是别人申请的，而不是自己去邀请的
+					// 濡傛灉鍦ㄦ湰鍦版暟鎹簱娌℃湁鏌ュ埌缂撳瓨璁板綍锛岃鏄庢槸鍒汉鐢宠鐨勶紝鑰屼笉鏄嚜宸卞幓閭�鐨�
 					if (waitMessageExist != -1) {
 						boolean isTrue = VerificationProvider
 								.deleteCrowdInviteWattingQualMessage(waitMessageExist);
@@ -1527,13 +1533,13 @@ public class JNIService extends Service implements
 					cg.addNewFileNum(list.size());
 				}
 			} else if (group.type == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
-				// TODO 会议共享文件
+				// TODO 浼氳鍏变韩鏂囦欢
 				return;
 			}
 
 			for (FileJNIObject fileJNIObject : list) {
 				long uploadUserID = fileJNIObject.user.uid;
-				// 自己上传不提示
+				// 鑷繁涓婁紶涓嶆彁绀�
 				if (GlobalHolder.getInstance().getCurrentUserId() == uploadUserID)
 					continue;
 				User user = GlobalHolder.getInstance().getUser(uploadUserID);
@@ -1589,7 +1595,7 @@ public class JNIService extends Service implements
 							ind.getSzSessionID(), ind.getFromUserId());
 					// mark voice state to connected
 					GlobalHolder.getInstance().setVoiceConnectedState(true);
-					V2Log.d(TAG, "自动接受了对方音频邀请因为在视频通话中并且是同一个人");
+					V2Log.d(TAG, "鑷姩鎺ュ彈浜嗗鏂归煶棰戦個璇峰洜涓哄湪瑙嗛閫氳瘽涓苟涓旀槸鍚屼竴涓汉");
 				} else {
 					V2Log.i("Ignore audio call for others: "
 							+ ind.getFromUserId());
@@ -1610,7 +1616,7 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			// 如果在p2p界面则拒绝
+			// 濡傛灉鍦╬2p鐣岄潰鍒欐嫆缁�
 			ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
 			List<RunningTaskInfo> listRunningTaskInfo = activityManager
 					.getRunningTasks(1);
@@ -1634,7 +1640,6 @@ public class JNIService extends Service implements
 			iv.putExtra("voice", true);
 			iv.putExtra("sessionID", ind.getSzSessionID());
 			mContext.startActivity(iv);
-			GlobalHolder.getInstance().setP2pAVNeedStickyBraodcast(true);
 
 		}
 
@@ -1669,19 +1674,6 @@ public class JNIService extends Service implements
 			intent.putExtra("remoteID", currentVideoBean.remoteUserID);
 			sendBroadcast(intent);
 		}
-
-		@Override
-		public void OnAudioChatClosed(AudioJNIObjectInd ind) {
-			super.OnAudioChatClosed(ind);
-			if (GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast()) {
-				Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
-				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("fromUserId", ind.getFromUserId());
-				i.putExtra("groupId", ind.getGroupId());
-				// Send sticky broadcast, make sure activity receive
-				mContext.sendStickyBroadcast(i);
-			}
-		}
 	}
 
 	class VideoRequestCB extends VideoRequestCallbackAdapter {
@@ -1705,7 +1697,7 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			// 如果在p2p界面则拒绝
+			// 濡傛灉鍦╬2p鐣岄潰鍒欐嫆缁�
 			ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
 			List<RunningTaskInfo> listRunningTaskInfo = activityManager
 					.getRunningTasks(1);
@@ -1724,7 +1716,6 @@ public class JNIService extends Service implements
 
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_VIDEO_INVITION, ind)
 					.sendToTarget();
-			GlobalHolder.getInstance().setP2pAVNeedStickyBraodcast(true);
 		}
 
 		@Override
@@ -1750,20 +1741,21 @@ public class JNIService extends Service implements
 		 */
 		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
 			super.OnVideoChatClosed(ind);
-			// if (GlobalHolder.getInstance().isInMeeting()
-			// || GlobalHolder.getInstance().isInAudioCall()
-			// || GlobalHolder.getInstance().isInVideoCall()) {
-			// Log.i("20150128 1","OnVideoChatClosed return");
-			// return;
-			// }
-			if (GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast()) {
-				Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
-				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				i.putExtra("fromUserId", ind.getFromUserId());
-				i.putExtra("groupId", ind.getGroupId());
-				// Send sticky broadcast, make sure activity receive
-				mContext.sendStickyBroadcast(i);
-			} 
+			if (GlobalHolder.getInstance().isInMeeting()
+					|| GlobalHolder.getInstance().isInAudioCall()
+					|| GlobalHolder.getInstance().isInVideoCall()) {
+				return;
+			}
+			Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
+			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+			i.putExtra("fromUserId", ind.getFromUserId());
+			i.putExtra("groupId", ind.getGroupId());
+			// Send sticky broadcast, make sure activity receive
+			mContext.sendStickyBroadcast(i);
+
+			Log.i("20150123 1",
+					"sendStickyBroadcast JNI_BROADCAST_VIDEO_CALL_CLOSED");
+
 		}
 
 		private void updateVideoRecord(VideoJNIObjectInd ind) {
@@ -1832,7 +1824,7 @@ public class JNIService extends Service implements
 					"CLASS = JNIService.ConfRequestCB METHOD = OnConfSyncOpenVideo()"
 							+ " str = " + str);
 
-			// 广播给界面
+			// 骞挎挱缁欑晫闈�
 
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO);
@@ -1855,7 +1847,7 @@ public class JNIService extends Service implements
 							+ " nDstUserID = " + nDstUserID + " sDstMediaID = "
 							+ sDstMediaID);
 
-			// 广播给界面
+			// 骞挎挱缁欑晫闈�
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO_TO_MOBILE);
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -1875,7 +1867,7 @@ public class JNIService extends Service implements
 					"CLASS = JNIService.ConfRequestCB METHOD = OnConfSyncOpenVideoToMobile()"
 							+ " sSyncVideoMsgXML = " + sSyncVideoMsgXML);
 
-			// 广播给界面
+			// 骞挎挱缁欑晫闈�
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_OPEN_VIDEO_TO_MOBILE);
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -1889,7 +1881,7 @@ public class JNIService extends Service implements
 					"CLASS = JNIService.ConfRequestCB METHOD = OnConfSyncCloseVideo()"
 							+ " gid = " + gid + " str = " + str);
 
-			// 广播给界面
+			// 骞挎挱缁欑晫闈�
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_CONFERENCE_CONF_SYNC_CLOSE_VIDEO);
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
@@ -1916,50 +1908,37 @@ public class JNIService extends Service implements
 			String uuid = XmlParser.parseForMessageUUID(szXmlText);
 
 			// Record audio data meta
-			VMessage cacheAudio = new VMessage(eGroupType, nGroupID, fromUser,
-					toUser, uuid, new Date(nTime * 1000));
-			cacheAudio.setmXmlDatas(szXmlText);
-			XmlParser.extraAudioMetaFrom(cacheAudio, szXmlText);
-			if (cacheAudio.getItems().size() > 0) {
-				synchronized (cacheAudioMeta) {
-					cacheAudioMeta.add(cacheAudio);
-					return;
-				}
-			}
-			
-			VMessage cacheImage = new VMessage(eGroupType, nGroupID, fromUser,
-					toUser, uuid, new Date(nTime * 1000));
-			cacheImage.setmXmlDatas(szXmlText);
-			XmlParser.extraImageMetaFrom(cacheImage, szXmlText);
-			if(cacheImage.getItems().size() > 0) {
-				synchronized (cacheImageMeta) {
-					cacheImageMeta.add(cacheImage);
-					return ;
-				}
-			}
-			
 			VMessage vm = new VMessage(eGroupType, nGroupID, fromUser, toUser,
 					uuid, new Date(nTime * 1000));
 			vm.setmXmlDatas(szXmlText);
-			
-			//TODO 此代码正在调整结构
-//			VMessage vm = null;
-//			// Record image data meta
-//			vm = new VMessage(eGroupType, nGroupID, fromUser,
-//					toUser, uuid, new Date(nTime * 1000));
-//			vm.setmXmlDatas(szXmlText);
-//			XmlParser.extraImageMetaFrom(vm, szXmlText);
-//			// 如果没有获取到image数据，则重新构建VMessage
-//			if(vm.getItems().size() > 0) {
-//				synchronized (cacheImageMeta) {
-//					cacheImageMeta.add(vm);
-//				}
-//			} else {
-//				vm = new VMessage(eGroupType, nGroupID, fromUser, toUser,
-//						uuid, new Date(nTime * 1000));
-//				vm.setmXmlDatas(szXmlText);
-//			}
-			
+			XmlParser.extraAudioMetaFrom(vm, szXmlText);
+			if (vm.getAudioItems().size() > 0) {
+				synchronized (cacheAudioMeta) {
+					cacheAudioMeta.add(vm);
+					// messageQueue.add(vm);
+					MessageBuilder.saveMessage(mContext, vm);
+				}
+			} else {
+				// Record image data meta
+				vm = new VMessage(eGroupType, nGroupID, fromUser, toUser, uuid,
+						new Date(nTime * 1000));
+				vm.setmXmlDatas(szXmlText);
+				XmlParser.extraImageMetaFrom(vm, szXmlText);
+				if (vm.getImageItems().size() > 0) {
+					synchronized (cacheImageMeta) {
+						cacheImageMeta.add(vm);
+						// messageQueue.add(vm);
+						MessageBuilder.saveMessage(mContext, vm);
+					}
+				} else {
+					vm = new VMessage(eGroupType, nGroupID, fromUser, toUser,
+							uuid, new Date(nTime * 1000));
+					vm.setmXmlDatas(szXmlText);
+					// messageQueue.add(vm);
+					MessageBuilder.saveMessage(mContext, vm);
+				}
+			}
+
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
@@ -2056,7 +2035,6 @@ public class JNIService extends Service implements
 						if (vait.getUuid().equals(uuid)) {
 							receivedCount++;
 							vm = v;
-							cacheImageMetaSize.remove(vait.getUuid());
 							vait.setFilePath(binaryPath);
 							vait.setReceived(true);
 							continue;
@@ -2075,11 +2053,8 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
-					.sendToTarget();
-			//TODO 此代码正在调整结构
-//			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE_BINARY_DATA, vm)
-//			.sendToTarget();
+			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE_BINARY_DATA,
+					vm).sendToTarget();
 		}
 
 		private void handlerChatAudioCallback(int eGroupType, long nGroupID,
@@ -2093,6 +2068,7 @@ public class JNIService extends Service implements
 						VMessageAudioItem item = list.get(i);
 						if (item.getUuid().equals(messageId)) {
 							item.setAudioFilePath(binaryPath);
+							item.setState(VMessageAbstractItem.STATE_SENT_SUCCESS);
 							cacheAudioMeta.remove(item);
 							vm = v;
 							break;
@@ -2105,8 +2081,8 @@ public class JNIService extends Service implements
 			}
 
 			if (vm != null) {
-				Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
-						.sendToTarget();
+				Message.obtain(mCallbackHandler,
+						JNI_RECEIVED_MESSAGE_BINARY_DATA, vm).sendToTarget();
 			} else {
 				V2Log.e(" Didn't find audio item : " + messageId);
 			}
@@ -2168,10 +2144,11 @@ public class JNIService extends Service implements
 			VMessage vm = new VMessage(0, 0, fromUser, GlobalHolder
 					.getInstance().getCurrentUser(), new Date(
 					GlobalConfig.getGlobalServerTime()));
-			VMessageFileItem vfi = new VMessageFileItem(vm, file.fileId,
-					file.fileSize, VMessageFileItem.STATE_FILE_UNDOWNLOAD,
-					file.fileName, FileType.fromInt(file.fileType));
+			new VMessageFileItem(vm, file.fileId, file.fileSize,
+					VMessageFileItem.STATE_FILE_UNDOWNLOAD, file.fileName,
+					FileType.fromInt(file.fileType));
 			vm.setmXmlDatas(vm.toXml());
+			MessageBuilder.saveMessage(mContext, vm);
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vm)
 					.sendToTarget();
 		}
@@ -2180,6 +2157,18 @@ public class JNIService extends Service implements
 		public void OnFileTransEnd(String szFileID, String szFileName,
 				long nFileSize, int nTransType) {
 			if (!szFileID.contains("AVATAR")) {
+				for (int i = 0; i < cacheImageMeta.size(); i++) {
+					VMessage vMessage = cacheImageMeta.get(i);
+					for (int j = 0; j < vMessage.getImageItems().size(); j++) {
+						VMessageImageItem vMessageImageItem = vMessage
+								.getImageItems().get(j);
+						if (vMessageImageItem.getUuid().equals(szFileID)) {
+							vMessage.notReceiveImageSize -= 1;
+							break;
+						}
+					}
+				}
+
 				mark.remove(szFileID);
 				GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
 				VMessageFileItem fileItem = MessageLoader
@@ -2202,7 +2191,7 @@ public class JNIService extends Service implements
 						"JNIService OnFileTransEnd", false);
 				int updates = MessageBuilder.updateVMessageItem(mContext,
 						fileItem);
-				V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
+				V2Log.d(TAG, "OnFileTransEnd updates success : " + updates);
 				fileItem = null;
 			}
 		}
@@ -2210,22 +2199,54 @@ public class JNIService extends Service implements
 		@Override
 		public void OnFileTransError(String szFileID, int errorCode,
 				int nTransType) {
+			boolean isTrueLocation = false;
 			if (!szFileID.contains("AVATAR")) {
-				VMessage vm = cacheImageMetaSize.get(szFileID);
-				if (vm != null && vm.getImageItems().size() == 1) {
-					VMessageImageItem image = vm.getImageItems().get(0);
-					if (image.getUuid().equals(szFileID)) {
-						cacheImageMetaSize.remove(image.getUuid());
-						cacheImageMeta.remove(vm);
-						image.setFilePath("error");
-						vm.setmXmlDatas(vm.toXml());
-						V2Log.e(TAG, "the image -" + szFileID
-								+ "- trans error!");
-						vm.setDate(new Date(GlobalConfig.getGlobalServerTime()));
-						Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE,
-								vm).sendToTarget();
+				for (int i = 0; i < cacheImageMeta.size(); i++) {
+					VMessage vm = cacheImageMeta.get(i);
+					for (int j = 0; j < vm.getImageItems().size(); j++) {
+						VMessageImageItem image = vm.getImageItems().get(j);
+						if (image.getUuid().equals(szFileID)) {
+							isTrueLocation = true;
+							image.setFilePath("error");
+							V2Log.e(TAG, "the image -" + szFileID
+									+ "- trans error!");
+							break;
+						}
+					}
+
+					if (isTrueLocation) {
+						vm.setmXmlDatas(vm.getmXmlDatas());
+						if (vm.notReceiveImageSize -1 <= 0)
+							cacheImageMeta.remove(i);
+						Message.obtain(mCallbackHandler,
+								JNI_RECEIVED_MESSAGE_BINARY_DATA, vm)
+								.sendToTarget();
+						break;
 					}
 				}
+				
+				for (int i = 0; i < cacheAudioMeta.size(); i++) {
+					VMessage vm = cacheAudioMeta.get(i);
+					for (int j = 0; j < vm.getAudioItems().size(); j++) {
+						VMessageAudioItem audio = vm.getAudioItems().get(j);
+						if (audio.getUuid().equals(szFileID)) {
+							V2Log.e(TAG, "the audio -" + szFileID
+									+ "- trans error!");
+							audio.setState(VMessageAbstractItem.STATE_SENT_FALIED);
+							isTrueLocation = true;
+							break;
+						}
+					}
+					
+					if(isTrueLocation){
+						Message msg = Message.obtain(mCallbackHandler,
+								JNI_RECEIVED_MESSAGE_BINARY_DATA, vm);
+						msg.arg1 = 1;
+						msg.sendToTarget();
+						break;
+					}
+				}
+
 
 				mark.remove(szFileID);
 				GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
@@ -2257,28 +2278,12 @@ public class JNIService extends Service implements
 					intent.putExtra("transType", transType);
 					sendBroadcast(intent);
 				} else {
-					// V2Log.e(TAG, "OnFileTransError updates failed , id : "
-					// + szFileID);
+					V2Log.w(TAG, "OnFileTransError updates miss , id : "
+							+ szFileID);
 				}
 				fileItem = null;
 			}
 		}
-
-		// @Override
-		// public void OnFileTransCancel(String szFileID) {
-		// if(!szFileID.contains("AVATAR")){
-		// mark.remove(szFileID);
-		// GlobalHolder.getInstance().globleFileProgress.remove(szFileID);
-		// VMessage vm = new VMessage(0, 0, null, null);
-		// VMessageFileItem item = new VMessageFileItem(vm, null, 0);
-		// item.setUuid(szFileID);
-		// item.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-		// int updates = MessageBuilder.updateVMessageItem(mContext, item);
-		// V2Log.e(TAG, "OnFileTransEnd updates success : " + updates);
-		// vm = null;
-		// item = null;
-		// }
-		// }
 	}
 
 	@Override
@@ -2342,6 +2347,108 @@ public class JNIService extends Service implements
 			intent.putExtra("uid", newUser.getmUserId());
 			intent.putExtra("gid", nGroupID);
 			sendBroadcast(intent);
+		}
+	}
+
+	private synchronized void handleMessageQueue(boolean isAudioReceive) {
+		boolean isContinue = false;
+		for (int i = 0; i < messageQueue.size(); i++) {
+			VMessage vMessage = messageQueue.get(i);
+			if (vMessage.getAudioItems().size() > 0) {
+				if (!isAudioReceive)
+					break;
+				else
+					isContinue = true;
+
+			} else if (vMessage.getImageItems().size() > 0) {
+				// 得到的数组没有去重，即路径已经设置为error还会在设置一遍，需要处理，但此函数暂不用
+				String[] value = cacheErrorBinaryMeta.get(vMessage.getUUID());
+				if (value != null) {
+					for (int j = 0; j < value.length; j++) {
+						for (int y = 0; y < vMessage.getImageItems().size(); y++) {
+							VMessageImageItem vMessageImageItem = vMessage
+									.getImageItems().get(j);
+							if (value.equals(vMessageImageItem.getUuid())) {
+								vMessageImageItem.setFilePath("error");
+								break;
+							}
+						}
+					}
+				}
+			}
+
+			V2Log.e(TAG, "current index : " + i + " xml -- "
+					+ messageQueue.get(i).getmXmlDatas());
+			messageQueue.remove(i);
+			Message.obtain(mCallbackHandler, JNI_RECEIVED_MESSAGE, vMessage)
+					.sendToTarget();
+
+			if (isContinue) {
+				handleMessageQueue(false);
+			}
+		}
+	}
+
+	public void checkErrorImageMeta(String szFileID) {
+		boolean isTrueLocation = false;
+		for (int i = 0; i < cacheImageMeta.size(); i++) {
+			VMessage vm = cacheImageMeta.get(i);
+			if (vm.getImageItems().size() > 0) {
+				for (int j = 0; j < vm.getImageItems().size(); j++) {
+					VMessageImageItem image = vm.getImageItems().get(j);
+					if (image.getUuid().equals(szFileID)) {
+						isTrueLocation = true;
+						image.setFilePath("error");
+						V2Log.e(TAG, "the image -" + szFileID
+								+ "- trans error!");
+					}
+				}
+
+				if (isTrueLocation) {
+					vm.setmXmlDatas(vm.getmXmlDatas());
+					if (vm.notReceiveImageSize -1 <= 0)
+						cacheImageMeta.remove(i);
+
+					boolean isWait = false;
+					for (int x = 0; x < messageQueue.size(); x++) {
+						if (messageQueue.get(x).getUUID().equals(vm.getUUID())) {
+							isWait = true;
+							break;
+						}
+					}
+
+					if (isWait) {
+						String[] strings = cacheErrorBinaryMeta.get(vm
+								.getUUID());
+						if (strings != null) {
+							strings[strings.length] = szFileID;
+							cacheErrorBinaryMeta.put(vm.getUUID(), strings);
+						} else {
+							cacheErrorBinaryMeta.put(vm.getUUID(),
+									new String[] { szFileID });
+						}
+					} else
+						Message.obtain(mCallbackHandler,
+								JNI_RECEIVED_MESSAGE_BINARY_DATA, vm)
+								.sendToTarget();
+				}
+			}
+		}
+	}
+
+	public void checkErrorAudioMeta(String szFileID) {
+		for (int i = 0; i < cacheAudioMeta.size(); i++) {
+			VMessage vm = cacheAudioMeta.get(i);
+			if (vm.getAudioItems().size() > 0) {
+				for (int j = 0; j < vm.getAudioItems().size(); j++) {
+					VMessageAudioItem audio = vm.getAudioItems().get(j);
+					if (audio.getUuid().equals(szFileID)) {
+						handleMessageQueue(true);
+						V2Log.e(TAG, "the audio -" + szFileID
+								+ "- trans error!");
+					}
+				}
+			}
 		}
 	}
 

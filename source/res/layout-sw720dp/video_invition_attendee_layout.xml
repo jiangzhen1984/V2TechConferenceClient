@@ -171,9 +171,9 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:background="@null"
-                        android:ems="10"
                         android:inputType="datetime"
                         android:paddingBottom="5dp"
+                        android:ellipsize="end"
                         android:paddingTop="5dp"
                         android:textColor="@color/invitation_attendee_layout_item_color"
                         android:textSize="@dimen/common_item_text_size_16" >

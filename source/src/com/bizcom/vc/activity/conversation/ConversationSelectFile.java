@@ -202,12 +202,13 @@ public class ConversationSelectFile extends Activity {
 				mCheckedNameList.add(bean.fileName);
 				totalSize += bean.fileSize;
 			}
-			selectedFileSize.setText(getResources().getString(R.string.conversation_select_file_chosen)
+			selectedFileSize.setText(getResources().getString(
+					R.string.conversation_select_file_chosen)
 					+ getFileSize(totalSize));
 			sendButton.setText(String.format(
-				getResources()
-						.getString(R.string.conversation_select_file_send),
-				mCheckedList.size()));
+					getResources().getString(
+							R.string.conversation_select_file_send),
+					mCheckedList.size()));
 
 		}
 

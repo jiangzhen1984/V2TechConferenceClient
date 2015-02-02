@@ -71,14 +71,7 @@ public class ContactUserView extends LinearLayout {
 		mUserSignatureTV = (TextView) view
 				.findViewById(R.id.contact_user_signature);
 		
-		boolean isFriend = GlobalHolder.getInstance().isFriend(mUser);
-		if (isFriend) {
-			if (!TextUtils.isEmpty(mUser.getNickName()))
-				mUserNameTV.setText(mUser.getNickName());
-			else
-				mUserNameTV.setText(mUser.getName());
-		} else
-			mUserNameTV.setText(u.getName());
+		mUserNameTV.setText(u.getName());
 		mUserSignatureTV.setText(mUser.getSignature() == null ? "" : mUser
 				.getSignature());
 

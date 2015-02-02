@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -234,9 +235,7 @@ public class ConversationP2PAVActivity extends Activity implements
 				mRejectButton = findViewById(R.id.conversation_fragment_voice_reject_button);
 				mAcceptButton = findViewById(R.id.conversation_fragment_voice_accept_button);
 				TextView tv = (TextView) findViewById(R.id.conversation_fragment_audio_incoming_call_name);
-				if (tv != null) {
-					tv.setText(uad.getUser().getName());
-				}
+				setRmoteUserName(tv , uad.getUser());
 			} else if (uad.isVideoType()) {
 				currentVideoBean.mediaChatID = uad.getSzSessionID();
 				currentVideoBean.mediaType = AudioVideoMessageBean.TYPE_VIDEO;
@@ -245,9 +244,7 @@ public class ConversationP2PAVActivity extends Activity implements
 				mAcceptButton = findViewById(R.id.conversation_fragment_video_accept_button);
 				mAudioOnlyButton = findViewById(R.id.conversation_fragment_voice_accept_only_button);
 				TextView tv = (TextView) findViewById(R.id.conversation_fragment_video_invitation_name);
-				if (tv != null) {
-					tv.setText(uad.getUser().getName());
-				}
+				setRmoteUserName(tv , uad.getUser());
 			}
 			mRejectButton.setOnClickListener(mRejectButtonOnClick);
 			mAcceptButton.setOnClickListener(mAcceptButtonOnClickListener);
@@ -289,7 +286,14 @@ public class ConversationP2PAVActivity extends Activity implements
 			if (uad.isVideoType()) {
 				// Update view
 				if (uad.getUser() != null) {
-					String name = uad.getUser().getName();
+					String name = null;
+					boolean friend = GlobalHolder.getInstance().isFriend(uad.getUser());
+					if(friend && !TextUtils.isEmpty(uad.getUser().getNickName())){
+						name = uad.getUser().getNickName();
+					} else {
+						name = uad.getUser().getName();
+					}
+					
 					if (name != null) {
 						TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
 						tv.setText(tv.getText().toString().replace("[]", name));
@@ -298,7 +302,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			} else {
 				mTimerTV.setText(R.string.conversation_waiting);
 				TextView nameTV = (TextView) findViewById(R.id.conversation_fragment_connected_name);
-				nameTV.setText(uad.getUser().getName());
+				setRmoteUserName(nameTV , uad.getUser());
 				// Update mute button to disable
 				setMuteButtonDisable(true);
 			}
@@ -491,6 +495,17 @@ public class ConversationP2PAVActivity extends Activity implements
 	@Override
 	public void onBackPressed() {
 		showConfirmDialog();
+	}
+	
+	private void setRmoteUserName(TextView view , User remoteUser){
+		if(view == null || remoteUser == null)
+			return ;
+		
+		boolean friend = GlobalHolder.getInstance().isFriend(remoteUser);
+		if(friend && !TextUtils.isEmpty(remoteUser.getNickName())){
+			view.setText(remoteUser.getNickName());
+		} else
+			view.setText(remoteUser.getName());
 	}
 
 	private void initTelephonyManagerListener() {
@@ -915,8 +930,8 @@ public class ConversationP2PAVActivity extends Activity implements
 						R.id.conversation_fragment_outing_video_card_container)
 						.setVisibility(View.VISIBLE);
 
-				((TextView) findViewById(R.id.conversation_fragment_video_outing_call_name))
-						.setText(uad.getUser().getName());
+				TextView nameTv = ((TextView) findViewById(R.id.conversation_fragment_video_outing_call_name));
+				setRmoteUserName(nameTv, uad.getUser());
 			} else if (uad.isConnected()) {
 				findViewById(R.id.conversation_fragment_connected_title_text)
 						.setVisibility(View.VISIBLE);
@@ -1478,7 +1493,7 @@ public class ConversationP2PAVActivity extends Activity implements
 
 			} else {
 				TextView nameTV = (TextView) findViewById(R.id.conversation_fragment_connected_name);
-				nameTV.setText(uad.getUser().getName());
+				setRmoteUserName(nameTV, uad.getUser());
 			}
 			currentVideoBean.startDate = GlobalConfig.getGlobalServerTime();
 			V2Log.d(TAG, "get startDate is :" + currentVideoBean.startDate);

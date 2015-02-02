@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -47,14 +48,13 @@ import com.bizcom.vc.widget.cus.DateTimePicker.OnDateSetListener;
 import com.bizcom.vo.Conference;
 import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.Group;
-import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
+import com.bizcom.vo.User;
 import com.v2tech.R;
 
 public class ConferenceCreateActivity extends BaseCreateActivity {
 
 	private static final int CREATE_CONFERENC_RESP = 4;
-	private static final int START_GROUP_SELECT = 6;
 
 	private static final int OP_ADD_ALL_GROUP_USER = 1;
 	private static final int OP_DEL_ALL_GROUP_USER = 0;
@@ -70,13 +70,12 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 	private long preSelectedUID;
 	private long preSelectedGroupId;
 
-	private ProgressDialog mCreateWaitingDialog;
 	private ProgressDialog mWaitingDialog;
 
 	private LocalBroadcastReceiver receiver;
 
 	private DateTimePicker dtp;
-
+	
 	/**
 	 * show all group org
 	 */
@@ -88,7 +87,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 		super.onCreate(savedInstanceState);
 		initReceiver();
 	}
-
+	
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -109,7 +108,6 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 		mConfStartTimeET.setOnTouchListener(mDateTimePickerListener);
 		mConfStartTimeET.setText(DateUtil.getStandardDate(new Date(GlobalConfig
 				.getGlobalServerTime())));
-
 		new LoadContactsAT().execute();
 	}
 
@@ -136,16 +134,16 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 		}
 		mState = State.CREATEING;
 
-		mCreateWaitingDialog = ProgressDialog.show(mContext, "", mContext
+		mWaitingDialog = ProgressDialog.show(mContext, "", mContext
 				.getResources()
 				.getString(R.string.notification_watiing_process), true);
 		final String title = mConfTitleET.getText().toString().trim();
 		final String startTimeStr = mConfStartTimeET.getText().toString();
 		boolean strongly = ConfStrongWatch(title, startTimeStr);
 		if (strongly == false) {
-			if (mCreateWaitingDialog != null
-					&& mCreateWaitingDialog.isShowing()) {
-				mCreateWaitingDialog.dismiss();
+			if (mWaitingDialog != null
+					&& mWaitingDialog.isShowing()) {
+				mWaitingDialog.dismiss();
 			}
 			mState = State.DONE;
 			return;
@@ -225,7 +223,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 
 	@Override
 	protected void mGroupListViewCheckBoxChecked(View view, ItemData item) {
-		CheckBox cb = (CheckBox) view;
+		final CheckBox cb = (CheckBox) view;
 		int flag = -1;
 		Object obj = item.getObject();
 		if (obj instanceof User) {
@@ -244,13 +242,8 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 				mGroupListView.checkBelongGroupAllChecked(group, users);
 			}
 		} else if (obj instanceof Group) {
-			Message.obtain(
-					mLocalHandler,
-					START_GROUP_SELECT,
-					cb.isChecked() ? OP_ADD_ALL_GROUP_USER
-							: OP_DEL_ALL_GROUP_USER, 0, (Group) obj)
-					.sendToTarget();
-			mGroupListView.updateCheckItem((Group) obj, cb.isChecked());
+			Group selectedGroup = (Group) obj;
+			startSelectGroup(mLocalHandler,cb, selectedGroup);
 		}
 	}
 
@@ -275,23 +268,6 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 			removeAttendee(u);
 		} else if (op == OP_ADD_ALL_GROUP_USER) {
 			addAttendee(u);
-		}
-
-	}
-
-	private void doPreSelect() {
-		User preUser = GlobalHolder.getInstance().getUser(preSelectedUID);
-		if (preUser != null) {
-			updateUserToAttendList(preUser, OP_ADD_ALL_GROUP_USER);
-			mGroupListView.selectUser(preUser);
-		}
-
-		Group preGroup = GlobalHolder.getInstance().getGroupById(
-				preSelectedGroupId);
-		if (preGroup != null) {
-			mGroupListView.selectUser(preGroup.getUsers());
-			Message.obtain(mLocalHandler, START_GROUP_SELECT,
-					OP_ADD_ALL_GROUP_USER, 0, preGroup).sendToTarget();
 		}
 
 	}
@@ -357,28 +333,39 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 
 		@Override
 		protected Void doInBackground(Void... params) {
-
 			mList.addAll(GlobalHolder.getInstance().getGroup(
 					GroupType.CONTACT.intValue()));
 			mList.addAll(GlobalHolder.getInstance().getGroup(
 					GroupType.ORG.intValue()));
-
 			return null;
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			mGroupListView.setGroupList(mList);
-
 			preSelectedUID = getIntent().getLongExtra("uid", 0);
 			preSelectedUID = getIntent().getLongExtra("uid", 0);
 			preSelectedGroupId = getIntent().getLongExtra("gid", 0);
-			if (preSelectedUID > 0 || preSelectedGroupId > 0) {
-				doPreSelect();
+			if (preSelectedUID > 0) {
+				User preUser = GlobalHolder.getInstance().getUser(
+						preSelectedUID);
+				if (preUser != null) {
+					updateUserToAttendList(preUser, OP_ADD_ALL_GROUP_USER);
+					mGroupListView.selectUser(preUser);
+				}
 			}
+
+			if (preSelectedGroupId > 0) {
+				Group preGroup = GlobalHolder.getInstance().getGroupById(
+						preSelectedGroupId);
+				if (preGroup != null) {
+					mGroupListView.selectUser(preGroup.getUsers());
+					selectGroup(preGroup, true);
+				}
+			}		
 		}
 	};
-
+	
 	class LocalHandler extends Handler {
 
 		@Override
@@ -401,17 +388,17 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 								.setText(R.string.error_create_conference_failed_from_server_side);
 					}
 					mState = State.DONE;
-					if (mCreateWaitingDialog != null
-							&& mCreateWaitingDialog.isShowing()) {
-						mCreateWaitingDialog.dismiss();
+					if (mWaitingDialog != null
+							&& mWaitingDialog.isShowing()) {
+						mWaitingDialog.dismiss();
 					}
 					break;
 				}
 				// 防止界面在未销户之前，用户再次点击创建按钮
 				rightButtonTV.setClickable(false);
-				if (mCreateWaitingDialog != null
-						&& mCreateWaitingDialog.isShowing()) {
-					mCreateWaitingDialog.dismiss();
+				if (mWaitingDialog != null
+						&& mWaitingDialog.isShowing()) {
+					mWaitingDialog.dismiss();
 				}
 
 				Date startDate;
@@ -435,18 +422,6 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 				mContext.sendBroadcast(i);
 				finish();
-				break;
-			case START_GROUP_SELECT:
-				mWaitingDialog = ProgressDialog.show(
-						mContext,
-						"",
-						mContext.getResources().getString(
-								R.string.notification_watiing_process), true);
-				selectGroup((Group) msg.obj,
-						msg.arg1 == OP_ADD_ALL_GROUP_USER ? true : false);
-				if (mWaitingDialog != null && mWaitingDialog.isShowing()) {
-					mWaitingDialog.dismiss();
-				}
 				break;
 			}
 		}

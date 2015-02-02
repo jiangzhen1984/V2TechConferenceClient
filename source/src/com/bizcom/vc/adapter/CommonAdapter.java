@@ -29,7 +29,7 @@ public class CommonAdapter extends BaseAdapter {
 
 	public interface CommonAdapterItemWrapper {
 		public Object getItemObject();
-
+		
 		public long getItemLongId();
 
 		public View getView();

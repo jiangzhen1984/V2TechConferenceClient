@@ -541,8 +541,7 @@ public class MainActivity extends FragmentActivity implements
 										+ fileItem.getFileName() + " state : "
 										+ State.fromInt(fileItem.getState()));
 						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
-								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING
-								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD)
+								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING)
 							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
 						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING
 								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
@@ -553,6 +552,10 @@ public class MainActivity extends FragmentActivity implements
 							V2Log.e(TAG,
 									"update file state failed... file id is : "
 											+ fileItem.getUuid());
+						}
+						
+						if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD){
+							GlobalHolder.getInstance().mFailedFiles.add(fileItem.getUuid());
 						}
 					}
 				} else

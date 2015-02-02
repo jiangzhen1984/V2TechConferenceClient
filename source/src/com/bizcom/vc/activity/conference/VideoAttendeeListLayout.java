@@ -59,8 +59,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private ListView mAttendeeContainer;
 
 	private List<Wrapper> mList;
-	private List<Wrapper> mFilterList;
-	private List<Wrapper> mSearchFilterList;
+	private List<Wrapper> mSearchList;
 
 	private boolean mIsStartedSearch;
 	private EditText mSearchET;
@@ -97,7 +96,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		super(context);
 		this.conf = conf;
 		mList = new ArrayList<Wrapper>();
-		mFilterList = mList;
 		initLayout();
 	}
 
@@ -275,7 +273,11 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				if (aUser.isRapidInitiation()) {
 					nameTV.setText("<" + aUser.getName() + ">");
 				} else {
-					nameTV.setText(aUser.getName());
+					boolean isFriend = GlobalHolder.getInstance().isFriend(aUser);
+					if(isFriend && !TextUtils.isEmpty(aUser.getNickName()))
+						nameTV.setText(aUser.getNickName());
+					else
+						nameTV.setText(aUser.getName());
 					if (aUser.getName() == null) {
 						Log.i("20150121 1", "null");
 					}
@@ -1024,7 +1026,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				SearchUtils.clearAll();
 				mIsStartedSearch = SearchUtils.mIsStartedSearch;
 				isFrist = true;
-				mSearchFilterList.clear();
+				mSearchList.clear();
 				adapter.notifyDataSetChanged();
 			} else {
 				if (isFrist) {
@@ -1035,7 +1037,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					isFrist = false;
 				}
 
-				mSearchFilterList = SearchUtils.startVideoAttendeeSearch(et
+				mSearchList = SearchUtils.startVideoAttendeeSearch(et
 						.toString());
 				mIsStartedSearch = SearchUtils.mIsStartedSearch;
 				adapter.notifyDataSetChanged();
@@ -1061,17 +1063,17 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		@Override
 		public int getCount() {
 			if (mIsStartedSearch)
-				return mSearchFilterList.size();
+				return mSearchList.size();
 			else
-				return mFilterList.size();
+				return mList.size();
 		}
 
 		@Override
 		public Object getItem(int position) {
 			if (mIsStartedSearch)
-				return mSearchFilterList.get(position);
+				return mSearchList.get(position);
 			else
-				return mFilterList.get(position);
+				return mList.get(position);
 		}
 
 		@Override
@@ -1083,9 +1085,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			Wrapper wrapper;
 			if (mIsStartedSearch)
-				wrapper = mSearchFilterList.get(position);
+				wrapper = mSearchList.get(position);
 			else
-				wrapper = mFilterList.get(position);
+				wrapper = mList.get(position);
 
 			if (convertView == null) {
 				convertView = buildAttendeeView(wrapper);

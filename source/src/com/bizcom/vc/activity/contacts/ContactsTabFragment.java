@@ -146,6 +146,8 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 			intentFilter
+					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO);
+			intentFilter
 					.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 
 			intentFilter
@@ -404,8 +406,7 @@ public class ContactsTabFragment extends Fragment implements TextWatcher {
 			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO
 					.equals(intent.getAction())) {
 				long uid = intent.getLongExtra("uid", -1);
-				if (uid == -1
-						|| uid != GlobalHolder.getInstance().getCurrentUserId())
+				if (uid == -1)
 					return;
 				Message.obtain(mHandler, UPDATE_USER_SIGN, uid).sendToTarget();
 			}

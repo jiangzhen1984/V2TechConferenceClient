@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -122,10 +123,16 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 		String cid  = String.valueOf(crowd.getmGId());
 //		mNoTV.setText(cid.length() > 4 ? cid.substring(5) : cid.substring(1));
 		mNoTV.setText(cid);
+		
+		boolean isFriend = GlobalHolder.getInstance().isFriend(crowd.getOwnerUser());
+		if(isFriend && !TextUtils.isEmpty(crowd.getOwnerUser().getNickName()))
+			mCreatorTV.setText(crowd.getOwnerUser().getNickName());
+		else
+			mCreatorTV.setText(crowd.getOwnerUser().getName());
+		mCreatorTV.setSingleLine();
+		
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
-		mCreatorTV.setText(crowd.getOwnerUser().getName());
-		mCreatorTV.setSingleLine();
 		mAnouncementTV.setText(crowd.getAnnouncement());
 		if (crowd.getOwnerUser().getmUserId() == GlobalHolder.getInstance()
 				.getCurrentUserId()) {

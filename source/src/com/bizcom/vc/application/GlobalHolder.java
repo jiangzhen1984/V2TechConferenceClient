@@ -12,7 +12,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.ImRequest;
@@ -31,7 +30,6 @@ import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.OrgGroup;
 import com.bizcom.vo.User;
 import com.bizcom.vo.UserDeviceConfig;
-import com.bizcom.vo.VMessage;
 import com.v2tech.R;
 
 public class GlobalHolder {
@@ -67,17 +65,10 @@ public class GlobalHolder {
 	public Map<String, FileDownLoadBean> globleFileProgress = new HashMap<String, FileDownLoadBean>();
 
 	public Map<String, String> mTransingLockFiles = new HashMap<String, String>();
-
+	
+	public List<String> mFailedFiles = new ArrayList<String>();
 
 	private volatile boolean p2pAVNeedStickyBraodcast = false;
-
-	public boolean isP2pAVNeedStickyBraodcast() {
-		return p2pAVNeedStickyBraodcast;
-	}
-
-	public void setP2pAVNeedStickyBraodcast(boolean p2pAVNeedStickyBraodcast) {
-		this.p2pAVNeedStickyBraodcast = p2pAVNeedStickyBraodcast;
-	}
 
 	public static synchronized GlobalHolder getInstance() {
 		if (holder == null) {
@@ -635,6 +626,10 @@ public class GlobalHolder {
 		}
 	}
 
+	public void setP2pAVNeedStickyBraodcast(boolean p2pAVNeedStickyBraodcast) {
+		this.p2pAVNeedStickyBraodcast = p2pAVNeedStickyBraodcast;
+	}
+
 	public boolean isVoiceConnected() {
 		synchronized (mState) {
 			return this.mState.isVoiceConnected();
@@ -694,6 +689,10 @@ public class GlobalHolder {
 		synchronized (mState) {
 			return mState.isOfflineLoaded();
 		}
+	}
+
+	public boolean isP2pAVNeedStickyBraodcast() {
+		return p2pAVNeedStickyBraodcast;
 	}
 
 	/**

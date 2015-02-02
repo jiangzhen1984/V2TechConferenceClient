@@ -99,15 +99,15 @@ public class BitmapUtil {
 			throw new NullPointerException(" file is null");
 		}
 
-		if (filePath.equals("error")) {
-			return BitmapFactory.decodeResource(context.getResources(),
-					R.drawable.ws_download_error_icon);
-		}
-
 		File f = new File(filePath);
-		if (!f.exists()) {
+		if (filePath.equals("wait")) {
 			return BitmapFactory.decodeResource(context.getResources(),
 					R.drawable.ws_receive_image_wait);
+		}
+
+		if (filePath.equals("error") || !f.exists()) {
+			return BitmapFactory.decodeResource(context.getResources(),
+					R.drawable.ws_download_error_icon);
 		}
 
 		BitmapFactory.Options options = new BitmapFactory.Options();

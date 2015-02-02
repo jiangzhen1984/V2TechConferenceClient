@@ -6,8 +6,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import v2av.CaptureCapability;
 import v2av.VideoCaptureDevInfo;
@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
@@ -109,9 +108,9 @@ import com.bizcom.vo.PermissionState;
 import com.bizcom.vo.User;
 import com.bizcom.vo.UserDeviceConfig;
 import com.bizcom.vo.V2Doc;
+import com.bizcom.vo.V2Doc.Page;
 import com.bizcom.vo.V2ShapeMeta;
 import com.bizcom.vo.VMessage;
-import com.bizcom.vo.V2Doc.Page;
 import com.v2tech.R;
 
 public class ConferenceActivity extends Activity {

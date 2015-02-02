@@ -44,11 +44,7 @@ public class CrowdConversation extends Conversation {
 						u = GlobalHolder.getInstance().getUser(u.getmUserId());
 						group.setOwnerUser(u);
 					}
-					boolean isFriend = GlobalHolder.getInstance().isFriend(u);
-					if (isFriend)
-						return u.getNickName();
-					else
-						return u.getName();
+					return u.getName();
 				}
 			}
 			return msg;

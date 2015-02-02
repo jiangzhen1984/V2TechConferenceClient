@@ -9,12 +9,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.MeasureSpec;
+import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
 import com.V2.jni.util.V2Log;
-import com.bizcom.vc.widget.cus.GifView;
+import com.bizcom.vc.widget.cus.SubsamplingScaleImageView;
 import com.bizcom.vc.widget.cus.TouchImageView;
 import com.bizcom.vo.VMessage;
 import com.bizcom.vo.VMessageImageItem;
@@ -62,55 +62,58 @@ public class PlaceSlideFragment extends Fragment {
 //			view.setGIFResource(filePath);
 //		}
 //		else{
-			final TouchImageView iv  = new TouchImageView(this.getActivity());
-			mHoldPlaceBitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.RGB_565);
-			iv.setImageBitmap(mHoldPlaceBitmap);
+			final SubsamplingScaleImageView iv  = new SubsamplingScaleImageView(this.getActivity());
+			iv.setFitScreen(true);
+			iv.setMaxScale(3F);
+			iv.setImageFile(filePath);
+//			mHoldPlaceBitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.RGB_565);
+//			iv.setImageBitmap(mHoldPlaceBitmap);
 			
-			at = new AsyncTask<Void, Void, Bitmap>() {
-
-				@Override
-				protected Bitmap doInBackground(Void... params) {
-					synchronized (mLock) {
-						if (vim != null) {
-							return vim.getFullQuantityBitmap();
-						}
-						return null;
-					}
-				}
-
-				@Override
-				protected void onPostExecute(Bitmap result) {
-						if(result == null){
-							V2Log.e("ConversationView", "getFullQuantityBitmap is null");
-							return;
-						}
-						iv.setImageBitmap(result);
-						iv.setFilePath(filePath);
-				}
-
-				@Override
-				protected void onCancelled() {
-					super.onCancelled();
-					synchronized (vim) {
-						if (vim != null) {
-							vim.recycleFull();
-						}
-					}
-					iv.setImageBitmap(null);
-				}
-
-				@Override
-				protected void onCancelled(Bitmap result) {
-					super.onCancelled(result);
-					synchronized (vim) {
-						if (vim != null) {
-							vim.recycle();
-						}
-					}
-					iv.setImageBitmap(null);
-				}
-
-			}.execute();
+//			at = new AsyncTask<Void, Void, Bitmap>() {
+//
+//				@Override
+//				protected Bitmap doInBackground(Void... params) {
+//					synchronized (mLock) {
+//						if (vim != null) {
+//							return vim.getFullQuantityBitmap();
+//						}
+//						return null;
+//					}
+//				}
+//
+//				@Override
+//				protected void onPostExecute(Bitmap result) {
+//						if(result == null){
+//							V2Log.e("ConversationView", "getFullQuantityBitmap is null");
+//							return;
+//						}
+//						iv.setImageBitmap(result);
+//						iv.setFilePath(filePath);
+//				}
+//
+//				@Override
+//				protected void onCancelled() {
+//					super.onCancelled();
+//					synchronized (vim) {
+//						if (vim != null) {
+//							vim.recycleFull();
+//						}
+//					}
+//					iv.setImageBitmap(null);
+//				}
+//
+//				@Override
+//				protected void onCancelled(Bitmap result) {
+//					super.onCancelled(result);
+//					synchronized (vim) {
+//						if (vim != null) {
+//							vim.recycle();
+//						}
+//					}
+//					iv.setImageBitmap(null);
+//				}
+//
+//			}.execute();
 			
 			RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
 					RelativeLayout.LayoutParams.MATCH_PARENT,

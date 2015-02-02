@@ -8,10 +8,13 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -58,7 +61,6 @@ public class ConferenceMessageBodyView extends LinearLayout{
 				R.layout.conference_message_body, null, false);
 		initView();
 		initData();
-		
 	}
 
 	public void setConf(ConferenceGroup conf) {
@@ -115,6 +117,18 @@ public class ConferenceMessageBodyView extends LinearLayout{
 					i.putExtra("type", conf.getGroupType().intValue());
 					i.putExtra("gid", conf.getmGId());
 					mContext.startActivity(i);
+					return ;
+				}
+				
+				List<VMessageLinkTextItem> linkItems = mMsg.getLinkItems();
+				if (linkItems != null && linkItems.size() > 0) {
+					VMessageLinkTextItem linkItem = linkItems.get(0);
+					Intent intent = new Intent();
+					intent.setAction("android.intent.action.VIEW");
+					Uri content_url = Uri.parse("http://" + linkItem.getUrl());
+					intent.setData(content_url);
+					mContext.startActivity(intent);
+					return;
 				}
 			}
 		});
@@ -165,7 +179,14 @@ public class ConferenceMessageBodyView extends LinearLayout{
 				et.setText(builder);
 
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
-				et.append(((VMessageLinkTextItem) item).getText());
+				String linkText = ((VMessageLinkTextItem) item).getText();
+				SpannableStringBuilder style = new SpannableStringBuilder(
+						((VMessageLinkTextItem) item).getText());
+				style.setSpan(new ForegroundColorSpan(Color.BLUE), 0,
+						linkText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				style.setSpan(new UnderlineSpan(), 0, linkText.length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				et.append(style);
 			}
 
 		}

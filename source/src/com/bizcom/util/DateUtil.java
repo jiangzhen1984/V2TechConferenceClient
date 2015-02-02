@@ -73,19 +73,26 @@ public class DateUtil {
 	}
 
 	/**
-	 * get the time format , like HH:mm:ss
+	 * get the time format , like HH:mm:ss , VoiceMessageDetailActivity use
 	 * 
-	 * @param mTimeLine
+	 * @param times
 	 * @return
 	 */
-	public static String calculateTime(long mTimeLine) {
+	public static String calculateTime(long times) {
 
-		mTimeLine = mTimeLine / 1000;
-		int hour = (int) mTimeLine / 3600;
-		int minute = (int) (mTimeLine - (hour * 3600)) / 60;
-		int second = (int) mTimeLine - (hour * 3600 + minute * 60);
-		return (hour < 10 ? "0" + hour : hour) + ":"
-				+ (minute < 10 ? "0" + minute : minute) + ":"
-				+ (second < 10 ? "0" + second : second);
+		times = times / 1000;
+		int hour = (int) times / 3600;
+		int minute = (int) (times - (hour * 3600)) / 60;
+		int second = (int) times - (hour * 3600 + minute * 60);
+		if (hour <= 0) {
+			return minute < 10 ? "0" + minute : minute + "分"
+					+ (second < 10 ? "0" + second : second) + "秒";
+		} else if (minute <= 0 && hour <= 0) {
+			return second < 10 ? "0" + second : second + "秒";
+		} else {
+			return (hour < 10 ? "0" + hour : hour) + "时"
+					+ (minute < 10 ? "0" + minute : minute) + "分"
+					+ (second < 10 ? "0" + second : second) + "秒";
+		}
 	}
 }

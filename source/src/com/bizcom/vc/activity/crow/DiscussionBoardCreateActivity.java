@@ -49,11 +49,6 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 
 	private static final int CREATE_GROUP_MESSAGE = 4;
 	private static final int UPDATE_CROWD_RESPONSE = 5;
-	private static final int START_GROUP_SELECT = 6;
-	private static final int END_GROUP_SELECT = 8;
-
-	private static final int OP_ADD_ALL_GROUP_USER = 1;
-	private static final int OP_DEL_ALL_GROUP_USER = 0;
 
 	private static final int SEND_SERVER_TYPE_INVITE = 10;
 	private static final int SEND_SERVER_TYPE_CREATE = 11;
@@ -66,8 +61,6 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 	private CrowdGroupService cg = new CrowdGroupService();
 
 	private boolean isInInvitationMode = false;
-
-	private ProgressDialog mWaitingDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -226,13 +219,11 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 				mGroupListView.checkBelongGroupAllChecked(group, users);
 			}
 		} else if (obj instanceof Group) {
-			Message.obtain(
-					mLocalHandler,
-					START_GROUP_SELECT,
-					cb.isChecked() ? OP_ADD_ALL_GROUP_USER
-							: OP_DEL_ALL_GROUP_USER, 0, (Group) obj)
-					.sendToTarget();
-			mGroupListView.updateCheckItem((Group) obj, cb.isChecked());
+			startSelectGroup(mLocalHandler, cb, (Group) obj);
+			if(cb.isChecked())
+				changeConfirmAble(true);
+			else
+				changeConfirmAble(false);
 		}
 	}
 
@@ -264,7 +255,10 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 			addAttendee(u);
 		}
 
-		changeConfirmAble();
+		if(mAttendeeArrayList.size() > 0)
+			changeConfirmAble(true);
+		else
+			changeConfirmAble(false);
 	}
 
 	private void sendServer(final int type) {
@@ -281,8 +275,8 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 		}).start();
 	}
 
-	private void changeConfirmAble() {
-		if (mAttendeeList.size() > 0) {
+	private void changeConfirmAble(boolean isAble) {
+		if (isAble) {
 			rightButtonTV.setClickable(true);
 			rightButtonTV.setTextColor(getResources().getColor(
 					R.color.conf_create_button_color));
@@ -293,7 +287,6 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 		}
 	}
 
-
 	@Override
 	protected void addAttendee(User u) {
 		if (u.isCurrentLoggedInUser()) {
@@ -303,6 +296,7 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 	}
 
 	private ProgressDialog mCreateWaitingDialog;
+
 	class LoadContactsAT extends AsyncTask<Void, Void, Void> {
 
 		@Override
@@ -380,23 +374,6 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 				discussion.addUserToGroup(mAttendeeList);
 				setResult(Activity.RESULT_OK);
 				finish();
-				break;
-
-			case START_GROUP_SELECT: {
-				mWaitingDialog = ProgressDialog.show(
-						mContext,
-						"",
-						mContext.getResources().getString(
-								R.string.notification_watiing_process), true);
-				selectGroup((Group) msg.obj,
-						msg.arg1 == OP_ADD_ALL_GROUP_USER ? true : false);
-				Message.obtain(this, END_GROUP_SELECT).sendToTarget();
-				break;
-			}
-			case END_GROUP_SELECT:
-				mWaitingDialog.dismiss();
-				mWaitingDialog = null;
-				changeConfirmAble();
 				break;
 			case END_CREATE_OPERATOR:
 				if (mCreateWaitingDialog != null

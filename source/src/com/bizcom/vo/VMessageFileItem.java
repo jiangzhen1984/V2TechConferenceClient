@@ -51,7 +51,7 @@ public class VMessageFileItem extends VMessageAbstractItem {
 	public VMessageFileItem(VMessage vm, String uuid, String filePath,
 			String fileName, long fileSize, int fileState, float progress,
 			long downloadedSize, float speed, FileType fileType, int transType) {
-		super(vm);
+		super(vm , ITEM_TYPE_FILE);
 		this.uuid = uuid;
 		this.filePath = filePath;
 		this.fileName = fileName;
@@ -62,7 +62,6 @@ public class VMessageFileItem extends VMessageAbstractItem {
 		this.speed = speed;
 		this.fileType = fileType;
 		this.transType = transType;
-		this.type = VMessageAbstractItem.ITEM_TYPE_FILE;
 
 		if (TextUtils.isEmpty(uuid))
 			this.uuid = UUID.randomUUID().toString();

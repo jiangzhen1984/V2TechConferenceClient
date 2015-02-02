@@ -33,7 +33,7 @@ public class VMessageImageItem extends VMessageAbstractItem{
 	}
 	
 	public VMessageImageItem(VMessage vm, String uuid, String filePath , String extension) {
-		super(vm);
+		super(vm , ITEM_TYPE_IMAGE);
 		if(uuid == null)
 			this.uuid = UUID.randomUUID().toString();
 		else
@@ -51,7 +51,6 @@ public class VMessageImageItem extends VMessageAbstractItem{
 			}
 		} else
 			this.extension = extension;
-		this.type = ITEM_TYPE_IMAGE;
 	}
 	
 	public String getFilePath() {

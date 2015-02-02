@@ -10,9 +10,8 @@ public class VMessageTextItem extends VMessageAbstractItem {
 	private String text;
 
 	public VMessageTextItem(VMessage vm, String text) {
-		super(vm);
+		super(vm , ITEM_TYPE_TEXT);
 		this.text = text;
-		this.type = ITEM_TYPE_TEXT;
 		this.uuid = UUID.randomUUID().toString();
 	}
 

@@ -14,52 +14,57 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 	private int seconds;
 	private boolean isPlaying;
 	private int readState;
+	private boolean isReceive;
 
-    /**
-     * XmlParser used
-     * @param vm
-     * @param uuid
-     * @param extension
-     * @param seconds
-     */
-    public VMessageAudioItem(VMessage vm, String uuid, String extension, int seconds) {
-		this(vm , uuid , null , extension , seconds , -1);
+	/**
+	 * XmlParser used
+	 * 
+	 * @param vm
+	 * @param uuid
+	 * @param extension
+	 * @param seconds
+	 */
+	public VMessageAudioItem(VMessage vm, String uuid, String extension,
+			int seconds) {
+		this(vm, uuid, null, extension, seconds, -1);
 	}
 
-    /**
-     * MessageBuilder buildAudioMessage used
-     * @param vm
-     * @param uuid
-     * @param audioFilePath
-     * @param seconds
-     * @param readState
-     */
-    public VMessageAudioItem(VMessage vm, String uuid , String audioFilePath, int seconds , int readState) {
-        this(vm , uuid , audioFilePath , null , seconds , readState);
-    }
-	
-	public VMessageAudioItem(VMessage vm, String uuid , String audioFilePath , String extension, int seconds, 
-			int readState) {
-		super(vm);
+	/**
+	 * MessageBuilder buildAudioMessage used
+	 * 
+	 * @param vm
+	 * @param uuid
+	 * @param audioFilePath
+	 * @param seconds
+	 * @param readState
+	 */
+	public VMessageAudioItem(VMessage vm, String uuid, String audioFilePath,
+			int seconds, int readState) {
+		this(vm, uuid, audioFilePath, null, seconds, readState);
+	}
+
+	public VMessageAudioItem(VMessage vm, String uuid, String audioFilePath,
+			String extension, int seconds, int readState) {
+		super(vm , ITEM_TYPE_AUDIO);
 		this.uuid = uuid;
 		this.audioFilePath = audioFilePath;
 		this.extension = extension;
 		this.seconds = seconds;
 		this.readState = readState;
-		this.type = ITEM_TYPE_AUDIO;
-		
-		if(uuid == null)
-			this.uuid = UUID.randomUUID().toString();
-		
-		if(TextUtils.isEmpty(audioFilePath) && !TextUtils.isEmpty(extension))
-            this.audioFilePath = GlobalConfig.getGlobalAudioPath() + "/" + uuid + extension;
 
-        if(!TextUtils.isEmpty(audioFilePath) && TextUtils.isEmpty(extension)){
-            int start = this.audioFilePath.lastIndexOf(".");
-            if (start != -1) {
-                this.extension = this.audioFilePath.substring(start);
-            }
-        }
+		if (uuid == null)
+			this.uuid = UUID.randomUUID().toString();
+
+		if (TextUtils.isEmpty(audioFilePath) && !TextUtils.isEmpty(extension))
+			this.audioFilePath = GlobalConfig.getGlobalAudioPath() + "/" + uuid
+					+ extension;
+
+		if (!TextUtils.isEmpty(audioFilePath) && TextUtils.isEmpty(extension)) {
+			int start = this.audioFilePath.lastIndexOf(".");
+			if (start != -1) {
+				this.extension = this.audioFilePath.substring(start);
+			}
+		}
 	}
 
 	public String getAudioFilePath() {
@@ -82,19 +87,28 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 		this.isPlaying = isPlaying;
 	}
 
-    public int getReadState() {
-        return readState;
-    }
+	public int getReadState() {
+		return readState;
+	}
 
-    public void setReadState(int readState) {
-        this.readState = readState;
-    }
+	public void setReadState(int readState) {
+		this.readState = readState;
+	}
+
+	public boolean isReceive() {
+		return isReceive;
+	}
+
+	public void setReceive(boolean isReceive) {
+		this.isReceive = isReceive;
+	}
+
 	/**
 	 */
 	public String toXmlItem() {
 		long userID = 0;
-		//if toUser is null , mean group no user
-		if (vm.getToUser() != null) { 
+		// if toUser is null , mean group no user
+		if (vm.getToUser() != null) {
 			userID = vm.getToUser().getmUserId();
 		}
 		if (vm.getFromUser() == null) {
@@ -102,9 +116,9 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 			return "";
 		}
 		String xml = "<TAudioChatItem NewLine=\"True\" FileExt=\"" + extension
-				+ "\" FileID=\"" + uuid + "\" RecvUserID=\""
-				+ userID + "\" Seconds=\"" + seconds
-				+ "\" SendUserID=\"" + vm.getFromUser().getmUserId() + "\"/>";
+				+ "\" FileID=\"" + uuid + "\" RecvUserID=\"" + userID
+				+ "\" Seconds=\"" + seconds + "\" SendUserID=\""
+				+ vm.getFromUser().getmUserId() + "\"/>";
 		return xml;
 	}
 

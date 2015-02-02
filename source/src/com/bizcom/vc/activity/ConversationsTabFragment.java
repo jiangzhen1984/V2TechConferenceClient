@@ -756,9 +756,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 
 		// Update unread conversation list
-		if (cov.getReadFlag() == Conversation.READ_FLAG_UNREAD) {
-			updateUnreadConversation(currentItem);
-		}
+		updateUnreadConversation(currentItem);
 		adapter.notifyDataSetChanged();
 	}
 
@@ -1442,21 +1440,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					User user = GlobalHolder.getInstance().getUser(
 							invitation.getInvitationUser().getmUserId());
 					if (!user.isDirty()) {
-						boolean isFriend = GlobalHolder.getInstance().isFriend(
-								user);
-						if (isFriend && !TextUtils.isEmpty(user.getNickName()))
-							invitationName = user.getNickName();
-						else
-							invitationName = user.getName();
+						invitationName = user.getName();
 					}
 				} else {
 					User user = invitation.getInvitationUser();
-					boolean isFriend = GlobalHolder.getInstance()
-							.isFriend(user);
-					if (isFriend && !TextUtils.isEmpty(user.getNickName()))
-						invitationName = user.getNickName();
-					else
-						invitationName = user.getName();
+					invitationName = user.getName();
 				}
 
 				if (invitation.getQualState() == QualificationState.BE_ACCEPTED) {
@@ -1485,21 +1473,11 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					User user = GlobalHolder.getInstance().getUser(
 							apply.getApplicant().getmUserId());
 					if (!user.isDirty()) {
-						boolean isFriend = GlobalHolder.getInstance().isFriend(
-								user);
-						if (isFriend && !TextUtils.isEmpty(user.getNickName()))
-							applyName = user.getNickName();
-						else
-							applyName = user.getName();
+						applyName = user.getName();
 					}
 				} else {
 					User user = apply.getApplicant();
-					boolean isFriend = GlobalHolder.getInstance()
-							.isFriend(user);
-					if (isFriend && !TextUtils.isEmpty(user.getNickName()))
-						applyName = user.getNickName();
-					else
-						applyName = user.getName();
+					applyName = user.getName();
 				}
 
 				if (apply.getQualState() == QualificationState.BE_REJECT)
@@ -1820,12 +1798,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						// delete messages
 						if (temp.getType() == Conversation.TYPE_CONTACT) {
 							MessageLoader.deleteMessageByID(mContext,
-									Conversation.TYPE_CONTACT, -1,
+									Conversation.TYPE_CONTACT, 0,
 									temp.getExtId(), false);
 						} else {
 							// clear the crowd group all chat database messges
 							MessageLoader.deleteMessageByID(mContext,
-									temp.getType(), temp.getExtId(), -1, false);
+									temp.getType(), temp.getExtId(), 0, false);
 						}
 						V2Log.d(TAG,
 								" Successfully remove contact conversation , id is : "
@@ -2757,15 +2735,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			if (mIsStartedSearch) {
 				return searchList.get(position).gp;
 			} else {
+				ScrollItem scrollItem = mItemList.get(position);
 				if (mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER) {
-					Conversation cov = mItemList.get(position).cov;
+					Conversation cov = scrollItem.cov;
 					if (cov.getType() == Conversation.TYPE_CONTACT) {
 						Bitmap bp = ((ContactConversation) cov).getU()
 								.getAvatarBitmap();
-						GroupLayout gl = (GroupLayout) mItemList.get(position).gp;
+						GroupLayout gl = (GroupLayout) scrollItem.gp;
 						gl.updateIcon(bp);
 					}
-				}
+				} 
+				updateUnreadConversation(scrollItem);
 				return mItemList.get(position).gp;
 			}
 		}

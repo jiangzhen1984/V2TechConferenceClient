@@ -390,11 +390,13 @@ public class VideoDocLayout extends LinearLayout {
 				src.bottom = ops.outHeight;
 				ops.inJustDecodeBounds = false;
 
-				V2Log.d(TAG , "updateCurrentDocPage --> doc file path : "
-						+ p.getFilePath());
+				V2Log.d(TAG,
+						"updateCurrentDocPage --> doc file path : "
+								+ p.getFilePath());
 
 				recycleBitmap(mBackgroundBitMap);
-				mBackgroundBitMap = BitmapUtil.getCompressedBitmap(p.getFilePath());
+				mBackgroundBitMap = BitmapUtil.getCompressedBitmap(p
+						.getFilePath());
 				Matrix m = new Matrix();
 				m.postRotate(BitmapUtil.getBitmapRotation(p.getFilePath()));
 				mBackgroundBitMap = Bitmap.createBitmap(mBackgroundBitMap, 0,
@@ -407,8 +409,7 @@ public class VideoDocLayout extends LinearLayout {
 				dest.right = params[0];
 				dest.top = (src.bottom - params[1]) / 2;
 				dest.bottom = params[1];
-				matrix.postScale(params[0] / src.right, params[1]
-						/ src.bottom);
+				matrix.postScale(params[0] / src.right, params[1] / src.bottom);
 				matrix.mapRect(dest, src);
 
 				for (int i = 0; i < mDocDisplayContainer.getChildCount(); i++) {

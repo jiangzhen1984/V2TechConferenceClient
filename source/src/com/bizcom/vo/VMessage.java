@@ -59,10 +59,21 @@ public class VMessage {
 	 * This flag indicates that this VMessage Object is autio reply or not
 	 */
 	protected boolean isAutoReply;
-
+	
 	protected int readState;
+	
+	public int notReceiveImageSize = 0;
+	
+	public boolean isBeginSendingAnima;
+	public boolean isShowFailed;
+	public boolean isUpdateDate;
+	public boolean isUpdateFileState;
+	public boolean isUpdateAvatar;
 
 	protected List<VMessageAbstractItem> itemList;
+	protected List<VMessageImageItem> imageItems;
+	protected List<VMessageAudioItem> audioItems;
+	protected List<VMessageFileItem> fileItems;
 
 	public VMessage(int groupType, long groupId, User fromUser, Date date) {
 		this(groupType, groupId, fromUser, null, UUID.randomUUID().toString(),
@@ -86,6 +97,9 @@ public class VMessage {
 		this.readState = VMessageAbstractItem.STATE_READED;
 
 		itemList = new ArrayList<VMessageAbstractItem>();
+		imageItems = new ArrayList<VMessageImageItem>();
+		audioItems = new ArrayList<VMessageAudioItem>();
+		fileItems = new ArrayList<VMessageFileItem>();
 	}
 
 	public long getmDateLong() {
@@ -203,34 +217,35 @@ public class VMessage {
 	public void setResendMessage(boolean isResendMessage) {
 		this.isResendMessage = isResendMessage;
 	}
-
-	public List<VMessageImageItem> getImageItems() {
-		List<VMessageImageItem> imageItems = new ArrayList<VMessageImageItem>();
-		for (VMessageAbstractItem item : itemList) {
-			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
-				imageItems.add((VMessageImageItem) item);
-			}
+	
+	public void setImageItems(List<VMessageImageItem> imageItems) {
+		for (int i = 0; i < this.imageItems.size(); i++) {
+			this.imageItems.get(i).recycle();
+			this.imageItems.get(i).setFilePath(imageItems.get(i).getFilePath());
 		}
+		this.imageItems = imageItems;
+	}
+	
+	public void addItem(VMessageAbstractItem item) {
+		this.itemList.add(item);
+		if(item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE){
+			imageItems.add((VMessageImageItem) item);
+		} else if(item.getType() == VMessageAbstractItem.ITEM_TYPE_AUDIO){
+			audioItems.add((VMessageAudioItem) item);
+		} else if(item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE){
+			fileItems.add((VMessageFileItem) item);
+		}
+	}
+	
+	public List<VMessageImageItem> getImageItems() {
 		return imageItems;
 	}
 
 	public List<VMessageAudioItem> getAudioItems() {
-		List<VMessageAudioItem> videoItems = new ArrayList<VMessageAudioItem>();
-		for (VMessageAbstractItem item : itemList) {
-			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_AUDIO) {
-				videoItems.add((VMessageAudioItem) item);
-			}
-		}
-		return videoItems;
+		return audioItems;
 	}
 
 	public List<VMessageFileItem> getFileItems() {
-		List<VMessageFileItem> fileItems = new ArrayList<VMessageFileItem>();
-		for (VMessageAbstractItem item : itemList) {
-			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FILE) {
-				fileItems.add((VMessageFileItem) item);
-			}
-		}
 		return fileItems;
 	}
 
@@ -264,10 +279,6 @@ public class VMessage {
 
 	public User getToUser() {
 		return this.mToUser;
-	}
-
-	public void addItem(VMessageAbstractItem item) {
-		this.itemList.add(item);
 	}
 
 	public List<VMessageAbstractItem> getItems() {

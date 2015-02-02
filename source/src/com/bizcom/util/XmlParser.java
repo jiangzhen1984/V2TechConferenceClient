@@ -44,7 +44,7 @@ public class XmlParser {
 	}
 
 	public static String parseForMessageUUID(String xml) {
-		
+
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder;
 		InputStream is = null;
@@ -69,10 +69,7 @@ public class XmlParser {
 	}
 
 	public static VMessage parseForMessage(VMessage vm) {
-		// public static VMessage parseForMessage(User from, User to, Date date,
-		// String xml) {
 		String xml = vm.getmXmlDatas();
-		xml = EscapedcharactersProcessing.convertAmp(xml);
 		if (xml == null)
 			return vm;
 
@@ -85,11 +82,12 @@ public class XmlParser {
 			Document doc = dBuilder.parse(is);
 
 			doc.getDocumentElement().normalize();
-			Element element = (Element) doc.getElementsByTagName("TChatData").item(0);
+			Element element = (Element) doc.getElementsByTagName("TChatData")
+					.item(0);
 			boolean isAutoReply = "True".equals(element
 					.getAttribute("IsAutoReply"));
 			vm.setAutoReply(isAutoReply);
-			
+
 			NodeList textMsgItemNL = doc.getElementsByTagName("ItemList");
 			if (textMsgItemNL.getLength() <= 0) {
 				return null;
@@ -106,23 +104,14 @@ public class XmlParser {
 					VMessageAbstractItem va = null;
 					if (msgEl.getTagName().equals("TTextChatItem")) {
 						String text = msgEl.getAttribute("Text");
-						text = text.replaceAll("&lt;", "<");
-						text = text.replaceAll("&gt;", ">");
-						text = text.replaceAll("&apos;", "'");
-						text = text.replaceAll("&quot;", "\"");
-						text = text.replaceAll("&amp;", "&");
-
-						va = new VMessageTextItem(vm, text);
+						xml = EscapedcharactersProcessing.reverse(text);
+						String newText = text.replace("0xD0xA", "\n");
+						va = new VMessageTextItem(vm, newText);
 						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TLinkTextChatItem")) {
 						String text = msgEl.getAttribute("Text");
 						String url = msgEl.getAttribute("URL");
-						text = text.replaceAll("&lt;", "<");
-						text = text.replaceAll("&gt;", ">");
-						text = text.replaceAll("&apos;", "'");
-						text = text.replaceAll("&quot;", "\"");
-						text = text.replaceAll("&amp;", "&");
-
+						xml = EscapedcharactersProcessing.reverse(url);
 						va = new VMessageLinkTextItem(vm, text, url);
 						va.setNewLine(isNewLine);
 					} else if (msgEl.getTagName().equals("TSysFaceChatItem")) {
@@ -163,9 +152,10 @@ public class XmlParser {
 							V2Log.e("Invalid uuid ");
 							continue;
 						}
-						
+
 						String filePath = msgEl.getAttribute("name");
-						VMessageFileItem vii = new VMessageFileItem(vm, filePath , 0);
+						VMessageFileItem vii = new VMessageFileItem(vm,
+								filePath, 0);
 						vii.setUuid(uuid);
 						vii.setNewLine(isNewLine);
 					}
@@ -179,7 +169,7 @@ public class XmlParser {
 
 		return vm;
 	}
-	
+
 	public static void extraImageMetaFrom(VMessage vm, String xml) {
 		InputStream is = null;
 
@@ -206,7 +196,9 @@ public class XmlParser {
 				VMessageImageItem vii = new VMessageImageItem(vm, uuid,
 						msgEl.getAttribute("FileExt"));
 				vii.setNewLine(isNewLine);
+				vii.setFilePath("wait");
 			}
+			vm.notReceiveImageSize = imgMsgItemNL.getLength();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -240,7 +232,9 @@ public class XmlParser {
 						audioItemEl.getAttribute("FileExt"),
 						Integer.parseInt(audioItemEl.getAttribute("Seconds")));
 				vii.setNewLine(true);
-                vii.setReadState(VMessageAbstractItem.STATE_UNREAD);
+				vii.setReceive(false);
+				vii.setState(VMessageAbstractItem.STATE_NORMAL);
+				vii.setReadState(VMessageAbstractItem.STATE_UNREAD);
 			}
 
 		} catch (Exception e) {
@@ -572,11 +566,11 @@ public class XmlParser {
 									Integer.parseInt(str[index + 1]));
 							earser.addPoint(Integer.parseInt(str[index + 2]),
 									Integer.parseInt(str[index + 3]));
-//
-//							 earser.lineToLine(Integer.parseInt(str[index]),
-//							 Integer.parseInt(str[index + 1]),
-//							 Integer.parseInt(str[index + 2]),
-//							 Integer.parseInt(str[index + 3]));
+							//
+							// earser.lineToLine(Integer.parseInt(str[index]),
+							// Integer.parseInt(str[index + 1]),
+							// Integer.parseInt(str[index + 2]),
+							// Integer.parseInt(str[index + 3]));
 						}
 					} else if (shapeE.getTagName().equals("Pen")) {
 

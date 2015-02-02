@@ -60,10 +60,7 @@ public class OrganizationTabFragment extends Fragment implements TextWatcher{
 		super.onCreate(savedInstanceState);
 
 		mGroupList = new ArrayList<Group>();
-
 		getActivity().registerReceiver(receiver, getIntentFilter());
-		getActivity();
-
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				this.bitmapChangedListener);
 	}
@@ -134,6 +131,7 @@ public class OrganizationTabFragment extends Fragment implements TextWatcher{
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
+			intentFilter.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 			intentFilter
@@ -141,7 +139,7 @@ public class OrganizationTabFragment extends Fragment implements TextWatcher{
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
 			intentFilter
-					.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO);
 
 		}
 		return intentFilter;
@@ -276,11 +274,16 @@ public class OrganizationTabFragment extends Fragment implements TextWatcher{
 				Group dest = GlobalHolder.getInstance().getGroupById(
 						GroupType.CONTACT.intValue(), destGroupId);
 				mContactsContainer.updateUserGroup(u, src, dest);
+			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO
+					.equals(intent.getAction())) {
+				long uid = intent.getLongExtra("uid", -1);
+				if (uid == -1)
+					return;
+				Message.obtain(mHandler, UPDATE_USER_SIGN, uid).sendToTarget();
 			} else if (PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION
 					.equals(intent.getAction())) {
 				Long uid = intent.getLongExtra("modifiedUser", -1);
 				if (uid == -1l) {
-					V2Log.e("OrganizationTabFragment BROADCAST_USER_COMMENT_NAME_NOTIFICATION ---> update user comment name failed , get id is -1");
 					return;
 				}
 
