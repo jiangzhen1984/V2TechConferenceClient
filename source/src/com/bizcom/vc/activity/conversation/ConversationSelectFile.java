@@ -783,7 +783,8 @@ public class ConversationSelectFile extends Activity {
 
 		saveButton.setText(R.string.conversation_select_file_determine);
 		fileView.setText(fileName
-				+ R.string.conversation_select_file_empty_file);
+				+ getResources().getString(
+						R.string.conversation_select_file_empty_file));
 
 		cancelButton.setOnClickListener(new OnClickListener() {
 

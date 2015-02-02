@@ -218,29 +218,29 @@ public class ConferenceMessageBodyView extends LinearLayout{
 		initData();
 	}
 
-	class LoadTask extends AsyncTask<ImageView, Void, ImageView[]> {
+	class ImageViewsImageLoadAsyncTask extends AsyncTask<ImageView, Void, ImageView[]> {
 
 		@Override
-		protected ImageView[] doInBackground(ImageView... vms) {
+		protected ImageView[] doInBackground(ImageView... ivs) {
 			// Only has one element
-			for (ImageView vm : vms) {
-				((VMessageImageItem) vm.getTag()).getCompressedBitmap();
+			for (ImageView iv : ivs) {
+				((VMessageImageItem) iv.getTag()).getCompressedBitmap();
 			}
-			return vms;
+			return ivs;
 		}
 
 		@Override
 		protected void onPostExecute(ImageView[] result) {
 			// Only has one element
-			ImageView vm = result[0];
-			// If loaded vm is not same member's, means current view has changed
+			ImageView iv = result[0];
+			// If loaded iv is not same member's, means current view has changed
 			// message, ignore this result
-			VMessageImageItem item = ((VMessageImageItem) vm.getTag());
+			VMessageImageItem item = ((VMessageImageItem) iv.getTag());
 			if (item.getVm() != mMsg) {
 				return;
 			}
 			Bitmap bm = item.getCompressedBitmap();
-			vm.setImageBitmap(bm);
+			iv.setImageBitmap(bm);
 		}
 
 	}

@@ -40,12 +40,13 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.util.BitmapUtil;
+import com.bizcom.util.OrderedHashMap;
 import com.bizcom.vc.widget.cus.TouchImageView;
 import com.bizcom.vo.V2Doc;
 import com.bizcom.vo.V2ShapeMeta;
 import com.v2tech.R;
 
-public class VideoDocLayout extends LinearLayout {
+public class LeftShareDocLayout extends LinearLayout {
 
 	private static final String TAG = "VideoDocLayout";
 	private FrameLayout mDocDisplayContainer;
@@ -72,7 +73,8 @@ public class VideoDocLayout extends LinearLayout {
 
 	private View rootView;
 	private DocListener listener;
-	private Map<String, V2Doc> mDocs;
+	private OrderedHashMap<String, V2Doc> mDocs;
+
 	// Use to draw image backgroud
 	private Bitmap mBackgroundBitMap;
 	// Use to draw all shapes
@@ -104,11 +106,11 @@ public class VideoDocLayout extends LinearLayout {
 
 	};
 
-	public VideoDocLayout(Context context, Map<String, V2Doc> docs,
+	public LeftShareDocLayout(Context context, Map<String, V2Doc> docs,
 			String currentLecturerActivateDocId) {
 		super(context);
 		this.mContext = context;
-		mDocs = new HashMap<String, V2Doc>();
+		mDocs = new OrderedHashMap<String, V2Doc>();
 		mDocs.putAll(docs);
 		V2Doc currentLecturerActivateDoc = mDocs
 				.get(currentLecturerActivateDocId);
@@ -916,8 +918,9 @@ public class VideoDocLayout extends LinearLayout {
 				// TODO prompt doc list is empty
 				return;
 			}
+
 			if (mDocListWindow == null) {
-				LayoutInflater inflater = (LayoutInflater) VideoDocLayout.this
+				LayoutInflater inflater = (LayoutInflater) LeftShareDocLayout.this
 						.getContext().getSystemService(
 								Context.LAYOUT_INFLATER_SERVICE);
 				View view = inflater.inflate(R.layout.video_doc_list_layout,
@@ -944,9 +947,9 @@ public class VideoDocLayout extends LinearLayout {
 				mDocListView = (LinearLayout) view
 						.findViewById(R.id.video_doc_list_container);
 				View currActivateView = null;
-				for (Entry<String, V2Doc> e : mDocs.entrySet()) {
-					View v = addDocNameViewToDocListView(e.getValue());
-					if (e.getValue() == mCurrentDoc) {
+				for (String key : mDocs.keyOrderList()) {
+					View v = addDocNameViewToDocListView(mDocs.get(key));
+					if (mDocs.get(key) == mCurrentDoc) {
 						currActivateView = v;
 					}
 				}
@@ -994,11 +997,9 @@ public class VideoDocLayout extends LinearLayout {
 				return;
 			}
 			V2Doc v2Doc = (V2Doc) v.getTag();
-
 			if (v2Doc == null) {
 				return;
 			}
-
 			if (v2Doc != mCurrentDoc) {
 				V2Doc.Page p = v2Doc.getActivatePage();
 
@@ -1039,6 +1040,14 @@ public class VideoDocLayout extends LinearLayout {
 					if (listener != null) {
 						listener.updateDoc(v2Doc, v2Doc.getActivatePage());
 					}
+				}
+
+				if (!isLectureStateGranted) {
+					((ConferenceActivity) mContext)
+							.setNeedToFollowThePage(true);
+				} else {
+					((ConferenceActivity) mContext)
+							.setNeedToFollowThePage(false);
 				}
 			}
 		}

@@ -10,10 +10,10 @@ import android.widget.BaseAdapter;
  * Use to wrap simple adapter for ListView
  * 
  * <ul>
- * Use {@link ViewConvertListener} to wrap construct view object.
+ * Use {@link CommonAdapterGetViewListener} to wrap construct view object.
  * </ul>
  * <ul>
- * Use {@link CommonAdapterItemWrapper} to wrap List object.
+ * Use {@link CommonAdapterItemDateAndViewWrapper} to wrap List object.
  * </ul>
  * 
  * @author jiangzhen
@@ -21,13 +21,13 @@ import android.widget.BaseAdapter;
  */
 public class CommonAdapter extends BaseAdapter {
 
-	private List<CommonAdapterItemWrapper> dataset;
+	private List<CommonAdapterItemDateAndViewWrapper> dataset;
 
-	private ViewConvertListener listener;
+	private CommonAdapterGetViewListener listener;
 
 	private int batchCount;
 
-	public interface CommonAdapterItemWrapper {
+	public interface CommonAdapterItemDateAndViewWrapper {
 		public Object getItemObject();
 		
 		public long getItemLongId();
@@ -35,18 +35,17 @@ public class CommonAdapter extends BaseAdapter {
 		public View getView();
 	}
 
-	public interface ViewConvertListener {
-		public View converView(CommonAdapterItemWrapper wr, View view,
-				ViewGroup vg);
+	public interface CommonAdapterGetViewListener {
+		public View getView(CommonAdapterItemDateAndViewWrapper wr, View view, ViewGroup vg);
 	}
 
-	public CommonAdapter(List<CommonAdapterItemWrapper> dataset,
-			ViewConvertListener listener) {
+	public CommonAdapter(List<CommonAdapterItemDateAndViewWrapper> dataset,
+			CommonAdapterGetViewListener listener) {
 		this(dataset, listener, 1);
 	}
 
-	public CommonAdapter(List<CommonAdapterItemWrapper> dataset,
-			ViewConvertListener listener, int viewCount) {
+	public CommonAdapter(List<CommonAdapterItemDateAndViewWrapper> dataset,
+			CommonAdapterGetViewListener listener, int viewCount) {
 		super();
 		this.dataset = dataset;
 		this.listener = listener;
@@ -77,7 +76,7 @@ public class CommonAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(int pos, View view, ViewGroup vg) {
-		return listener.converView(dataset.get(pos), view, vg);
+		return listener.getView(dataset.get(pos), view, vg);
 	}
 
 }

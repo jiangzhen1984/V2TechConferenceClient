@@ -81,7 +81,8 @@ import com.bizcom.vc.activity.ConversationsTabFragment;
 import com.bizcom.vc.activity.contacts.ContactDetail;
 import com.bizcom.vc.activity.crow.CrowdDetailActivity;
 import com.bizcom.vc.activity.crow.CrowdFilesActivity.CrowdFileActivityType;
-import com.bizcom.vc.adapter.VMessageAdater;
+import com.bizcom.vc.adapter.VMessageDataAndViewWrapper;
+import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemDateAndViewWrapper;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -2205,7 +2206,7 @@ public class ConversationTextActivity extends Activity implements
 		judgeShouldShowTime(m);
 		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
 		mv.setCallback(listener);
-		VMessageAdater adater = new VMessageAdater(m);
+		VMessageDataAndViewWrapper adater = new VMessageDataAndViewWrapper(m);
 		adater.setView(mv);
 		messageArray.add(m);
 		if (!isStopped)

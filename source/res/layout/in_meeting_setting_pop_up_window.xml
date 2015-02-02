@@ -39,7 +39,7 @@
                 android:paddingTop="20dp"
                 android:progress="0"
                 android:progressDrawable="@drawable/seek_bar_progress"
-                android:thumb="@drawable/seekbar_ball" />
+                android:thumb="@drawable/seekbar_thumb" />
 
             <RelativeLayout
                 android:layout_width="wrap_content"

@@ -587,9 +587,9 @@ public class ChatService extends DeviceService {
 
 		@Override
 		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
-			Log.i("temptag20141030 1", "OnVideoChatClosed()");
-			notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
-			mCaller = null;
+//			Log.i("temptag20141030 1", "OnVideoChatClosed()");
+//			notifyListener(KEY_CANCELLED_LISTNER, 0, 0, null);
+//			mCaller = null;
 		}
 
 		@Override

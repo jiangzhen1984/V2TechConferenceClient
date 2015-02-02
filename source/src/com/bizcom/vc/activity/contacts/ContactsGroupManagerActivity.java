@@ -31,8 +31,8 @@ import com.bizcom.request.MessageListener;
 import com.bizcom.request.jni.GroupServiceJNIResponse;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.vc.adapter.CommonAdapter;
-import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemWrapper;
-import com.bizcom.vc.adapter.CommonAdapter.ViewConvertListener;
+import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemDateAndViewWrapper;
+import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterGetViewListener;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vo.ContactGroup;
@@ -52,7 +52,7 @@ public class ContactsGroupManagerActivity extends Activity {
 	private Context mContext;
 	private ListView mListView;
 
-	private List<CommonAdapterItemWrapper> mDataset;
+	private List<CommonAdapterItemDateAndViewWrapper> mDataset;
 	private BaseAdapter adapter;
 
 	private ContactsService contactService = new ContactsService();
@@ -104,8 +104,8 @@ public class ContactsGroupManagerActivity extends Activity {
 		contactService.clearCalledBack();
 	}
 
-	private List<CommonAdapterItemWrapper> convert(List<Group> listGroup) {
-		List<CommonAdapterItemWrapper> ds = new ArrayList<CommonAdapterItemWrapper>(
+	private List<CommonAdapterItemDateAndViewWrapper> convert(List<Group> listGroup) {
+		List<CommonAdapterItemDateAndViewWrapper> ds = new ArrayList<CommonAdapterItemDateAndViewWrapper>(
 				listGroup.size() - 1);
 		for (int i = 0; i < listGroup.size(); i++) {
 			final Group g = listGroup.get(i);
@@ -280,10 +280,10 @@ public class ContactsGroupManagerActivity extends Activity {
 
 	};
 
-	private ViewConvertListener converter = new ViewConvertListener() {
+	private CommonAdapterGetViewListener converter = new CommonAdapterGetViewListener() {
 
 		@Override
-		public View converView(CommonAdapterItemWrapper wr, View view,
+		public View getView(CommonAdapterItemDateAndViewWrapper wr, View view,
 				ViewGroup vg) {
 			LocalItemWrapper liw= (LocalItemWrapper) wr;
 			if (view == null) {
@@ -381,7 +381,7 @@ public class ContactsGroupManagerActivity extends Activity {
 
 	};
 
-	class LocalItemWrapper implements CommonAdapterItemWrapper {
+	class LocalItemWrapper implements CommonAdapterItemDateAndViewWrapper {
 
 		private Group g;
 		private boolean showDeleteButton;

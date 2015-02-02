@@ -1640,6 +1640,8 @@ public class JNIService extends Service implements
 			iv.putExtra("voice", true);
 			iv.putExtra("sessionID", ind.getSzSessionID());
 			mContext.startActivity(iv);
+			Log.i("20150130 1", "OnAudioChatInvite set true "
+					+ GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast());
 
 		}
 
@@ -1673,6 +1675,21 @@ public class JNIService extends Service implements
 			intent.putExtra("hasUnread", true);
 			intent.putExtra("remoteID", currentVideoBean.remoteUserID);
 			sendBroadcast(intent);
+		}
+
+		@Override
+		public void OnAudioChatClosed(AudioJNIObjectInd ind) {
+			super.OnAudioChatClosed(ind);
+			if (GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast()) {
+				Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
+				i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+				i.putExtra("fromUserId", ind.getFromUserId());
+				i.putExtra("groupId", ind.getGroupId());
+				// Send sticky broadcast, make sure activity receive
+				mContext.sendStickyBroadcast(i);
+			}
+			Log.i("20150130 1", "OnAudioChatClosed: "
+					+ GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast());
 		}
 	}
 
@@ -1716,6 +1733,8 @@ public class JNIService extends Service implements
 
 			Message.obtain(mCallbackHandler, JNI_RECEIVED_VIDEO_INVITION, ind)
 					.sendToTarget();
+			Log.i("20150130 1", "OnVideoChatInviteCallback set true "
+					+ GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast());
 		}
 
 		@Override
@@ -1729,34 +1748,36 @@ public class JNIService extends Service implements
 			GlobalHolder.getInstance().updateUserDevice(uid, ll);
 		}
 
-		@Override
-		/*
-		 * Use to user quickly pressed video call button more than one time
-		 * Because chat close event doesn't notify to activity. P2PConversation
-		 * doesn't start up yet.
-		 * 
-		 * @see
-		 * com.V2.jni.VideoRequestCallbackAdapter#OnVideoChatClosed(com.V2.jni
-		 * .ind.VideoJNIObjectInd)
-		 */
-		public void OnVideoChatClosed(VideoJNIObjectInd ind) {
-			super.OnVideoChatClosed(ind);
-			if (GlobalHolder.getInstance().isInMeeting()
-					|| GlobalHolder.getInstance().isInAudioCall()
-					|| GlobalHolder.getInstance().isInVideoCall()) {
-				return;
-			}
-			Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
-			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			i.putExtra("fromUserId", ind.getFromUserId());
-			i.putExtra("groupId", ind.getGroupId());
-			// Send sticky broadcast, make sure activity receive
-			mContext.sendStickyBroadcast(i);
-
-			Log.i("20150123 1",
-					"sendStickyBroadcast JNI_BROADCAST_VIDEO_CALL_CLOSED");
-
-		}
+		// @Override
+		// /*
+		// * Use to user quickly pressed video call button more than one time
+		// * Because chat close event doesn't notify to activity.
+		// P2PConversation
+		// * doesn't start up yet.
+		// *
+		// * @see
+		// * com.V2.jni.VideoRequestCallbackAdapter#OnVideoChatClosed(com.V2.jni
+		// * .ind.VideoJNIObjectInd)
+		// */
+		// public void OnVideoChatClosed(VideoJNIObjectInd ind) {
+		// super.OnVideoChatClosed(ind);
+		// // if (GlobalHolder.getInstance().isInMeeting()
+		// // || GlobalHolder.getInstance().isInAudioCall()
+		// // || GlobalHolder.getInstance().isInVideoCall()) {
+		// // Log.i("20150128 1","OnVideoChatClosed return");
+		// // return;
+		// // }
+		// if (GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast()) {
+		// Intent i = new Intent(JNI_BROADCAST_VIDEO_CALL_CLOSED);
+		// i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+		// i.putExtra("fromUserId", ind.getFromUserId());
+		// i.putExtra("groupId", ind.getGroupId());
+		// // Send sticky broadcast, make sure activity receive
+		// mContext.sendStickyBroadcast(i);
+		// }
+		// Log.i("20150130 1", "OnVideoChatClosed:"
+		// + GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast());
+		// }
 
 		private void updateVideoRecord(VideoJNIObjectInd ind) {
 			if ((System.currentTimeMillis() / 1000) - lastNotificatorTime > 2) {

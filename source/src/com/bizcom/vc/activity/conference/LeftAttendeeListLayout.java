@@ -44,7 +44,7 @@ import com.bizcom.vo.UserDeviceConfig;
 import com.bizcom.vo.User.DeviceType;
 import com.v2tech.R;
 
-public class VideoAttendeeListLayout extends LinearLayout {
+public class LeftAttendeeListLayout extends LinearLayout {
 
 	private static final String TAG = "VideoAttendeeListLayout";
 
@@ -62,12 +62,16 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private List<Wrapper> mSearchList;
 
 	private boolean mIsStartedSearch;
-	private EditText mSearchET;
+	private boolean isFrist;
 
+	private EditText mSearchET;
 	private View mPinButton;
 	private TextView attendPersons;
+	private OnClickListener mPinButtonOnClickListener = new PinButtonOnClickListener();
+	private AttendeeContainerOnItemClickListener mAttendeeContainerOnItemClickListener = new AttendeeContainerOnItemClickListener();
+	private TextWatcher mSearchETTextChangedListener = new SearchETTextChangedListener();
 
-	private AttendeesAdapter adapter = new AttendeesAdapter();
+	private AttendeeContainerAdapter adapter = new AttendeeContainerAdapter();
 
 	/**
 	 * Online attendee count without mixed device
@@ -92,7 +96,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	};
 
-	public VideoAttendeeListLayout(Conference conf, Context context) {
+	public LeftAttendeeListLayout(Conference conf, Context context) {
 		super(context);
 		this.conf = conf;
 		mList = new ArrayList<Wrapper>();
@@ -110,42 +114,12 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		mSearchET = (EditText) view.findViewById(R.id.attendee_search);
 
 		mPinButton = view.findViewById(R.id.video_attendee_pin_button);
-		mPinButton.setOnClickListener(mRequestFixedListener);
+		mPinButton.setOnClickListener(mPinButtonOnClickListener);
 
 		mAttendeeContainer.setAdapter(adapter);
 		mAttendeeContainer.setTextFilterEnabled(true);
-		mAttendeeContainer.setOnItemClickListener(new OnItemClickListener() {
-
-			@Override
-			public void onItemClick(AdapterView<?> ad, View view, int pos,
-					long id) {
-				if (listener != null) {
-					Wrapper wr = (Wrapper) view.getTag();
-					if (!wr.a.isJoined()) {
-						return;
-					}
-
-					if (wr.udc == null || !wr.udc.isEnable()) {
-						V2Log.i("User device config is disabled ");
-						Toast.makeText(getContext(),
-								R.string.error_open_device_disable,
-								Toast.LENGTH_SHORT).show();
-						return;
-					}
-
-					listener.OnAttendeeClicked(wr.a, wr.udc);
-
-					if (!wr.udc.isShowing()) {
-						view.setBackgroundColor(Color.WHITE);
-					} else {
-						view.setBackgroundColor(getContext().getResources()
-								.getColor(R.color.attendee_select_bg));
-					}
-
-				}
-			}
-
-		});
+		mAttendeeContainer
+				.setOnItemClickListener(mAttendeeContainerOnItemClickListener);
 
 		mAttendeeContainer.setFocusable(true);
 		mAttendeeContainer.setFocusableInTouchMode(true);
@@ -154,7 +128,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
-		mSearchET.addTextChangedListener(mSearchListener);
+		mSearchET.addTextChangedListener(mSearchETTextChangedListener);
 		rootView = this;
 	}
 
@@ -195,10 +169,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 	private void addAttendeeWithoutNotification(List<Attendee> atList) {
 		for (int index = 0; index < atList.size(); index++) {
 			Attendee at = atList.get(index);
-			if (at.getType() != Attendee.TYPE_MIXED_VIDEO
-					&& !TextUtils.isEmpty(getResources().getString(
-							R.string.vo_attendee_mixed_device_mix_video)
-							+ at.getAttName())) {
+			// && !TextUtils.isEmpty(getResources().getString(
+			// R.string.vo_attendee_mixed_device_mix_video)
+			// + at.getAttName())
+			if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
 				configAttendee(at);
 			}
 			List<UserDeviceConfig> dList = at.getmDevices();
@@ -221,12 +195,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		Context ctx = this.getContext();
 		View view = LayoutInflater.from(ctx).inflate(
 				R.layout.video_attendee_device_layout, null, false);
-
-		ImageView cameraIV = (ImageView) view
-				.findViewById(R.id.video_attendee_device_camera_icon);
-
-		cameraIV.setOnTouchListener(mListViewOnTouchListener);
-
 		updateView(wr, view);
 		return view;
 
@@ -247,7 +215,25 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		ImageView cameraIV = (ImageView) view
 				.findViewById(R.id.video_attendee_device_camera_icon);
 
-		if (wr.sortFlag != FIRST_DEVICE_FLAG) {
+		if (wr.sortFlag == FIRST_DEVICE_FLAG) {
+			if (wr.a != null) {
+				if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+					nameTV.setText(R.string.vo_attendee_mixed_device_mix_video);
+				} else if (wr.a.getType() == Attendee.TYPE_ATTENDEE) {
+					User aUser = wr.a.getUser();
+					if (aUser != null) {
+						if (aUser.isRapidInitiation()) {
+							nameTV.setText("<" + aUser.getName() + ">");
+						} else {
+							nameTV.setText(aUser.getName());
+						}
+					} else {
+						nameTV.setText("");
+					}
+				}
+
+			}
+		} else {
 			UserDeviceConfig udc = wr.getUserDeviceConfig();
 			if (udc != null) {
 				String deviceID = udc.getDeviceID();
@@ -258,33 +244,8 @@ public class VideoAttendeeListLayout extends LinearLayout {
 					deciceName = deviceID.substring(start + 1, end);
 				}
 				nameTV.setText("     " + deciceName);
-
 			} else {
 				nameTV.setText("     ");
-				Log.i("20150121 1", "长空");
-			}
-		} else {
-			User aUser = null;
-			if (wr.a != null) {
-				aUser = wr.a.getUser();
-			}
-
-			if (aUser != null) {
-				if (aUser.isRapidInitiation()) {
-					nameTV.setText("<" + aUser.getName() + ">");
-				} else {
-					boolean isFriend = GlobalHolder.getInstance().isFriend(aUser);
-					if(isFriend && !TextUtils.isEmpty(aUser.getNickName()))
-						nameTV.setText(aUser.getNickName());
-					else
-						nameTV.setText(aUser.getName());
-					if (aUser.getName() == null) {
-						Log.i("20150121 1", "null");
-					}
-				}
-			} else {
-				nameTV.setText("");
-				Log.i("20150121 1", "空");
 			}
 		}
 
@@ -875,112 +836,71 @@ public class VideoAttendeeListLayout extends LinearLayout {
 		adapter.notifyDataSetChanged();
 	}
 
-	private OnTouchListener mListViewOnTouchListener = new OnTouchListener() {
-
-		private View dragView;
-		private Bitmap cbm;
-
-		@Override
-		public synchronized boolean onTouch(View view, MotionEvent event) {
-			if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-				if (cbm != null && !cbm.isRecycled()) {
-					cbm.recycle();
-					cbm = null;
-				}
-
-				Wrapper w = (Wrapper) ((View) view.getParent().getParent())
-						.getTag();
-				dragView = getView(w);
-
-				WindowManager wd = (WindowManager) getContext()
-						.getSystemService(Context.WINDOW_SERVICE);
-				WindowManager.LayoutParams vl = getLayoutParams(event);
-				wd.addView(dragView, vl);
-				mAttendeeContainer
-						.setOverScrollMode(ListView.OVER_SCROLL_NEVER);
-			} else if (event.getAction() == MotionEvent.ACTION_MOVE) {
-				if (dragView != null) {
-					WindowManager wd = (WindowManager) getContext()
-							.getSystemService(Context.WINDOW_SERVICE);
-					WindowManager.LayoutParams vl = getLayoutParams(event);
-					wd.updateViewLayout(dragView, vl);
-				}
-
-			} else if (event.getAction() == MotionEvent.ACTION_UP
-					|| event.getAction() == MotionEvent.ACTION_CANCEL) {
-				if (dragView != null) {
-					if (listener != null
-							&& event.getAction() != MotionEvent.ACTION_CANCEL) {
-						View itemView = (View) (View) view.getParent()
-								.getParent();
-						Wrapper wr = (Wrapper) itemView.getTag();
-						// Rect r = new Rect();
-						// mAttendeeContainer.getLocalVisibleRect(r);
-						// if (r.contains((int) event.getX(), (int)
-						// event.getY())) {
-						// listener.OnAttendeeClicked(wr.a, wr.udc);
-						// } else
-						{
-							listener.OnAttendeeDragged(wr.a, wr.udc,
-									(int) event.getRawX(),
-									(int) event.getRawY());
-						}
-					}
-					WindowManager wd = (WindowManager) getContext()
-							.getSystemService(Context.WINDOW_SERVICE);
-					wd.removeView(dragView);
-				}
-				mAttendeeContainer
-						.setOverScrollMode(ListView.OVER_SCROLL_ALWAYS);
-				dragView = null;
-			}
+	public boolean getWindowSizeState() {
+		String str = (String) mPinButton.getTag();
+		if (str == null || str.equals("float")) {
+			return false;
+		} else {
 			return true;
 		}
+	}
 
-		private WindowManager.LayoutParams getLayoutParams(MotionEvent event) {
-			WindowManager.LayoutParams vl = new WindowManager.LayoutParams();
-			vl.format = PixelFormat.TRANSLUCENT;
-			vl.gravity = Gravity.TOP | Gravity.LEFT;
-			vl.width = 80;
-			vl.height = 80;
-			vl.type = WindowManager.LayoutParams.TYPE_APPLICATION_PANEL;
-			vl.x = (int) event.getRawX();
-			vl.y = (int) event.getRawY();
-			return vl;
+	private void configAttendee(Attendee at) {
+		if (at == null) {
+			return;
 		}
-
-		private View getView(Wrapper wr) {
-			RelativeLayout rl = new RelativeLayout(getContext());
-			ImageView iv = new ImageView(getContext());
-			Bitmap bm = wr.a.getAvatar();
-			if (bm == null) {
-				bm = BitmapFactory.decodeResource(getContext().getResources(),
-						R.drawable.avatar);
-				cbm = bm;
+		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
+			mAttendeeCount++;
+			if ((at.isJoined() || at.isSelf())) {
+				onLinePersons++;
 			}
-			iv.setImageBitmap(bm);
-			RelativeLayout.LayoutParams rll = new RelativeLayout.LayoutParams(
-					RelativeLayout.LayoutParams.WRAP_CONTENT,
-					RelativeLayout.LayoutParams.WRAP_CONTENT);
-			rll.addRule(RelativeLayout.CENTER_IN_PARENT);
-			rl.addView(iv, rll);
-
-			TextView tv = new TextView(getContext());
-			tv.setText(getResources().getString(
-					R.string.vo_attendee_mixed_device_mix_video)
-					+ wr.a.getAttName());
-			tv.setGravity(Gravity.CENTER);
-			tv.setEllipsize(TruncateAt.END);
-			tv.setMaxWidth(60);
-			tv.setSingleLine();
-			rl.addView(tv, rll);
-
-			return rl;
 		}
-	};
+		updateStatist();
+	}
 
-	private OnClickListener mRequestFixedListener = new OnClickListener() {
+	public void updateStatist() {
+		attendPersons.setText(onLinePersons + "/" + (mAttendeeCount));
+		adapter.notifyDataSetChanged();
+	}
+
+	public void updateDisplay() {
+		adapter.notifyDataSetChanged();
+	}
+
+	private class AttendeeContainerOnItemClickListener implements
+			OnItemClickListener {
+
+		@Override
+		public void onItemClick(AdapterView<?> ad, View view, int pos, long id) {
+			if (listener != null) {
+				Wrapper wr = (Wrapper) view.getTag();
+				if (!wr.a.isJoined()) {
+					return;
+				}
+
+				if (wr.udc == null || !wr.udc.isEnable()) {
+					V2Log.i("User device config is disabled ");
+					Toast.makeText(getContext(),
+							R.string.error_open_device_disable,
+							Toast.LENGTH_SHORT).show();
+					return;
+				}
+
+				listener.OnAttendeeClicked(wr.a, wr.udc);
+
+				if (!wr.udc.isShowing()) {
+					view.setBackgroundColor(Color.WHITE);
+				} else {
+					view.setBackgroundColor(getContext().getResources()
+							.getColor(R.color.attendee_select_bg));
+				}
+
+			}
+		}
+
+	}
+
+	private class PinButtonOnClickListener implements OnClickListener {
 
 		@Override
 		public void onClick(View view) {
@@ -1006,19 +926,9 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			}
 		}
 
-	};
-
-	public boolean getWindowSizeState() {
-		String str = (String) mPinButton.getTag();
-		if (str == null || str.equals("float")) {
-			return false;
-		} else {
-			return true;
-		}
 	}
 
-	private boolean isFrist;
-	private TextWatcher mSearchListener = new TextWatcher() {
+	private class SearchETTextChangedListener implements TextWatcher {
 
 		@Override
 		public void afterTextChanged(Editable et) {
@@ -1058,7 +968,7 @@ public class VideoAttendeeListLayout extends LinearLayout {
 
 	};
 
-	class AttendeesAdapter extends BaseAdapter {
+	private class AttendeeContainerAdapter extends BaseAdapter {
 
 		@Override
 		public int getCount() {
@@ -1125,9 +1035,20 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else {
 					return 1;
 				}
+			} else if (!this.a.isJoined()) {
+				if (wr.a == null) {
+					return -1;
+				} else if (!wr.a.isJoined()) {
+					return 0;
+				} else {
+					return 1;
+				}
+
 			} else if (this.a.getUser() != null
 					&& this.a.getUser().isRapidInitiation()) {
 				if (wr.a == null) {
+					return -1;
+				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getUser() != null
 						&& wr.a.getUser().isRapidInitiation()) {
@@ -1136,24 +1057,13 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				} else {
 					return 1;
 				}
-			} else if (!this.a.isJoined()) {
-				if (wr.a == null) {
-					return -1;
-				} else if (wr.a.getUser() != null
-						&& wr.a.getUser().isRapidInitiation()) {
-					return -1;
-				} else if (!wr.a.isJoined()) {
-					return 0;
-				} else {
-					return 1;
-				}
 			} else if (this.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 				if (wr.a == null) {
 					return -1;
+				} else if (!wr.a.isJoined()) {
+					return -1;
 				} else if (wr.a.getUser() != null
 						&& wr.a.getUser().isRapidInitiation()) {
-					return -1;
-				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return calledByCompareTo(wr);
@@ -1164,10 +1074,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.isChairMan()) {
 				if (wr.a == null) {
 					return -1;
+				} else if (!wr.a.isJoined()) {
+					return -1;
 				} else if (wr.a.getUser() != null
 						&& wr.a.getUser().isRapidInitiation()) {
-					return -1;
-				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
@@ -1180,10 +1090,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
 				if (wr.a == null) {
 					return -1;
+				} else if (!wr.a.isJoined()) {
+					return -1;
 				} else if (wr.a.getUser() != null
 						&& wr.a.getUser().isRapidInitiation()) {
-					return -1;
-				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
@@ -1198,10 +1108,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.getLectureState() == Attendee.LECTURE_STATE_APPLYING) {
 				if (wr.a == null) {
 					return -1;
+				} else if (!wr.a.isJoined()) {
+					return -1;
 				} else if (wr.a.getUser() != null
 						&& wr.a.getUser().isRapidInitiation()) {
-					return -1;
-				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
@@ -1218,10 +1128,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else if (this.a.isSpeaking()) {
 				if (wr.a == null) {
 					return -1;
+				} else if (!wr.a.isJoined()) {
+					return -1;
 				} else if (wr.a.getUser() != null
 						&& wr.a.getUser().isRapidInitiation()) {
-					return -1;
-				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
@@ -1239,10 +1149,10 @@ public class VideoAttendeeListLayout extends LinearLayout {
 			} else {
 				if (wr.a == null) {
 					return -1;
+				} else if (!wr.a.isJoined()) {
+					return -1;
 				} else if (wr.a.getUser() != null
 						&& wr.a.getUser().isRapidInitiation()) {
-					return -1;
-				} else if (!wr.a.isJoined()) {
 					return -1;
 				} else if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
 					return 1;
@@ -1283,28 +1193,6 @@ public class VideoAttendeeListLayout extends LinearLayout {
 				}
 			}
 		}
-	}
-
-	private void configAttendee(Attendee at) {
-		if (at == null) {
-			return;
-		}
-		if (at.getType() != Attendee.TYPE_MIXED_VIDEO) {
-			mAttendeeCount++;
-			if ((at.isJoined() || at.isSelf())) {
-				onLinePersons++;
-			}
-		}
-		updateStatist();
-	}
-
-	public void updateStatist() {
-		attendPersons.setText(onLinePersons + "/" + (mAttendeeCount));
-		adapter.notifyDataSetChanged();
-	}
-
-	public void updateDisplay() {
-		adapter.notifyDataSetChanged();
 	}
 
 }

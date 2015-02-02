@@ -2,15 +2,15 @@ package com.bizcom.vc.adapter;
 
 import android.view.View;
 
-import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemWrapper;
+import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemDateAndViewWrapper;
 import com.bizcom.vo.VMessage;
 
-public class VMessageAdater implements CommonAdapterItemWrapper {
+public class VMessageDataAndViewWrapper implements CommonAdapterItemDateAndViewWrapper {
 
 	private VMessage vm;
 	private View v;
 
-	public VMessageAdater(VMessage vm) {
+	public VMessageDataAndViewWrapper(VMessage vm) {
 		super();
 		this.vm = vm;
 	}

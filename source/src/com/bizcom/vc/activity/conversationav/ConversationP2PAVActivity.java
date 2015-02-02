@@ -329,10 +329,11 @@ public class ConversationP2PAVActivity extends Activity implements
 			V2Log.d(TAG, "initReceiver invoking ..hangUp() ");
 			removeStickyBroadcast(i);
 			hangUp();
+			Log.i("20150130 1","粘性挂断");
 		}
 		
 		GlobalHolder.getInstance().setP2pAVNeedStickyBraodcast(false);
-		
+		Log.i("20150130 1","oncreate set false "+GlobalHolder.getInstance().isP2pAVNeedStickyBraodcast());
 	}
 
 	public boolean verifyDisplayWidthIsLonger() {

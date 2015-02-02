@@ -610,7 +610,7 @@
     <string name="application_global_holder_download">下载</string>
     <string name="application_global_holder_limit_number">上传或下载的文件最多不能超过5个</string>
     <!-- vo -->
-    <string name="vo_attendee_mixed_device_mix_video">混合视频  (</string>
+    <string name="vo_attendee_mixed_device_mix_video">混合视频</string>
     <string name="vo_conference_conversation_creation">创建人:</string>
     <string name="vo_conference_crowd_conversation_creation">@string/vo_conference_conversation_creation</string>
     <string name="vo_conference_department_conversation_creation">@string/vo_conference_conversation_creation</string>

@@ -2,22 +2,19 @@ package com.bizcom.vc.widget.cus;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.ViewConfiguration;
-import android.view.ViewParent;
+import android.widget.AbsSeekBar;
 import android.widget.SeekBar;
 
 //系统没有垂直的seekbar只能自定义
 public class VerticalSeekBar extends SeekBar {
 
-	private boolean mIsDragging;
-	private float mTouchDownY;
-	private int mScaledTouchSlop;
-	private boolean isInScrollingContainer = false;
-	private OnSeekBarChangeListener mOnSeekBarChangeListener;
-	private int lastValue = 0;
+	private Drawable mThumb;
 
 	public interface OnSeekBarChangeListener {
 		void onProgressChanged(VerticalSeekBar VerticalSeekBar, int progress,
@@ -28,43 +25,75 @@ public class VerticalSeekBar extends SeekBar {
 		void onStopTrackingTouch(VerticalSeekBar VerticalSeekBar);
 	}
 
+	private OnSeekBarChangeListener mOnSeekBarChangeListener;
+
+	public VerticalSeekBar(Context context) {
+		this(context, null);
+	}
+
+	public VerticalSeekBar(Context context, AttributeSet attrs) {
+		this(context, attrs, android.R.attr.seekBarStyle);
+	}
+
+	public VerticalSeekBar(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+	}
+
 	public void setOnSeekBarChangeListener(OnSeekBarChangeListener l) {
 		mOnSeekBarChangeListener = l;
 	}
 
-	public boolean isInScrollingContainer() {
-		return isInScrollingContainer;
+	void onStartTrackingTouch() {
+		if (mOnSeekBarChangeListener != null) {
+			mOnSeekBarChangeListener.onStartTrackingTouch(this);
+		}
 	}
 
-	public void setInScrollingContainer(boolean isInScrollingContainer) {
-		this.isInScrollingContainer = isInScrollingContainer;
+	void onStopTrackingTouch() {
+		if (mOnSeekBarChangeListener != null) {
+			mOnSeekBarChangeListener.onStopTrackingTouch(this);
+		}
 	}
 
-	/**
-	 * On touch, this offset plus the scaled value from the position of the
-	 * touch will form the progress value. Usually 0.
-	 */
-	float mTouchProgressOffset;
-
-	public VerticalSeekBar(Context context, AttributeSet attrs, int defStyle) {
-		super(context, attrs, defStyle);
-		mScaledTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
-
+	void onProgressRefresh(float scale, boolean fromUser) {
+		Drawable thumb = mThumb;
+		if (thumb != null) {
+			setThumbPos(getHeight(), thumb, scale, Integer.MIN_VALUE);
+			invalidate();
+		}
+		if (mOnSeekBarChangeListener != null) {
+			mOnSeekBarChangeListener.onProgressChanged(this, getProgress(),
+					fromUser);
+		}
 	}
 
-	public VerticalSeekBar(Context context, AttributeSet attrs) {
-		super(context, attrs);
-	}
-
-	public VerticalSeekBar(Context context) {
-		super(context);
+	private void setThumbPos(int w, Drawable thumb, float scale, int gap) {
+		int available = w + getPaddingLeft() - getPaddingRight();
+		int thumbWidth = thumb.getIntrinsicWidth();
+		int thumbHeight = thumb.getIntrinsicHeight();
+		available -= thumbWidth;
+		// The extra space for the thumb to move on the track
+		available += getThumbOffset() * 2;
+		int thumbPos = (int) (scale * available);
+		int topBound, bottomBound;
+		if (gap == Integer.MIN_VALUE) {
+			Rect oldBounds = thumb.getBounds();
+			topBound = oldBounds.top;
+			bottomBound = oldBounds.bottom;
+		} else {
+			topBound = gap;
+			bottomBound = gap + thumbHeight;
+		}
+		thumb.setBounds(thumbPos, topBound, thumbPos + thumbWidth, bottomBound);
 	}
 
 	@Override
-	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-		super.onSizeChanged(h, w, oldh, oldw);
+	protected void onDraw(Canvas c) {
+		c.rotate(-90);
+		c.translate(-getHeight(), 0);
+		super.onDraw(c);
 	}
-	
+
 	@Override
 	protected synchronized void onMeasure(int widthMeasureSpec,
 			int heightMeasureSpec) {
@@ -73,10 +102,14 @@ public class VerticalSeekBar extends SeekBar {
 	}
 
 	@Override
-	protected synchronized void onDraw(Canvas canvas) {
-		canvas.rotate(-90);
-		canvas.translate(-getHeight(), 0);
-		super.onDraw(canvas);
+	public void setThumb(Drawable thumb) {
+		mThumb = thumb;
+		super.setThumb(thumb);
+	}
+
+	@Override
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+		super.onSizeChanged(h, w, oldw, oldh);
 	}
 
 	@Override
@@ -84,131 +117,60 @@ public class VerticalSeekBar extends SeekBar {
 		if (!isEnabled()) {
 			return false;
 		}
-
 		switch (event.getAction()) {
 		case MotionEvent.ACTION_DOWN:
-			if (isInScrollingContainer()) {
-				mTouchDownY = event.getY();
-			} else {
-				setPressed(true);
-				invalidate();
-				onStartTrackingTouch();
-				trackTouchEvent(event);
-				attemptClaimDrag();
-				onSizeChanged(getWidth(), getHeight(), 0, 0);
-			}
+			setPressed(true);
+			onStartTrackingTouch();
+			trackTouchEvent(event);
+			onSizeChanged(getWidth(), getHeight(), 0, 0);
 			break;
 
 		case MotionEvent.ACTION_MOVE:
-			if (mIsDragging) {
-				trackTouchEvent(event);
-				if (lastValue != getProgress()) {
-					if (mOnSeekBarChangeListener != null) {
-						mOnSeekBarChangeListener.onProgressChanged(this,
-								getProgress(), true);
-					}
-					lastValue = getProgress();
-				}
-			} else {
-				final float y = event.getY();
-				if (Math.abs(y - mTouchDownY) > mScaledTouchSlop) {
-					setPressed(true);
-					invalidate();
-					onStartTrackingTouch();
-					trackTouchEvent(event);
-					attemptClaimDrag();
-				}
-			}
+			trackTouchEvent(event);
+			attemptClaimDrag();
 			onSizeChanged(getWidth(), getHeight(), 0, 0);
 			break;
 
 		case MotionEvent.ACTION_UP:
-			if (mIsDragging) {
-				trackTouchEvent(event);
-				onStopTrackingTouch();
-				setPressed(false);
-
-			} else {
-				// Touch up when we never crossed the touch slop threshold
-				// should
-				// be interpreted as a tap-seek to that location.
-				onStartTrackingTouch();
-				trackTouchEvent(event);
-				onStopTrackingTouch();
-
-			}
+			trackTouchEvent(event);
+			onStopTrackingTouch();
+			setPressed(false);
 			onSizeChanged(getWidth(), getHeight(), 0, 0);
-			// ProgressBar doesn't know to repaint the thumb drawable
-			// in its inactive state when the touch stops (because the
-			// value has not apparently changed)
-			invalidate();
+			break;
+
+		case MotionEvent.ACTION_CANCEL:
+			onStopTrackingTouch();
+			setPressed(false);
+			onSizeChanged(getWidth(), getHeight(), 0, 0);
 			break;
 		}
 		return true;
-
 	}
 
 	private void trackTouchEvent(MotionEvent event) {
-		final int height = getHeight();
-		final int top = getPaddingTop();
-		final int bottom = getPaddingBottom();
-		final int available = height - top - bottom;
-
-		int y = (int) event.getY();
-
+		final int Height = getHeight();
+		final int available = Height - getPaddingBottom() - getPaddingTop();
+		int Y = (int) event.getY();
 		float scale;
 		float progress = 0;
-
-		// 下面是最小值
-		if (y > height - bottom) {
+		if (Y > Height - getPaddingBottom()) {
 			scale = 0.0f;
-		} else if (y < top) {
+		} else if (Y < getPaddingTop()) {
 			scale = 1.0f;
 		} else {
-			scale = (float) (available - y + top) / (float) available;
-			progress = mTouchProgressOffset;
+			scale = (float) (Height - getPaddingBottom() - Y)
+					/ (float) available;
 		}
 
 		final int max = getMax();
-		progress += scale * max;
+		progress = scale * max;
 
 		setProgress((int) progress);
-
-	}
-
-	/**
-	 * This is called when the user has started touching this widget.
-	 */
-	void onStartTrackingTouch() {
-		mIsDragging = true;
-		if (mOnSeekBarChangeListener != null) {
-			mOnSeekBarChangeListener.onStartTrackingTouch(this);
-		}
-	}
-
-	/**
-	 * This is called when the user either releases his touch or the touch is
-	 * canceled.
-	 */
-	void onStopTrackingTouch() {
-		mIsDragging = false;
-		if (mOnSeekBarChangeListener != null) {
-			mOnSeekBarChangeListener.onStopTrackingTouch(this);
-		}
 	}
 
 	private void attemptClaimDrag() {
-		ViewParent p = getParent();
-		if (p != null) {
-			p.requestDisallowInterceptTouchEvent(true);
+		if (getParent() != null) {
+			getParent().requestDisallowInterceptTouchEvent(true);
 		}
 	}
-
-	@Override
-	public synchronized void setProgress(int progress) {
-		super.setProgress(progress);
-		onSizeChanged(getWidth(), getHeight(), 0, 0);
-
-	}
-
 }

@@ -728,7 +728,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			 * 除了个人Conversation布局，其他组类Conversation布局默认可能不会显示时间，或者内容
 			 * 所以这里需要将布局改变为个人的Conversation布局
 			 */
-			if(mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER) {
+			if (mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER) {
 				if (cov.getType() == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
 					gp.updateDiscussionLayout(true);
 				} else {
@@ -944,7 +944,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private void initVoiceItem() {
 		voiceMessageItem = new Conversation(Conversation.TYPE_VOICE_MESSAGE,
 				Conversation.SPECIFIC_VOICE_ID);
-		voiceMessageItem.setName(res.getString(R.string.specificItem_voice_title));
+		voiceMessageItem.setName(res
+				.getString(R.string.specificItem_voice_title));
 		voiceLayout = new GroupLayout(mContext, voiceMessageItem);
 		voiceLayout.update();
 		voiceMessageItem.setReadFlag(Conversation.READ_FLAG_READ);
@@ -958,7 +959,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		verificationMessageItemData = new ConversationFirendAuthenticationData(
 				Conversation.TYPE_VERIFICATION_MESSAGE,
 				Conversation.SPECIFIC_VERIFICATION_ID);
-		verificationMessageItemData.setName(res.getString(R.string.group_create_group_qualification));
+		verificationMessageItemData.setName(res
+				.getString(R.string.group_create_group_qualification));
 		verificationMessageItemLayout = new GroupLayout(mContext,
 				verificationMessageItemData);
 		verificationMessageItemLayout.update();
@@ -1456,8 +1458,9 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							+ res.getString(R.string.conversation_deny_your_application);
 				} else {
 					content = invitationName
-							+ String.format(res.getString(R.string.conversation_invite_to_join), 
-							crowdGroup.getName());
+							+ String.format(
+									res.getString(R.string.conversation_invite_to_join),
+									crowdGroup.getName());
 				}
 			}
 			break;
@@ -1481,14 +1484,19 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				}
 
 				if (apply.getQualState() == QualificationState.BE_REJECT)
-					content = applyName + String.format(res.getString(R.string.conversation_refused_to_join), 
-							applyGroup.getName());
+					content = applyName
+							+ String.format(
+									res.getString(R.string.conversation_refused_to_join),
+									applyGroup.getName());
 				else if (apply.getQualState() == QualificationState.BE_ACCEPTED)
-					content = applyName + String.format(res.getString(R.string.conversation_agree_to_join), 
-							applyGroup.getName());
+					content = applyName
+							+ String.format(
+									res.getString(R.string.conversation_agree_to_join),
+									applyGroup.getName());
 				else
 					content = applyName
-							+ String.format(res.getString(R.string.conversation_agree_to_join), 
+							+ String.format(
+									res.getString(R.string.conversation_agree_to_join),
 									applyGroup.getName());
 			}
 			break;
@@ -1770,17 +1778,17 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			Conversation temp = mItemList.get(i).cov;
 			if (temp.getExtId() == conversationID) {
 				ScrollItem removeItem = mItemList.get(i);
-				//update readState
+				// update readState
 				removeItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
 				updateUnreadConversation(removeItem);
-				//remove item
+				// remove item
 				ScrollItem removed = mItemList.remove(i);
 				if (removed == null)
 					V2Log.e(TAG, "Delete Conversation Failed...id is : "
 							+ conversationID);
-				
+
 				if (mCurrentTabFlag == V2GlobalConstants.GROUP_TYPE_USER) {
-					if(temp.getType() == Conversation.TYPE_VERIFICATION_MESSAGE){
+					if (temp.getType() == Conversation.TYPE_VERIFICATION_MESSAGE) {
 						// -1 mean delete all messages
 						int friend = VerificationProvider
 								.deleteFriendVerificationMessage(-1);
@@ -1790,7 +1798,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 							V2Log.e(TAG,
 									"Successfully delete verification , update conversaton!");
 						}
-					} else if(temp.getType() == Conversation.TYPE_VOICE_MESSAGE){
+					} else if (temp.getType() == Conversation.TYPE_VOICE_MESSAGE) {
 						MessageLoader.deleteVoiceMessage(-1);
 					} else {
 						// delete conversation
@@ -1810,7 +1818,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 										+ conversationID);
 					}
 				}
-				//clear all system notification
+				// clear all system notification
 				Notificator.cancelSystemNotification(getActivity(),
 						PublicIntent.MESSAGE_NOTIFICATION_ID);
 				break;
@@ -1823,7 +1831,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		}
 		sortAndUpdate();
 	}
-	
+
 	private void removeVerificationMessage(long id) {
 		// clear the crowd group all verification database messges
 		int friend = VerificationProvider.deleteFriendVerificationMessage(id);
@@ -1870,7 +1878,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					}
 					sb.append(((VMessageTextItem) item).getText());
 				} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
-					sb.append(mContext.getResources().getString(R.string.receive_face_notification));
+					sb.append(mContext.getResources().getString(
+							R.string.receive_face_notification));
 				}
 			}
 			content = sb.toString();
@@ -3151,7 +3160,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 					.equals(intent.getAction())) {
 				long confId = intent.getLongExtra("gid", 0);
 				// Remove conference conversation from list
-				removeConversation(confId , false);
+				removeConversation(confId, false);
 				// This broadcast is sent after create conference successfully
 			} else if (PublicIntent.BROADCAST_NEW_CONFERENCE_NOTIFICATION
 					.equals(intent.getAction())) {

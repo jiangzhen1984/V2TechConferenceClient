@@ -13,7 +13,7 @@ import android.util.SparseArray;
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.provider.SearchContentProvider;
 import com.bizcom.vc.activity.ConversationsTabFragment.ScrollItem;
-import com.bizcom.vc.activity.conference.VideoAttendeeListLayout.Wrapper;
+import com.bizcom.vc.activity.conference.LeftAttendeeListLayout.Wrapper;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vo.User;
 

@@ -85,6 +85,7 @@ import com.bizcom.request.jni.PermissionRequestIndication;
 import com.bizcom.request.jni.PermissionUpdateIndication;
 import com.bizcom.util.DensityUtils;
 import com.bizcom.util.DialogManager;
+import com.bizcom.util.OrderedHashMap;
 import com.bizcom.vc.activity.ConversationsTabFragment;
 import com.bizcom.vc.activity.conversation.ConversationSelectImage;
 import com.bizcom.vc.activity.conversation.MessageLoader;
@@ -173,6 +174,8 @@ public class ConferenceActivity extends Activity {
 	private FrameLayout mVideoLayout;
 	private FrameLayout mSubWindowLayout;
 
+	private VerticalSeekBar sbar;
+
 	private TextView mGroupNameTV;
 	private ImageView mChairmanControl;
 	private View mMoreIV;
@@ -188,10 +191,10 @@ public class ConferenceActivity extends Activity {
 	private ConferenceMsgDialog mConferenceMsgDialog;
 
 	private Dialog mQuitDialog;
-	private VideoInvitionAttendeeLayout mInvitionContainer;
-	private VideoMsgChattingLayout mMessageContainer;
-	private VideoAttendeeListLayout mAttendeeContainer;
-	private VideoDocLayout mDocContainer;
+	private LeftInvitionAttendeeLayout mInvitionContainer;
+	private LeftMessageChattingLayout mMessageContainer;
+	private LeftAttendeeListLayout mAttendeeContainer;
+	private LeftShareDocLayout mDocContainer;
 
 	private ImageView mMenuButton;
 	private View mMenuButtonContainer;
@@ -232,8 +235,8 @@ public class ConferenceActivity extends Activity {
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
 	private List<Attendee> mFastAttendeeList = new ArrayList<Attendee>();
 
-	private Map<String, V2Doc> mDocs = new HashMap<String, V2Doc>();
-	private String mCurrentLecturerActivateDocId = null;
+	private OrderedHashMap<String, V2Doc> mDocs = new OrderedHashMap<String, V2Doc>();
+	private String mCurrentLecturerActivateDocIdStr = null;
 	private V2Doc.Page mCurrentLecturerActivateDocPage = null;
 
 	private List<VMessage> mPendingMessageList;
@@ -709,7 +712,7 @@ public class ConferenceActivity extends Activity {
 		if (mMessageContainer != null) {
 			return mMessageContainer;
 		}
-		mMessageContainer = new VideoMsgChattingLayout(this, cg);
+		mMessageContainer = new LeftMessageChattingLayout(this, cg);
 		mMessageContainer.setListener(mLeftSubViewListener);
 
 		// Populate message
@@ -723,7 +726,7 @@ public class ConferenceActivity extends Activity {
 
 	private View initAttendeeContainer() {
 		if (mAttendeeContainer == null) {
-			mAttendeeContainer = new VideoAttendeeListLayout(conf, this);
+			mAttendeeContainer = new LeftAttendeeListLayout(conf, this);
 			mAttendeeContainer.setAttendsList(this.mAttendeeList);
 
 			mAttendeeContainer.bringToFront();
@@ -766,8 +769,8 @@ public class ConferenceActivity extends Activity {
 	private View initDocLayout() {
 
 		if (mDocContainer == null) {
-			mDocContainer = new VideoDocLayout(this, mDocs,
-					mCurrentLecturerActivateDocId);
+			mDocContainer = new LeftShareDocLayout(this, mDocs,
+					mCurrentLecturerActivateDocIdStr);
 			mDocContainer.setListener(mLeftSubViewListener);
 
 			Group g = GlobalHolder.getInstance().findGroupById(conf.getId());
@@ -786,7 +789,7 @@ public class ConferenceActivity extends Activity {
 
 	private View initInvitionContainer() {
 		if (mInvitionContainer == null) {
-			mInvitionContainer = new VideoInvitionAttendeeLayout(this, conf);
+			mInvitionContainer = new LeftInvitionAttendeeLayout(this, conf);
 			mInvitionContainer.setListener(mLeftSubViewListener);
 
 		}
@@ -1304,9 +1307,9 @@ public class ConferenceActivity extends Activity {
 		PowerManager pm = (PowerManager) mContext
 				.getSystemService(Context.POWER_SERVICE);
 		boolean isScreenOn = pm.isScreenOn();// 如果为true，则表示屏幕“亮”了，否则屏幕“暗”了。
-		if(!isScreenOn)
+		if (!isScreenOn)
 			isMoveTaskBack = false;
-		
+
 		if (!isMoveTaskBack)
 			isMoveTaskBack = true;
 		else
@@ -1833,7 +1836,7 @@ public class ConferenceActivity extends Activity {
 			page = (V2Doc.Page) res.getResult();
 			docId = page.getDocId();
 			// Record current activate Id;
-			mCurrentLecturerActivateDocId = docId;
+			mCurrentLecturerActivateDocIdStr = docId;
 
 			break;
 		case DOC_PAGE_CANVAS_NOTIFICATION:
@@ -2056,7 +2059,7 @@ public class ConferenceActivity extends Activity {
 				}
 			}
 
-			mCurrentLecturerActivateDocId = docId;
+			mCurrentLecturerActivateDocIdStr = docId;
 			mCurrentLecturerActivateDocPage = page;
 
 			if (page != null) {
@@ -2341,9 +2344,11 @@ public class ConferenceActivity extends Activity {
 				// If current user is chairman or has get host rights then show
 				// shared doc button
 				if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
-					((VideoDocLayout) content).updateLectureStateGranted(true);
+					((LeftShareDocLayout) content)
+							.updateLectureStateGranted(true);
 				} else {
-					((VideoDocLayout) content).updateLectureStateGranted(false);
+					((LeftShareDocLayout) content)
+							.updateLectureStateGranted(false);
 				}
 
 			} else if (v.getTag().equals("invition")) {
@@ -2575,6 +2580,7 @@ public class ConferenceActivity extends Activity {
 	private class SettingButtonOnClickListener implements OnClickListener {
 		VideoCaptureDevInfo.VideoCaptureDevice vcd;
 		private int seekbarValue;
+		View view;
 
 		@Override
 		public void onClick(View v) {
@@ -2582,41 +2588,41 @@ public class ConferenceActivity extends Activity {
 		}
 
 		private void showSettingWindow() {
-			if (mSettingWindow == null) {
-				LayoutInflater inflater = (LayoutInflater) mContext
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View view = inflater.inflate(
-						R.layout.in_meeting_setting_pop_up_window, null);
+			// 每次都需要重新建，兼容小米3显示垂直seekbar显示问题
+			// if (mSettingWindow == null) {
+			// }
+			LayoutInflater inflater = (LayoutInflater) mContext
+					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			view = inflater.inflate(R.layout.in_meeting_setting_pop_up_window,
+					null);
+			// set
+			int height = (int) (dm.heightPixels * 0.5);
+			mSettingWindow = new PopupWindow(view, LayoutParams.WRAP_CONTENT,
+					height);
+			mSettingWindow.setBackgroundDrawable(new ColorDrawable(
+					Color.TRANSPARENT));
+			mSettingWindow.setFocusable(true);
+			mSettingWindow.setTouchable(true);
+			mSettingWindow.setOutsideTouchable(true);
+			mSettingWindow.setOnDismissListener(new OnDismissListener() {
+				@Override
+				public void onDismiss() {
+					mSettingWindow.dismiss();
+				}
 
-				int height = (int) (dm.heightPixels * 0.5);
-				// set
-				mSettingWindow = new PopupWindow(view,
-						LayoutParams.WRAP_CONTENT, height);
-				mSettingWindow.setBackgroundDrawable(new ColorDrawable(
-						Color.TRANSPARENT));
-				mSettingWindow.setFocusable(true);
-				mSettingWindow.setTouchable(true);
-				mSettingWindow.setOutsideTouchable(true);
-				mSettingWindow.setOnDismissListener(new OnDismissListener() {
-					@Override
-					public void onDismiss() {
-						mSettingWindow.dismiss();
-					}
+			});
 
-				});
+			sbar = (VerticalSeekBar) view
+					.findViewById(R.id.camera_setting_quality);
 
-				VerticalSeekBar sbar = (VerticalSeekBar) view
-						.findViewById(R.id.camera_setting_quality);
+			vcd = VideoCaptureDevInfo.CreateVideoCaptureDevInfo().GetDevice(
+					VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
+							.GetDefaultDevName());
 
-				vcd = VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-						.GetDevice(
-								VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
-										.GetDefaultDevName());
+			sbar.setMax(vcd.capabilites.size());
+			sbar.setOnSeekBarChangeListener(onSeekBarChangeListener);
 
-				sbar.setMax(vcd.capabilites.size());
-
-				sbar.setOnSeekBarChangeListener(onSeekBarChangeListener);
-			}
+			sbar.setProgress(seekbarValue);
 			// calculate arrow offset
 			mSettingWindow.showAtLocation(mRootContainer, Gravity.CENTER, 0, 0);
 		}
@@ -2626,25 +2632,20 @@ public class ConferenceActivity extends Activity {
 			public void onProgressChanged(VerticalSeekBar vsb, int value,
 					boolean flag) {
 				seekbarValue = value;
-				Log.i("20150127 1", "onProgressChanged:" + value);
 			}
 
 			@Override
 			public void onStartTrackingTouch(VerticalSeekBar vSeekBar) {
-				// seekBar.getVerticalScrollbarPosition();
-				Log.i("20150127 1", "onStartTrackingTouch");
 			}
 
 			@Override
 			public void onStopTrackingTouch(VerticalSeekBar vSeekBar) {
-				Log.i("20150127 1", "onStopTrackingTouch");
-				final VerticalSeekBar vsb = vSeekBar;
+				final VerticalSeekBar vsb = (VerticalSeekBar) vSeekBar;
 				vsb.setEnabled(false);
 				mLocalHandler.postDelayed(new Runnable() {
 
 					@Override
 					public void run() {
-						// TODO Auto-generated method stub
 						vsb.setEnabled(true);
 					}
 				}, 2000);
@@ -3165,10 +3166,8 @@ public class ConferenceActivity extends Activity {
 			cb.notifyAllMessage(cg.getmGId());
 			suspendOrResume(true);
 
-			
-			
-			//定义能收了
-			
+			// 定义能收了
+
 		}
 
 		@Override
@@ -3297,10 +3296,11 @@ public class ConferenceActivity extends Activity {
 		}
 	};
 
-	private class LeftSubViewListener implements VideoDocLayout.DocListener,
-			VideoAttendeeListLayout.VideoAttendeeActionListener,
-			VideoMsgChattingLayout.ChattingListener,
-			VideoInvitionAttendeeLayout.Listener {
+	private class LeftSubViewListener implements
+			LeftShareDocLayout.DocListener,
+			LeftAttendeeListLayout.VideoAttendeeActionListener,
+			LeftMessageChattingLayout.ChattingListener,
+			LeftInvitionAttendeeLayout.Listener {
 
 		@Override
 		public void requestSendMsg(VMessage vm) {
@@ -3405,7 +3405,7 @@ public class ConferenceActivity extends Activity {
 		@Override
 		public void updateDoc(V2Doc doc, Page p) {
 			// If current user is host
-			boolean isLecturer = currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED;
+			boolean isLecturer = (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED);
 			ds.switchDoc(currentAttendee.getAttId(), doc, isLecturer, null);
 
 		}
@@ -3479,35 +3479,43 @@ public class ConferenceActivity extends Activity {
 			V2Doc preV2Doc = null;
 			V2Doc nextV2Doc = null;
 			boolean finded = false;
-			for (Entry<String, V2Doc> e : mDocs.entrySet()) {
+			for (String key : mDocs.keyOrderList()) {
+				V2Doc v2doc = mDocs.get(key);
+				if (v2doc == null) {
+					continue;
+				}
+
 				if (finded) {
-					nextV2Doc = e.getValue();
+					nextV2Doc = v2doc;
 					break;
 				}
-				if (e.getValue().getId() == mCurrentLecturerActivateDocId) {
+				if (v2doc.getId().equals(mCurrentLecturerActivateDocIdStr)) {
 					finded = true;
 				}
 				if (!finded) {
-					preV2Doc = e.getValue();
+					preV2Doc = v2doc;
 				}
-
 			}
+
+			String willCloseDocIDStr = mCurrentLecturerActivateDocIdStr;
 
 			if (nextV2Doc != null) {
 				mDocContainer.updateCurrentDoc(nextV2Doc);
 				mDocContainer.updateCurrentDoc();
 				// 发活跃的文档。
 				updateDoc(nextV2Doc, nextV2Doc.getActivatePage());
+				Log.i("20150129 1", "打开下一个文档：" + nextV2Doc.getDocName());
 			} else {
 				if (preV2Doc != null) {
 					mDocContainer.updateCurrentDoc(preV2Doc);
 					mDocContainer.updateCurrentDoc();
 					// 发活跃的文档。
 					updateDoc(preV2Doc, preV2Doc.getActivatePage());
+					Log.i("20150129 1", "打开上一个文档：" + preV2Doc.getDocName());
 				}
 			}
 
-			cb.closeShareDoc(conf, mCurrentLecturerActivateDocId);
+			cb.closeShareDoc(conf, willCloseDocIDStr);
 
 		}
 	}
@@ -3546,9 +3554,13 @@ public class ConferenceActivity extends Activity {
 						RelativeLayout.LayoutParams.MATCH_PARENT,
 						RelativeLayout.LayoutParams.MATCH_PARENT));
 				TextView tv = new TextView(mContext);
-				tv.setText(getResources().getString(
-						R.string.vo_attendee_mixed_device_mix_video)
-						+ at.getAttName());
+				if (at.getType() == Attendee.TYPE_MIXED_VIDEO) {
+					tv.setText(getResources().getString(
+							R.string.vo_attendee_mixed_device_mix_video));
+				} else if (at.getType() == Attendee.TYPE_ATTENDEE) {
+					tv.setText(at.getAttName());
+				}
+
 				int widthDP = DensityUtils.dip2px(mContext, 80);
 				tv.setMaxWidth(widthDP);
 				tv.setEllipsize(TruncateAt.END);
@@ -3792,13 +3804,11 @@ public class ConferenceActivity extends Activity {
 							mConferenceMsgDialog.deleteFromList(user);
 						}
 
-						if (mHostRequestUsers.size() == 0) {
-
-							if (mConferenceMsgDialog != null
-									&& mConferenceMsgDialog.isShowing()) {
-								mConferenceMsgDialog.dismiss();
-							}
-
+						if (mHostRequestUsers.size() == 0) {									
+//							if (mConferenceMsgDialog != null
+//									&& mConferenceMsgDialog.isShowing()) {
+//								mConferenceMsgDialog.dismiss();
+//							}
 							hasUnreadChiremanControllMsg = false;
 							mMsgNotification.setVisibility(View.GONE);
 							if (mConfMsgRedDot != null) {

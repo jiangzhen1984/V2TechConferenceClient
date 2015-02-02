@@ -37,7 +37,7 @@ import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
-public class VideoInvitionAttendeeLayout extends LinearLayout {
+public class LeftInvitionAttendeeLayout extends LinearLayout {
 
 	private static final int UPDATE_ATTENDEES = 2;
 	private static final int START_GROUP_SELECT = 6;
@@ -76,7 +76,7 @@ public class VideoInvitionAttendeeLayout extends LinearLayout {
 		public void requestInvitation(Conference conf, List<User> attendUsers , boolean isNotify);
 	}
 
-	public VideoInvitionAttendeeLayout(Context context, Conference conf) {
+	public LeftInvitionAttendeeLayout(Context context, Conference conf) {
 		super(context);
 		this.conf = conf;
 		mGroupList = new ArrayList<Group>();

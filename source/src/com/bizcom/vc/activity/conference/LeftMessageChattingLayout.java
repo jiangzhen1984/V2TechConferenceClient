@@ -18,8 +18,8 @@ import android.widget.ListView;
 
 import com.bizcom.util.MessageUtil;
 import com.bizcom.vc.adapter.CommonAdapter;
-import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemWrapper;
-import com.bizcom.vc.adapter.VMessageAdater;
+import com.bizcom.vc.adapter.VMessageDataAndViewWrapper;
+import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemDateAndViewWrapper;
 import com.bizcom.vc.listener.CommonCallBack;
 import com.bizcom.vc.listener.CommonCallBack.CommonNotifyChatInterToReplace;
 import com.bizcom.vc.widget.cus.PasteEditText;
@@ -27,126 +27,91 @@ import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.VMessage;
 import com.v2tech.R;
 
-public class VideoMsgChattingLayout extends LinearLayout implements CommonNotifyChatInterToReplace{
+public class LeftMessageChattingLayout extends LinearLayout implements
+		CommonNotifyChatInterToReplace {
 
 	private ConferenceGroup conf;
-	private View rootView;
-	private ListView mMsgContainer;
 	private ChattingListener listener;
-	private View mSendButton;
-	private PasteEditText mContentTV;
-	private View mPinButton;
-	private List<CommonAdapterItemWrapper> messageArray;
+	private List<CommonAdapterItemDateAndViewWrapper> ItemDataAndViewWrapperList;
 	private CommonAdapter adapter;
 	private Context mContext;
-	
+
+	private View rootView;
+	private ListView mMsgListView;
+	private View mSendButton;
+	private PasteEditText mInputMessageTV;
+	private View mPinButton;
+	private OnKeyListener mInputMessageTVOnKeyListener = new InputMessageTVOnKeyListener();
+	private OnClickListener mPinButtonOnClickListener = new PinButtonOnClickListener();
+	private CommonAdapter.CommonAdapterGetViewListener mListViewAdapterGetViewListener = new ListViewAdapterGetViewListener();
+	private SendButtonOnClickListener mSendButtonOnClickListener = new SendButtonOnClickListener();
+	private MsgContainerOnTouchListener mMsgContainerOnTouchListener = new MsgContainerOnTouchListener();
+
 	public interface ChattingListener {
 		public void requestSendMsg(VMessage vm);
-		
+
 		public void requestChattingViewFixedLayout(View v);
 
 		public void requestChattingViewFloatLayout(View v);
 	};
 
-	public VideoMsgChattingLayout(Context context, ConferenceGroup conf) {
+	public LeftMessageChattingLayout(Context context, ConferenceGroup conf) {
 		super(context);
 		initLayout();
 		initData();
-		setListeners();
 		this.conf = conf;
 		mContext = context;
 		CommonCallBack.getInstance().setNotifyChatInterToReplace(this);
 	}
 
-	public View getmSendButton() {
-		return mSendButton;
-	}
-	
 	private void initLayout() {
 		View view = LayoutInflater.from(getContext()).inflate(
 				R.layout.video_msg_chatting_layout, null, false);
 
 		mPinButton = view.findViewById(R.id.video_msg_chatting_pin_button);
-		mPinButton.setOnClickListener(mRequestFixedListener);
+		mPinButton.setOnClickListener(mPinButtonOnClickListener);
 
 		this.addView(view, new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT));
 
-		this.mMsgContainer = (ListView) view
+		this.mMsgListView = (ListView) view
 				.findViewById(R.id.video_msg_container);
-		this.mContentTV = (PasteEditText) view
+		this.mMsgListView.setOnTouchListener(mMsgContainerOnTouchListener);
+		this.mInputMessageTV = (PasteEditText) view
 				.findViewById(R.id.video_msg_chatting_layout_msg_content);
+		this.mInputMessageTV.setOnKeyListener(mInputMessageTVOnKeyListener);
 		this.mSendButton = view
 				.findViewById(R.id.video_msg_chatting_layout_send_button);
-		mContentTV.setOnKeyListener(keyListener);
+		this.mSendButton.setOnClickListener(mSendButtonOnClickListener);
+
 		rootView = this;
 	}
-	
+
 	private void initData() {
-		messageArray = new ArrayList<CommonAdapterItemWrapper>();
-		adapter = new CommonAdapter(messageArray, mConvertListener);
-		mMsgContainer.setAdapter(adapter);
+		ItemDataAndViewWrapperList = new ArrayList<CommonAdapterItemDateAndViewWrapper>();
+		adapter = new CommonAdapter(ItemDataAndViewWrapperList,
+				mListViewAdapterGetViewListener);
+		mMsgListView.setAdapter(adapter);
 	}
-	
-	private void setListeners() {
-		this.mMsgContainer.setOnTouchListener(new OnTouchListener() {
-			
-			@Override
-			public boolean onTouch(View view, MotionEvent arg1) {
-				InputMethodManager imm = (InputMethodManager) mContext.getSystemService(Context.INPUT_METHOD_SERVICE);
-				imm.hideSoftInputFromWindow(mContentTV.getWindowToken(),
-						InputMethodManager.RESULT_UNCHANGED_SHOWN);
-				if (mMsgContainer == view) {
-					if (imm != null) {  
-				        imm.hideSoftInputFromWindow(mContentTV.getWindowToken(), 0);  
-				    }  
-				}
-				return false;
-			}
-		});
 
-		mSendButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View view) {
-				if (listener != null) {
-					if (mContentTV.getText() == null
-							|| mContentTV.getText().toString().trim().isEmpty()) {
-						return;
-					}
-					VMessage vm = MessageUtil.buildChatMessage(mContext, mContentTV, conf.getGroupType().intValue(),
-							conf.getmGId(), null);
-					addNewMessage(vm);
-					listener.requestSendMsg(vm);
-				}
-			}
-		});
-	}
-	
 	public void setListener(ChattingListener listener) {
 		this.listener = listener;
 	}
 
 	public void requestScrollToNewMessage() {
-		if (messageArray.size() <= 0) {
+		if (ItemDataAndViewWrapperList.size() <= 0) {
 			return;
 		}
-		mMsgContainer.setSelection(messageArray.size() - 1);
+		mMsgListView.setSelection(ItemDataAndViewWrapperList.size() - 1);
 	}
 
 	public void addNewMessage(VMessage vm) {
-		messageArray.add(new VMessageAdater(vm));
+		ItemDataAndViewWrapperList.add(new VMessageDataAndViewWrapper(vm));
 		adapter.notifyDataSetChanged();
 		requestScrollToNewMessage();
 	}
 
-	
-	public void clean() {
-		
-	}
-	
-	
 	/**
 	 * Used to manually request FloatLayout, Because when this layout will hide,
 	 * call this function to inform interface
@@ -163,31 +128,68 @@ public class VideoMsgChattingLayout extends LinearLayout implements CommonNotify
 		((ImageView) mPinButton)
 				.setImageResource(R.drawable.pin_button_selector);
 	}
-	
+
 	public boolean getWindowSizeState() {
-		String str =(String)mPinButton.getTag();
+		String str = (String) mPinButton.getTag();
 		if (str == null || str.equals("float")) {
 			return false;
 		} else {
 			return true;
 		}
 	}
-	
-	
-	private OnKeyListener keyListener = new OnKeyListener() {
+
+	private class MsgContainerOnTouchListener implements OnTouchListener {
+
+		@Override
+		public boolean onTouch(View view, MotionEvent arg1) {
+			InputMethodManager imm = (InputMethodManager) mContext
+					.getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(mInputMessageTV.getWindowToken(),
+					InputMethodManager.RESULT_UNCHANGED_SHOWN);
+			if (mMsgListView == view) {
+				if (imm != null) {
+					imm.hideSoftInputFromWindow(
+							mInputMessageTV.getWindowToken(), 0);
+				}
+			}
+			return false;
+		}
+	}
+
+	private class SendButtonOnClickListener implements OnClickListener {
+
+		@Override
+		public void onClick(View view) {
+			if (listener != null) {
+				if (mInputMessageTV.getText() == null
+						|| mInputMessageTV.getText().toString().trim()
+								.isEmpty()) {
+					return;
+				}
+				VMessage vm = MessageUtil.buildChatMessage(mContext,
+						mInputMessageTV, conf.getGroupType().intValue(),
+						conf.getmGId(), null);
+				addNewMessage(vm);
+				listener.requestSendMsg(vm);
+			}
+		}
+	}
+
+	private class InputMessageTVOnKeyListener implements OnKeyListener {
 
 		@Override
 		public boolean onKey(View view, int actionId, KeyEvent event) {
 			if (actionId == EditorInfo.IME_ACTION_DONE) {
-				InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+				InputMethodManager imm = (InputMethodManager) getContext()
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
 				imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 			}
 			return false;
 		}
-		
+
 	};
 
-	private OnClickListener mRequestFixedListener = new OnClickListener() {
+	private class PinButtonOnClickListener implements OnClickListener {
 
 		@Override
 		public void onClick(View view) {
@@ -214,18 +216,18 @@ public class VideoMsgChattingLayout extends LinearLayout implements CommonNotify
 		}
 
 	};
-	
-	
-	
-	private CommonAdapter.ViewConvertListener mConvertListener = new CommonAdapter.ViewConvertListener() {
+
+	private class ListViewAdapterGetViewListener implements
+			CommonAdapter.CommonAdapterGetViewListener {
 
 		@Override
-		public View converView(CommonAdapterItemWrapper wr, View convertView,
-				ViewGroup vg) {
-			
+		public View getView(CommonAdapterItemDateAndViewWrapper wr,
+				View convertView, ViewGroup vg) {
+
 			VMessage vm = (VMessage) wr.getItemObject();
 			if (convertView == null) {
-				ConferenceMessageBodyView mv = new ConferenceMessageBodyView(getContext(), vm);
+				ConferenceMessageBodyView mv = new ConferenceMessageBodyView(
+						getContext(), vm);
 				mv.setConf(conf);
 				convertView = mv;
 			} else {
@@ -235,23 +237,22 @@ public class VideoMsgChattingLayout extends LinearLayout implements CommonNotify
 		}
 	};
 
-
-
 	@Override
 	public void notifyChatInterToReplace(final VMessage vm) {
-		for (int i = 0; i < messageArray.size(); i++) {
-			final VMessageAdater wrapper = (VMessageAdater) messageArray.get(i);
+		for (int i = 0; i < ItemDataAndViewWrapperList.size(); i++) {
+			final VMessageDataAndViewWrapper wrapper = (VMessageDataAndViewWrapper) ItemDataAndViewWrapperList
+					.get(i);
 			VMessage replaced = (VMessage) wrapper.getItemObject();
-			if(replaced.getUUID().equals(vm.getUUID())){
+			if (replaced.getUUID().equals(vm.getUUID())) {
 				replaced.setImageItems(vm.getImageItems());
-				((Activity)mContext).runOnUiThread(new Runnable() {
-					
+				((Activity) mContext).runOnUiThread(new Runnable() {
+
 					@Override
 					public void run() {
 						adapter.notifyDataSetChanged();
 					}
 				});
 			}
-		}		
+		}
 	}
 }
