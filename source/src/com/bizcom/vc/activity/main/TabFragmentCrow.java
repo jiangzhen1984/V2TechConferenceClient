@@ -1,4 +1,4 @@
-package com.bizcom.vc.activity;
+package com.bizcom.vc.activity.main;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,7 +78,6 @@ import com.bizcom.vc.activity.conference.GroupLayout;
 import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
 import com.bizcom.vc.activity.conversation.MessageLoader;
 import com.bizcom.vc.activity.conversationav.ConversationP2PAVActivity;
-import com.bizcom.vc.activity.main.MainActivity;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.activity.message.VoiceMessageActivity;
 import com.bizcom.vc.application.GlobalConfig;
@@ -120,7 +119,7 @@ import com.bizcom.vo.VMessageTextItem;
 import com.bizcom.vo.VideoBean;
 import com.v2tech.R;
 
-public class ConversationsTabFragment extends Fragment implements TextWatcher,
+public class TabFragmentCrow extends Fragment implements TextWatcher,
 		ConferenceListener, CommonUpdateConversationToCreate {
 	private static final String TAG = "ConversationsTabFragment";
 	private static final int FILL_CONFS_LIST = 2;
@@ -156,7 +155,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private List<ScrollItem> searchList = new ArrayList<ScrollItem>();
 	private List<Long> offlineDissCov = new ArrayList<Long>();
 	private List<Long> offLineConf = new ArrayList<Long>();
-	private List<CovCache> covCacheList = new ArrayList<ConversationsTabFragment.CovCache>();
+	private List<CovCache> covCacheList = new ArrayList<TabFragmentCrow.CovCache>();
 
 	private LocalHandler mHandler = new LocalHandler();
 
@@ -787,7 +786,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 
 			@Override
 			public void run() {
-				synchronized (ConversationsTabFragment.class) {
+				synchronized (TabFragmentCrow.class) {
 					List<Conversation> tempList = new ArrayList<Conversation>();
 					tempList = ConversationProvider.loadUserConversation(
 							tempList, verificationMessageItemData,

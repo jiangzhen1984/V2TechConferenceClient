@@ -1,4 +1,4 @@
-package com.bizcom.vc.activity;
+package com.bizcom.vc.activity.main;
 
 import java.util.List;
 import java.util.Vector;
@@ -30,7 +30,7 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.provider.SearchContentProvider;
 import com.bizcom.util.Notificator;
-import com.bizcom.vc.activity.contacts.ContactsTabFragment;
+import com.bizcom.vc.activity.ConversationsTabFragment;
 import com.bizcom.vc.activity.conversation.MessageLoader;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.MainApplication;
@@ -78,25 +78,25 @@ public class MainActivity extends FragmentActivity implements
 			new TabClass(PublicIntent.TAG_CONTACT,
 					R.drawable.selector_tab_contact_button,
 					R.string.tab_contact_name, R.string.tab_contact_name,
-					ContactsTabFragment.class.getName()),
+					TabFragmentContacts.class.getName()),
 
 			new TabClass(PublicIntent.TAG_ORG,
 					R.drawable.selector_tab_org_button, R.string.tab_org_name,
 					R.string.tab_org_name,
-					OrganizationTabFragment.class.getName()),
+					TabFragmentOrganization.class.getName()),
 			new TabClass(PublicIntent.TAG_GROUP,
 					R.drawable.selector_tab_group_button,
 					R.string.tab_group_name, R.string.tab_group_name,
-					ConversationsTabFragment.class.getName()),
+					TabFragmentCrow.class.getName()),
 			new TabClass(PublicIntent.TAG_CONF,
 					R.drawable.selector_tab_conference_button,
 					R.string.tab_conference_name, R.string.tab_conference_name,
-					ConversationsTabFragment.class.getName()),
+					TabFragmentConference.class.getName()),
 			new TabClass(PublicIntent.TAG_COV,
 					R.drawable.selector_tab_conversation_button,
 					R.string.tab_conversation_name,
 					R.string.tab_conversation_name,
-					ConversationsTabFragment.class.getName()) };
+					TabFragmentMessage.class.getName()) };
 
 	private LocalReceiver receiver = new LocalReceiver();
 
@@ -383,13 +383,14 @@ public class MainActivity extends FragmentActivity implements
 			// 恢复搜索状态
 			TabClass tab = mTabClasses[pos];
 			Fragment fragment = fragments.get(pos);
-			if (tab.mTabName.equals(PublicIntent.TAG_COV)
-					|| tab.mTabName.equals(PublicIntent.TAG_GROUP)
-					|| tab.mTabName.equals(PublicIntent.TAG_CONF)) {
-				((ConversationsTabFragment) fragment).updateSearchState();
-			} else if (tab.mTabName.equals(PublicIntent.TAG_CONTACT)
-					|| tab.mTabName.equals(PublicIntent.TAG_ORG)) {
-
+			if (tab.mTabName.equals(PublicIntent.TAG_CONTACT)) {
+			} else if (tab.mTabName.equals(PublicIntent.TAG_ORG)) {
+			} else if (tab.mTabName.equals(PublicIntent.TAG_GROUP)) {
+				((TabFragmentCrow) fragment).updateSearchState();
+			} else if (tab.mTabName.equals(PublicIntent.TAG_CONF)) {
+				((TabFragmentConference) fragment).updateSearchState();
+			} else if (tab.mTabName.equals(PublicIntent.TAG_COV)) {
+				((TabFragmentMessage) fragment).updateSearchState();
 			}
 
 			mViewPager.setCurrentItem(pos);
@@ -553,9 +554,10 @@ public class MainActivity extends FragmentActivity implements
 									"update file state failed... file id is : "
 											+ fileItem.getUuid());
 						}
-						
-						if(fileItem.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD){
-							GlobalHolder.getInstance().mFailedFiles.add(fileItem.getUuid());
+
+						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD) {
+							GlobalHolder.getInstance().mFailedFiles
+									.add(fileItem.getUuid());
 						}
 					}
 				} else

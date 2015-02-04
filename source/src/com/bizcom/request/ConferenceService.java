@@ -625,6 +625,7 @@ public class ConferenceService extends DeviceService {
 				user = new User(v2user.uid, v2user.getName());
 				user.setDeviceType(User.DeviceType.fromInt(v2user.deviceType));
 				user.setRapidInitiation(true);
+				GlobalHolder.getInstance().putUser(user.getmUserId(), user);
 			} else {
 				user = GlobalHolder.getInstance().getUser(v2user.uid);
 				user.setDeviceType(User.DeviceType.fromInt(v2user.deviceType));

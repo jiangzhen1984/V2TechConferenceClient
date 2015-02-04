@@ -52,49 +52,9 @@
         android:theme="@style/AppTheme" >
         <uses-library android:name="android.test.runner" />
 
-        <!-- service -->
-        <service android:name="com.bizcom.vc.service.JNIService" >
-        </service>
-        <service android:name="com.bizcom.request.ConferencMessageSyncService" >
-        </service>
-        <service android:name="com.bizcom.vc.service.FileService" >
-        </service>
-        <service
-            android:name="com.bizcom.vc.service.LogService"
-            android:process=":Server" >
-        </service>
-
-        <!-- receiver -->
-        <receiver
-            android:name="com.bizcom.vc.receiver.AvatarChangedReceiver"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="com.v2tech.jni.broadcast.user_avatar_notification" />
-
-                <category android:name="com.v2tech.jni.broadcast" />
-                <category android:name="com.v2tech" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name="com.bizcom.vc.receiver.CrowdQuitReceiver"
-            android:exported="false" >
-            <intent-filter>
-                <action android:name="com.v2tech.broadcast.crowd_quit_notification" />
-
-                <category android:name="com.v2tech.jni.broadcast" />
-                <category android:name="com.v2tech" />
-            </intent-filter>
-        </receiver>
-
-        <!-- provider -->
-        <provider
-            android:name="com.bizcom.db.provider.V2techContentProvider"
-            android:authorities="com.v2tech.bizcom"
-            android:exported="false" />
-
         <!-- activity -->
         <activity
-            android:name="com.bizcom.vc.activity.StartupActivity"
+            android:name="com.bizcom.vc.activity.main.StartupActivity"
             android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -115,7 +75,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.LoginActivity"
+            android:name="com.bizcom.vc.activity.main.LoginActivity"
             android:launchMode="singleTop"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
@@ -151,7 +111,7 @@
             android:name="com.bizcom.vc.activity.conversation.ConversationTextActivity"
             android:configChanges="orientation|screenSize"
             android:launchMode="singleTop"
-            android:parentActivityName="com.bizcom.vc.activity.StartupActivity"
+            android:parentActivityName="com.bizcom.vc.activity.main.StartupActivity"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
             <intent-filter>
@@ -189,7 +149,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.MainActivity"
+            android:name="com.bizcom.vc.activity.main.MainActivity"
             android:configChanges="screenSize|orientation"
             android:exported="true"
             android:launchMode="singleTask"
@@ -203,7 +163,7 @@
         <activity android:name="com.bizcom.vc.activity.setting.SettingAuthenticationActivity" >
         </activity>
         <activity
-            android:name="com.bizcom.vc.activity.AboutActivity"
+            android:name="com.bizcom.vc.activity.setting.AboutActivity"
             android:configChanges="screenSize|orientation"
             android:launchMode="singleTop"
             android:screenOrientation="nosensor" >
@@ -436,6 +396,46 @@
                 <category android:name="com.v2tech" />
             </intent-filter>
         </activity>
+
+        <!-- service -->
+        <service android:name="com.bizcom.vc.service.JNIService" >
+        </service>
+        <service android:name="com.bizcom.request.ConferencMessageSyncService" >
+        </service>
+        <service android:name="com.bizcom.vc.service.FileService" >
+        </service>
+        <service
+            android:name="com.bizcom.vc.service.LogService"
+            android:process=":Server" >
+        </service>
+
+        <!-- receiver -->
+        <receiver
+            android:name="com.bizcom.vc.receiver.AvatarChangedReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.v2tech.jni.broadcast.user_avatar_notification" />
+
+                <category android:name="com.v2tech.jni.broadcast" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.bizcom.vc.receiver.CrowdQuitReceiver"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.v2tech.broadcast.crowd_quit_notification" />
+
+                <category android:name="com.v2tech.jni.broadcast" />
+                <category android:name="com.v2tech" />
+            </intent-filter>
+        </receiver>
+
+        <!-- provider -->
+        <provider
+            android:name="com.bizcom.db.provider.V2techContentProvider"
+            android:authorities="com.v2tech.bizcom"
+            android:exported="false" />
     </application>
 
 </manifest>

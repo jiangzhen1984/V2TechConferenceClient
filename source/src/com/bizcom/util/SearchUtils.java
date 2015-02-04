@@ -9,12 +9,13 @@ import java.util.regex.Pattern;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.util.SparseArray;
+import android.view.View;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.provider.SearchContentProvider;
-import com.bizcom.vc.activity.ConversationsTabFragment.ScrollItem;
 import com.bizcom.vc.activity.conference.LeftAttendeeListLayout.Wrapper;
 import com.bizcom.vc.application.GlobalConfig;
+import com.bizcom.vo.Conversation;
 import com.bizcom.vo.User;
 
 public class SearchUtils {
@@ -27,7 +28,7 @@ public class SearchUtils {
 	private static SparseArray<List<Object>> contentCacheList = new SparseArray<List<Object>>();
 	private static SparseArray<String> contentLengthCacheList = new SparseArray<String>();
 	public static List<Object> receiveList = new ArrayList<Object>();
-	
+
 	private static boolean isShouldAdd;
 	private static boolean isShouldQP; // 是否需要启动全拼
 	private static int startIndex = 0;
@@ -39,6 +40,36 @@ public class SearchUtils {
 	private static final int TYPE_WRAPPER = 12;
 	private static int type = TYPE_CONVERSATION;
 
+	public static class ScrollItem implements Comparable<ScrollItem> {
+		public Conversation cov;
+		public View gp;
+
+		public ScrollItem(Conversation g, View gp) {
+			super();
+			this.cov = g;
+			this.gp = gp;
+			this.gp.setTag(cov);
+		}
+
+		@Override
+		public int compareTo(ScrollItem item) {
+			if (item == null)
+				return -1;
+			String localTime = cov.getDateLong();
+			String remoteTime = item.cov.getDateLong();
+			if (TextUtils.isEmpty(localTime))
+				return 1;
+
+			if (TextUtils.isEmpty(remoteTime))
+				return -1;
+
+			if (Long.valueOf(localTime) < Long.valueOf(remoteTime))
+				return 1;
+			else
+				return -1;
+		}
+	}
+
 	/**
 	 * For ConversationTabFragment search
 	 * 
@@ -49,9 +80,10 @@ public class SearchUtils {
 		type = TYPE_CONVERSATION;
 
 		List<Object> cache = contentCacheList.get(content.length());
-		if (cache != null && 
-				contentLengthCacheList.get(content.length()) != null &&
-				contentLengthCacheList.get(content.length()).equals(content.toString())) {
+		if (cache != null
+				&& contentLengthCacheList.get(content.length()) != null
+				&& contentLengthCacheList.get(content.length()).equals(
+						content.toString())) {
 			V2Log.e(TAG, "find cache list : key --> " + content.length()
 					+ " and value --> " + cache.size());
 			List<ScrollItem> cacheItems = new ArrayList<ScrollItem>();
@@ -65,22 +97,24 @@ public class SearchUtils {
 			if (content.length() - 1 != 0) {
 				startIndex = content.length() - 1;
 				searchList.clear();
-				List<Object> lastCache = contentCacheList.get(content.length() - 1);
-				if(lastCache != null)
+				List<Object> lastCache = contentCacheList
+						.get(content.length() - 1);
+				if (lastCache != null)
 					searchList.addAll(lastCache);
 			}
 
 			List<ScrollItem> searchItems = new ArrayList<ScrollItem>();
 			List<Object> search = search(content.toString());
-			if(search != null && search.size() > 0){
+			if (search != null && search.size() > 0) {
 				for (Object object : search) {
 					searchItems.add((ScrollItem) object);
 				}
-	
+
 				List<Object> temp = new ArrayList<Object>();
 				temp.addAll(search);
 				contentCacheList.put(content.length(), temp);
-				contentLengthCacheList.put(content.length(), content.toString());
+				contentLengthCacheList
+						.put(content.length(), content.toString());
 				V2Log.e(TAG, "put cache list : key --> " + content.length()
 						+ " and value --> " + search.size());
 				temp = null;
@@ -89,7 +123,7 @@ public class SearchUtils {
 			return searchItems;
 		}
 	}
-	
+
 	public static List<Wrapper> startVideoAttendeeSearch(String content) {
 		type = TYPE_WRAPPER;
 
@@ -107,18 +141,19 @@ public class SearchUtils {
 			if (content.length() - 1 != 0) {
 				startIndex = content.length() - 1;
 				searchList.clear();
-				List<Object> lastCache = contentCacheList.get(content.length() - 1);
-				if(lastCache != null)
+				List<Object> lastCache = contentCacheList
+						.get(content.length() - 1);
+				if (lastCache != null)
 					searchList.addAll(lastCache);
 			}
 
 			List<Wrapper> searchItems = new ArrayList<Wrapper>();
 			List<Object> search = search(content.toString());
-			if(search != null && search.size() > 0){
+			if (search != null && search.size() > 0) {
 				for (Object object : search) {
 					searchItems.add((Wrapper) object);
 				}
-	
+
 				List<Object> temp = new ArrayList<Object>();
 				temp.addAll(search);
 				contentCacheList.put(content.length(), temp);
@@ -152,9 +187,10 @@ public class SearchUtils {
 		type = TYPE_ITEM_DATA;
 
 		List<Object> cache = contentCacheList.get(content.length());
-		if (cache != null &&
-				contentLengthCacheList.get(content.length()) != null &&
-				contentLengthCacheList.get(content.length()).equals(content.toString())) {
+		if (cache != null
+				&& contentLengthCacheList.get(content.length()) != null
+				&& contentLengthCacheList.get(content.length()).equals(
+						content.toString())) {
 			V2Log.e(TAG, "find cache list : key --> " + content.length()
 					+ " and value --> " + cache.size());
 			List<User> cacheUsers = new ArrayList<User>();
@@ -168,22 +204,24 @@ public class SearchUtils {
 			if (content.length() - 1 != 0) {
 				startIndex = content.length() - 1;
 				searchList.clear();
-				List<Object> lastCache = contentCacheList.get(content.length() - 1);
-				if(lastCache != null)
+				List<Object> lastCache = contentCacheList
+						.get(content.length() - 1);
+				if (lastCache != null)
 					searchList.addAll(lastCache);
 			}
 
 			List<User> searchUsers = new ArrayList<User>();
 			List<Object> search = search(content.toString());
-			if(search != null && search.size() > 0){
+			if (search != null && search.size() > 0) {
 				for (Object object : search) {
 					searchUsers.add((User) object);
 				}
-	
+
 				List<Object> temp = new ArrayList<Object>();
 				temp.addAll(search);
 				contentCacheList.put(content.length(), temp);
-				contentLengthCacheList.put(content.length(), content.toString());
+				contentLengthCacheList
+						.put(content.length(), content.toString());
 				V2Log.e(TAG, "put cache list : key --> " + content.length()
 						+ " and value --> " + search.size());
 				temp = null;
@@ -211,7 +249,8 @@ public class SearchUtils {
 							String.valueOf(charSimpleArray[i]),
 							content.toString(), i, true, true);
 				} else {
-					V2Log.e(TAG, "--- " + charSimpleArray[i] + " ---not Chinese");
+					V2Log.e(TAG, "--- " + charSimpleArray[i]
+							+ " ---not Chinese");
 					searchCacheList = getSearchList(searchList,
 							String.valueOf(charSimpleArray[i]),
 							content.toString(), i, true, false);
@@ -222,9 +261,9 @@ public class SearchUtils {
 					isShouldQP = false;
 					singleCacheList.addAll(searchCacheList);
 					searchCacheList.clear();
-					
+
 					V2Log.d(TAG, "简拼找到结果 , 全拼再搜索一遍");
-					if(surplusList.size() > 0){
+					if (surplusList.size() > 0) {
 						searchCacheList.addAll(surplusList);
 						surplusList.clear();
 					}
@@ -234,14 +273,14 @@ public class SearchUtils {
 					singleCacheList.clear();
 				} else {
 					isShouldQP = true;
-					List<Object> cache = contentCacheList.get(content.length() - 1);
-					if(cache != null)
-						searchCacheList
-								.addAll(contentCacheList.get(content.length() - 1));
+					List<Object> cache = contentCacheList
+							.get(content.length() - 1);
+					if (cache != null)
+						searchCacheList.addAll(contentCacheList.get(content
+								.length() - 1));
 					V2Log.e(TAG, "简拼没有结果 开启全拼搜索");
 				}
 			}
-			
 
 			if (isShouldQP) { // 如果长度大于5则不按首字母查询
 				searchList.clear();
@@ -269,25 +308,24 @@ public class SearchUtils {
 		}
 	}
 
-	public static void startQPSearch(String content){
+	public static void startQPSearch(String content) {
 		content = content.toLowerCase();
 		V2Log.e(TAG, "全拼搜索的集合大小：" + searchCacheList.size());
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < searchCacheList.size(); i++) {
 			Object obj = searchCacheList.get(i);
 			V2Log.e(TAG, "current search word : " + getObjectValue(obj));
-			if(TextUtils.isEmpty(getObjectValue(obj))){
-				return ;
+			if (TextUtils.isEmpty(getObjectValue(obj))) {
+				return;
 			}
-			
+
 			// 获取名字，将名字变成拼音串起来
-			//FIXME 包含有多音字，需要重新组合
+			// FIXME 包含有多音字，需要重新组合
 			char[] charArray = getObjectValue(obj).toCharArray();
 			for (char c : charArray) {
 				String charStr = null;
 				if (isChineseWord(c)) {
-					charStr = GlobalConfig.allChinese.get(String
-							.valueOf(c));
+					charStr = GlobalConfig.allChinese.get(String.valueOf(c));
 				} else {
 					charStr = String.valueOf(c);
 				}
@@ -305,8 +343,7 @@ public class SearchUtils {
 					if (j >= material.length()
 							|| targetChars[j] != material.charAt(j)) {
 						isShouldAdd = true;
-						V2Log.e(TAG, "material not contains "
-								+ targetChars[j]);
+						V2Log.e(TAG, "material not contains " + targetChars[j]);
 						break;
 					}
 					isShouldAdd = false;
@@ -324,7 +361,7 @@ public class SearchUtils {
 			sb.delete(0, sb.length());
 		}
 	}
-	
+
 	/**
 	 * 根据 searchKey 获得搜索后的集合
 	 * 
@@ -402,11 +439,10 @@ public class SearchUtils {
 						}
 					}
 				}
-				
-				if(isAdd){
+
+				if (isAdd) {
 					tempList.add(obj);
-				}
-				else{
+				} else {
 					surplusList.add(obj);
 				}
 			}

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import android.util.Log;
+
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
@@ -514,6 +516,7 @@ public class GroupRequest {
 			return;
 		}
 
+		Log.i("20150203 1","4");
 		ImRequest.getInstance().getUserBaseInfo(remoteUser.uid);
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {

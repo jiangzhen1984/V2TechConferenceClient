@@ -34,119 +34,73 @@ import com.bizcom.vo.VMessageLinkTextItem;
 import com.bizcom.vo.VMessageTextItem;
 import com.v2tech.R;
 
-public class ConferenceMessageBodyView extends LinearLayout{
+public class ConferenceMessageBodyView extends LinearLayout {
 
-	private VMessage mMsg;
-	private ConferenceGroup conf;
-
-	private LinearLayout mContentContainer;
 	private View rootView;
-
 	private TextView senderTV;
+	private LinearLayout mMsgBodyContainer;
+	private TextView mMsgBodyTV;
+	private OnClickListener mMsgBodyTVOnClickListener = new MsgBodyTVOnClickListener();
+
+	private VMessage mVMessage;
+	private ConferenceGroup conf;
 	private Context mContext;
 
 	public interface ClickListener {
 		public void onMessageClicked(VMessage v);
 	}
-	
+
 	public interface ActionListener {
 		public void NotChangeTaskToBack();
 	}
 
 	public ConferenceMessageBodyView(Context context, VMessage m) {
 		super(context);
-		this.mMsg = m;
+		this.mVMessage = m;
 		this.mContext = context;
-		rootView = LayoutInflater.from(context).inflate(
+		initLayout();
+		setViewContent();
+	}
+
+	private void initLayout() {
+		rootView = LayoutInflater.from(this.mContext).inflate(
 				R.layout.conference_message_body, null, false);
-		initView();
-		initData();
-	}
-
-	public void setConf(ConferenceGroup conf) {
-		this.conf = conf;
-	}
-
-	private void initView() {
-		if (rootView == null) {
-			V2Log.e(" root view is Null can not initialize");
-			return;
-		}
-
 		senderTV = (TextView) rootView
 				.findViewById(R.id.conference_message_sender);
-		mContentContainer = (LinearLayout) rootView
+		senderTV.setTextColor(Color.BLUE);
+		mMsgBodyContainer = (LinearLayout) rootView
 				.findViewById(R.id.conference_message_body_ly);
+		mMsgBodyTV = new TextView(this.getContext());
+		mMsgBodyTV.setBackgroundColor(Color.TRANSPARENT);
+		mMsgBodyTV.setTextColor(Color.BLACK);
+		mMsgBodyTV.setSelected(false);
+		mMsgBodyTV.setClickable(true);
+		mMsgBodyTV.setOnClickListener(mMsgBodyTVOnClickListener);
+		LinearLayout.LayoutParams ll1 = new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.WRAP_CONTENT,
+				LinearLayout.LayoutParams.WRAP_CONTENT);
+		mMsgBodyContainer.addView(mMsgBodyTV, ll1);
 		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT);
 		this.addView(rootView, ll);
+
 	}
 
-	private void initData() {
-		senderTV.setTextColor(Color.BLUE);
-		senderTV.setText(this.mMsg.getFromUser().getName() + "  "
-				+ DateUtil.getStringDate(mMsg.getDate().getTime()));
+	private void setViewContent() {
+		mMsgBodyContainer.setTag(this.mVMessage);
+		senderTV.setText(this.mVMessage.getFromUser().getName() + "  "
+				+ DateUtil.getStringDate(mVMessage.getDate().getTime()));
 
-		TextView et = new TextView(this.getContext());
-		et.setBackgroundColor(Color.TRANSPARENT);
-		et.setTextColor(Color.BLACK);
-		et.setSelected(false);
-		et.setClickable(true);
-		et.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				List<VMessageImageItem> imageItems = mMsg.getImageItems();
-				if (imageItems != null && imageItems.size() > 0) {
-					VMessageImageItem imageItem = mMsg.getImageItems().get(0);
-					//notify conferenceActivity chanage flag isMoveToBack
-					Intent notify = new Intent();
-					notify.addCategory(PublicIntent.DEFAULT_CATEGORY);
-					notify.setAction(PublicIntent.NOTIFY_CONFERENCE_ACTIVITY);
-					mContext.sendBroadcast(notify);
-					
-					Intent i = new Intent();
-					i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-					i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
-					if (imageItem != null)
-						i.putExtra("imageID", imageItem.getUuid());
-					// type 0: is not group image view
-					// type 1: group image view
-					i.putExtra("cid", mMsg.getId());
-					i.putExtra("type", conf.getGroupType().intValue());
-					i.putExtra("gid", conf.getmGId());
-					mContext.startActivity(i);
-					return ;
-				}
-				
-				List<VMessageLinkTextItem> linkItems = mMsg.getLinkItems();
-				if (linkItems != null && linkItems.size() > 0) {
-					VMessageLinkTextItem linkItem = linkItems.get(0);
-					Intent intent = new Intent();
-					intent.setAction("android.intent.action.VIEW");
-					Uri content_url = Uri.parse("http://" + linkItem.getUrl());
-					intent.setData(content_url);
-					mContext.startActivity(intent);
-					return;
-				}
-			}
-		});
-		
-		LinearLayout.LayoutParams ll = new LinearLayout.LayoutParams(
-				LinearLayout.LayoutParams.WRAP_CONTENT,
-				LinearLayout.LayoutParams.WRAP_CONTENT);
-		mContentContainer.addView(et, ll);
-
-		List<VMessageAbstractItem> items = mMsg.getItems();
+		List<VMessageAbstractItem> items = mVMessage.getItems();
 		for (int i = 0; items != null && i < items.size(); i++) {
 			VMessageAbstractItem item = items.get(i);
 			// Add new layout for new line
-			if (item.isNewLine() && et.length() != 0) {
-				et.append("\n");
+			if (item.isNewLine() && mMsgBodyTV.length() != 0) {
+				mMsgBodyTV.append("\n");
 			}
 			if (item.getType() == VMessageAbstractItem.ITEM_TYPE_TEXT) {
-				et.append(((VMessageTextItem) item).getText());
+				mMsgBodyTV.append(((VMessageTextItem) item).getText());
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_FACE) {
 				Drawable dr = this
 						.getResources()
@@ -156,27 +110,29 @@ public class ConferenceMessageBodyView extends LinearLayout{
 				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
 						dr.getIntrinsicHeight());
 
-				et.append(".");
+				mMsgBodyTV.append(".");
 
 				SpannableStringBuilder builder = new SpannableStringBuilder(
-						et.getText());
+						mMsgBodyTV.getText());
 				ImageSpan is = new ImageSpan(dr);
-				builder.setSpan(is, et.getText().length() - 1, et.getText()
-						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				et.setText(builder);
+				builder.setSpan(is, mMsgBodyTV.getText().length() - 1,
+						mMsgBodyTV.getText().length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				mMsgBodyTV.setText(builder);
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_IMAGE) {
 				Drawable dr = new BitmapDrawable(this.getContext()
 						.getResources(),
 						((VMessageImageItem) item).getCompressedBitmap());
 				dr.setBounds(0, 0, dr.getIntrinsicWidth(),
 						dr.getIntrinsicHeight());
-				et.append(".");
+				mMsgBodyTV.append(".");
 				SpannableStringBuilder builder = new SpannableStringBuilder(
-						et.getText());
+						mMsgBodyTV.getText());
 				ImageSpan is = new ImageSpan(dr);
-				builder.setSpan(is, et.getText().length() - 1, et.getText()
-						.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				et.setText(builder);
+				builder.setSpan(is, mMsgBodyTV.getText().length() - 1,
+						mMsgBodyTV.getText().length(),
+						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+				mMsgBodyTV.setText(builder);
 
 			} else if (item.getType() == VMessageAbstractItem.ITEM_TYPE_LINK_TEXT) {
 				String linkText = ((VMessageLinkTextItem) item).getText();
@@ -186,21 +142,11 @@ public class ConferenceMessageBodyView extends LinearLayout{
 						linkText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 				style.setSpan(new UnderlineSpan(), 0, linkText.length(),
 						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-				et.append(style);
+				mMsgBodyTV.append(style);
 			}
 
 		}
 
-		mContentContainer.setTag(this.mMsg);
-
-	}
-
-	public VMessage getItem() {
-		return this.mMsg;
-	}
-
-	public void recycle() {
-		mMsg.recycleAllImageMessage();
 	}
 
 	public void updateView(VMessage vm) {
@@ -209,14 +155,66 @@ public class ConferenceMessageBodyView extends LinearLayout{
 			return;
 		}
 		
-		if (mContentContainer != null) {
-			mContentContainer.removeAllViews();
+		if (mMsgBodyContainer != null) {
+			mMsgBodyContainer.removeAllViews();
 		}
-		this.mMsg = vm;
-		initData();
+		this.mVMessage = vm;
+		setViewContent();
 	}
 
-	class ImageViewsImageLoadAsyncTask extends AsyncTask<ImageView, Void, ImageView[]> {
+	public VMessage getVMessage() {
+		return this.mVMessage;
+	}
+
+	public void recycle() {
+		mVMessage.recycleAllImageMessage();
+	}
+
+	public void setConf(ConferenceGroup conf) {
+		this.conf = conf;
+	}
+
+	private class MsgBodyTVOnClickListener implements OnClickListener {
+		@Override
+		public void onClick(View v) {
+			List<VMessageImageItem> imageItems = mVMessage.getImageItems();
+			if (imageItems != null && imageItems.size() > 0) {
+				VMessageImageItem imageItem = mVMessage.getImageItems().get(0);
+				// notify conferenceActivity chanage flag isMoveToBack
+				Intent notify = new Intent();
+				notify.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				notify.setAction(PublicIntent.NOTIFY_CONFERENCE_ACTIVITY);
+				mContext.sendBroadcast(notify);
+
+				Intent i = new Intent();
+				i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				i.setAction(PublicIntent.START_VIDEO_IMAGE_GALLERY);
+				if (imageItem != null)
+					i.putExtra("imageID", imageItem.getUuid());
+				// type 0: is not group image view
+				// type 1: group image view
+				i.putExtra("cid", mVMessage.getId());
+				i.putExtra("type", conf.getGroupType().intValue());
+				i.putExtra("gid", conf.getmGId());
+				mContext.startActivity(i);
+				return;
+			}
+
+			List<VMessageLinkTextItem> linkItems = mVMessage.getLinkItems();
+			if (linkItems != null && linkItems.size() > 0) {
+				VMessageLinkTextItem linkItem = linkItems.get(0);
+				Intent intent = new Intent();
+				intent.setAction("android.intent.action.VIEW");
+				Uri content_url = Uri.parse("http://" + linkItem.getUrl());
+				intent.setData(content_url);
+				mContext.startActivity(intent);
+				return;
+			}
+		}
+	}
+
+	class ImageViewsImageLoadAsyncTask extends
+			AsyncTask<ImageView, Void, ImageView[]> {
 
 		@Override
 		protected ImageView[] doInBackground(ImageView... ivs) {
@@ -234,7 +232,7 @@ public class ConferenceMessageBodyView extends LinearLayout{
 			// If loaded iv is not same member's, means current view has changed
 			// message, ignore this result
 			VMessageImageItem item = ((VMessageImageItem) iv.getTag());
-			if (item.getVm() != mMsg) {
+			if (item.getVm() != mVMessage) {
 				return;
 			}
 			Bitmap bm = item.getCompressedBitmap();

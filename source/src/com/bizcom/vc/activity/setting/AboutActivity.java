@@ -1,4 +1,4 @@
-package com.bizcom.vc.activity;
+package com.bizcom.vc.activity.setting;
 
 import android.app.Activity;
 import android.os.Bundle;

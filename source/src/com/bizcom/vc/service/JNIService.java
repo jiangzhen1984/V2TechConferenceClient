@@ -64,11 +64,11 @@ import com.bizcom.request.jni.FileDownLoadErrorIndication;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.util.Notificator;
 import com.bizcom.util.XmlParser;
-import com.bizcom.vc.activity.MainActivity;
 import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
 import com.bizcom.vc.activity.conversation.MessageBuilder;
 import com.bizcom.vc.activity.conversation.MessageLoader;
 import com.bizcom.vc.activity.conversationav.ConversationP2PAVActivity;
+import com.bizcom.vc.activity.main.MainActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.GlobalState;
@@ -218,10 +218,10 @@ public class JNIService extends Service implements
 		super.onCreate();
 		mContext = this;
 
-		HandlerThread callback = new HandlerThread("JNI-Callbck");
-		callback.start();
-		synchronized (callback) {
-			while (!callback.isAlive()) {
+		HandlerThread callbackHandlerThread = new HandlerThread("JNI-Callbck");
+		callbackHandlerThread.start();
+		synchronized (callbackHandlerThread) {
+			while (!callbackHandlerThread.isAlive()) {
 				try {
 					Thread.sleep(200);
 				} catch (InterruptedException e) {
@@ -230,7 +230,7 @@ public class JNIService extends Service implements
 			}
 		}
 
-		mCallbackHandler = new JNICallbackHandler(callback.getLooper());
+		mCallbackHandler = new JNICallbackHandler(callbackHandlerThread.getLooper());
 
 		mImCB = new ImRequestCB(mCallbackHandler);
 		ImRequest.getInstance(this.getApplicationContext()).addCallback(mImCB);
@@ -427,6 +427,7 @@ public class JNIService extends Service implements
 									"The User that id is : "
 											+ existU.getmUserId() + " dirty!"
 											+ " Need to get user base infos");
+							Log.i("20150203 1","2");
 							ImRequest.getInstance().getUserBaseInfo(
 									existU.getmUserId());
 						}
@@ -605,6 +606,7 @@ public class JNIService extends Service implements
 				long serverTime, String sDBID) {
 			if (JNIResponse.Result.fromInt(nResult) == JNIResponse.Result.SUCCESS) {
 				// Just request current logged in user information
+				Log.i("20150203 1","6");
 				ImRequest.getInstance().getUserBaseInfo(nUserID);
 			}
 		}

@@ -39,13 +39,13 @@ public class LeftMessageChattingLayout extends LinearLayout implements
 	private View rootView;
 	private ListView mMsgListView;
 	private View mSendButton;
-	private PasteEditText mInputMessageTV;
+	private PasteEditText mInputMessageET;
 	private View mPinButton;
-	private OnKeyListener mInputMessageTVOnKeyListener = new InputMessageTVOnKeyListener();
+	private OnKeyListener mInputMessageETOnKeyListener = new InputMessageETOnKeyListener();
 	private OnClickListener mPinButtonOnClickListener = new PinButtonOnClickListener();
 	private CommonAdapter.CommonAdapterGetViewListener mListViewAdapterGetViewListener = new ListViewAdapterGetViewListener();
 	private SendButtonOnClickListener mSendButtonOnClickListener = new SendButtonOnClickListener();
-	private MsgContainerOnTouchListener mMsgContainerOnTouchListener = new MsgContainerOnTouchListener();
+	private MsgListViewOnTouchListener mMsgListViewOnTouchListener = new MsgListViewOnTouchListener();
 
 	public interface ChattingListener {
 		public void requestSendMsg(VMessage vm);
@@ -77,10 +77,10 @@ public class LeftMessageChattingLayout extends LinearLayout implements
 
 		this.mMsgListView = (ListView) view
 				.findViewById(R.id.video_msg_container);
-		this.mMsgListView.setOnTouchListener(mMsgContainerOnTouchListener);
-		this.mInputMessageTV = (PasteEditText) view
+		this.mMsgListView.setOnTouchListener(mMsgListViewOnTouchListener);
+		this.mInputMessageET = (PasteEditText) view
 				.findViewById(R.id.video_msg_chatting_layout_msg_content);
-		this.mInputMessageTV.setOnKeyListener(mInputMessageTVOnKeyListener);
+		this.mInputMessageET.setOnKeyListener(mInputMessageETOnKeyListener);
 		this.mSendButton = view
 				.findViewById(R.id.video_msg_chatting_layout_send_button);
 		this.mSendButton.setOnClickListener(mSendButtonOnClickListener);
@@ -138,18 +138,18 @@ public class LeftMessageChattingLayout extends LinearLayout implements
 		}
 	}
 
-	private class MsgContainerOnTouchListener implements OnTouchListener {
+	private class MsgListViewOnTouchListener implements OnTouchListener {
 
 		@Override
 		public boolean onTouch(View view, MotionEvent arg1) {
 			InputMethodManager imm = (InputMethodManager) mContext
 					.getSystemService(Context.INPUT_METHOD_SERVICE);
-			imm.hideSoftInputFromWindow(mInputMessageTV.getWindowToken(),
+			imm.hideSoftInputFromWindow(mInputMessageET.getWindowToken(),
 					InputMethodManager.RESULT_UNCHANGED_SHOWN);
 			if (mMsgListView == view) {
 				if (imm != null) {
 					imm.hideSoftInputFromWindow(
-							mInputMessageTV.getWindowToken(), 0);
+							mInputMessageET.getWindowToken(), 0);
 				}
 			}
 			return false;
@@ -161,13 +161,13 @@ public class LeftMessageChattingLayout extends LinearLayout implements
 		@Override
 		public void onClick(View view) {
 			if (listener != null) {
-				if (mInputMessageTV.getText() == null
-						|| mInputMessageTV.getText().toString().trim()
+				if (mInputMessageET.getText() == null
+						|| mInputMessageET.getText().toString().trim()
 								.isEmpty()) {
 					return;
 				}
 				VMessage vm = MessageUtil.buildChatMessage(mContext,
-						mInputMessageTV, conf.getGroupType().intValue(),
+						mInputMessageET, conf.getGroupType().intValue(),
 						conf.getmGId(), null);
 				addNewMessage(vm);
 				listener.requestSendMsg(vm);
@@ -175,7 +175,7 @@ public class LeftMessageChattingLayout extends LinearLayout implements
 		}
 	}
 
-	private class InputMessageTVOnKeyListener implements OnKeyListener {
+	private class InputMessageETOnKeyListener implements OnKeyListener {
 
 		@Override
 		public boolean onKey(View view, int actionId, KeyEvent event) {

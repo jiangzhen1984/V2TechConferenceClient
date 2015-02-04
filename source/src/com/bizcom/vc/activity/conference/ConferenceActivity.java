@@ -545,13 +545,14 @@ public class ConferenceActivity extends Activity {
 	private void initAttendeeList(Group confGroup) {
 		List<User> l = confGroup.getUsers();
 		for (User u : l) {
-			if (TextUtils.isEmpty(u.getName())
-					&& GlobalHolder.getInstance().getGlobalState()
-							.isGroupLoaded()) {
-				V2Log.e(TAG, " User + " + u.getmUserId()
-						+ " need to get user base infos");
-				ImRequest.getInstance().getUserBaseInfo(u.getmUserId());
-			}
+			// if (TextUtils.isEmpty(u.getName())
+			// && GlobalHolder.getInstance().getGlobalState()
+			// .isGroupLoaded()) {
+			// V2Log.e(TAG, " User + " + u.getmUserId()
+			// + " need to get user base infos");
+			// Log.i("20150203 1","3");
+			// ImRequest.getInstance().getUserBaseInfo(u.getmUserId());
+			// }
 			Attendee at = new Attendee(u);
 
 			if (u.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
@@ -3804,11 +3805,11 @@ public class ConferenceActivity extends Activity {
 							mConferenceMsgDialog.deleteFromList(user);
 						}
 
-						if (mHostRequestUsers.size() == 0) {									
-//							if (mConferenceMsgDialog != null
-//									&& mConferenceMsgDialog.isShowing()) {
-//								mConferenceMsgDialog.dismiss();
-//							}
+						if (mHostRequestUsers.size() == 0) {
+							// if (mConferenceMsgDialog != null
+							// && mConferenceMsgDialog.isShowing()) {
+							// mConferenceMsgDialog.dismiss();
+							// }
 							hasUnreadChiremanControllMsg = false;
 							mMsgNotification.setVisibility(View.GONE);
 							if (mConfMsgRedDot != null) {

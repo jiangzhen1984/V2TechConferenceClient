@@ -204,6 +204,8 @@ public class LeftAttendeeListLayout extends LinearLayout {
 		if (wr == null || view == null) {
 			return;
 		}
+		Log.i("20150203 2","updateView()");
+		
 		view.setTag(wr);
 
 		TextView nameTV = (TextView) view
@@ -218,16 +220,20 @@ public class LeftAttendeeListLayout extends LinearLayout {
 		if (wr.sortFlag == FIRST_DEVICE_FLAG) {
 			if (wr.a != null) {
 				if (wr.a.getType() == Attendee.TYPE_MIXED_VIDEO) {
+					Log.i("20150203 2","name= 混合视频呢");
 					nameTV.setText(R.string.vo_attendee_mixed_device_mix_video);
 				} else if (wr.a.getType() == Attendee.TYPE_ATTENDEE) {
 					User aUser = wr.a.getUser();
 					if (aUser != null) {
 						if (aUser.isRapidInitiation()) {
 							nameTV.setText("<" + aUser.getName() + ">");
+							Log.i("20150203 2","快速入会name="+aUser.getName());
 						} else {
 							nameTV.setText(aUser.getName());
+							Log.i("20150203 2","普通用户name="+aUser.getName());
 						}
 					} else {
+						Log.i("20150203 2","不是参与者name");
 						nameTV.setText("");
 					}
 				}

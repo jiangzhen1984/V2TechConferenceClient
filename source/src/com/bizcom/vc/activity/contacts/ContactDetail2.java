@@ -36,7 +36,7 @@ import com.bizcom.request.MessageListener;
 import com.bizcom.request.UserService;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.util.ProgressUtils;
-import com.bizcom.vc.activity.MainActivity;
+import com.bizcom.vc.activity.main.MainActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;

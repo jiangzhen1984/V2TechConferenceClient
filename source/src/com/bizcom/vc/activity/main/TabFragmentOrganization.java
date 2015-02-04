@@ -1,4 +1,4 @@
-package com.bizcom.vc.activity;
+package com.bizcom.vc.activity.main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
-public class OrganizationTabFragment extends Fragment implements TextWatcher{
+public class TabFragmentOrganization extends Fragment implements TextWatcher{
 
 	private static final int FILL_CONTACTS_GROUP = 2;
 	private static final int UPDATE_GROUP_STATUS = 4;

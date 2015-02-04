@@ -12,6 +12,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Looper;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.ImRequest;
@@ -65,7 +66,7 @@ public class GlobalHolder {
 	public Map<String, FileDownLoadBean> globleFileProgress = new HashMap<String, FileDownLoadBean>();
 
 	public Map<String, String> mTransingLockFiles = new HashMap<String, String>();
-	
+
 	public List<String> mFailedFiles = new ArrayList<String>();
 
 	private volatile boolean p2pAVNeedStickyBraodcast = false;
@@ -189,14 +190,22 @@ public class GlobalHolder {
 		Long key = Long.valueOf(userID);
 		synchronized (key) {
 			User tmp = mUserHolder.get(key);
-			if (tmp == null || TextUtils.isEmpty(tmp.getName())) {
+			if (tmp == null) {
 				tmp = new User(userID);
 				mUserHolder.put(key, tmp);
 				if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
 					// if receive this callback , the dirty change false;
+					Log.i("20150203 1", "1");
+					ImRequest.getInstance().getUserBaseInfo(userID);
+				}
+			} else if (TextUtils.isEmpty(tmp.getName())) {
+				if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
+					// if receive this callback , the dirty change false;
+					Log.i("20150203 1", "1");
 					ImRequest.getInstance().getUserBaseInfo(userID);
 				}
 			}
+
 			return tmp;
 		}
 	}

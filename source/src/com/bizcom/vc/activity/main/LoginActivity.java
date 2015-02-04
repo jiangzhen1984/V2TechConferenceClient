@@ -1,4 +1,4 @@
-package com.bizcom.vc.activity;
+package com.bizcom.vc.activity.main;
 
 import java.io.File;
 import java.util.List;

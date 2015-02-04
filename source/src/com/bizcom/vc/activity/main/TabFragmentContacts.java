@@ -1,4 +1,4 @@
-package com.bizcom.vc.activity.contacts;
+package com.bizcom.vc.activity.main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +47,7 @@ import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
-public class ContactsTabFragment extends Fragment implements TextWatcher {
+public class TabFragmentContacts extends Fragment implements TextWatcher {
 	public static final String TAG = "ContactsTabFragment";
 	private static final int FILL_CONTACTS_GROUP = 2;
 	private static final int UPDATE_GROUP_STATUS = 4;

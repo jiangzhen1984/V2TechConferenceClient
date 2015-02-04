@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.bizcom.request.ContactsService;
 import com.bizcom.vc.activity.ConversationsTabFragment;
-import com.bizcom.vc.activity.MainActivity;
+import com.bizcom.vc.activity.main.MainActivity;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.MainApplication;

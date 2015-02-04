@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -158,6 +159,7 @@ public class SearchedResultActivity extends Activity {
 					isGetInfo = true;
 				
 				if(!isGetInfo) {
+					Log.i("20150203 1","5");
                     ImRequest.getInstance().getUserBaseInfo(item.id);
                     Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_DETAIL_ACTIVITY);
                     intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
