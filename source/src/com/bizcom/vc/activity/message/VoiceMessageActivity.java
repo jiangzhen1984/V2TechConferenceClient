@@ -296,7 +296,7 @@ public class VoiceMessageActivity extends Activity {
 	protected void onDestroy() {
 		unregisterReceiver(receiver);
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(bitmapChangedListener);
-		if(mListItem.size() <= 0)
+		if(mListItem != null && mListItem.size() <= 0)
 			notificateConversationUpdate();
 		mListItem = null;
 		deleteList = null;

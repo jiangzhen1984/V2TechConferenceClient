@@ -67,7 +67,6 @@ public class VMessage {
 	public boolean isBeginSendingAnima;
 	public boolean isShowFailed;
 	public boolean isUpdateDate;
-	public boolean isUpdateFileState;
 	public boolean isUpdateAvatar;
 
 	protected List<VMessageAbstractItem> itemList;

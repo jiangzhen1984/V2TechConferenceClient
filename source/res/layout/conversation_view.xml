@@ -44,7 +44,7 @@
             android:ellipsize="end"
             android:gravity="left|top"
             android:singleLine="true"
-            android:text="TextView"
+            android:text=""
             android:textColor="@color/conversation_view_name_color"
             android:textSize="@dimen/common_item_text_size_16" />
         <TextView
@@ -56,7 +56,7 @@
             android:ellipsize="end"
             android:gravity="left|bottom"
             android:singleLine="true"
-            android:text="TextViewaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            android:text=""
             android:textColor="@color/conversation_view_text_color"
             android:textSize="@dimen/common_item_text_size_16" />
     </RelativeLayout>

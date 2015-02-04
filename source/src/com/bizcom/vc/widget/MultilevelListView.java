@@ -218,6 +218,10 @@ public class MultilevelListView extends ListView {
 	public void setListener(MultilevelListViewListener listener) {
 		this.mListener = listener;
 	}
+	
+	public List<Group> getmGroupList() {
+		return mGroupList;
+	}
 
 	/**
 	 * Update User online status and update user item position
@@ -289,6 +293,18 @@ public class MultilevelListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
+	public void updateAllGroupItemCheck(Group group) {
+		List<Group> childGroup = group.getChildGroup();
+		if (childGroup.size() > 0) {
+			for (int i = 0; i < childGroup.size(); i++) {
+				updateAllGroupItemCheck(childGroup.get(i));
+			}
+		} else {
+			updateCheckItemWithoutNotification(group, false);
+		}
+		adapter.notifyDataSetChanged();
+	}
+
 	/**
 	 * Update user's checked status of item
 	 * 
@@ -315,7 +331,7 @@ public class MultilevelListView extends ListView {
 	public ItemData checkBelongGroupAllChecked(Group group, List<User> list) {
 		int count = 0;
 		for (User u : list) {
-			ItemData item = getItem(group , u);
+			ItemData item = getItem(group, u);
 			if (item.isChecked()) {
 				count = count + 1;
 			}
@@ -323,8 +339,9 @@ public class MultilevelListView extends ListView {
 
 		List<Group> childGroup = group.getChildGroup();
 		for (Group child : childGroup) {
-			ItemData childGroupItem = checkBelongGroupAllChecked(child , child.getUsers());
-			if (childGroupItem.isChecked()) {
+			ItemData childGroupItem = checkBelongGroupAllChecked(child,
+					child.getUsers());
+			if (childGroupItem != null && childGroupItem.isChecked()) {
 				count = count + 1;
 			}
 		}
@@ -540,23 +557,23 @@ public class MultilevelListView extends ListView {
 		for (User user : userList) {
 			Set<Group> groupList = user.getBelongsGroup();
 			for (Group g : groupList) {
-				if(g.getGroupType() == GroupType.CHATING ||
-						g.getGroupType() == GroupType.DISCUSSION ||
-						g.getGroupType() == GroupType.CONFERENCE)
+				if (g.getGroupType() == GroupType.CHATING
+						|| g.getGroupType() == GroupType.DISCUSSION
+						|| g.getGroupType() == GroupType.CONFERENCE)
 					continue;
-				
+
 				ItemData item = getItem(g, user);
 				item.setChecked(true);
-				
+
 				Group group = temp.get(g.getmGId());
-				if(group == null)
+				if (group == null)
 					temp.put(g.getmGId(), g);
 			}
 		}
-		
+
 		for (int i = 0; i < mGroupList.size(); i++) {
 			Group group = mGroupList.get(i);
-			if(temp.get(group.getmGId()) != null){
+			if (temp.get(group.getmGId()) != null) {
 				temp.remove(group.getmGId());
 				GroupItemData groupItem = (GroupItemData) getItem(group);
 				if (!groupItem.isExpanded) {
@@ -568,7 +585,7 @@ public class MultilevelListView extends ListView {
 				}
 			}
 		}
-		
+
 		for (int i = 0; i < temp.size(); i++) {
 			Group group = temp.valueAt(i);
 			GroupItemData groupItem = (GroupItemData) getItem(group);
@@ -580,12 +597,12 @@ public class MultilevelListView extends ListView {
 				}
 			}
 		}
-		
+
 		for (int i = 0; i < mGroupList.size(); i++) {
 			Group group = mGroupList.get(i);
 			checkBelongGroupAllChecked(group, group.getUsers());
 		}
-		
+
 		adapter.notifyDataSetChanged();
 	}
 

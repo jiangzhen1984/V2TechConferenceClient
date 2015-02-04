@@ -210,9 +210,9 @@ public class BitmapManager {
 						}
 						
 						bitmapLru.put(callback.filePath, bitmap);
-						callback.bitmapCallBack(bitmap);
+						callback.bitmapCallBack(callback.iv , bitmap);
 					} else {
-						callback.bitmapCallBack(bitmap);
+						callback.bitmapCallBack(callback.iv , bitmap);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -239,11 +239,13 @@ public class BitmapManager {
 	public abstract class LoadBitmapCallBack{
 		
 		public String filePath;
-		public LoadBitmapCallBack(String filePath){
+		public ImageView iv;
+		public LoadBitmapCallBack(String filePath , ImageView iv){
 			this.filePath = filePath;
+			this.iv = iv;
 		}
 		
-		public abstract void bitmapCallBack(Bitmap bitmap);
+		public abstract void bitmapCallBack(ImageView iv , Bitmap bitmap);
 	}
 
 	/**

@@ -553,7 +553,7 @@ public class JNIService extends Service implements
 					ii.putExtra("gm", vm.getGroupId() != 0);
 					// Send ordered broadcast, make sure conversationview
 					// receive message first
-					mContext.sendOrderedBroadcast(ii, null);
+					mContext.sendBroadcast(ii, null);
 				}
 				break;
 			case JNI_RECEIVED_MESSAGE_BINARY_DATA:
@@ -855,7 +855,6 @@ public class JNIService extends Service implements
 				Message.obtain(mCallbackHandler, JNI_CONFERENCE_INVITATION, g)
 						.sendToTarget();
 			} else if (gType == GroupType.CHATING) {
-
 				VMessageQualification qualication = VerificationProvider
 						.queryCrowdQualMessageByCrowdId(group.creator.uid,
 								group.id);
@@ -927,16 +926,15 @@ public class JNIService extends Service implements
 				VMessageQualification.Type type, CrowdGroup g, User user,
 				String reason) {
 			VMessageQualification crowdMsg = null;
-			// 缇ょ敵璇�
 			if (type == Type.CROWD_APPLICATION) {
 				crowdMsg = VerificationProvider
 						.queryCrowdApplyQualMessageByUserId(g.getmGId(),
 								user.getmUserId());
-			} else { // 缇ら個璇�
+			} else { 
 				crowdMsg = VerificationProvider.queryCrowdQualMessageByCrowdId(
 						user, g);
 			}
-			// 濡傛灉浠庢暟鎹簱鏌ュ嚭璇ユ潯璁板綍锛屽垯鍙渶瑕佹洿鏂版椂闂村拰鐘舵�
+			
 			if (crowdMsg != null) {
 				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
 					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
@@ -1121,11 +1119,13 @@ public class JNIService extends Service implements
 
 			if (groupType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT
 					&& nUserID == GlobalHolder.getInstance().getCurrentUserId()) {
-				// TODO 璇存槑宸茶绠＄悊绯荤粺鍒犻櫎锛岄渶瑕佺粰鐢ㄦ埛鎻愮ず骞堕�鍑虹▼搴�
+				/**
+				 * TODO If the deleted user is yourself, you will need to exit the program and give prompt, 
+				 * finally return to the login Activity
+				 */
 			}
 
 			if (groupType == GroupType.CONTACT.intValue()) {
-				// 濡傛灉鏄ソ鍙嬬粍锛屽ソ鍙嬪叧绯昏鍒汉绉婚櫎锛屼紶鏉ョ殑groupId涓�
 				Set<Group> groupSet = GlobalHolder.getInstance()
 						.getUser(nUserID).getBelongsGroup();
 				for (Group gg : groupSet) {
@@ -1215,7 +1215,6 @@ public class JNIService extends Service implements
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
 					long waitMessageExist = VerificationProvider
 							.queryCrowdInviteWaitingQualMessageById(user.uid);
-					// 濡傛灉鍦ㄦ湰鍦版暟鎹簱娌℃湁鏌ュ埌缂撳瓨璁板綍锛岃鏄庢槸鍒汉鐢宠鐨勶紝鑰屼笉鏄嚜宸卞幓閭�鐨�
 					if (waitMessageExist != -1) {
 						boolean isTrue = VerificationProvider
 								.deleteCrowdInviteWattingQualMessage(waitMessageExist);

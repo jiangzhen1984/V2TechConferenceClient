@@ -84,15 +84,25 @@ public class DateUtil {
 		int hour = (int) times / 3600;
 		int minute = (int) (times - (hour * 3600)) / 60;
 		int second = (int) times - (hour * 3600 + minute * 60);
-		if (hour <= 0) {
-			return minute < 10 ? "0" + minute : minute + "分"
+		if (minute <= 0 && hour <= 0) {
+			return (second < 10 ? "0" + second : second) + "秒";
+		} else if (hour <= 0) {
+			return (minute < 10 ? "0" + minute : minute) + "分"
 					+ (second < 10 ? "0" + second : second) + "秒";
-		} else if (minute <= 0 && hour <= 0) {
-			return second < 10 ? "0" + second : second + "秒";
 		} else {
-			return (hour < 10 ? "0" + hour : hour) + "时"
-					+ (minute < 10 ? "0" + minute : minute) + "分"
-					+ (second < 10 ? "0" + second : second) + "秒";
+			if(minute <= 0 && second > 0){
+				return (hour < 10 ? "0" + hour : hour) + "时"
+						+ (second < 10 ? "0" + second : second) + "秒";
+			} else if(second <= 0 && minute > 0){
+				return (hour < 10 ? "0" + hour : hour) + "时"
+						+ (minute < 10 ? "0" + minute : minute) + "分";
+			} else if(second <= 0 && minute <= 0){
+				return (hour < 10 ? "0" + hour : hour) + "时";
+			} else {
+				return (hour < 10 ? "0" + hour : hour) + "时"
+						+ (minute < 10 ? "0" + minute : minute) + "分"
+						+ (second < 10 ? "0" + second : second) + "秒";
+			}
 		}
 	}
 }

@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
@@ -421,7 +420,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			mNickNameET.setText(u.getNickName());
 		}
 
-		mNameTitleIV.setText(u.getName());
+		mNameTitleIV.setText(u.getRealName());
 		mAccountTV.setText(u.getAccount());
 		if (u.getSex() != null) {
 			if (u.getSex().equals("0")) {

@@ -1,13 +1,8 @@
 package com.bizcom.vc.widget.cus;
-import java.io.IOException;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapRegionDecoder;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -31,9 +26,6 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.OverScroller;
 import android.widget.Scroller;
-
-import com.V2.jni.util.V2Log;
-import com.bizcom.util.BitmapUtil;
 
 public class TouchImageView extends ImageView {
 

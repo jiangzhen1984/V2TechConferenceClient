@@ -3,7 +3,6 @@ package com.bizcom.vc.adapter;
 import java.util.List;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
 import android.view.View;
@@ -13,9 +12,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.widget.ContactUserView;
 import com.bizcom.vo.User;
+import com.bizcom.vo.User.DeviceType;
 import com.v2tech.R;
 
 public class CommonCreateAdapter extends BaseAdapter {
@@ -59,6 +58,7 @@ public class CommonCreateAdapter extends BaseAdapter {
 				tag.headIcon = ((ContactUserView) convertView).getmPhotoIV();
 				tag.name = ((ContactUserView) convertView).getmUserNameTV();
 				tag.mSignature = ((ContactUserView) convertView).getmUserSignatureTV();
+				tag.statusIcon = ((ContactUserView) convertView).getmStatusIV();
 			} 
 			else {
 				convertView = getAttendeeView(tag, user);
@@ -82,9 +82,39 @@ public class CommonCreateAdapter extends BaseAdapter {
 		}
 
 		tag.name.setText(user.getName());
+		
 		if(tag.mSignature != null)
 			tag.mSignature.setText(user.getSignature() == null ? "" : user
 					.getSignature());
+		
+		if(tag.statusIcon != null){
+			DeviceType deviceType = user.getDeviceType();
+			if(deviceType == DeviceType.CELL_PHONE) {
+				tag.statusIcon.setImageResource(R.drawable.cell_phone_user);
+			} else {
+				switch (user.getmStatus()) {
+				case ONLINE:
+					tag.statusIcon.setImageResource(R.drawable.online);
+					break;
+				case LEAVE:
+					tag.statusIcon.setImageResource(R.drawable.leave);
+					break;
+				case BUSY:
+					tag.statusIcon.setImageResource(R.drawable.busy);
+					break;
+				case DO_NOT_DISTURB:
+					tag.statusIcon.setImageResource(R.drawable.do_not_distrub);
+					break;
+				default:
+					break;
+				}
+				if (user.getmStatus() == User.Status.OFFLINE || user.getmStatus() == User.Status.HIDDEN) {
+					tag.statusIcon.setVisibility(View.GONE);
+				} else {
+					tag.statusIcon.setVisibility(View.VISIBLE);
+				}
+			}
+		}
 	}
 
 	private View getAttendeeView(ViewTag tag, final User u) {
@@ -120,6 +150,7 @@ public class CommonCreateAdapter extends BaseAdapter {
 	
 	class ViewTag {
 		ImageView headIcon;
+		ImageView statusIcon;
 		TextView name;
 		TextView mSignature;
 	}

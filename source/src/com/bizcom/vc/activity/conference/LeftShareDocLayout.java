@@ -2,10 +2,8 @@ package com.bizcom.vc.activity.conference;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -41,6 +39,8 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.bizcom.util.BitmapUtil;
 import com.bizcom.util.OrderedHashMap;
+import com.bizcom.vc.application.GlobalConfig;
+import com.bizcom.vc.widget.cus.SubsamplingScaleImageView;
 import com.bizcom.vc.widget.cus.TouchImageView;
 import com.bizcom.vo.V2Doc;
 import com.bizcom.vo.V2ShapeMeta;
@@ -421,20 +421,31 @@ public class LeftShareDocLayout extends LinearLayout {
 					}
 				}
 				mDocDisplayContainer.removeAllViews();
-				TouchImageView iv = new TouchImageView(this.getContext());
-				iv.setOnDoubleTapListener(mTouchImageViewGestureDetectorListener);
-				// Merge bitmap
-				mImageViewBitmap = mergeBitmapToImage(mBackgroundBitMap,
-						mShapeBitmap);
-				if (mImageViewBitmap != null && !mImageViewBitmap.isRecycled()) {
-					iv.setImageBitmap(mImageViewBitmap);
+				View v = null;
+				if (params[0] > GlobalConfig.BITMAP_MAX_SIZE
+						|| params[1] > GlobalConfig.BITMAP_MAX_SIZE) {
+					v = new SubsamplingScaleImageView(this.getContext());
+					SubsamplingScaleImageView subImage = (SubsamplingScaleImageView) v;
+					subImage.setFitScreen(true);
+					subImage.setImageFile(p.getFilePath());
+					subImage.setOnDoubleTapListener(mTouchImageViewGestureDetectorListener);
 				} else {
-					iv.setImageBitmap(null);
+					v = new TouchImageView(this.getContext());
+					TouchImageView iv = (TouchImageView) v;
+					iv.setOnDoubleTapListener(mTouchImageViewGestureDetectorListener);
+					// Merge bitmap
+					mergeBitmapToImage(mBackgroundBitMap,mShapeBitmap);
+					if (!mImageViewBitmap.isRecycled()) {
+						iv.setImageBitmap(mImageViewBitmap);
+					} else {
+						iv.setImageBitmap(null);
+					}
 				}
+
 				FrameLayout.LayoutParams fl = new FrameLayout.LayoutParams(
 						FrameLayout.LayoutParams.MATCH_PARENT,
 						FrameLayout.LayoutParams.MATCH_PARENT);
-				mDocDisplayContainer.addView(iv, fl);
+				mDocDisplayContainer.addView(v, fl);
 				// mDocDisplayContainer.postInvalidate();
 			} else {
 				// // Set interval timer for waiting page download
@@ -509,47 +520,17 @@ public class LeftShareDocLayout extends LinearLayout {
 	 * @param shareDocBm
 	 * @param shapesBm
 	 */
-	private Bitmap mergeBitmapToImage(Bitmap shareDocBm, Bitmap shapesBm) {
-		// if (mImageViewBitmap == null || mImageViewBitmap.isRecycled()) {
-		// if (shareDocBm != null && !shareDocBm.isRecycled()) {
-		// mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
-		// shareDocBm.getHeight(), Config.ARGB_8888);
-		// } else if (shapesBm != null && !shapesBm.isRecycled()) {
-		// mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
-		// shapesBm.getHeight(), Config.ARGB_8888);
-		// } else {
-		// V2Log.e(" No available bitmap");
-		// return;
-		// }
-		// } else {
-		// if (shareDocBm != null && !shareDocBm.isRecycled()) {
-		// // Current image view bitmap is smaller than shared document
-		// // bitmap, we have to create new one
-		// if (mImageViewBitmap.getWidth() < shareDocBm.getWidth()
-		// || mImageViewBitmap.getHeight() < shareDocBm
-		// .getHeight()) {
-		// mImageViewBitmap.recycle();
-		// mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
-		// shareDocBm.getHeight(), Config.ARGB_8888);
-		// // }
-		// }
-		// }
-
-		if (shareDocBm != null && !shareDocBm.isRecycled()) {
-			// if(mImageViewBitmap != null && !mImageViewBitmap.isRecycled())
-			// mImageViewBitmap.recycle();
-			recycleBitmap(mImageViewBitmap);
-			mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
-					shareDocBm.getHeight(), Config.ARGB_8888);
-		} else if (shapesBm != null && !shapesBm.isRecycled()) {
-			// if(mImageViewBitmap != null && !mImageViewBitmap.isRecycled())
-			// mImageViewBitmap.recycle();
-			recycleBitmap(mImageViewBitmap);
-			mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
-					shapesBm.getHeight(), Config.ARGB_8888);
-		} else {
-			V2Log.e(" No available bitmap");
-			return null;
+	private void mergeBitmapToImage(Bitmap shareDocBm, Bitmap shapesBm) {
+		if (mImageViewBitmap == null || mImageViewBitmap.isRecycled()) {
+			if (shareDocBm != null && !shareDocBm.isRecycled()) {
+				mImageViewBitmap = Bitmap.createBitmap(shareDocBm.getWidth(),
+						shareDocBm.getHeight(), Config.ARGB_8888);
+			} else if (shapesBm != null && !shapesBm.isRecycled()) {
+				mImageViewBitmap = Bitmap.createBitmap(shapesBm.getWidth(),
+						shapesBm.getHeight(), Config.ARGB_8888);
+			} else {
+				V2Log.e(" No available bitmap");
+			}
 		}
 
 		Canvas canvas = new Canvas(mImageViewBitmap);
@@ -567,8 +548,6 @@ public class LeftShareDocLayout extends LinearLayout {
 		if (shapesBm != null && !shapesBm.isRecycled()) {
 			canvas.drawBitmap(shapesBm, 0, 0, p);
 		}
-
-		return mImageViewBitmap;
 	}
 
 	private void recycleBitmap(Bitmap bm) {

@@ -208,9 +208,7 @@ public class ConferenceMessageBodyView extends LinearLayout{
 			V2Log.e("Can't not update data vm is null");
 			return;
 		}
-		if (this.mMsg == vm) {
-			return;
-		}
+		
 		if (mContentContainer != null) {
 			mContentContainer.removeAllViews();
 		}

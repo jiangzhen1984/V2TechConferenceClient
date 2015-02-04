@@ -76,7 +76,7 @@ public class UserService extends AbstractHandler {
 		if (user.getmUserId() == GlobalHolder.getInstance().getCurrentUserId()) {
 			ImRequest.getInstance().modifyBaseInfo(user.toXml());
 		} else {
-			if (!TextUtils.isEmpty(user.getNickName()))
+//			if (!TextUtils.isEmpty(user.getNickName()))
 				ImRequest.getInstance()
 						.modifyCommentName(
 								user.getmUserId(),

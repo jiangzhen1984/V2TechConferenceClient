@@ -128,7 +128,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 					Toast.LENGTH_SHORT).show();
 			return;
 		}
-
+		
 		if (mState == State.CREATEING) {
 			return;
 		}

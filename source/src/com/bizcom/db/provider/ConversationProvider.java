@@ -419,14 +419,12 @@ public class ConversationProvider extends DatabaseProvider{
 	}
 
 	/**
-	 * update conversation state
-	 * 
-	 * @param context
+	 * update conversation read state
 	 * @param cov
-	 * @param ret
+	 * @param readState
 	 * @return
 	 */
-	public static int updateConversationToDatabase(Conversation cov, int ret) {
+	public static int updateConversationToDatabase(Conversation cov, int readState) {
 
 		if (cov == null)
 			return -1;
@@ -457,7 +455,7 @@ public class ConversationProvider extends DatabaseProvider{
 		}
 		values.put(
 				ContentDescriptor.RecentHistoriesMessage.Cols.HISTORY_RECENT_MESSAGE_READ_STATE,
-				ret);
+				readState);
 		return mContext.getContentResolver().update(
 				ContentDescriptor.RecentHistoriesMessage.CONTENT_URI, values,
 				where, selectionArgs);

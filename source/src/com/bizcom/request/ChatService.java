@@ -338,8 +338,9 @@ public class ChatService extends DeviceService {
 			// VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED)
 			// FileRequest.getInstance().httpDownloadFile(url, sfileid,
 			// filePath, encrypttype);
-			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),
-					GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName());
+			String path = GlobalConfig.getGlobalFilePath() + "/" + vfi.getFileName();
+			V2Log.d(TAG, "start download file! id is : " + vfi.getUuid() + " and path is : " + path);
+			FileRequest.getInstance().acceptFileTrans(vfi.getUuid(),path);
 		default:
 			break;
 

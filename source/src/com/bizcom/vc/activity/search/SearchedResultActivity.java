@@ -22,6 +22,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.V2.jni.ImRequest;
+import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.request.BitmapManager;
 import com.bizcom.request.BitmapManager.BitmapChangedListener;
@@ -243,14 +244,15 @@ public class SearchedResultActivity extends Activity {
 				if(TextUtils.isEmpty(avatarPath))
 					item.iv.setImageResource(R.drawable.avatar);
 				else {
+					V2Log.e("test", " uid : " + srItem.id + " avatarPath : " + avatarPath);
 					BitmapManager.getInstance().loadBitmapFromPath(BitmapManager.getInstance().
-							new LoadBitmapCallBack(avatarPath) {
+							new LoadBitmapCallBack(avatarPath , item.iv) {
 						
 						@Override
-						public void bitmapCallBack(Bitmap bitmap) {
+						public void bitmapCallBack(ImageView iv , Bitmap bitmap) {
 							//FIXME There is a warning to deal with
 							try{
-								item.iv.setImageBitmap(bitmap);
+								iv.setImageBitmap(bitmap);
 							}
 							catch(Exception e){}
 						}
@@ -267,12 +269,11 @@ public class SearchedResultActivity extends Activity {
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
 			if(user == null || bm == null)
-				return 
-						;
-			adapter.notifyDataSetChanged();
+				return ;
 			for (SearchedResultItem item : mList) {
 				if(item.mType == Type.USER){
 					adapter.notifyDataSetChanged();
+					break;
 				}
 			}
 		}

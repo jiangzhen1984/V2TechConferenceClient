@@ -2,7 +2,6 @@ package com.bizcom.vc.activity.conference;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -14,8 +13,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.text.TextUtils.TruncateAt;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -27,14 +26,12 @@ import android.widget.ListAdapter;
 
 import com.bizcom.vc.adapter.CreateConfOrCrowdAdapter;
 import com.bizcom.vc.application.GlobalHolder;
-import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.widget.MultilevelListView;
 import com.bizcom.vc.widget.MultilevelListView.ItemData;
 import com.bizcom.vo.Conference;
-import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.Group;
-import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
+import com.bizcom.vo.User;
 import com.v2tech.R;
 
 public class LeftInvitionAttendeeLayout extends LinearLayout {
@@ -73,7 +70,8 @@ public class LeftInvitionAttendeeLayout extends LinearLayout {
 	private Listener listener;
 
 	public interface Listener {
-		public void requestInvitation(Conference conf, List<User> attendUsers , boolean isNotify);
+		public void requestInvitation(Conference conf, List<User> attendUsers,
+				boolean isNotify);
 	}
 
 	public LeftInvitionAttendeeLayout(Context context, Conference conf) {
@@ -95,7 +93,8 @@ public class LeftInvitionAttendeeLayout extends LinearLayout {
 		mGroupListView.setListener(mListener);
 		mGroupListView.setIgnoreCurrentUser(true);
 
-		mAttendeeContainer = (AdapterView<ListAdapter>) view.findViewById(R.id.conference_attendee_container);
+		mAttendeeContainer = (AdapterView<ListAdapter>) view
+				.findViewById(R.id.conference_attendee_container);
 		mAttendeeContainer.setOnItemClickListener(mItemClickedListener);
 		landLayout = mAttendeeContainer.getTag().equals("vertical") ? PAD_LAYOUT
 				: PHONE_LAYOUT;
@@ -186,9 +185,9 @@ public class LeftInvitionAttendeeLayout extends LinearLayout {
 		@Override
 		public void afterTextChanged(Editable s) {
 			if (TextUtils.isEmpty(s.toString())) {
-//				if (!TextUtils.isEmpty(mGroupListView.getTextFilter())) {
-					mGroupListView.clearTextFilter();
-//				}
+				// if (!TextUtils.isEmpty(mGroupListView.getTextFilter())) {
+				mGroupListView.clearTextFilter();
+				// }
 			} else {
 				mGroupListView.setFilterText(s.toString());
 			}
@@ -254,44 +253,48 @@ public class LeftInvitionAttendeeLayout extends LinearLayout {
 
 		@Override
 		public void onClick(View view) {
-			List<User> removeUsers = new ArrayList<User>();
-			ConferenceGroup confGroup = (ConferenceGroup) GlobalHolder.getInstance().
-					getGroupById(V2GlobalConstants.GROUP_TYPE_CONFERENCE, conf.getId());
-			List<User> users = confGroup.getUsers();
 			List<User> attends = new ArrayList<User>(mAttendeeList);
+			// Now allow send repeat invite
+			// List<User> removeUsers = new ArrayList<User>();
+			// ConferenceGroup confGroup = (ConferenceGroup)
+			// GlobalHolder.getInstance().
+			// getGroupById(V2GlobalConstants.GROUP_TYPE_CONFERENCE,
+			// conf.getId());
+			// List<User> users = confGroup.getUsers();
 			// Clean
-			mGroupListView.updateUserItemcCheck(attends , false);
-			for(User checkUser : attends){
-				for (User user : users) {
-					if (user.getmUserId() == checkUser.getmUserId()) {
-						removeUsers.add(checkUser);
-						break;
-					}
-				}
-			}
+			// mGroupListView.updateUserItemcCheck(attends , false);
+			// for(User checkUser : attends){
+			// for (User user : users) {
+			// if (user.getmUserId() == checkUser.getmUserId()) {
+			// removeUsers.add(checkUser);
+			// break;
+			// }
+			// }
+			// }
+			//
+			// for (int i = 0; i < removeUsers.size(); i++) {
+			// attends.remove(removeUsers.get(i));
+			// }
 
-			for (int i = 0; i < removeUsers.size(); i++) {
-				attends.remove(removeUsers.get(i));
-			}
-			
 			if (listener != null) {
-				if(removeUsers.size() > 0)
-					listener.requestInvitation(conf, attends , false);
-				else
-					listener.requestInvitation(conf, attends , true);
+				listener.requestInvitation(conf, attends, true);
 			}
 
-			mAttendeeList.clear();
-			mUserListArray.clear();
-			removeUsers = null;
-			if(mAttendeeContainer.getChildCount() > 0){
+			if (mAttendeeContainer.getChildCount() > 0) {
 				mAttendeeContainer.removeAllViewsInLayout();
 				mAdapter.notifyDataSetChanged();
 			}
+			
+			for (int i = 0; i < mGroupListView.getmGroupList().size(); i++) {
+				mGroupListView.updateAllGroupItemCheck(mGroupListView.getmGroupList().get(i));
+			}
+			
+			mAttendeeList.clear();
+			mUserListArray.clear();
 		}
 
 	};
-	
+
 	private OnItemClickListener mItemClickedListener = new OnItemClickListener() {
 
 		@Override

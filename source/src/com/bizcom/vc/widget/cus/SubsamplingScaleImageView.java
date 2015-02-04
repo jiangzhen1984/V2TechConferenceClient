@@ -16,6 +16,7 @@ limitations under the License.
 
 package com.bizcom.vc.widget.cus;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -346,6 +347,9 @@ public class SubsamplingScaleImageView extends View {
 	 *            URI of the file to display.
 	 */
 	public final void setImageFile(String extFile) {
+		File check = new File(extFile);
+		if(!check.exists())
+			return ;
 		reset(true);
 		BitmapInitTask task = new BitmapInitTask(this, getContext(), extFile,
 				BitmapInitTask.SourceType.FILE_PATH);
@@ -1399,8 +1403,9 @@ public class SubsamplingScaleImageView extends View {
 								.loadingComplete();
 					}
 				} else {
-					subsamplingScaleImageView.getLongImageLoadingListener()
-							.loadingFailed();
+					if(subsamplingScaleImageView != null)
+						subsamplingScaleImageView.getLongImageLoadingListener()
+								.loadingFailed();
 				}
 			}
 		}

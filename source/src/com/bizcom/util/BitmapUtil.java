@@ -114,13 +114,22 @@ public class BitmapUtil {
 		options.inJustDecodeBounds = true;
 		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
 		BitmapFactory.decodeFile(filePath, options);
-		if (options.outWidth >= 1080 || options.outHeight >= 1080) {
-			options.inSampleSize = 8;
-		} else if (options.outWidth > 500 || options.outHeight > 500) {
-			options.inSampleSize = 4;
-		} else {
-			options.inSampleSize = 2;
+		// if (options.outWidth >= 1080 || options.outHeight >= 1080) {
+		// options.inSampleSize = 4;
+		// } else if (options.outWidth > 500 || options.outHeight > 500) {
+		// options.inSampleSize = 2;
+		// } else {
+		// options.inSampleSize = 2;
+		// }
+
+		double wr = (double) options.outWidth / GlobalConfig.SCREEN_WIDTH;
+		double hr = (double) options.outHeight / GlobalConfig.SCREEN_HEIGHT;
+		double ratio = Math.min(wr, hr);
+		float cross = 1.0f;
+		while ((cross * 2) <= ratio) {
+			cross *= 2;
 		}
+		options.inSampleSize = (int) cross;
 		options.inJustDecodeBounds = false;
 		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
 		options.inPurgeable = true;
@@ -134,9 +143,9 @@ public class BitmapUtil {
 		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
 		BitmapFactory.decodeFile(file, options);
 		if (options.outWidth >= 1080 || options.outHeight >= 1080) {
-			options.inSampleSize = 8;
-		} else if (options.outWidth > 500 || options.outHeight > 500) {
 			options.inSampleSize = 4;
+		} else if (options.outWidth > 500 || options.outHeight > 500) {
+			options.inSampleSize = 2;
 		} else if (options.outWidth > 200 || options.outHeight > 200) {
 			options.inSampleSize = 2;
 		} else {

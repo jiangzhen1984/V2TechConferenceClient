@@ -13,7 +13,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Message;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,7 +23,6 @@ import android.widget.CheckBox;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.bizcom.util.ProgressUtils;
 import com.bizcom.vc.adapter.CommonCreateAdapter;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;

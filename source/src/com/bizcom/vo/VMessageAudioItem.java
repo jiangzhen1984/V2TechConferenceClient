@@ -15,6 +15,7 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 	private boolean isPlaying;
 	private int readState;
 	private boolean isReceive;
+	private boolean isStartPlay;
 
 	/**
 	 * XmlParser used
@@ -101,6 +102,14 @@ public class VMessageAudioItem extends VMessageAbstractItem {
 
 	public void setReceive(boolean isReceive) {
 		this.isReceive = isReceive;
+	}
+	
+	public boolean isStartPlay() {
+		return isStartPlay;
+	}
+
+	public void setStartPlay(boolean isStartPlay) {
+		this.isStartPlay = isStartPlay;
 	}
 
 	/**

@@ -164,4 +164,8 @@ public class ContactUserView extends LinearLayout {
 	public TextView getmUserSignatureTV() {
 		return mUserSignatureTV;
 	}
+	
+	public ImageView getmStatusIV() {
+		return mStatusIV;
+	}
 }

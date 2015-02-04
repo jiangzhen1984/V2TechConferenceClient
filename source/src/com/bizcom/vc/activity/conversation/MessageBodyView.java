@@ -258,6 +258,7 @@ public class MessageBodyView extends LinearLayout {
 	}
 
 	public void initTextView() {
+
 		TextView contentView = new TextView(getContext());
 		contentView.setOnClickListener(messageClickListener);
 		contentView.setBackgroundColor(Color.TRANSPARENT);
@@ -481,10 +482,11 @@ public class MessageBodyView extends LinearLayout {
 			public void onClick(View view) {
 				if (item != null && !TextUtils.isEmpty(item.getAudioFilePath())) {
 					if (item.isPlaying()) {
-						callback.requestStopAudio(view, mMsg, item);
+						callback.requestStopAudio(mMsg, item);
 					} else {
 						callback.requestStopOtherAudio(mMsg);
-						callback.requestPlayAudio(mMsg, item);
+						callback.requestPlayAudio(MessageBodyView.this, mMsg,
+								item);
 						updateUnreadFlag(false, item);
 					}
 				}
@@ -617,6 +619,10 @@ public class MessageBodyView extends LinearLayout {
 
 	public void setCallback(ClickListener cl) {
 		this.callback = cl;
+	}
+
+	public ClickListener getCallback() {
+		return callback;
 	}
 
 	public void updateView(VMessage vm, boolean showTime) {
@@ -1054,9 +1060,10 @@ public class MessageBodyView extends LinearLayout {
 				if (al != null && al.size() > 0) {
 					VMessageAudioItem audioItem = al.get(0);
 					if (audioItem.isPlaying()) {
-						callback.requestStopAudio(anchor, mMsg, audioItem);
+						callback.requestStopAudio(mMsg, audioItem);
 					} else {
-						callback.requestPlayAudio(mMsg, audioItem);
+						callback.requestPlayAudio(MessageBodyView.this, mMsg,
+								audioItem);
 						audioItem.setPlaying(true);
 					}
 					return;
@@ -1203,9 +1210,10 @@ public class MessageBodyView extends LinearLayout {
 
 		public void requestDelMessage(VMessage v);
 
-		public void requestPlayAudio(VMessage vm, VMessageAudioItem vai);
+		public void requestPlayAudio(MessageBodyView view, VMessage vm,
+				VMessageAudioItem vai);
 
-		public void requestStopAudio(View v, VMessage vm, VMessageAudioItem vai);
+		public void requestStopAudio(VMessage vm, VMessageAudioItem vai);
 
 		public void requestDownloadFile(View v, VMessage vm,
 				VMessageFileItem vfi);
