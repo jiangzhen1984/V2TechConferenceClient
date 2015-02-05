@@ -4,12 +4,10 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -17,7 +15,6 @@ import android.text.style.ImageSpan;
 import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -89,6 +86,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 
 	private void setViewContent() {
 		mMsgBodyContainer.setTag(this.mVMessage);
+		mMsgBodyTV.setText(null);
 		senderTV.setText(this.mVMessage.getFromUser().getName() + "  "
 				+ DateUtil.getStringDate(mVMessage.getDate().getTime()));
 
@@ -146,7 +144,6 @@ public class ConferenceMessageBodyView extends LinearLayout {
 			}
 
 		}
-
 	}
 
 	public void updateView(VMessage vm) {
@@ -155,11 +152,20 @@ public class ConferenceMessageBodyView extends LinearLayout {
 			return;
 		}
 		
+		boolean isAddView = false;
 		if (mMsgBodyContainer != null) {
 			mMsgBodyContainer.removeAllViews();
+			isAddView = true;
 		}
 		this.mVMessage = vm;
 		setViewContent();
+		
+		if(isAddView){
+			LinearLayout.LayoutParams ll1 = new LinearLayout.LayoutParams(
+					LinearLayout.LayoutParams.WRAP_CONTENT,
+					LinearLayout.LayoutParams.WRAP_CONTENT);
+			mMsgBodyContainer.addView(mMsgBodyTV, ll1);
+		}
 	}
 
 	public VMessage getVMessage() {
@@ -212,33 +218,4 @@ public class ConferenceMessageBodyView extends LinearLayout {
 			}
 		}
 	}
-
-	class ImageViewsImageLoadAsyncTask extends
-			AsyncTask<ImageView, Void, ImageView[]> {
-
-		@Override
-		protected ImageView[] doInBackground(ImageView... ivs) {
-			// Only has one element
-			for (ImageView iv : ivs) {
-				((VMessageImageItem) iv.getTag()).getCompressedBitmap();
-			}
-			return ivs;
-		}
-
-		@Override
-		protected void onPostExecute(ImageView[] result) {
-			// Only has one element
-			ImageView iv = result[0];
-			// If loaded iv is not same member's, means current view has changed
-			// message, ignore this result
-			VMessageImageItem item = ((VMessageImageItem) iv.getTag());
-			if (item.getVm() != mVMessage) {
-				return;
-			}
-			Bitmap bm = item.getCompressedBitmap();
-			iv.setImageBitmap(bm);
-		}
-
-	}
-
 }

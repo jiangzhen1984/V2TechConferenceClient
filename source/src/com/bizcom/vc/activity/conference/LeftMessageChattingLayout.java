@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
+import com.V2.jni.util.V2Log;
 import com.bizcom.util.MessageUtil;
 import com.bizcom.vc.adapter.CommonAdapter;
 import com.bizcom.vc.adapter.VMessageDataAndViewWrapper;
@@ -238,12 +239,17 @@ public class LeftMessageChattingLayout extends LinearLayout implements
 	};
 
 	@Override
-	public void notifyChatInterToReplace(final VMessage vm) {
+	public void notifyChatInterToReplace(VMessage vm) {
+		if(ItemDataAndViewWrapperList == null)
+			return ;
+		
 		for (int i = 0; i < ItemDataAndViewWrapperList.size(); i++) {
-			final VMessageDataAndViewWrapper wrapper = (VMessageDataAndViewWrapper) ItemDataAndViewWrapperList
+			VMessageDataAndViewWrapper wrapper = (VMessageDataAndViewWrapper) ItemDataAndViewWrapperList
 					.get(i);
 			VMessage replaced = (VMessage) wrapper.getItemObject();
 			if (replaced.getUUID().equals(vm.getUUID())) {
+				V2Log.e("binaryReplace", "LeftMessageChattingLayout -- "
+						+ "Recevice Binary data from server , and replaced wait! id is : " + vm.getmXmlDatas());
 				replaced.setImageItems(vm.getImageItems());
 				((Activity) mContext).runOnUiThread(new Runnable() {
 

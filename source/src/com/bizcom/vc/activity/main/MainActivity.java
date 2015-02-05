@@ -44,9 +44,9 @@ import com.bizcom.vc.widget.TitleBar;
 import com.bizcom.vo.Conference;
 import com.bizcom.vo.Conversation;
 import com.bizcom.vo.NetworkStateCode;
+import com.bizcom.vo.VFile.State;
 import com.bizcom.vo.VMessageAbstractItem;
 import com.bizcom.vo.VMessageFileItem;
-import com.bizcom.vo.VFile.State;
 import com.v2tech.R;
 
 public class MainActivity extends FragmentActivity implements
@@ -87,16 +87,16 @@ public class MainActivity extends FragmentActivity implements
 			new TabClass(PublicIntent.TAG_GROUP,
 					R.drawable.selector_tab_group_button,
 					R.string.tab_group_name, R.string.tab_group_name,
-					TabFragmentCrow.class.getName()),
+					ConversationsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_CONF,
 					R.drawable.selector_tab_conference_button,
 					R.string.tab_conference_name, R.string.tab_conference_name,
-					TabFragmentConference.class.getName()),
+					ConversationsTabFragment.class.getName()),
 			new TabClass(PublicIntent.TAG_COV,
 					R.drawable.selector_tab_conversation_button,
 					R.string.tab_conversation_name,
 					R.string.tab_conversation_name,
-					TabFragmentMessage.class.getName()) };
+					ConversationsTabFragment.class.getName()) };
 
 	private LocalReceiver receiver = new LocalReceiver();
 
@@ -386,11 +386,11 @@ public class MainActivity extends FragmentActivity implements
 			if (tab.mTabName.equals(PublicIntent.TAG_CONTACT)) {
 			} else if (tab.mTabName.equals(PublicIntent.TAG_ORG)) {
 			} else if (tab.mTabName.equals(PublicIntent.TAG_GROUP)) {
-				((TabFragmentCrow) fragment).updateSearchState();
+				((ConversationsTabFragment) fragment).updateSearchState();
 			} else if (tab.mTabName.equals(PublicIntent.TAG_CONF)) {
-				((TabFragmentConference) fragment).updateSearchState();
+				((ConversationsTabFragment) fragment).updateSearchState();
 			} else if (tab.mTabName.equals(PublicIntent.TAG_COV)) {
-				((TabFragmentMessage) fragment).updateSearchState();
+				((ConversationsTabFragment) fragment).updateSearchState();
 			}
 
 			mViewPager.setCurrentItem(pos);

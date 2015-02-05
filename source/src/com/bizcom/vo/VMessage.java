@@ -219,7 +219,7 @@ public class VMessage {
 	
 	public void setImageItems(List<VMessageImageItem> imageItems) {
 		for (int i = 0; i < this.imageItems.size(); i++) {
-			this.imageItems.get(i).recycle();
+			this.imageItems.get(i).recycleAll();
 			this.imageItems.get(i).setFilePath(imageItems.get(i).getFilePath());
 		}
 		this.imageItems = imageItems;

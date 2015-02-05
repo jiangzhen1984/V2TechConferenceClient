@@ -220,11 +220,9 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 			}
 		} else if (obj instanceof Group) {
 			startSelectGroup(mLocalHandler, cb, (Group) obj);
-			if(cb.isChecked())
-				changeConfirmAble(true);
-			else
-				changeConfirmAble(false);
 		}
+		
+		changeConfirmAble();
 	}
 
 	/**
@@ -254,11 +252,6 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 		} else {
 			addAttendee(u);
 		}
-
-		if(mAttendeeArrayList.size() > 0)
-			changeConfirmAble(true);
-		else
-			changeConfirmAble(false);
 	}
 
 	private void sendServer(final int type) {
@@ -275,8 +268,8 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 		}).start();
 	}
 
-	private void changeConfirmAble(boolean isAble) {
-		if (isAble) {
+	private void changeConfirmAble() {
+		if (mAttendeeArrayList.size() > 0) {
 			rightButtonTV.setClickable(true);
 			rightButtonTV.setTextColor(getResources().getColor(
 					R.color.conf_create_button_color));

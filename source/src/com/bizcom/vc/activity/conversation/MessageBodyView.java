@@ -228,10 +228,17 @@ public class MessageBodyView extends LinearLayout {
 
 		failedIcon.setVisibility(View.INVISIBLE);
 		unReadIcon.setVisibility(View.GONE);
-		seconds.setVisibility(View.GONE);
 		sendingIcon.setVisibility(View.GONE);
+		seconds.setVisibility(View.GONE);
 		mArrowIV.bringToFront();
 
+		if (isShowTime && mMsg.getDate() != null) {
+			timeTV.setVisibility(View.VISIBLE);
+			timeTV.setText(mMsg.getStringDate());
+		} else {
+			timeTV.setVisibility(View.GONE);
+		}
+		
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
 			User fromUser = GlobalHolder.getInstance().getUser(
 					mMsg.getFromUser().getmUserId());
@@ -242,12 +249,6 @@ public class MessageBodyView extends LinearLayout {
 						+ mMsg.getFromUser().getmUserId()
 						+ "] information from server");
 			}
-		}
-
-		if (isShowTime && mMsg.getDate() != null) {
-			timeTV.setText(mMsg.getStringDate());
-		} else {
-			timeTV.setVisibility(View.GONE);
 		}
 
 		if (mMsg.getFromUser() != null) {
@@ -427,8 +428,7 @@ public class MessageBodyView extends LinearLayout {
 	 */
 	private void populateAudioMessage(List<VMessageAudioItem> audioItems) {
 		final VMessageAudioItem item = audioItems.get(0);
-		if (item.getReadState() == VMessageAbstractItem.STATE_UNREAD
-				&& !isSending)
+		if (item.getReadState() == VMessageAbstractItem.STATE_UNREAD)
 			unReadIcon.setVisibility(View.VISIBLE);
 		else
 			unReadIcon.setVisibility(View.INVISIBLE);
@@ -625,11 +625,6 @@ public class MessageBodyView extends LinearLayout {
 		return callback;
 	}
 
-	public void updateView(VMessage vm, boolean showTime) {
-		isShowTime = showTime;
-		updateView(vm);
-	}
-
 	public void updateUnreadFlag(boolean flag, VMessageAudioItem item) {
 		if (!flag) {
 			item.setState(VMessageAbstractItem.STATE_READED);
@@ -696,31 +691,45 @@ public class MessageBodyView extends LinearLayout {
 		}
 
 		String olderUuid = this.mMsg.getUUID();
+		boolean isLocal = this.mMsg.isLocal();
 		this.mMsg = vm;
-		if (!olderUuid.equals(vm.getUUID())) {
+		this.isShowTime = vm.isShowTime();
+		if (!olderUuid.equals(vm.getUUID()) && isLocal != vm.isLocal()) {
 			initView();
-		}
-
-		if (mMsg.isBeginSendingAnima) {
-			updateSendingAnima(true);
 		} else {
-			updateSendingAnima(false);
+			if (isShowTime && mMsg.getDate() != null) {
+				timeTV.setVisibility(View.VISIBLE);
+				timeTV.setText(mMsg.getStringDate());
+			} else {
+				timeTV.setVisibility(View.GONE);
+			}
+			
+			if (mMsg.isBeginSendingAnima) {
+				updateSendingAnima(true);
+			} else {
+				updateSendingAnima(false);
+			}
+
+			if (mMsg.isUpdateAvatar)
+				updateAvatar(mMsg.getFromUser().getAvatarBitmap());
+
+			if (mMsg.isShowFailed) {
+				updateFailedFlag(true);
+			} else {
+				updateFailedFlag(false);
+			}
+
+			if (mMsg.isUpdateDate) {
+				updateDate();
+				mMsg.isUpdateDate = false;
+			}
+			
+			unReadIcon.setVisibility(View.GONE);
+			seconds.setVisibility(View.GONE);
+			mContentContainer.setTag(this.mMsg);
 		}
-
-		if (mMsg.isUpdateAvatar)
-			updateAvatar(mMsg.getFromUser().getAvatarBitmap());
-
-		if (mMsg.isShowFailed) {
-			updateFailedFlag(true);
-		} else {
-			updateFailedFlag(false);
-		}
-
-		if (mMsg.isUpdateDate) {
-			updateDate();
-		}
-
-		mContentContainer.removeAllViews();
+		
+		mContentContainer.removeAllViews();	
 		populateMessage();
 	}
 

@@ -9,7 +9,6 @@ public class VMessageDataAndViewWrapper implements CommonAdapterItemDateAndViewW
 
 	private VMessage vm;
 	private View v;
-
 	public VMessageDataAndViewWrapper(VMessage vm) {
 		super();
 		this.vm = vm;
@@ -25,16 +24,16 @@ public class VMessageDataAndViewWrapper implements CommonAdapterItemDateAndViewW
 		return vm.getId();
 	}
 
+	public void setVm(VMessage vm) {
+		this.vm = vm;
+	}
+
 	@Override
 	public View getView() {
 		return v;
 	}
-
-	public void setView(View v) {
+	
+	public void setView(View v){
 		this.v = v;
-	}
-
-	public void setVm(VMessage vm) {
-		this.vm = vm;
 	}
 }

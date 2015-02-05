@@ -749,6 +749,10 @@ public class MultilevelListView extends ListView {
 			start++;
 			end--;
 		}
+		
+		// 如果start与end相等而break，则说明目标user的位置就是start再加1的位置
+		if(start == end)
+			pos = start++;
 
 		// Update user new position;
 		if (pos != -1 && pos < mShowItemDataList.size()) {

@@ -81,7 +81,6 @@ import com.bizcom.vc.activity.ConversationsTabFragment;
 import com.bizcom.vc.activity.contacts.ContactDetail;
 import com.bizcom.vc.activity.crow.CrowdDetailActivity;
 import com.bizcom.vc.activity.crow.CrowdFilesActivity.CrowdFileActivityType;
-import com.bizcom.vc.adapter.VMessageDataAndViewWrapper;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -221,7 +220,6 @@ public class ConversationTextActivity extends Activity implements
 
 	private View root; // createVideoDialog的View
 	private SparseArray<VMessage> messageAllID;
-	private long lastMessageBodyShowTime = 0;
 	private long intervalTime = 60000; // 显示消息时间状态的间隔时间
 	private boolean isReLoading; // 用于onNewIntent判断是否需要重新加载界面聊天数据
 	private boolean sendFile; // 用于从个人信息中传递过来的文件，只发送一次
@@ -1771,9 +1769,9 @@ public class ConversationTextActivity extends Activity implements
 			public void run() {
 				offset++;
 				judgeShouldShowTime(msg);
+				messageArray.add(msg);
 				if (msg.getFileItems().size() > 0)
 					msg.isBeginSendingAnima = false;
-				messageArray.add(msg);
 				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 				scrollToBottom();
 			}
@@ -2158,11 +2156,9 @@ public class ConversationTextActivity extends Activity implements
 		if (showingPopupWindow != null)
 			showingPopupWindow.dissmisPopupWindow();
 		judgeShouldShowTime(m);
+		messageArray.add(m);
 		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
 		mv.setCallback(listener);
-		VMessageDataAndViewWrapper adater = new VMessageDataAndViewWrapper(m);
-		adater.setView(mv);
-		messageArray.add(m);
 		if (!isStopped)
 			this.scrollToBottom();
 		else
@@ -2170,13 +2166,6 @@ public class ConversationTextActivity extends Activity implements
 
 		return true;
 	}
-
-	// private void setMessageBodyViewBelongId(MessageBodyView mv) {
-	// if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
-	// mv.setCurrentBelongID(remoteChatUserID);
-	// else
-	// mv.setCurrentBelongID(remoteGroupID);
-	// }
 
 	private boolean removeMessage(VMessage vm) {
 		if (vm == null) {
@@ -2222,12 +2211,15 @@ public class ConversationTextActivity extends Activity implements
 	 * @param message
 	 */
 	private void judgeShouldShowTime(VMessage message) {
-
-		if (message.getmDateLong() - lastMessageBodyShowTime < intervalTime)
-			message.setShowTime(false);
-		else
+		if(messageArray != null && messageArray.size() > 1){
+			VMessage vMessage = messageArray.get(messageArray.size() - 1);
+			if (message.getmDateLong() - vMessage.getmDateLong() < intervalTime)
+				message.setShowTime(false);
+			else
+				message.setShowTime(true);
+		} else {
 			message.setShowTime(true);
-		lastMessageBodyShowTime = message.getmDateLong();
+		}
 	}
 
 	private void updateFileProgressView(String uuid, long tranedSize,
@@ -2946,13 +2938,14 @@ public class ConversationTextActivity extends Activity implements
 	@Override
 	public void notifyChatInterToReplace(final VMessage vm) {
 
-		V2Log.e(TAG, "Recevice Binary data from server , and replaced wait");
 		if(messageArray == null)
 			return ;
 		
 		for (int i = 0; i < messageArray.size(); i++) {
 			VMessage replaced = messageArray.get(i);
 			if (replaced.getUUID().equals(vm.getUUID())) {
+				V2Log.e("binaryReplace", "ConversationTextActivity -- "
+						+ "Recevice Binary data from server , and replaced wait! id is : " + vm.getmXmlDatas());
 				replaced.setImageItems(vm.getImageItems());
 				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 				break;

@@ -368,9 +368,9 @@ public class CrowdFilesActivity extends Activity {
 			if (mUploadedFiles.size() > 0)
 				mUploadingFileNotificationIcon.setVisibility(View.VISIBLE);
 			else
-				mUploadingFileNotificationIcon.setVisibility(View.GONE);
+				mUploadingFileNotificationIcon.setVisibility(View.INVISIBLE);
 		} else
-			mUploadingFileNotificationIcon.setVisibility(View.GONE);
+			mUploadingFileNotificationIcon.setVisibility(View.INVISIBLE);
 	}
 
 	/**
@@ -686,7 +686,7 @@ public class CrowdFilesActivity extends Activity {
 	private void adapterUploadShow() {
 
 		if (showUploaded) {
-			mUploadingFileNotificationIcon.setVisibility(View.GONE);
+			mUploadingFileNotificationIcon.setVisibility(View.INVISIBLE);
 			if (mUploadedFiles.size() <= 0)
 				mUploadFinish.setVisibility(View.VISIBLE);
 			else
@@ -696,7 +696,7 @@ public class CrowdFilesActivity extends Activity {
 			if (mUploadedFiles.size() > 0)
 				mUploadingFileNotificationIcon.setVisibility(View.VISIBLE);
 			else
-				mUploadingFileNotificationIcon.setVisibility(View.GONE);
+				mUploadingFileNotificationIcon.setVisibility(View.INVISIBLE);
 		}
 	}
 
@@ -725,7 +725,7 @@ public class CrowdFilesActivity extends Activity {
 			// Update screen to uploading UI
 			showUploaded = true;
 			mTitle.setText(R.string.crowd_files_title_uploading);
-			mShowUploadedFileButton.setVisibility(View.GONE);
+			mShowUploadedFileButton.setVisibility(View.INVISIBLE);
 			adapterUploadShow();
 			adapter.notifyDataSetChanged();
 		}
@@ -1118,8 +1118,8 @@ public class CrowdFilesActivity extends Activity {
 			case UNKNOWN:
 				item.mFileButton
 						.setText(R.string.crowd_files_button_name_download);
-				item.mFailedIcon.setVisibility(View.GONE);
-				item.mFileText.setVisibility(View.GONE);
+				item.mFailedIcon.setVisibility(View.INVISIBLE);
+				item.mFileText.setVisibility(View.INVISIBLE);
 				item.mFileButton.setVisibility(View.VISIBLE);
 				item.mProgressLayout.setVisibility(View.GONE);
 				break;
@@ -1128,25 +1128,25 @@ public class CrowdFilesActivity extends Activity {
 				item.mFileButton
 						.setText(R.string.crowd_files_button_name_pause);
 				item.mFileButton.setVisibility(View.VISIBLE);
-				item.mFailedIcon.setVisibility(View.GONE);
-				item.mFileText.setVisibility(View.GONE);
+				item.mFailedIcon.setVisibility(View.INVISIBLE);
+				item.mFileText.setVisibility(View.INVISIBLE);
 				item.mProgressLayout.setVisibility(View.VISIBLE);
 				break;
 			case UPLOAD_PAUSE:
 			case DOWNLOAD_PAUSE:
 				item.mFileButton
 						.setText(R.string.crowd_files_button_name_resume);
-				item.mFailedIcon.setVisibility(View.GONE);
-				item.mFileText.setVisibility(View.GONE);
+				item.mFailedIcon.setVisibility(View.INVISIBLE);
+				item.mFileText.setVisibility(View.INVISIBLE);
 				item.mFileButton.setVisibility(View.VISIBLE);
 				item.mProgressLayout.setVisibility(View.VISIBLE);
 				break;
 			case DOWNLOADED:
 				item.mFileButton.setText(R.string.crowd_files_name_open_file);
 				item.mFileButton.setVisibility(View.VISIBLE);
-				item.mFileText.setVisibility(View.GONE);
-				item.mFileProgress.setVisibility(View.GONE);
-				item.mFailedIcon.setVisibility(View.GONE);
+				item.mFileText.setVisibility(View.INVISIBLE);
+				item.mFileProgress.setVisibility(View.INVISIBLE);
+				item.mFailedIcon.setVisibility(View.INVISIBLE);
 				item.mProgressLayout.setVisibility(View.GONE);
 				break;
 			case UPLOADED:
@@ -1155,15 +1155,15 @@ public class CrowdFilesActivity extends Activity {
 					item.mFileButton
 							.setText(R.string.crowd_files_name_open_file);
 					item.mFileButton.setVisibility(View.VISIBLE);
-					item.mFileText.setVisibility(View.GONE);
-					item.mFileProgress.setVisibility(View.GONE);
-					item.mFailedIcon.setVisibility(View.GONE);
+					item.mFileText.setVisibility(View.INVISIBLE);
+					item.mFileProgress.setVisibility(View.INVISIBLE);
+					item.mFailedIcon.setVisibility(View.INVISIBLE);
 					item.mProgressLayout.setVisibility(View.GONE);
 				} else {
 					item.mFileButton
 							.setText(R.string.crowd_files_button_name_download);
-					item.mFailedIcon.setVisibility(View.GONE);
-					item.mFileText.setVisibility(View.GONE);
+					item.mFailedIcon.setVisibility(View.INVISIBLE);
+					item.mFileText.setVisibility(View.INVISIBLE);
 					item.mFileButton.setVisibility(View.VISIBLE);
 					item.mProgressLayout.setVisibility(View.GONE);
 				}
@@ -1172,8 +1172,8 @@ public class CrowdFilesActivity extends Activity {
 			case UPLOAD_FAILED:
 			case REMOVED:
 				item.mFailedIcon.setVisibility(View.VISIBLE);
-				item.mFileButton.setVisibility(View.GONE);
-				item.mFileText.setVisibility(View.GONE);
+				item.mFileButton.setVisibility(View.INVISIBLE);
+				item.mFileText.setVisibility(View.INVISIBLE);
 				item.mProgressLayout.setVisibility(View.GONE);
 				break;
 			default:
@@ -1182,9 +1182,9 @@ public class CrowdFilesActivity extends Activity {
 
 			if (file.getFlag() == SHOW_DELETE_BUTTON_FLAG) {
 				item.mFileDeleteButton.setVisibility(View.VISIBLE);
-				item.mFailedIcon.setVisibility(View.GONE);
-				item.mFileText.setVisibility(View.GONE);
-				item.mFileButton.setVisibility(View.GONE);
+				item.mFailedIcon.setVisibility(View.INVISIBLE);
+				item.mFileText.setVisibility(View.INVISIBLE);
+				item.mFileButton.setVisibility(View.INVISIBLE);
 			} else {
 				item.mFileDeleteButton.setVisibility(View.INVISIBLE);
 			}
@@ -1357,7 +1357,7 @@ public class CrowdFilesActivity extends Activity {
 				}
 
 				if (item.mFileDeleteButton.getVisibility() == View.VISIBLE) {
-					item.mFileDeleteButton.setVisibility(View.GONE);
+					item.mFileDeleteButton.setVisibility(View.INVISIBLE);
 					switch (tag.vf.getState()) {
 					case DOWNLOAD_FAILED:
 					case UPLOAD_FAILED:
@@ -1374,9 +1374,9 @@ public class CrowdFilesActivity extends Activity {
 					tag.vf.setFlag(HIDE_DELETE_BUTTON_FLAG);
 				} else {
 					item.mFileDeleteButton.setVisibility(View.VISIBLE);
-					item.mFailedIcon.setVisibility(View.GONE);
-					item.mFileButton.setVisibility(View.GONE);
-					item.mFileText.setVisibility(View.GONE);
+					item.mFailedIcon.setVisibility(View.INVISIBLE);
+					item.mFileButton.setVisibility(View.INVISIBLE);
+					item.mFileText.setVisibility(View.INVISIBLE);
 					tag.vf.setFlag(SHOW_DELETE_BUTTON_FLAG);
 				}
 			}

@@ -135,7 +135,6 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 
 		searchList = new ArrayList<ScrollItem>();
 		mUnreadConvList = new HashSet<Conversation>();
-		getResources();
 	}
 
 	@Override
