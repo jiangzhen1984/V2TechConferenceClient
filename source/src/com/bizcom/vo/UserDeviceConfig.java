@@ -25,7 +25,7 @@ import com.bizcom.vc.service.JNIService;
  * Local user video device is unnecessary VideoPlayer and device id information.<br>
  * If we want to open remote user's video, we need VidePlayer and device id
  * information. To get remote user's device id, we can listen
- * {@link com.V2.jni.VideoRequestCallback#OnRemoteUserVideoDevice(String)}. <br>
+ * {@link com.V2.jni.callbackInterface.VideoRequestCallback#OnRemoteUserVideoDevice(String)}. <br>
  * If object as local device, mVP is null and deviceID is "".
  * 
  * @see v2av.VideoPlayer com.V2.jni.VideoRequestCallback

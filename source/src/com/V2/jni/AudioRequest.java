@@ -7,17 +7,18 @@ import java.util.List;
 import android.content.Context;
 import android.util.Log;
 
+import com.V2.jni.callbackInterface.AudioRequestCallback;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.util.V2Log;
 import com.bizcom.vc.application.V2GlobalEnum;
 
 public class AudioRequest {
+	private List<WeakReference<AudioRequestCallback>> callbacks;
 
 	private final String TAG = "AudioRequest";
+
 	private Context context;
 	private static AudioRequest mAudioRequest;
-
-	private List<WeakReference<AudioRequestCallback>> callbacks;
 
 	private AudioRequest(Context context) {
 		this.context = context;
@@ -115,6 +116,7 @@ public class AudioRequest {
 
 	/**
 	 * 让底层开始录音的函数接口
+	 * 
 	 * @param fileID
 	 */
 	public native void RecordFile(String fileID);

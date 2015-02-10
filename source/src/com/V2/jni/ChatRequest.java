@@ -6,21 +6,20 @@ import java.util.List;
 import android.content.Context;
 import android.util.Log;
 
+import com.V2.jni.callbackInterface.ChatRequestCallback;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.V2.jni.util.V2Log;
 
 public class ChatRequest {
+	private ChatRequestCallback callback;
 
 	public static final int BT_CONF = 1;
 	public static final int BT_IM = 2;
 
 	private static ChatRequest mChatRequest;
 
-	private ChatRequestCallback callback;
-
 	private ChatRequest() {
-
-	};
+	}
 
 	public static synchronized ChatRequest getInstance(Context context) {
 		if (mChatRequest == null) {
@@ -54,7 +53,7 @@ public class ChatRequest {
 		// clear cache.
 		ctL.clear();
 		btL.clear();
-//		cpL.clear();
+		// cpL.clear();
 	}
 
 	public static synchronized ChatRequest getInstance() {

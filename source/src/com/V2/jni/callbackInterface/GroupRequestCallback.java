@@ -1,7 +1,8 @@
-package com.V2.jni;
+package com.V2.jni.callbackInterface;
 
 import java.util.List;
 
+import com.V2.jni.GroupRequest;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;

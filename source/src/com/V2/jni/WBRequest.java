@@ -7,6 +7,7 @@ import java.util.List;
 import android.content.Context;
 import android.util.Log;
 
+import com.V2.jni.callbackInterface.WBRequestCallback;
 import com.V2.jni.util.V2Log;
 
 public class WBRequest {

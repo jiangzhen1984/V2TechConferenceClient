@@ -17,13 +17,13 @@ public class RequestEnterConfResponse extends JNIResponse {
 	Conference conf;
 
 	/**
-	 * This class is wrapper that wrap{@link com.V2.jni.ConfRequestCallback#OnEnterConfCallback(long, long,
+	 * This class is wrapper that wrap{@link com.V2.jni.callbackInterface.ConfRequestCallback#OnEnterConfCallback(long, long,
 	 *      String, int)} return data
 	 * @param nConfID
 	 * @param nTime
 	 * @param szConfData
 	 * @param nJoinResult
-	 * @see  com.V2.jni.ConfRequestCallback#OnEnterConfCallback(long, long,
+	 * @see  com.V2.jni.callbackInterface.ConfRequestCallback#OnEnterConfCallback(long, long,
 	 *      String, int)
 	 */
 	public RequestEnterConfResponse(long nConfID, long nTime,

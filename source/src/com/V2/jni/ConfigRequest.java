@@ -11,11 +11,5 @@ public class ConfigRequest
 	public native void getConfigProp(String szItemPath,String szConfigAttr, byte[] pValueBuf, int nBufLen);
 	public native void getConfigPropCount(String szItemPath);
 	public native void removeConfigProp(String szItemPath,String szConfigAttr);
-	
-	/**
-	 * 
-	 * @param szServerIP
-	 * @param nPort
-	 */
 	public native void setServerAddress(String szServerIP, int nPort);
 }

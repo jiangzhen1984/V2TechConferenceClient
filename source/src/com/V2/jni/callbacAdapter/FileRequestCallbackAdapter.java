@@ -1,5 +1,6 @@
-package com.V2.jni;
+package com.V2.jni.callbacAdapter;
 
+import com.V2.jni.callbackInterface.FileRequestCallback;
 import com.V2.jni.ind.FileJNIObject;
 
 public abstract class FileRequestCallbackAdapter implements FileRequestCallback {

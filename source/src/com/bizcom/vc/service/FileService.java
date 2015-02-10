@@ -15,8 +15,8 @@ import android.os.Message;
 import android.text.TextUtils;
 
 import com.V2.jni.FileRequest;
-import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
+import com.V2.jni.callbacAdapter.FileRequestCallbackAdapter;
 import com.V2.jni.util.V2Log;
 import com.bizcom.vc.activity.conversation.MessageLoader;
 import com.bizcom.vc.application.GlobalConfig;

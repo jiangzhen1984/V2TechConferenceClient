@@ -394,7 +394,7 @@
 
     <!-- activity_conference -->
     <string name="conference_toast_sharing_failed">主讲权已被取消，共享失败</string>
-    <string name="conference_toast_no_meeting">您当前没有会议</string>
+    <string name="conference_toast_no_meeting">您当前没有会议消息</string>
     <string name="conference_toast_chairman_synchronous_video">主席正在同步视频</string>
     <!-- activity_conference_groupLayout -->
     <string name="conference_groupLayout_creation">创建人:</string>

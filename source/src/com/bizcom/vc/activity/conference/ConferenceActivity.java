@@ -1556,6 +1556,13 @@ public class ConferenceActivity extends Activity {
 		att.setJoined(false);
 		att.setSpeakingState(false);
 		att.setLectureState(Attendee.LECTURE_STATE_NOT);
+		if(att.getLectureState() == Attendee.LECTURE_STATE_NOT ){
+			hasUnreadChiremanControllMsg = false;
+			mMsgNotification.setVisibility(View.GONE);
+			if (mConfMsgRedDot != null) {
+				mConfMsgRedDot.setVisibility(View.GONE);
+			}
+		}
 
 		// adjust layout if we closed video
 		if (layoutChanged) {

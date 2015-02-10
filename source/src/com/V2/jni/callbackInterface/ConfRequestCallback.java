@@ -1,5 +1,6 @@
-package com.V2.jni;
+package com.V2.jni.callbackInterface;
 
+import com.V2.jni.ConfRequest;
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2User;
 

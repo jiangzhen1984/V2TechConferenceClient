@@ -7,14 +7,14 @@ import android.os.HandlerThread;
 import android.util.Log;
 
 import com.V2.jni.AudioRequest;
-import com.V2.jni.AudioRequestCallback;
 import com.V2.jni.ChatRequest;
 import com.V2.jni.FileRequest;
-import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.VideoRequest;
-import com.V2.jni.VideoRequestCallback;
-import com.V2.jni.VideoRequestCallbackAdapter;
+import com.V2.jni.callbacAdapter.FileRequestCallbackAdapter;
+import com.V2.jni.callbacAdapter.VideoRequestCallbackAdapter;
+import com.V2.jni.callbackInterface.AudioRequestCallback;
+import com.V2.jni.callbackInterface.VideoRequestCallback;
 import com.V2.jni.ind.AudioJNIObjectInd;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.EscapedcharactersProcessing;

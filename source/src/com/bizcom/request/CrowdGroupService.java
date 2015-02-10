@@ -7,9 +7,9 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.V2.jni.FileRequest;
-import com.V2.jni.FileRequestCallbackAdapter;
 import com.V2.jni.GroupRequest;
-import com.V2.jni.GroupRequestCallbackAdapter;
+import com.V2.jni.callbacAdapter.FileRequestCallbackAdapter;
+import com.V2.jni.callbacAdapter.GroupRequestCallbackAdapter;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
@@ -637,7 +637,7 @@ public class CrowdGroupService extends AbstractHandler {
 		 * Used to as callback of accept join crowd group <br />
 		 * ===OnAcceptInviteJoinGroup never called===
 		 * 
-		 * @see com.V2.jni.GroupRequestCallbackAdapter#onAddGroupInfo(V2Group)
+		 * @see com.V2.jni.callbacAdapter.GroupRequestCallbackAdapter#onAddGroupInfo(V2Group)
 		 */
 		public void onAddGroupInfo(V2Group group) {
 			if (group.type == V2Group.TYPE_CROWD) {

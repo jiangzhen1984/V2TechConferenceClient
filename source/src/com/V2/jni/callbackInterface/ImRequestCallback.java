@@ -1,7 +1,8 @@
-package com.V2.jni;
+package com.V2.jni.callbackInterface;
 
 import java.util.List;
 
+import com.V2.jni.ImRequest;
 import com.V2.jni.ind.V2User;
 
 

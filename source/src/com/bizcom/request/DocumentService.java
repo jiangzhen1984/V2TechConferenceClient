@@ -3,9 +3,9 @@ package com.bizcom.request;
 import android.os.Handler;
 
 import com.V2.jni.GroupRequest;
-import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.WBRequest;
-import com.V2.jni.WBRequestCallback;
+import com.V2.jni.callbacAdapter.GroupRequestCallbackAdapter;
+import com.V2.jni.callbackInterface.WBRequestCallback;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.util.V2Log;
 import com.bizcom.request.jni.JNIResponse;

@@ -1,7 +1,8 @@
-package com.V2.jni;
+package com.V2.jni.callbacAdapter;
 
 import java.util.List;
 
+import com.V2.jni.callbackInterface.ImRequestCallback;
 import com.V2.jni.ind.V2User;
 
 public abstract class ImRequestCallbackAdapter implements ImRequestCallback {

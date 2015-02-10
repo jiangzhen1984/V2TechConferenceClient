@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.V2.jni.callbackInterface.ConfRequestCallback;
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;

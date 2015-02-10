@@ -38,13 +38,6 @@ import com.bizcom.util.BitmapUtil;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.V2GlobalConstants;
 
-/**
- * User information
- * 
- * @author 28851274
- * 
- */
-
 public class User implements Comparable<User> {
 
 	// Server transfer fields
@@ -69,31 +62,25 @@ public class User implements Comparable<User> {
 	private String mSignature;
 	private String mTelephone;
 	private String mCommentname;
-
 	// group
 	private String mCompany;
 	private String mDepartment;
 	// end Server transfer fields
-
 	// custom fields
 	private boolean isCurrentLoggedInUser;
 	private NetworkStateCode mResult;
 	private DeviceType mType;
 	private Status mStatus;
 	private String mName;
-
 	private Set<Group> mBelongsGroup;
 	private String mAvatarPath;
 	private String abbra;
-
 	// For Discussion Member Activity , onItemLongClick
 	public boolean isShowDelete;
-
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
 	// This value indicate this object is dirty, construct locally without any
 	// user information
 	private boolean isDirty;
-
 	// 会议中的快速入会用户
 	private boolean isRapidInitiation = false;
 
@@ -175,14 +162,14 @@ public class User implements Comparable<User> {
 	public void setmResult(NetworkStateCode mResult) {
 		this.mResult = mResult;
 	}
-	
-	public String getRealName(){
+
+	public String getRealName() {
 		return mName;
 	}
 
 	public String getName() {
 		boolean isFriend = GlobalHolder.getInstance().isFriend(this);
-		if(isFriend && !TextUtils.isEmpty(mNickName))
+		if (isFriend && !TextUtils.isEmpty(mNickName))
 			return mNickName;
 		else
 			return mName;
@@ -500,7 +487,7 @@ public class User implements Comparable<User> {
 		if (another.getmStatus() == this.mStatus) {
 			return this.abbra.compareTo(another.abbra);
 		}
-		
+
 		if (this.mStatus == Status.ONLINE || this.mStatus == Status.LEAVE
 				|| this.mStatus == Status.DO_NOT_DISTURB
 				|| this.mStatus == Status.BUSY) {

@@ -44,18 +44,15 @@ public class XmlParser {
 	}
 
 	public static String parseForMessageUUID(String xml) {
-
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
-		InputStream is = null;
 		String uuid = null;
 		try {
-			dBuilder = dbFactory.newDocumentBuilder();
-			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-			Document doc = dBuilder.parse(is);
+			DocumentBuilder documentBuilder = DocumentBuilderFactory
+					.newInstance().newDocumentBuilder();
+			InputStream is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document document = documentBuilder.parse(is);
 
-			doc.getDocumentElement().normalize();
-			NodeList ChatMsgData = doc.getElementsByTagName("TChatData");
+			document.getDocumentElement().normalize();
+			NodeList ChatMsgData = document.getElementsByTagName("TChatData");
 			if (ChatMsgData.getLength() <= 0) {
 				return null;
 			}
@@ -70,25 +67,23 @@ public class XmlParser {
 
 	public static VMessage parseForMessage(VMessage vm) {
 		String xml = vm.getmXmlDatas();
-		if (xml == null)
+		if (xml == null) {
 			return vm;
-
-		InputStream is = null;
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
+		}
 		try {
-			dBuilder = dbFactory.newDocumentBuilder();
-			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-			Document doc = dBuilder.parse(is);
+			DocumentBuilder documentBuilder = DocumentBuilderFactory
+					.newInstance().newDocumentBuilder();
+			InputStream is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+			Document document = documentBuilder.parse(is);
 
-			doc.getDocumentElement().normalize();
-			Element element = (Element) doc.getElementsByTagName("TChatData")
-					.item(0);
+			document.getDocumentElement().normalize();
+			Element element = (Element) document.getElementsByTagName(
+					"TChatData").item(0);
 			boolean isAutoReply = "True".equals(element
 					.getAttribute("IsAutoReply"));
 			vm.setAutoReply(isAutoReply);
 
-			NodeList textMsgItemNL = doc.getElementsByTagName("ItemList");
+			NodeList textMsgItemNL = document.getElementsByTagName("ItemList");
 			if (textMsgItemNL.getLength() <= 0) {
 				return null;
 			}
@@ -171,17 +166,14 @@ public class XmlParser {
 	}
 
 	public static void extraImageMetaFrom(VMessage vm, String xml) {
-		InputStream is = null;
-
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
 		try {
-			dBuilder = dbFactory.newDocumentBuilder();
-			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
+
+			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder();
+			InputStream is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
 			Document doc = dBuilder.parse(is);
 
 			doc.getDocumentElement().normalize();
-
 			NodeList imgMsgItemNL = doc
 					.getElementsByTagName("TPictureChatItem");
 			for (int i = 0; i < imgMsgItemNL.getLength(); i++) {
@@ -208,16 +200,13 @@ public class XmlParser {
 
 	public static void extraAudioMetaFrom(VMessage vm, String xml) {
 		InputStream is = null;
-
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
 		try {
-			dBuilder = dbFactory.newDocumentBuilder();
+			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder();
 			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
 			Document doc = dBuilder.parse(is);
 
 			doc.getDocumentElement().normalize();
-
 			NodeList audioMsgItemNL = doc
 					.getElementsByTagName("TAudioChatItem");
 			for (int i = 0; i < audioMsgItemNL.getLength(); i++) {
@@ -247,15 +236,13 @@ public class XmlParser {
 		V2Doc.Doc pr = new V2Doc.Doc();
 		pr.setDocId(docId);
 		InputStream is = null;
-
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
 		try {
-			dBuilder = dbFactory.newDocumentBuilder();
+			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder();
 			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
 			Document doc = dBuilder.parse(is);
-			doc.getDocumentElement().normalize();
 
+			doc.getDocumentElement().normalize();
 			NodeList pageList = doc.getElementsByTagName("page");
 			Page[] pages = new Page[pageList.getLength()];
 			for (int i = 0; i < pageList.getLength(); i++) {
@@ -294,12 +281,10 @@ public class XmlParser {
 	 */
 	public static List<V2ShapeMeta> parseV2ShapeMeta(String xml) {
 		List<V2ShapeMeta> metaList = new ArrayList<V2ShapeMeta>();
-
 		InputStream is = null;
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
 		try {
-			dBuilder = dbFactory.newDocumentBuilder();
+			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance()
+					.newDocumentBuilder();
 			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
 			Document doc = dBuilder.parse(is);
 			doc.getDocumentElement().normalize();
@@ -436,12 +421,9 @@ public class XmlParser {
 	 * @return
 	 */
 	public static V2ShapeMeta parseV2ShapeMetaSingle(String xml) {
-
 		InputStream is = null;
-		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder dBuilder;
 		try {
-			dBuilder = dbFactory.newDocumentBuilder();
+			DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 			is = new ByteArrayInputStream(xml.getBytes("UTF-8"));
 			Document doc = dBuilder.parse(is);
 			doc.getDocumentElement().normalize();

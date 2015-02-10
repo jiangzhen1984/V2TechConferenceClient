@@ -8,19 +8,33 @@ import java.util.List;
 import android.content.Context;
 import android.util.Log;
 
+import com.V2.jni.callbackInterface.ImRequestCallback;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 
 public class ImRequest {
+	private List<WeakReference<ImRequestCallback>> mCallbacks;
+
 	public boolean loginResult;
 	private static ImRequest mImRequest;
-
-	private List<WeakReference<ImRequestCallback>> mCallbacks;
 
 	private ImRequest(Context context) {
 		mCallbacks = new ArrayList<WeakReference<ImRequestCallback>>();
 	};
+
+	public void addCallback(ImRequestCallback callback) {
+		this.mCallbacks.add(new WeakReference<ImRequestCallback>(callback));
+	}
+
+	public void removeCallback(ImRequestCallback callback) {
+		for (int i = 0; i < mCallbacks.size(); i++) {
+			if (mCallbacks.get(i).get() == callback) {
+				this.mCallbacks.remove(i);
+				break;
+			}
+		}
+	}
 
 	public static synchronized ImRequest getInstance(Context context) {
 		if (mImRequest == null) {
@@ -44,23 +58,6 @@ public class ImRequest {
 		}
 
 		return mImRequest;
-	}
-
-	/**
-	 * 
-	 * @param callback
-	 */
-	public void addCallback(ImRequestCallback callback) {
-		this.mCallbacks.add(new WeakReference<ImRequestCallback>(callback));
-	}
-
-	public void removeCallback(ImRequestCallback callback) {
-		for (int i = 0; i < mCallbacks.size(); i++) {
-			if (mCallbacks.get(i).get() == callback) {
-				this.mCallbacks.remove(i);
-				break;
-			}
-		}
 	}
 
 	public native boolean initialize(ImRequest request);
@@ -97,20 +94,23 @@ public class ImRequest {
 	 * @param nStatus
 	 * @param serverTime
 	 * @param sDBID
-	 * 			server id
+	 *            server id
 	 * @param nResult
 	 *            0: logged in successfully
 	 * 
 	 * @see #login(String, String, int, int, boolean)
 	 */
-	private void OnLogin(long nUserID, int nStatus, long serverTime, String sDBID , int nResult) {
-		V2Log.d("ImRequest UI", "OnLogin ---> nUserID: " + nUserID + " | nStatus: " + nStatus + " | serverTime: " + serverTime
-				 + " | sDBID: " + sDBID + " | nResult: " + nResult);
+	private void OnLogin(long nUserID, int nStatus, long serverTime,
+			String sDBID, int nResult) {
+		V2Log.d("ImRequest UI", "OnLogin ---> nUserID: " + nUserID
+				+ " | nStatus: " + nStatus + " | serverTime: " + serverTime
+				+ " | sDBID: " + sDBID + " | nResult: " + nResult);
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnLoginCallback(nUserID, nStatus, nResult, serverTime , sDBID.trim());
+				callback.OnLoginCallback(nUserID, nStatus, nResult, serverTime,
+						sDBID.trim());
 			}
 		}
 	}
@@ -161,15 +161,16 @@ public class ImRequest {
 	 * 
 	 */
 	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
-		V2Log.d("ImRequest UI", "OnUpdateBaseInfo ---> nUserID: " + nUserID + " | updatexml: " + updatexml);
-		
-		V2User user = XmlAttributeExtractor.fromXml(nUserID , updatexml);
+		V2Log.d("ImRequest UI", "OnUpdateBaseInfo ---> nUserID: " + nUserID
+				+ " | updatexml: " + updatexml);
+
+		V2User user = XmlAttributeExtractor.fromXml(nUserID, updatexml);
 		if (user == null) {
-			V2Log.e("ImRequest OnUpdateBaseInfo --> Parsed the xml convert to a V2User Object failed... userID is : " +
-                    "" + nUserID + " and xml is : " + updatexml);
+			V2Log.e("ImRequest OnUpdateBaseInfo --> Parsed the xml convert to a V2User Object failed... userID is : "
+					+ "" + nUserID + " and xml is : " + updatexml);
 			return;
 		}
-		
+
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			Object obj = mCallbacks.get(i).get();
 
@@ -209,9 +210,10 @@ public class ImRequest {
 	 */
 	private void OnUserStatusUpdated(long nUserID, int nType, int nStatus,
 			String szStatusDesc) {
-		V2Log.d("ImRequest UI", "OnUserStatusUpdated ---> nUserID: " + nUserID + " | nType: " + nType
-				 + " | nStatus: " + nStatus + " | szStatusDesc: " + szStatusDesc);
-		
+		V2Log.d("ImRequest UI", "OnUserStatusUpdated ---> nUserID: " + nUserID
+				+ " | nType: " + nType + " | nStatus: " + nStatus
+				+ " | szStatusDesc: " + szStatusDesc);
+
 		if (nUserID == 113 || nUserID == 112) {
 			V2Log.d(" OnUserStatusUpdated--> nUserID:" + nUserID + "  nStatus:"
 					+ nStatus + " nType:" + nType + " szStatusDesc:"
@@ -315,8 +317,6 @@ public class ImRequest {
 
 	}
 
-	
-
 	// 鏇存敼绯荤粺澶村儚
 	public native void changeSystemAvatar(String szAvatarName);
 
@@ -362,8 +362,9 @@ public class ImRequest {
 	 */
 	private void OnGetSearchMember(String xmlinfo) {
 		Log.e("ImRequest UI", "OnGetSearchMember:" + xmlinfo);
-		List<V2User> list = XmlAttributeExtractor.parseUserList(xmlinfo, "user");
-		for (int i = 0; i <this.mCallbacks.size(); i++) {
+		List<V2User> list = XmlAttributeExtractor
+				.parseUserList(xmlinfo, "user");
+		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
 			if (obj != null) {
@@ -372,10 +373,10 @@ public class ImRequest {
 			}
 		}
 	}
-	
+
 	private void OnOfflineStart() {
 		V2Log.d("ImRequest UI", "OnOfflineStart ---> START!");
-		for (int i = 0; i <this.mCallbacks.size(); i++) {
+		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
 			if (obj != null) {
@@ -384,10 +385,10 @@ public class ImRequest {
 			}
 		}
 	}
-	
+
 	private void OnOfflineEnd() {
 		V2Log.d("ImRequest UI", "OnOfflineStart ---> END!");
-		for (int i = 0; i <this.mCallbacks.size(); i++) {
+		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
 			if (obj != null) {
@@ -433,12 +434,9 @@ public class ImRequest {
 		Log.e("ImRequest UI", "OnUpdateDownloading::" + size);
 	}
 
-	private void OnUpdateDownloadEnd(boolean error)
-
-	{
+	private void OnUpdateDownloadEnd(boolean error) {
 		Log.e("ImRequest UI", "OnUpdateDownloadEnd:" + error);
 	}
-
 
 	private void Oncrowdfile(long nCrowdId, String InfoXml) {
 		Log.e("ImRequest UI", "Oncrowdfile:" + nCrowdId);
@@ -455,7 +453,7 @@ public class ImRequest {
 	private void OnSignalDisconnected() {
 		Log.e("ImRequest UI", "OnSignalDisconnected");
 	}
-	
+
 	private void OnDelGroupInfo(int type, long groupid, boolean isdel) {
 		Log.e("ImRequest UI", "OnDelGroupInfo" + type + ":" + groupid + ":"
 				+ isdel);
@@ -469,9 +467,9 @@ public class ImRequest {
 
 	private void OnGetGroupsInfoEnd() {
 		Log.e("ImRequest UI", "OnGetGroupsInfoEnd");
-		
+
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
-			WeakReference<ImRequestCallback> wf =  this.mCallbacks.get(i);
+			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;

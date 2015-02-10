@@ -8,6 +8,7 @@ import java.util.List;
 import android.content.Context;
 import android.util.Log;
 
+import com.V2.jni.callbackInterface.FileRequestCallback;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;

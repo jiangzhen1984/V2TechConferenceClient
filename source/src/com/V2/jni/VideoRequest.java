@@ -8,6 +8,7 @@ import v2av.VideoPlayer;
 import android.content.Context;
 import android.util.Log;
 
+import com.V2.jni.callbackInterface.VideoRequestCallback;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
 import com.bizcom.vc.application.V2GlobalConstants;

@@ -6,9 +6,9 @@ import android.os.Handler;
 import android.os.Message;
 
 import com.V2.jni.GroupRequest;
-import com.V2.jni.GroupRequestCallbackAdapter;
 import com.V2.jni.ImRequest;
-import com.V2.jni.ImRequestCallbackAdapter;
+import com.V2.jni.callbacAdapter.GroupRequestCallbackAdapter;
+import com.V2.jni.callbacAdapter.ImRequestCallbackAdapter;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.bizcom.request.jni.JNIResponse;

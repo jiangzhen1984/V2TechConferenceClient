@@ -1,5 +1,6 @@
-package com.V2.jni;
+package com.V2.jni.callbacAdapter;
 
+import com.V2.jni.callbackInterface.ChatRequestCallback;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
 
 public abstract class ChatRequestCallbackAdapter implements ChatRequestCallback {

@@ -1,4 +1,4 @@
-package com.V2.jni;
+package com.V2.jni.callbackInterface;
 
 import com.V2.jni.ind.VideoJNIObjectInd;
 
