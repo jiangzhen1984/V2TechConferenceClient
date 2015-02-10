@@ -25,10 +25,10 @@
     <string name="ip_setting_button_save">保  存</string>
     <string name="ip_setting_button_cancel">取  消</string>
     <string name="login_chk">记住密码</string>
-    <string name="login_title">Viking&#032;&#032;&#032;&#032;</string>
+    <string name="login_title">V-LINK&#032;&#032;&#032;&#032;</string>
     <string name="login_title_2">Business Communication</string>
     <string name="login_title_copyright">版权所有&#0169;北京威速科技有限公司 保留所有权</string>
-    <string name="login_user_name">请输入BizCom用户名</string>
+    <string name="login_user_name">请输入用户名</string>
 
     <color name="logo_background">#ffffff</color>
     <color name="setting_outer_bg">#b8c9d4</color>
