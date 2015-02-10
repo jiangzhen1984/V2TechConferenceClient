@@ -17,7 +17,9 @@ import com.bizcom.request.jni.GroupServiceJNIResponse;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestConfCreateResponse;
 import com.bizcom.vc.application.GlobalHolder;
+import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vo.ContactGroup;
+import com.bizcom.vo.DiscussionGroup;
 import com.bizcom.vo.Group;
 import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
@@ -222,7 +224,6 @@ public class ContactsService extends AbstractHandler {
 						defaultGroup.getmGId(), user.getmUserId());
 				group.removeUserFromGroup(user);
 				defaultGroup.addUserToGroup(user);
-				
 			}
 		}
 		// Initialize time out message
@@ -294,6 +295,9 @@ public class ContactsService extends AbstractHandler {
 			}
 			// If equals, means we are waiting for modified response
 			if (group.id == mWatingGid) {
+				ContactGroup conGroup = (ContactGroup) GlobalHolder.getInstance().
+						getGroupById(V2GlobalConstants.GROUP_TYPE_CONTACT, group.id);
+				conGroup.setName(group.getName());
 				JNIResponse jniRes = new GroupServiceJNIResponse(
 						RequestConfCreateResponse.Result.SUCCESS);
 				Message.obtain(mCallbackHandler, UPDATE_CONTACTS_GROUP, jniRes)

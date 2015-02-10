@@ -55,6 +55,7 @@ import com.V2.jni.ind.V2User;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
+import com.bizcom.bo.MessageObject;
 import com.bizcom.bo.UserAvatarObject;
 import com.bizcom.bo.UserStatusObject;
 import com.bizcom.db.ContentDescriptor;
@@ -74,16 +75,17 @@ import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.GlobalState;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
-import com.bizcom.vc.application.V2GlobalEnum;
 import com.bizcom.vc.listener.CommonCallBack;
 import com.bizcom.vc.listener.CommonCallBack.CommonUpdateConversationStateInterface;
 import com.bizcom.vo.AddFriendHistorieNode;
 import com.bizcom.vo.AudioVideoMessageBean;
 import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.CrowdGroup;
+import com.bizcom.vo.CrowdGroup.AuthType;
 import com.bizcom.vo.DiscussionGroup;
 import com.bizcom.vo.FileDownLoadBean;
 import com.bizcom.vo.Group;
+import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.GroupQualicationState;
 import com.bizcom.vo.NetworkStateCode;
 import com.bizcom.vo.User;
@@ -92,17 +94,15 @@ import com.bizcom.vo.VMessage;
 import com.bizcom.vo.VMessageAbstractItem;
 import com.bizcom.vo.VMessageAudioItem;
 import com.bizcom.vo.VMessageFileItem;
+import com.bizcom.vo.VMessageFileItem.FileType;
 import com.bizcom.vo.VMessageImageItem;
 import com.bizcom.vo.VMessageQualification;
-import com.bizcom.vo.VMessageQualificationApplicationCrowd;
-import com.bizcom.vo.VMessageQualificationInvitationCrowd;
-import com.bizcom.vo.VideoBean;
-import com.bizcom.vo.CrowdGroup.AuthType;
-import com.bizcom.vo.Group.GroupType;
-import com.bizcom.vo.VMessageFileItem.FileType;
 import com.bizcom.vo.VMessageQualification.QualificationState;
 import com.bizcom.vo.VMessageQualification.ReadState;
 import com.bizcom.vo.VMessageQualification.Type;
+import com.bizcom.vo.VMessageQualificationApplicationCrowd;
+import com.bizcom.vo.VMessageQualificationInvitationCrowd;
+import com.bizcom.vo.VideoBean;
 import com.v2tech.R;
 
 /**
@@ -193,11 +193,10 @@ public class JNIService extends Service implements
 	private Context mContext;
 	private List<Integer> delayBroadcast = new ArrayList<Integer>();
 	private List<GroupUserInfoOrig> delayUserBroadcast = new ArrayList<GroupUserInfoOrig>();
+	private List<MessageObject> delayMessageBroadcast = new ArrayList<MessageObject>();
 
 	private List<VMessage> cacheImageMeta = new ArrayList<VMessage>();
 	private List<VMessage> cacheAudioMeta = new ArrayList<VMessage>();
-	private List<VMessage> messageQueue = new ArrayList<VMessage>();
-	private HashMap<String, String[]> cacheErrorBinaryMeta = new HashMap<String, String[]>();
 	private LongSparseArray<UserStatusObject> onLineUsers = new LongSparseArray<UserStatusObject>();
 
 	private final LocalBinder mBinder = new LocalBinder();
@@ -254,7 +253,7 @@ public class JNIService extends Service implements
 	@Override
 	public void updateConversationState() {
 		V2Log.d(TAG,
-				"ConversationTabFragment already builed successfully , send broadcast now!");
+				"TabFragmentMessage already builed successfully , send broadcast now!");
 		if (delayBroadcast.size() <= 0) {
 			V2Log.d(TAG,
 					"There is no broadcast in delayBroadcast collections , mean no callback!");
@@ -295,8 +294,19 @@ public class JNIService extends Service implements
 					intent.putExtra("gtype", go.gType);
 					mContext.sendBroadcast(intent);
 				}
+
+				for (int i = 0; i < delayMessageBroadcast.size(); i++) {
+					MessageObject msgObj = delayMessageBroadcast.get(i);
+					Intent intent = new Intent(JNI_BROADCAST_NEW_MESSAGE);
+					intent.addCategory(JNI_BROADCAST_CATEGROY);
+					intent.putExtra("msgObj", msgObj);
+					mContext.sendBroadcast(intent);
+				}
 			}
+
 			delayBroadcast.clear();
+			delayUserBroadcast.clear();
+			delayMessageBroadcast.clear();
 		}
 		noNeedBroadcast = true;
 	}
@@ -368,108 +378,6 @@ public class JNIService extends Service implements
 		sendBroadcast(i);
 	}
 
-	private synchronized void handleMessageQueue(boolean isAudioReceive) {
-		boolean isContinue = false;
-		for (int i = 0; i < messageQueue.size(); i++) {
-			VMessage vMessage = messageQueue.get(i);
-			if (vMessage.getAudioItems().size() > 0) {
-				if (!isAudioReceive)
-					break;
-				else
-					isContinue = true;
-
-			} else if (vMessage.getImageItems().size() > 0) {
-				// 得到的数组没有去重，即路径已经设置为error还会在设置一遍，需要处理，但此函数暂不用
-				String[] value = cacheErrorBinaryMeta.get(vMessage.getUUID());
-				if (value != null) {
-					for (int j = 0; j < value.length; j++) {
-						for (int y = 0; y < vMessage.getImageItems().size(); y++) {
-							VMessageImageItem vMessageImageItem = vMessage
-									.getImageItems().get(j);
-							if (value.equals(vMessageImageItem.getUuid())) {
-								vMessageImageItem.setFilePath("error");
-								break;
-							}
-						}
-					}
-				}
-			}
-
-			V2Log.e(TAG, "current index : " + i + " xml -- "
-					+ messageQueue.get(i).getmXmlDatas());
-			messageQueue.remove(i);
-			Message.obtain(mLocalHandlerThreadHandler, JNI_RECEIVED_MESSAGE,
-					vMessage).sendToTarget();
-
-			if (isContinue) {
-				handleMessageQueue(false);
-			}
-		}
-	}
-
-	private void checkErrorImageMeta(String szFileID) {
-		boolean isTrueLocation = false;
-		for (int i = 0; i < cacheImageMeta.size(); i++) {
-			VMessage vm = cacheImageMeta.get(i);
-			if (vm.getImageItems().size() > 0) {
-				for (int j = 0; j < vm.getImageItems().size(); j++) {
-					VMessageImageItem image = vm.getImageItems().get(j);
-					if (image.getUuid().equals(szFileID)) {
-						isTrueLocation = true;
-						image.setFilePath("error");
-						V2Log.e(TAG, "the image -" + szFileID
-								+ "- trans error!");
-					}
-				}
-
-				if (isTrueLocation) {
-					vm.setmXmlDatas(vm.getmXmlDatas());
-					if (vm.notReceiveImageSize - 1 <= 0)
-						cacheImageMeta.remove(i);
-
-					boolean isWait = false;
-					for (int x = 0; x < messageQueue.size(); x++) {
-						if (messageQueue.get(x).getUUID().equals(vm.getUUID())) {
-							isWait = true;
-							break;
-						}
-					}
-
-					if (isWait) {
-						String[] strings = cacheErrorBinaryMeta.get(vm
-								.getUUID());
-						if (strings != null) {
-							strings[strings.length] = szFileID;
-							cacheErrorBinaryMeta.put(vm.getUUID(), strings);
-						} else {
-							cacheErrorBinaryMeta.put(vm.getUUID(),
-									new String[] { szFileID });
-						}
-					} else
-						Message.obtain(mLocalHandlerThreadHandler,
-								JNI_RECEIVED_MESSAGE_BINARY_DATA, vm)
-								.sendToTarget();
-				}
-			}
-		}
-	}
-
-	private void checkErrorAudioMeta(String szFileID) {
-		for (int i = 0; i < cacheAudioMeta.size(); i++) {
-			VMessage vm = cacheAudioMeta.get(i);
-			if (vm.getAudioItems().size() > 0) {
-				for (int j = 0; j < vm.getAudioItems().size(); j++) {
-					VMessageAudioItem audio = vm.getAudioItems().get(j);
-					if (audio.getUuid().equals(szFileID)) {
-						handleMessageQueue(true);
-						V2Log.e(TAG, "the audio -" + szFileID
-								+ "- trans error!");
-					}
-				}
-			}
-		}
-	}
-
 	public class LocalBinder extends Binder {
 		public JNIService getService() {
 			return JNIService.this;
@@ -530,7 +438,7 @@ public class JNIService extends Service implements
 					if (msg.arg1 == V2GlobalConstants.GROUP_TYPE_DEPARTMENT
 							&& !noNeedBroadcast) {
 						V2Log.d(TAG,
-								"ConversationTabFragment no builed successfully! Need to delay sending , type is "
+								"TabFragmentMessage no builed successfully! Need to delay sending , type is "
 										+ msg.arg1);
 						delayBroadcast.add(msg.arg1);
 					} else {
@@ -578,8 +486,10 @@ public class JNIService extends Service implements
 						}
 
 						if (group == null) {
-							V2Log.e(TAG, "didn't find group information  "
-									+ go.gId);
+							V2Log.e(TAG,
+									"Load Group users , didn't find group information , user"
+											+ " id is : " + tu.getmUserId()
+											+ " group id is : " + go.gId);
 						} else {
 							group.addUserToGroup(existU);
 						}
@@ -589,7 +499,7 @@ public class JNIService extends Service implements
 							+ go.gType + "- user size is : " + lu.size());
 					if (!noNeedBroadcast) {
 						V2Log.d(TAG,
-								"ConversationTabFragment no builed successfully! Need to delay sending , type is "
+								"TabFragmentMessage no builed successfully! Need to delay sending , type is "
 										+ msg.arg1);
 						delayUserBroadcast.add(go);
 					} else {
@@ -608,7 +518,7 @@ public class JNIService extends Service implements
 				V2Log.e(TAG, "The All Group Infos Loaded !");
 				if (!noNeedBroadcast) {
 					V2Log.d(TAG,
-							"ConversationTabFragment no builed successfully! Need to delay sending , type is 锛欽NI_GROUP_LOADED");
+							"TabFragmentMessage no builed successfully! Need to delay sending , type is 锛欽NI_GROUP_LOADED");
 					delayBroadcast.add(JNI_GROUP_LOADED);
 				} else {
 					Intent loaded = new Intent();
@@ -622,7 +532,7 @@ public class JNIService extends Service implements
 				V2Log.e(TAG, "OFFLINE MESSAGE LOAD : " + isOfflineEnd);
 				if (!noNeedBroadcast) {
 					V2Log.d(TAG,
-							"ConversationTabFragment no builed successfully! Need to delay sending , type is 锛欽NI_OFFLINE_LOADED");
+							"TabFragmentMessage no builed successfully! Need to delay sending , type is 锛欽NI_OFFLINE_LOADED");
 					delayBroadcast.add(JNI_OFFLINE_LOADED);
 				} else {
 					Intent i = new Intent();
@@ -669,22 +579,42 @@ public class JNIService extends Service implements
 					MessageBuilder.saveBinaryVMessage(mContext, vm);
 					MessageBuilder.saveFileVMessage(mContext, vm);
 
+					boolean isDelay = false;
 					if (vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 						action = JNI_BROADCAST_NEW_CONF_MESSAGE;
 					} else {
 						action = JNI_BROADCAST_NEW_MESSAGE;
+						isDelay = true;
 					}
 
-					Intent ii = new Intent(action);
-					ii.addCategory(JNI_BROADCAST_CATEGROY);
-					ii.putExtra("mid", vm.getId());
-					ii.putExtra("groupID", vm.getGroupId());
-					ii.putExtra("groupType", vm.getMsgCode());
-					ii.putExtra("remoteUserID", vm.getFromUser().getmUserId());
-					ii.putExtra("gm", vm.getGroupId() != 0);
-					// Send ordered broadcast, make sure conversationview
-					// receive message first
-					mContext.sendBroadcast(ii, null);
+					MessageObject msgObj = new MessageObject(vm.getMsgCode(),
+							vm.getGroupId(), vm.getFromUser().getmUserId(),
+							vm.getId());
+
+					if (isDelay) {
+						if (!noNeedBroadcast) {
+							V2Log.d(TAG,
+									"TabFragmentMessage no builed successfully! Need to delay sending , type is 锛欽NI_OFFLINE_LOADED");
+							delayMessageBroadcast.add(msgObj);
+						} else {
+							Intent msgIntent = new Intent(action);
+							msgIntent
+									.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+							msgIntent.putExtra("msgObj", msgObj);
+							// Send ordered broadcast, make sure
+							// conversationview
+							// receive message first
+							mContext.sendBroadcast(msgIntent, null);
+						}
+					} else {
+						Intent msgIntent = new Intent(action);
+						msgIntent
+								.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
+						msgIntent.putExtra("msgObj", msgObj);
+						// Send ordered broadcast, make sure conversationview
+						// receive message first
+						mContext.sendBroadcast(msgIntent, null);
+					}
 				}
 				break;
 			case JNI_RECEIVED_MESSAGE_BINARY_DATA:
@@ -906,6 +836,11 @@ public class JNIService extends Service implements
 				DiscussionGroup cg = (DiscussionGroup) GlobalHolder
 						.getInstance().getGroupById(group.id);
 				cg.setName(group.getName());
+			} else if (group.type == GroupType.CONTACT.intValue()) {
+				/**
+				 * @see ContactsService#OnModifyGroupInfoCallback
+				 */
+				return;
 			}
 
 			// Send broadcast
@@ -1261,6 +1196,7 @@ public class JNIService extends Service implements
 				 */
 			}
 
+			// 好友删除：被删除的时候，nGroupID 为 0
 			if (groupType == GroupType.CONTACT.intValue()) {
 
 				Set<Group> groupSet = GlobalHolder.getInstance()
@@ -1269,6 +1205,10 @@ public class JNIService extends Service implements
 				for (Group gg : groupSet) {
 					if (gg.getGroupType() == GroupType.CONTACT) {
 						nGroupID = gg.getmGId();
+						V2Log.d(TAG,
+								"OnDelGroupUserCallback --> delete group id is : "
+										+ nGroupID);
+						break;
 					}
 				}
 
@@ -1964,8 +1904,6 @@ public class JNIService extends Service implements
 			User owner = GlobalHolder.getInstance().getUser(user.uid);
 			Group g = new ConferenceGroup(v2conf.cid, v2conf.name, owner,
 					v2conf.startTime, owner);
-			User u = GlobalHolder.getInstance().getUser(user.uid);
-			g.setOwnerUser(u);
 			GlobalHolder.getInstance().addGroupToList(
 					Group.GroupType.CONFERENCE.intValue(), g);
 
@@ -2444,7 +2382,7 @@ public class JNIService extends Service implements
 		}
 	}
 
-	private class ContactsGroupRequestCBHandler {
+	public class ContactsGroupRequestCBHandler {
 		private void OnAddContactsGroupUserInfoCallback(long nGroupID,
 				User newUser) {
 			AddFriendHistroysHandler.becomeFriendHanler(

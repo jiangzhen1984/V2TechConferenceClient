@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import android.app.Activity;
@@ -18,9 +19,10 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
@@ -39,9 +41,9 @@ import com.bizcom.request.CrowdGroupService;
 import com.bizcom.request.FileOperationEnum;
 import com.bizcom.request.MessageListener;
 import com.bizcom.request.jni.FileTransStatusIndication;
+import com.bizcom.request.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestFetchGroupFilesResponse;
-import com.bizcom.request.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.bizcom.util.FileUitls;
 import com.bizcom.util.V2Toast;
 import com.bizcom.vc.activity.conversation.ConversationSelectFile;
@@ -57,14 +59,14 @@ import com.bizcom.vc.service.JNIService;
 import com.bizcom.vo.CrowdGroup;
 import com.bizcom.vo.FileDownLoadBean;
 import com.bizcom.vo.FileInfoBean;
+import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.NetworkStateCode;
 import com.bizcom.vo.VCrowdFile;
 import com.bizcom.vo.VFile;
+import com.bizcom.vo.VFile.State;
 import com.bizcom.vo.VMessage;
 import com.bizcom.vo.VMessageAbstractItem;
 import com.bizcom.vo.VMessageFileItem;
-import com.bizcom.vo.Group.GroupType;
-import com.bizcom.vo.VFile.State;
 import com.v2tech.R;
 
 public class CrowdFilesActivity extends Activity {
@@ -951,9 +953,9 @@ public class CrowdFilesActivity extends Activity {
 		}
 
 	}
-
 	class FileListAdapter extends BaseAdapter implements Filterable {
-
+		private int progressLayoutWidth;
+		private Map<ViewItem , VCrowdFile> items = new HashMap<CrowdFilesActivity.FileListAdapter.ViewItem , VCrowdFile>();
 		class ViewItem {
 			ImageView mFileDeleteModeButton;
 			ImageView mFileIcon;
@@ -1057,7 +1059,6 @@ public class CrowdFilesActivity extends Activity {
 						.findViewById(R.id.file_velocity);
 				item.mFileProgress = (TextView) convertView
 						.findViewById(R.id.file_process_percent);
-
 				item.mProgressParent = convertView
 						.findViewById(R.id.file_download_progress_state_ly);
 				item.mProgress = (ImageView) convertView
@@ -1087,18 +1088,13 @@ public class CrowdFilesActivity extends Activity {
 		}
 
 		private void updateViewItem(Tag tag) {
-			VCrowdFile file = tag.vf;
-			ViewItem item = tag.item;
+			final VCrowdFile file = tag.vf;
+			final ViewItem item = tag.item;
 			item.mFileName.setText(file.getName());
 			item.mFileSize.setText(file.getFileSizeStr());
 			item.mFileButton.setTag(file);
 			item.mFailedIcon.setTag(file);
 			VFile.State fs = file.getState();
-
-			// TODO show uploading item
-			if (showUploaded) {
-
-			}
 
 			if (isInDeleteMode
 					&& (file.getUploader().getmUserId() == currentLoginUserID || GlobalHolder
@@ -1189,39 +1185,78 @@ public class CrowdFilesActivity extends Activity {
 				item.mFileDeleteButton.setVisibility(View.INVISIBLE);
 			}
 			
-			item.mProgressParent.measure(MeasureSpec.UNSPECIFIED,
-					MeasureSpec.UNSPECIFIED);
+			ViewTreeObserver viewTreeObserver = item.mProgressLayout.getViewTreeObserver();
+			viewTreeObserver.addOnPreDrawListener(new OnPreDrawListener() {
+
+				@Override
+				public boolean onPreDraw() {
+					if (progressLayoutWidth == 0) {
+						progressLayoutWidth = item.mProgressLayout.getMeasuredWidth();
+						runOnUiThread(new Runnable() {
+							
+							@Override
+							public void run() {
+								
+								if(items.size() > 0){
+									Set<ViewItem> keySet = items.keySet();
+									for (ViewItem viewItem : keySet) {
+										VCrowdFile file = items.get(viewItem);
+										updateProgress(viewItem, items.get(viewItem));
+										V2Log.e(TAG, "onPreDraw --> update file name is : " + file.getName());
+									}
+									items.clear();
+								}
+							}
+						});
+					}
+					return true;
+				}
+			});
+			
+			if(item.mProgressLayout.getMeasuredWidth() == 0){
+				items.put(item, file);
+			}
+			
 			updateProgress(item, file);
 		}
 
 		private void updateProgress(ViewItem item, VCrowdFile file) {
 
 			item.mFileProgress.setVisibility(View.VISIBLE);
+			FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress
+					.get(file.getId());
 			if (!isFromStartState && (file.getState() == VFile.State.UPLOAD_PAUSE || 
 					file.getState() == VFile.State.DOWNLOAD_PAUSE)) {
+				if(bean != null)
+					file.setProceedSize(bean.currentLoadSize);
 				item.mFileProgress.setText(file.getProceedSizeStr() + "/"
 						+ file.getFileSizeStr());
-				item.mVelocity.setText("0kb/S");
+				item.mVelocity.setText("0kb/s");
 				
 				double percent = ((double) file.getProceedSize() / (double) file
 						.getSize());
-				int width = item.mProgressLayout.getMeasuredWidth();
+//				int width = item.mProgressLayout.getMeasuredWidth();
 				ViewGroup.LayoutParams vl = item.mProgress.getLayoutParams();
-				vl.width = (int) (width * percent);
+				vl.width = (int) (progressLayoutWidth * percent);
 				item.mProgress.setLayoutParams(vl);
 			} else {
-				FileDownLoadBean bean = GlobalHolder.getInstance().globleFileProgress
-						.get(file.getId());
 				double percent = 0;
 				float speed = 0;
 				if (bean != null) {
 					file.setProceedSize(bean.currentLoadSize);
-					long sec = (System.currentTimeMillis() - bean.lastLoadTime);
-					long size = file.getProceedSize() - bean.lastLoadSize;
-					percent = ((double) file.getProceedSize() / (double) file
-							.getSize());
-					speed = (size / sec) * 1000;
-					item.mVelocity.setText(file.getFileSize(speed) + "/S");
+					if(file.getState() == VFile.State.UPLOAD_PAUSE || 
+							file.getState() == VFile.State.DOWNLOAD_PAUSE){
+						item.mVelocity.setText("0kb/s");
+						percent = ((double) file.getProceedSize() / (double) file
+								.getSize());
+					} else{
+						long sec = (System.currentTimeMillis() - bean.lastLoadTime);
+						long size = file.getProceedSize() - bean.lastLoadSize;
+						percent = ((double) file.getProceedSize() / (double) file
+								.getSize());
+						speed = (size / sec) * 1000;
+						item.mVelocity.setText(file.getFileSize(speed) + "/S");
+					}
 				} else {
 					item.mVelocity.setText("0kb/S");
 				}
@@ -1229,9 +1264,9 @@ public class CrowdFilesActivity extends Activity {
 				item.mFileProgress.setText(file.getProceedSizeStr() + "/"
 						+ file.getFileSizeStr());
 
-				int width = item.mProgressLayout.getMeasuredWidth();
+//				int width = item.mProgressLayout.getMeasuredWidth();
 				ViewGroup.LayoutParams vl = item.mProgress.getLayoutParams();
-				vl.width = (int) (width * percent);
+				vl.width = (int) (progressLayoutWidth * percent);
 				item.mProgress.setLayoutParams(vl);
 			}
 		}
@@ -1539,9 +1574,7 @@ public class CrowdFilesActivity extends Activity {
 					service.handleCrowdFile(file,
 							FileOperationEnum.OPERATION_RESUME_SEND, null);
 					isUpload = true;
-				} else {
-
-				}
+				} 
 				adapter.notifyDataSetChanged();
 
 				VMessageFileItem fileItem = MessageLoader

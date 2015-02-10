@@ -53,7 +53,7 @@
                 android:gravity="bottom"
                 android:singleLine="true"
                 android:text="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                android:textColor="@color/contacts_user_view_item_color_offline"
+                android:textColor="@color/common_item_text_color_black"
                 android:textSize="@dimen/conversation_view_name_text_size" />
             <!-- VoiceMessageActivity.java -->
             <TextView
@@ -94,7 +94,7 @@
             android:gravity="bottom"
             android:singleLine="true"
             android:text="other"
-            android:textColor="@color/common_item_text_color"
+            android:textColor="@color/common_item_text_color_black"
             android:textSize="@dimen/conversation_view_name_text_size" />
     </RelativeLayout>
 </RelativeLayout>

@@ -48,7 +48,7 @@ import com.v2tech.R;
 
 public class LeftShareDocLayout extends LinearLayout {
 
-	private static final String TAG = "VideoDocLayout";
+	private static final String TAG = "LeftShareDocLayout";
 	private FrameLayout mDocDisplayContainer;
 	private TextView mDocPageNumberTV;
 	private TextView mDocTitleView;
@@ -397,7 +397,7 @@ public class LeftShareDocLayout extends LinearLayout {
 								+ p.getFilePath());
 
 				recycleBitmap(mBackgroundBitMap);
-				mBackgroundBitMap = BitmapUtil.getCompressedBitmap(p
+				mBackgroundBitMap = BitmapUtil.getDocCompressBitmap(p
 						.getFilePath());
 				Matrix m = new Matrix();
 				m.postRotate(BitmapUtil.getBitmapRotation(p.getFilePath()));
@@ -1085,18 +1085,24 @@ public class LeftShareDocLayout extends LinearLayout {
 				if (listener != null) {
 					listener.requestDocViewFillParent(rootView);
 					if (mDocDisplayContainer.getChildCount() > 0) {
-						TouchImageView tiv = (TouchImageView) mDocDisplayContainer
-								.getChildAt(0);
-						tiv.setZoom(tiv.getCurrentZoom());
+						View child = mDocDisplayContainer.getChildAt(0);
+						if(child instanceof TouchImageView){
+							TouchImageView tiv = (TouchImageView) mDocDisplayContainer
+									.getChildAt(0);
+							tiv.setZoom(tiv.getCurrentZoom());
+						}
 					}
 				}
 			} else {
 				if (listener != null) {
 					listener.requestDocViewRestore(rootView);
 					if (mDocDisplayContainer.getChildCount() > 0) {
-						TouchImageView tiv = (TouchImageView) mDocDisplayContainer
-								.getChildAt(0);
-						tiv.setZoom(tiv.getCurrentZoom());
+						View child = mDocDisplayContainer.getChildAt(0);
+						if(child instanceof TouchImageView){
+							TouchImageView tiv = (TouchImageView) mDocDisplayContainer
+									.getChildAt(0);
+							tiv.setZoom(tiv.getCurrentZoom());
+						}
 					}
 				}
 			}

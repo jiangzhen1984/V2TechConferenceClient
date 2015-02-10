@@ -1211,44 +1211,34 @@ public class MessageAuthenticationActivity extends Activity {
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_accepted);
-				item.mContentTV.setText(res
-						.getString(R.string.crowd_invitation_apply_join)
-						+ vqac.getCrowdGroup().getName()
-						+ res.getString(R.string.crowd_Authentication_crowd));
+				item.mContentTV.setText(String.format(res
+						.getString(R.string.crowd_invitation_apply_join), vqac.getCrowdGroup().getName()));
 			} else if (vqac.getQualState() == QualificationState.REJECT) {
 				item.mRes.setVisibility(View.VISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_rejected);
-				item.mContentTV.setText(res
-						.getString(R.string.crowd_invitation_apply_join)
-						+ vqac.getCrowdGroup().getName()
-						+ res.getString(R.string.crowd_Authentication_crowd));
+				item.mContentTV.setText(String.format(res
+						.getString(R.string.crowd_invitation_apply_join), vqac.getCrowdGroup().getName()));
 			} else if (vqac.getQualState() == QualificationState.BE_REJECT) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
 				// item.mRejectContentTV.setText(vqac.getApplyReason());
-				item.mContentTV.setText(res
-						.getString(R.string.crowd_invitation_reject_join)
-						+ vqac.getCrowdGroup().getName()
-						+ res.getString(R.string.crowd_Authentication_crowd));
+				item.mContentTV.setText(String.format(res
+						.getString(R.string.crowd_invitation_reject_join), vqac.getCrowdGroup().getName()));
 			} else if (vqac.getQualState() == QualificationState.BE_ACCEPTED) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
-				item.mContentTV.setText(res
-						.getString(R.string.crowd_invitation_accept_join)
-						+ vqac.getCrowdGroup().getName()
-						+ res.getString(R.string.crowd_Authentication_crowd));
+				item.mContentTV.setText(String.format(res
+						.getString(R.string.crowd_invitation_accept_join), vqac.getCrowdGroup().getName()));
 			} else if (vqac.getQualState() == QualificationState.WAITING) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.VISIBLE);
-				item.mContentTV.setText(res
-						.getString(R.string.crowd_invitation_apply_join)
-						+ vqac.getCrowdGroup().getName()
-						+ res.getString(R.string.crowd_Authentication_crowd));
+				item.mContentTV.setText(String.format(res
+						.getString(R.string.crowd_invitation_apply_join), vqac.getCrowdGroup().getName()));
 			}
 		}
 
@@ -1376,7 +1366,6 @@ public class MessageAuthenticationActivity extends Activity {
 								null, msg, false);
 						// startCrowdInvitationDetail(msg);
 					} else {
-
 						Crowd crowd = new Crowd(cg.getmGId(),
 								cg.getOwnerUser(), cg.getName(), cg.getBrief());
 						crowdService.acceptInvitation(crowd,

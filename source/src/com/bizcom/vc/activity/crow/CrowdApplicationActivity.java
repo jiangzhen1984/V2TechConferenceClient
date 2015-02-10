@@ -74,6 +74,7 @@ public class CrowdApplicationActivity extends Activity {
 	private boolean disableAuth;
 	private boolean isReturnData;
 	private boolean shieldScreen;
+	private boolean isFailed;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -345,15 +346,18 @@ public class CrowdApplicationActivity extends Activity {
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
 					.getAction())) {
+				isFailed = true;
 				mNotes.setText(R.string.crowd_invitation_invalid_notes);
 				Toast.makeText(
 						getApplicationContext(),
 						getResources().getString(
 								R.string.crowd_Authentication_hit),
 						Toast.LENGTH_SHORT).show();
-				vq.setQualState(VMessageQualification.QualificationState.INVALID);
-				VerificationProvider.updateCrowdQualicationMessage(vq);
-				isReturnData = true;
+				if(vq != null){
+					vq.setQualState(VMessageQualification.QualificationState.INVALID);
+					VerificationProvider.updateCrowdQualicationMessage(vq);
+					isReturnData = true;
+				}
 				mReturnButton.performClick();
 			} else if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
 					.equals(intent.getAction())) {
@@ -411,12 +415,14 @@ public class CrowdApplicationActivity extends Activity {
 							mLocalHandler.postDelayed(new Runnable() {
 								@Override
 								public void run() {
-									Toast.makeText(
-											mContext,
-											R.string.crowd_applicant_invite_finish,
-											Toast.LENGTH_SHORT).show();
-									shieldScreen = false;
-									onBackPressed();
+									if(!isFailed){
+										Toast.makeText(
+												mContext,
+												R.string.crowd_applicant_invite_finish,
+												Toast.LENGTH_SHORT).show();
+										shieldScreen = false;
+										onBackPressed();
+									}
 								}
 							}, 1000);
 						}

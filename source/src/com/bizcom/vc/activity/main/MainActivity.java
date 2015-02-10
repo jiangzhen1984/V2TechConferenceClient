@@ -87,16 +87,16 @@ public class MainActivity extends FragmentActivity implements
 			new TabClass(PublicIntent.TAG_GROUP,
 					R.drawable.selector_tab_group_button,
 					R.string.tab_group_name, R.string.tab_group_name,
-					ConversationsTabFragment.class.getName()),
+					TabFragmentCrow.class.getName()),
 			new TabClass(PublicIntent.TAG_CONF,
 					R.drawable.selector_tab_conference_button,
 					R.string.tab_conference_name, R.string.tab_conference_name,
-					ConversationsTabFragment.class.getName()),
+					TabFragmentConference.class.getName()),
 			new TabClass(PublicIntent.TAG_COV,
 					R.drawable.selector_tab_conversation_button,
 					R.string.tab_conversation_name,
 					R.string.tab_conversation_name,
-					ConversationsTabFragment.class.getName()) };
+					TabFragmentMessage.class.getName()) };
 
 	private LocalReceiver receiver = new LocalReceiver();
 
@@ -313,7 +313,6 @@ public class MainActivity extends FragmentActivity implements
 				JNIService.class));
 		// Just for user remove application from recent task list
 		Notificator.cancelAllSystemNotification(getApplicationContext());
-
 		V2Log.d("system destroyed v2tech");
 	}
 
@@ -386,11 +385,11 @@ public class MainActivity extends FragmentActivity implements
 			if (tab.mTabName.equals(PublicIntent.TAG_CONTACT)) {
 			} else if (tab.mTabName.equals(PublicIntent.TAG_ORG)) {
 			} else if (tab.mTabName.equals(PublicIntent.TAG_GROUP)) {
-				((ConversationsTabFragment) fragment).updateSearchState();
+				((TabFragmentCrow) fragment).updateSearchState();
 			} else if (tab.mTabName.equals(PublicIntent.TAG_CONF)) {
-				((ConversationsTabFragment) fragment).updateSearchState();
+				((TabFragmentConference) fragment).updateSearchState();
 			} else if (tab.mTabName.equals(PublicIntent.TAG_COV)) {
-				((ConversationsTabFragment) fragment).updateSearchState();
+				((TabFragmentMessage) fragment).updateSearchState();
 			}
 
 			mViewPager.setCurrentItem(pos);

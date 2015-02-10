@@ -226,7 +226,7 @@ public class ConfRequest {
 	 * User invite current user to join further conference, this function will
 	 * be called
 	 * 
-	 * @param str
+	 * @param confXml
 	 *            {@code <conf createuserid='18' id='514000758190' starttime='1400162220' subject=' 就'/> }
 	 * @param creatorXml
 	 *            {@code <user id='18'/>}
@@ -239,34 +239,33 @@ public class ConfRequest {
 		V2Log.d("OnConfNotify " + confXml + " creatorXml:" + creatorXml);
 
 		V2Conference conf = new V2Conference();
-		String confId = XmlAttributeExtractor.extract(creatorXml, "id='", "'");
+		String confId = XmlAttributeExtractor.extract(confXml, " id='", "'");
 		if (confId == null || confId.isEmpty()) {
 			V2Log.e("confId is null  can not pasrse");
 			return;
 		}
-		String startTime = XmlAttributeExtractor.extract(creatorXml,
-				"starttime='", "'");
-		String subject = XmlAttributeExtractor.extract(creatorXml, "subject='",
+		
+		String startTime = XmlAttributeExtractor.extract(confXml,
+				" starttime='", "'");
+		String subject = XmlAttributeExtractor.extract(confXml, " subject='",
 				"'");
-		// String creator = XmlAttributeExtractor.extract(creatorXml,
-		// "createuserid='", "'");
+		
 		conf.cid = Long.parseLong(confId);
 		conf.name = subject;
 		if (!TextUtils.isEmpty(startTime))
-			conf.startTime = new Date(Long.parseLong(startTime) / 1000);
+			conf.startTime = new Date(Long.parseLong(startTime) * 1000);
 		else {
 			V2Log.e("OnConfNotify : get startTime is null...");
 			conf.startTime = new Date(GlobalConfig.getGlobalServerTime());
 		}
 
 		V2User user = new V2User();
-		String uid = XmlAttributeExtractor.extract(creatorXml, "id='", "'");
+		String uid = XmlAttributeExtractor.extract(creatorXml, " id='", "'");
 		if (uid == null || uid.isEmpty()) {
 			V2Log.e("uid is null  can not pasrse");
 			return;
 		}
 		user.uid = Long.parseLong(uid);
-
 		conf.creator = user;
 
 		for (int i = 0; i < this.mCallbacks.size(); i++) {

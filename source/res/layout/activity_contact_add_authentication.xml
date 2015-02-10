@@ -73,68 +73,13 @@
             android:id="@+id/RelativeLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="5dp"
             android:layout_alignParentTop="true" >
 
-            <ImageView
-                android:id="@+id/contact_user_detail_head_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="@dimen/button_padding_horizontal"
-                android:layout_marginTop="20dp"
-                android:src="@drawable/avatar" />
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/contact_user_detail_head_icon"
-                android:layout_alignTop="@+id/contact_user_detail_head_icon"
-                android:layout_marginLeft="@dimen/detail_detail_signature_margin_left"
-                android:layout_toRightOf="@+id/contact_user_detail_head_icon"
-                android:orientation="vertical" >
-
-                <TextView
-                    android:id="@+id/contact_user_detail_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top"
-                    android:ellipsize="end"
-                    android:gravity="top"
-                    android:maxWidth="@dimen/detail_detail_name_max_width"
-                    android:singleLine="true"
-                    android:text="TextView"
-                    android:textColor="@color/activiy_contact_item_color" />
-
-                <TextView
-                    android:id="@+id/contact_user_detail_user_signature_tv"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:ellipsize="end"
-                    android:gravity="bottom"
-                    android:maxWidth="@dimen/detail_detail_name_max_width"
-                    android:singleLine="true"
-                    android:text="TextView"
-                    android:textColor="@color/common_item_text_color" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/contact_user_detail_invite_video"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerVertical="true"
-                android:layout_marginRight="@dimen/button_gap_horizontal"
-                android:background="@drawable/button_bg_blue_bound"
-                android:gravity="center"
-                android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"
-                android:paddingLeft="@dimen/button_padding_horizontal"
-                android:paddingRight="@dimen/button_padding_horizontal"
-                android:paddingTop="@dimen/detail_detail_2_button_padding_vertical"
-                android:text="@string/contacts_user_detail_invite_video"
-                android:textColor="@color/button_text_color_blue"
-                android:textSize="@dimen/common_item_text_size_small"
-                android:visibility="gone" />
+           <include layout="@layout/common_conversation_layout"/>
         </RelativeLayout>
 
         <LinearLayout

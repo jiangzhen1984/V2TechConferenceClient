@@ -183,7 +183,7 @@ public abstract class Group implements Comparable<Group> {
 
 	public void addUserToGroup(User u) {
 		if (u == null) {
-			V2Log.e(" Invalid user data");
+			V2Log.e(" addUserToGroup --> Invalid user data");
 			return;
 		}
 		synchronized (mLock) {
@@ -193,8 +193,13 @@ public abstract class Group implements Comparable<Group> {
 	}
 
 	public void removeUserFromGroup(User u) {
+		if (u == null) {
+			V2Log.e(" removeUserFromGroup --> Invalid user data");
+			return;
+		}
 		synchronized (mLock) {
 			this.users.remove(u);
+			u.removeUserFromGroup(this);
 		}
 	}
 

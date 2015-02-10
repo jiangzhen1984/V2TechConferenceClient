@@ -80,4 +80,6 @@ public class V2GlobalConstants {
 	public static final int FILE_TRANS_SENDING = 10;
 	public static final int FILE_TRANS_DOWNLOADING = 11;
 	public static final int FILE_TRANS_ERROR = 13;
+	
+	public static final int REQUEST_CONVERSATION_TEXT_RETURN = 14;
 }

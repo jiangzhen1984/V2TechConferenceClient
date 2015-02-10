@@ -83,6 +83,8 @@
     <dimen name="in_meeting_local_video_layout_height">144dp</dimen>
     <dimen name="in_meeting_tools_bar_margin_right">15dp</dimen>
     
+    <!-- CrowdFilesActivity -->
+    <dimen name="crowd_file_fail_icon">13dp</dimen>
 
         <!-- fragment conversation connected layout -->
         <dimen name="fragment_conversation_connected_voice_gray_button_padding_vertical">20dp</dimen>
