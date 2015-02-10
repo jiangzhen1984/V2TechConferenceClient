@@ -131,7 +131,6 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private static final int REMOVE_CONVERSATION = 12;
 	private static final int REQUEST_ENTER_CONF = 14;
 	private static final int REQUEST_ENTER_CONF_RESPONSE = 15;
-	public static final int REQUEST_UPDATE_CHAT_CONVERSATION = 17;
 
 	private static final int UPDATE_CONVERSATION_MESSAGE = 16;
 	private static final int UPDATE_VERIFICATION_MESSAGE = 17;
@@ -516,7 +515,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == REQUEST_UPDATE_CHAT_CONVERSATION && data != null) {
+		if (requestCode == V2GlobalConstants.REQUEST_CONVERSATION_TEXT_RETURN && data != null) {
 			int groupType = data.getIntExtra("groupType", -1);
 			long groupID = data.getLongExtra("groupID", -1);
 			long remoteUserID = data.getLongExtra("remoteUserID", -1);
@@ -1513,7 +1512,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				else
 					content = applyName
 							+ String.format(
-									res.getString(R.string.conversation_agree_to_join),
+									res.getString(R.string.crowd_invitation_apply_join),
 									applyGroupName);
 			}
 			break;
@@ -3677,7 +3676,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				"obj",
 				new ConversationNotificationObject(cov.getType(), cov
 						.getExtId()));
-		startActivityForResult(i, REQUEST_UPDATE_CHAT_CONVERSATION);
+		startActivityForResult(i, V2GlobalConstants.REQUEST_CONVERSATION_TEXT_RETURN);
 	}
 
 	@Override

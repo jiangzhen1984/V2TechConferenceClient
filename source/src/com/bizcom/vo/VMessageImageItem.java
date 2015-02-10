@@ -156,7 +156,6 @@ public class VMessageImageItem extends VMessageAbstractItem{
 
 	public synchronized Bitmap getFullQuantityBitmap() {
 		if (mFullQualityBitmap == null || mFullQualityBitmap.isRecycled()) {
-			
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inJustDecodeBounds = true;
 			options.inPreferredConfig = Config.ARGB_8888;
@@ -177,14 +176,14 @@ public class VMessageImageItem extends VMessageAbstractItem{
 	}
 
 	public void recycle() {
-		if (mCompressedBitmap != null) {
+		if (mCompressedBitmap != null && !mCompressedBitmap.isRecycled()) {
 			mCompressedBitmap.recycle();
 			mCompressedBitmap = null;
 		}
 	}
 
 	public void recycleFull() {
-		if (mFullQualityBitmap != null) {
+		if (mFullQualityBitmap != null && !mFullQualityBitmap.isRecycled()) {
 			mFullQualityBitmap.recycle();
 			mFullQualityBitmap = null;
 		}

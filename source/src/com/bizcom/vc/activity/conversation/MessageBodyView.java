@@ -184,14 +184,6 @@ public class MessageBodyView extends LinearLayout {
 					.findViewById(R.id.message_body_sending_icon_left);
 			mLocalMessageContainter.setVisibility(View.VISIBLE);
 			mRemoteMessageContainter.setVisibility(View.INVISIBLE);
-			User fromUser = mMsg.getFromUser();
-			if (bodyType == MessageBodyType.GROUP_TYPE) {
-				name = (TextView) rootView
-						.findViewById(R.id.message_body_person_name_left);
-				if (fromUser != null) {
-					name.setText(fromUser.getName());
-				}
-			}
 
 			if (mMsg.getAudioItems().size() > 0)
 				updateSendingAnima(true);
@@ -214,17 +206,11 @@ public class MessageBodyView extends LinearLayout {
 			mLocalMessageContainter.setVisibility(View.INVISIBLE);
 			mRemoteMessageContainter.setVisibility(View.VISIBLE);
 
-			User localUser = GlobalHolder.getInstance().getCurrentUser();
-			if (bodyType == MessageBodyType.GROUP_TYPE) {
-				name = (TextView) rootView
-						.findViewById(R.id.message_body_person_name_right);
-				if (localUser != null)
-					name.setText(localUser.getName());
-			}
-
 			if (mMsg.getFileItems().size() <= 0)
 				updateSendingAnima(true);
 		}
+
+		updateChatUser();
 
 		failedIcon.setVisibility(View.INVISIBLE);
 		unReadIcon.setVisibility(View.GONE);
@@ -238,7 +224,7 @@ public class MessageBodyView extends LinearLayout {
 		} else {
 			timeTV.setVisibility(View.GONE);
 		}
-		
+
 		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
 			User fromUser = GlobalHolder.getInstance().getUser(
 					mMsg.getFromUser().getmUserId());
@@ -690,6 +676,7 @@ public class MessageBodyView extends LinearLayout {
 			return;
 		}
 
+		long oldUserID = this.mMsg.getFromUser().getmUserId();
 		String olderUuid = this.mMsg.getUUID();
 		boolean isLocal = this.mMsg.isLocal();
 		this.mMsg = vm;
@@ -697,21 +684,27 @@ public class MessageBodyView extends LinearLayout {
 		if (!olderUuid.equals(vm.getUUID()) && isLocal != vm.isLocal()) {
 			initView();
 		} else {
+			if (oldUserID != this.mMsg.getFromUser().getmUserId()) {
+				updateChatUser();
+			}
+			
+			if ((mMsg.isUpdateAvatar && 
+					oldUserID == this.mMsg.getFromUser().getmUserId()) || 
+					oldUserID != this.mMsg.getFromUser().getmUserId())
+				updateAvatar(mMsg.getFromUser().getAvatarBitmap());
+
 			if (isShowTime && mMsg.getDate() != null) {
 				timeTV.setVisibility(View.VISIBLE);
 				timeTV.setText(mMsg.getStringDate());
 			} else {
 				timeTV.setVisibility(View.GONE);
 			}
-			
+
 			if (mMsg.isBeginSendingAnima) {
 				updateSendingAnima(true);
 			} else {
 				updateSendingAnima(false);
 			}
-
-			if (mMsg.isUpdateAvatar)
-				updateAvatar(mMsg.getFromUser().getAvatarBitmap());
 
 			if (mMsg.isShowFailed) {
 				updateFailedFlag(true);
@@ -723,13 +716,13 @@ public class MessageBodyView extends LinearLayout {
 				updateDate();
 				mMsg.isUpdateDate = false;
 			}
-			
+
 			unReadIcon.setVisibility(View.GONE);
 			seconds.setVisibility(View.GONE);
 			mContentContainer.setTag(this.mMsg);
 		}
-		
-		mContentContainer.removeAllViews();	
+
+		mContentContainer.removeAllViews();
 		populateMessage();
 	}
 
@@ -751,6 +744,30 @@ public class MessageBodyView extends LinearLayout {
 			timeTV.setText(mMsg.getStringDate());
 		} else {
 			timeTV.setVisibility(View.GONE);
+		}
+	}
+
+	private void updateChatUser() {
+		if (!mMsg.isLocal()) {
+			User fromUser = mMsg.getFromUser();
+			if (bodyType == MessageBodyType.GROUP_TYPE) {
+				name = (TextView) rootView
+						.findViewById(R.id.message_body_person_name_left);
+				if (fromUser != null) {
+					name.setText(fromUser.getName());
+				}
+			}
+
+		} else {
+
+			User localUser = GlobalHolder.getInstance().getCurrentUser();
+			if (bodyType == MessageBodyType.GROUP_TYPE) {
+				name = (TextView) rootView
+						.findViewById(R.id.message_body_person_name_right);
+				if (localUser != null)
+					name.setText(localUser.getName());
+			}
+
 		}
 	}
 
@@ -797,7 +814,7 @@ public class MessageBodyView extends LinearLayout {
 			// 设置速度
 			if (vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING
 					|| vfi.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING) {
-				speed.setText("0kb");
+				speed.setText("0kb/s");
 			} else {
 				if (bean != null) {
 					V2Log.e(TAG, "lastLoadTime : " + bean.lastLoadTime
@@ -811,7 +828,7 @@ public class MessageBodyView extends LinearLayout {
 					speed.setText(vfi.getSpeedStr());
 				} else {
 					lastUpdateTime = System.currentTimeMillis();
-					speed.setText("0kb");
+					speed.setText("0kb/s");
 				}
 			}
 			// 设置进度

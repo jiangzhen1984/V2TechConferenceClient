@@ -457,7 +457,7 @@ public class ConversationSelectImage extends Activity {
 
 					Bitmap bitmap = null;
 					if(isClassify)
-						bitmap = BitmapUtil.getSizeBitmap(mContext , fb.filePath);
+						bitmap = BitmapUtil.getSizeBitmap(fb.filePath);
 					else
 						bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
 						

@@ -71,7 +71,6 @@ public class PlaceSlideFragment extends Fragment {
 			cusView = new SubsamplingScaleImageView(this.getActivity());
 			SubsamplingScaleImageView subImage = (SubsamplingScaleImageView) cusView;
 			subImage.setFitScreen(true);
-			subImage.setMaxScale(3F);
 			subImage.setImageFile(filePath);
 		} else {
 			cusView = new TouchImageView(getActivity());

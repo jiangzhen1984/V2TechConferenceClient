@@ -428,7 +428,8 @@ public class GlobalHolder {
 		if (g != null) {
 			g.removeUserFromGroup(uid);
 		} else {
-
+			V2Log.e("GlobalHolder removeGroupUser", " Remove user failed ! get group is null "
+					+ " group id is : " + gid + " user id is : " + uid);
 		}
 	}
 

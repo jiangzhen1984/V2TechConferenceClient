@@ -290,7 +290,7 @@ public class MessageLoader {
 				current = new VMessage(groupType, groupID, fromUser, new Date(
 						date));
 				current.setUUID(imageID);
-				item = new VMessageImageItem(current , imageID , imagePath , 0);
+				item = new VMessageImageItem(current, imageID, imagePath, 0);
 				imageItems.add(current);
 			}
 			return imageItems;
@@ -562,7 +562,7 @@ public class MessageLoader {
 				}
 				current = new VMessage(groupType, groupID, fromUser, new Date(
 						date));
-				item = new VMessageImageItem(current , imageID , imagePath , 0);
+				item = new VMessageImageItem(current, imageID, imagePath, 0);
 				imageItems.add(current);
 			}
 			return imageItems;
@@ -878,20 +878,21 @@ public class MessageLoader {
 	 * @param sortOrder
 	 * @return
 	 */
-	public static List<VMessage> queryMessage(String selection, String[] args,
+	public static synchronized List<VMessage> queryMessage(String selection, String[] args,
 			String sortOrder) {
 		List<VMessage> vimList = new ArrayList<VMessage>();
 		Cursor cursor = null;
 		try {
-			synchronized (MessageLoader.class) {
-				boolean existTable = isExistTable(ContentDescriptor.HistoriesMessage.NAME);
-				if (!existTable)
-					return vimList;
-				cursor = mContext.getContentResolver().query(
-						ContentDescriptor.HistoriesMessage.CONTENT_URI,
-						ContentDescriptor.HistoriesMessage.Cols.ALL_CLOS,
-						selection, args, sortOrder);
+			boolean existTable = isExistTable(ContentDescriptor.HistoriesMessage.NAME);
+			if (!existTable) {
+				V2Log.e(TAG, "build message failed! table no exist! name is : " + ContentDescriptor.HistoriesMessage.NAME);
+				return vimList;
 			}
+			
+			cursor = mContext.getContentResolver().query(
+					ContentDescriptor.HistoriesMessage.CONTENT_URI,
+					ContentDescriptor.HistoriesMessage.Cols.ALL_CLOS,
+					selection, args, sortOrder);
 
 			if (cursor == null) {
 				return vimList;
@@ -1544,21 +1545,28 @@ public class MessageLoader {
 	 * @param groupId
 	 * @return
 	 */
-	public static VMessage getNewestGroupMessage(Context context,
+	public static synchronized VMessage getNewestGroupMessage(Context context,
 			long groupType, long groupId) {
 
-		if (!isTableExist(context, groupType, groupId, 0, CROWD_TYPE))
+		if (!isTableExist(context, groupType, groupId, 0, CROWD_TYPE)) {
+			V2Log.e(TAG,
+					"getNewestGroupMessage --> Get newest group message failed! table no exist!"
+							+ " group id is : " + groupId);
 			return null;
+		}
 
 		String selection = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_ID
 				+ "=? ";
-		String[] args = new String[] { groupId + "" };
+		String[] args = new String[] { String.valueOf(groupId) };
 		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc limit 1 offset 0 ";
 		List<VMessage> list = queryMessage(selection, args, order);
 		if (list != null && list.size() > 0) {
 			return list.get(0);
 		} else {
+			V2Log.e(TAG,
+					"getNewestGroupMessage --> Get newest group message failed! build message is null"
+							+ " group id is : " + groupId);
 			return null;
 		}
 	}
@@ -1571,10 +1579,15 @@ public class MessageLoader {
 	 * @param uid2
 	 * @return
 	 */
-	public static VMessage getNewestMessage(Context context, long uid1,
-			long uid2) {
-		if (!isTableExist(context, 0, 0, uid2, CONTACT_TYPE))
+	public static synchronized VMessage getNewestMessage(Context context,
+			long uid1, long uid2) {
+		if (!isTableExist(context, 0, 0, uid2, CONTACT_TYPE)) {
+			V2Log.e(TAG,
+					"getNewestMessage --> Get newest p2p message failed! table no exist!"
+							+ " remote user id is : " + uid2);
 			return null;
+		}
+
 		String selection = "(("
 				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_FROM_USER_ID
 				+ "=? and "
@@ -1588,8 +1601,9 @@ public class MessageLoader {
 				+ ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_GROUP_TYPE
 				+ "= 0 ";
 
-		String[] args = new String[] { uid1 + "", uid2 + "", uid2 + "",
-				uid1 + "" };
+		String[] args = new String[] { String.valueOf(uid1),
+				String.valueOf(uid2), String.valueOf(uid2),
+				String.valueOf(uid1) };
 
 		String order = ContentDescriptor.HistoriesMessage.Cols.HISTORY_MESSAGE_SAVEDATE
 				+ " desc, "
@@ -1600,6 +1614,9 @@ public class MessageLoader {
 		if (list != null && list.size() > 0) {
 			return list.get(0);
 		} else {
+			V2Log.e(TAG,
+					"getNewestMessage --> Get newest p2p message failed! build message is null!"
+							+ " remote user id is : " + uid2);
 			return null;
 		}
 	}
@@ -1900,9 +1917,10 @@ public class MessageLoader {
 									.getColumnIndex(ContentDescriptor.HistoriesFiles.Cols.HISTORY_FILE_PATH));
 					item.setState(fileTransState);
 					item.setFileSize(fileSize);
-					//为了兼容群文件中重名文件更改
+					// 为了兼容群文件中重名文件更改
 					item.setFilePath(filePath);
-					String name = filePath.substring(filePath.lastIndexOf("/") + 1, filePath.length());
+					String name = filePath.substring(
+							filePath.lastIndexOf("/") + 1, filePath.length());
 					item.setFileName(name);
 				}
 			}
@@ -1927,11 +1945,12 @@ public class MessageLoader {
 	 */
 	private static boolean isExistTable(String tabName) {
 		SQLiteDatabase base;
+		Cursor cursor = null;
 		base = mContext.openOrCreateDatabase(V2TechDBHelper.DB_NAME, 0, null);
 		try {
 			String sql = "select count(*) as c from sqlite_master where type ='table' "
 					+ "and name ='" + tabName.trim() + "' ";
-			Cursor cursor = base.rawQuery(sql, null);
+			cursor = base.rawQuery(sql, null);
 			if (cursor != null && cursor.getCount() > 0 && cursor.moveToNext()) {
 				int count = cursor.getInt(0);
 				if (count > 0) {
@@ -1947,6 +1966,9 @@ public class MessageLoader {
 			if (base != null) {
 				base.close();
 			}
+			
+			if(cursor != null)
+				cursor.close();
 		}
 	}
 

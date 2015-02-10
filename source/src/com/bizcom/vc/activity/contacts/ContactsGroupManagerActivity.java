@@ -26,6 +26,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.V2.jni.util.EscapedcharactersProcessing;
 import com.bizcom.request.ContactsService;
 import com.bizcom.request.MessageListener;
 import com.bizcom.request.jni.GroupServiceJNIResponse;
@@ -170,12 +171,13 @@ public class ContactsGroupManagerActivity extends Activity {
 							.getText(R.string.activiy_contact_group_dialog_group_name_required));
 					return;
 				}
+				
+				String groupName = EscapedcharactersProcessing.convert(mGroupNameET.getText().toString());
 				if (group == null) {
-					ContactGroup newGroup = new ContactGroup(0, mGroupNameET
-							.getText().toString());
+					ContactGroup newGroup = new ContactGroup(0, groupName);
 					updateGroup(newGroup, OPT.CREATE);
 				} else {
-					group.setName(mGroupNameET.getText().toString());
+					group.setName(groupName);
 					updateGroup(group, OPT.UPDATE);
 				}
 				
@@ -354,6 +356,7 @@ public class ContactsGroupManagerActivity extends Activity {
 				}
 				break;
 			case UPDATE_GROUP_DONE:
+				adapter.notifyDataSetChanged();
 				break;
 			case REMOVE_GROUP_DONE:
 				if (res.getResult() == JNIResponse.Result.SUCCESS) {

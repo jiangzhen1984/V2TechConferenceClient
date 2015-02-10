@@ -46,7 +46,7 @@ public abstract class BaseCreateActivity extends Activity {
 	protected static final int CREATE_LAYOUT_TYPE_CONFERENCE = 0x001;
 	protected static final int CREATE_LAYOUT_TYPE_CROWD = 0x002;
 	protected static final int CREATE_LAYOUT_TYPE_DISCUSSION = 0x004;
-	protected static final int SELECT_GROUP_END = 0x005;
+	protected static final int SELECT_GROUP_END = 10;
 
 	protected static final int PAD_LAYOUT = 1;
 	protected static final int PHONE_LAYOUT = 0;
@@ -205,7 +205,7 @@ public abstract class BaseCreateActivity extends Activity {
 		}
 	}
 	
-	protected void startSelectGroup(Handler mLocalHandler , final CheckBox cb, final Group selectedGroup) {
+	protected void startSelectGroup(final Handler mLocalHandler , final CheckBox cb, final Group selectedGroup) {
 		mWaitingDialog = ProgressDialog.show(mContext, "", mContext
 				.getResources()
 				.getString(R.string.notification_watiing_process), true);
@@ -216,6 +216,7 @@ public abstract class BaseCreateActivity extends Activity {
 				selectGroup(selectedGroup, cb.isChecked());
 				mGroupListView.updateCheckItem(selectedGroup, cb.isChecked());
 				mWaitingDialog.dismiss();
+				mLocalHandler.sendEmptyMessage(SELECT_GROUP_END);
 			}
 		});
 	}

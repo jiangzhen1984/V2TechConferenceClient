@@ -218,11 +218,10 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 				List<User> users = group.getUsers();
 				mGroupListView.checkBelongGroupAllChecked(group, users);
 			}
+			changeConfirmAble();
 		} else if (obj instanceof Group) {
 			startSelectGroup(mLocalHandler, cb, (Group) obj);
 		}
-		
-		changeConfirmAble();
 	}
 
 	/**
@@ -386,6 +385,9 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 					cg.inviteMember(discussion, userList, new MessageListener(
 							mLocalHandler, UPDATE_CROWD_RESPONSE, discussion));
 				}
+				break;
+			case SELECT_GROUP_END:
+				changeConfirmAble();
 				break;
 			}
 		}

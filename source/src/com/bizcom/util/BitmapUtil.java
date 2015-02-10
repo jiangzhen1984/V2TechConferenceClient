@@ -114,13 +114,35 @@ public class BitmapUtil {
 		options.inJustDecodeBounds = true;
 		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
 		BitmapFactory.decodeFile(filePath, options);
-		// if (options.outWidth >= 1080 || options.outHeight >= 1080) {
-		// options.inSampleSize = 4;
-		// } else if (options.outWidth > 500 || options.outHeight > 500) {
-		// options.inSampleSize = 2;
-		// } else {
-		// options.inSampleSize = 2;
-		// }
+		if (options.outWidth >= 1080 || options.outHeight >= 1080) {
+			options.inSampleSize = 8;
+		} else if (options.outWidth > 500 || options.outHeight > 500) {
+			options.inSampleSize = 4;
+		} else {
+			options.inSampleSize = 2;
+		}
+
+		options.inJustDecodeBounds = false;
+		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
+		options.inPurgeable = true;
+		return BitmapFactory.decodeFile(filePath, options);
+	}
+
+	/**
+	 * This function is used by {@link #LeftShareDocLayout.updateCurrentDocPage}
+	 * 
+	 * @param filePath
+	 * @return
+	 */
+	public static Bitmap getDocCompressBitmap(String filePath) {
+		if (TextUtils.isEmpty(filePath)) {
+			throw new NullPointerException(" file is null");
+		}
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
+		BitmapFactory.decodeFile(filePath, options);
 
 		double wr = (double) options.outWidth / GlobalConfig.SCREEN_WIDTH;
 		double hr = (double) options.outHeight / GlobalConfig.SCREEN_HEIGHT;
@@ -134,6 +156,44 @@ public class BitmapUtil {
 		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
 		options.inPurgeable = true;
 		return BitmapFactory.decodeFile(filePath, options);
+	}
+
+	/**
+	 * This function is used by {@link #ConversationSelectImage.startLoadBitmap}
+	 * 
+	 * @param context
+	 * @param file
+	 * @return
+	 */
+	public static Bitmap getSizeBitmap(String file) {
+		if (TextUtils.isEmpty(file)) {
+			throw new NullPointerException(" file is null");
+		}
+		File f = new File(file);
+		if (!f.exists()) {
+			throw new RuntimeException(" file is no exists :" + file);
+		}
+
+		BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inJustDecodeBounds = true;
+		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
+		BitmapFactory.decodeFile(file, options);
+		if (options.outWidth >= 1080 || options.outHeight >= 1080) {
+			options.inSampleSize = 8;
+		} else if (options.outWidth > 500 || options.outHeight > 500) {
+			options.inSampleSize = 4;
+		} else if (options.outWidth > 200 || options.outHeight > 200) {
+			options.inSampleSize = 2;
+		} else {
+			options.inSampleSize = 1;
+		}
+		options.inJustDecodeBounds = false;
+		options.inPurgeable = true;
+		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
+		DensityUtils.dip2px(context, 100);
+		options.outHeight = DensityUtils.dip2px(context, 100);
+		options.outWidth = DensityUtils.dip2px(context, 100);
+		return BitmapFactory.decodeFile(file, options);
 	}
 
 	public static void getCompressedBitmapBounds(String file, int[] r) {
@@ -163,37 +223,6 @@ public class BitmapUtil {
 		BitmapFactory.decodeFile(file, options);
 		r[0] = options.outWidth;
 		r[1] = options.outHeight;
-	}
-
-	public static Bitmap getSizeBitmap(Context context, String file) {
-		if (TextUtils.isEmpty(file)) {
-			throw new NullPointerException(" file is null");
-		}
-		File f = new File(file);
-		if (!f.exists()) {
-			throw new RuntimeException(" file is no exists :" + file);
-		}
-
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inJustDecodeBounds = true;
-		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
-		BitmapFactory.decodeFile(file, options);
-		if (options.outWidth >= 1080 || options.outHeight >= 1080) {
-			options.inSampleSize = 8;
-		} else if (options.outWidth > 500 || options.outHeight > 500) {
-			options.inSampleSize = 4;
-		} else if (options.outWidth > 200 || options.outHeight > 200) {
-			options.inSampleSize = 2;
-		} else {
-			options.inSampleSize = 1;
-		}
-		options.inJustDecodeBounds = false;
-		options.inPurgeable = true;
-		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
-		DensityUtils.dip2px(context, 100);
-		options.outHeight = DensityUtils.dip2px(context, 100);
-		options.outWidth = DensityUtils.dip2px(context, 100);
-		return BitmapFactory.decodeFile(file, options);
 	}
 
 	public static int getBitmapRotation(String imgpath) {

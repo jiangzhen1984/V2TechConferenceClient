@@ -38,13 +38,12 @@ import com.bizcom.request.BitmapManager;
 import com.bizcom.vc.activity.contacts.ContactsGroupManagerActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
-import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.service.JNIService;
 import com.bizcom.vc.widget.MultilevelListView;
 import com.bizcom.vc.widget.MultilevelListView.ItemData;
 import com.bizcom.vo.Group;
-import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
+import com.bizcom.vo.User;
 import com.v2tech.R;
 
 public class TabFragmentContacts extends Fragment implements TextWatcher {

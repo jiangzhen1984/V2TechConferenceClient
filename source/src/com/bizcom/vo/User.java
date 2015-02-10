@@ -359,16 +359,18 @@ public class User implements Comparable<User> {
 
 	public void addUserToGroup(Group g) {
 		if (g == null) {
-			V2Log.e(" group is null can't add user to this group");
+			V2Log.e(" group is null , can't add user to this group");
 			return;
 		}
 		this.mBelongsGroup.add(g);
-		if (this.mUserId == 11111) {
-			Log.i("20141201 2", "数：" + mBelongsGroup.size());
-			for (Group gg : mBelongsGroup) {
-				Log.i("20141201 2", gg.getName());
-			}
+	}
+
+	public void removeUserFromGroup(Group g) {
+		if (g == null) {
+			V2Log.e(" group is null , can't remove user to this group");
+			return;
 		}
+		this.mBelongsGroup.remove(g);
 	}
 
 	public String getNickName() {

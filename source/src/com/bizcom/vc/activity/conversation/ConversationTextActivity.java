@@ -66,6 +66,7 @@ import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.bo.GroupUserObject;
+import com.bizcom.bo.MessageObject;
 import com.bizcom.request.AsyncResult;
 import com.bizcom.request.BitmapManager;
 import com.bizcom.request.ChatService;
@@ -77,7 +78,6 @@ import com.bizcom.request.jni.JNIResponse.Result;
 import com.bizcom.util.FileUitls;
 import com.bizcom.util.MessageUtil;
 import com.bizcom.util.SPUtil;
-import com.bizcom.vc.activity.ConversationsTabFragment;
 import com.bizcom.vc.activity.contacts.ContactDetail;
 import com.bizcom.vc.activity.crow.CrowdDetailActivity;
 import com.bizcom.vc.activity.crow.CrowdFilesActivity.CrowdFileActivityType;
@@ -740,7 +740,7 @@ public class ConversationTextActivity extends Activity implements
 		i.putExtra("groupID", remoteGroupID);
 		i.putExtra("remoteUserID", remoteChatUserID);
 		i.putExtra("isDelete", isDelete);
-		setResult(ConversationsTabFragment.REQUEST_UPDATE_CHAT_CONVERSATION, i);
+		setResult(V2GlobalConstants.REQUEST_CONVERSATION_TEXT_RETURN, i);
 	}
 
 	private void finishWork() {
@@ -2157,8 +2157,6 @@ public class ConversationTextActivity extends Activity implements
 			showingPopupWindow.dissmisPopupWindow();
 		judgeShouldShowTime(m);
 		messageArray.add(m);
-		MessageBodyView mv = new MessageBodyView(this, m, m.isShowTime());
-		mv.setCallback(listener);
 		if (!isStopped)
 			this.scrollToBottom();
 		else
@@ -2357,7 +2355,6 @@ public class ConversationTextActivity extends Activity implements
 			}
 			Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 		}
-
 	};
 
 	// private Runnable mUpdateMicStatusTimer = new Runnable() {
@@ -2418,6 +2415,7 @@ public class ConversationTextActivity extends Activity implements
 				
 				mv = (MessageBodyView) convertView;
 				mv.updateView(vm);
+				vm.isUpdateAvatar = false;
 				
 				if(isPlay)
 					mv.getCallback().requestPlayAudio(mv, vm, vMessageAudioItem);
@@ -2431,9 +2429,11 @@ public class ConversationTextActivity extends Activity implements
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_MESSAGE.equals(intent.getAction())) {
-				int groupType = intent.getIntExtra("groupType", -1);
-				long groupID = intent.getLongExtra("groupID", -1l);
-				long remoteID = intent.getLongExtra("remoteUserID", -1l);
+				MessageObject msgObj = intent.getParcelableExtra("msgObj");
+				int groupType = msgObj.groupType;
+				long groupID = msgObj.remoteGroupID;
+				long remoteID = msgObj.rempteUserID;
+				long msgID = msgObj.messageColsID;
 				if (currentConversationViewType == groupType) {
 					switch (currentConversationViewType) {
 					case V2GlobalConstants.GROUP_TYPE_CROWD:
@@ -2451,8 +2451,7 @@ public class ConversationTextActivity extends Activity implements
 				boolean isAppBack = GlobalConfig
 						.isApplicationBackground(mContext);
 				if (isReLoading && !isLoading) {
-					boolean result = queryAndAddMessage((int) intent
-							.getExtras().getLong("mid"));
+					boolean result = queryAndAddMessage((int) msgID);
 					if (result) {
 						offset += 1;
 						if (!isAppBack) {
