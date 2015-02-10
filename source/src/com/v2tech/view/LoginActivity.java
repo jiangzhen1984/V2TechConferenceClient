@@ -53,6 +53,9 @@ import com.v2tech.util.V2Log;
  */
 public class LoginActivity extends Activity {
 
+	
+	private static final String DEFAULT_IP = "58.96.171.118";
+	
 	/**
 	 * The default email to populate the email field with.
 	 */
@@ -293,7 +296,7 @@ public class LoginActivity extends Activity {
 			final EditText et = (EditText) dialog.findViewById(R.id.ip);
 			final EditText port = (EditText) dialog.findViewById(R.id.port);
 
-			et.setText(SPUtil.getConfigStrValue(mContext, "ip") == null? "58.96.171.118" : SPUtil.getConfigStrValue(mContext, "ip"));
+			et.setText(SPUtil.getConfigStrValue(mContext, "ip") == null? DEFAULT_IP : SPUtil.getConfigStrValue(mContext, "ip"));
 			port.setText(SPUtil.getConfigStrValue(mContext, "port") == null?"5123":SPUtil.getConfigStrValue(mContext, "port"));
 
 			saveButton.setOnClickListener(new OnClickListener() {
@@ -390,7 +393,7 @@ public class LoginActivity extends Activity {
 		String ip = SPUtil.getConfigStrValue(this, "ip");
 		String port = SPUtil.getConfigStrValue(this, "port");
 		if (ip == null || ip.isEmpty()) {
-			ip ="118.145.28.253";
+			ip = DEFAULT_IP;
 		}
 		if (port == null || port.isEmpty()) {
 			port ="5123";
