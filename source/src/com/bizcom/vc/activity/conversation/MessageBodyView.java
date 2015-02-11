@@ -1020,26 +1020,25 @@ public class MessageBodyView extends LinearLayout {
 						FileUitls.openFile(item.getFilePath());
 					} else {
 						if (item.getState() == VMessageFileItem.STATE_FILE_UNDOWNLOAD) {
-							long key;
-							if (mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER)
-								key = mMsg.getToUser().getmUserId();
-							else
-								key = mMsg.getGroupId();
-							boolean flag = GlobalHolder
-									.getInstance()
-									.changeGlobleTransFileMember(
-											V2GlobalConstants.FILE_TRANS_DOWNLOADING,
-											getContext(), true, key,
-											"MessageBodyView fileMessageItemClickListener");
-							if (!flag)
-								return;
-
 							if (GlobalHolder.getInstance().mFailedFiles
 									.contains(item.getUuid())) {
 								item.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
 								GlobalHolder.getInstance().mFailedFiles
 										.remove(item.getUuid());
 							} else {
+								long key;
+								if (mMsg.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER)
+									key = mMsg.getToUser().getmUserId();
+								else
+									key = mMsg.getGroupId();
+								boolean flag = GlobalHolder
+										.getInstance()
+										.changeGlobleTransFileMember(
+												V2GlobalConstants.FILE_TRANS_DOWNLOADING,
+												getContext(), true, key,
+												"MessageBodyView fileMessageItemClickListener");
+								if (!flag)
+									return;
 								callback.requestDownloadFile(view,
 										item.getVm(), item);
 								item.setState(VMessageFileItem.STATE_FILE_DOWNLOADING);

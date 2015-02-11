@@ -1,12 +1,9 @@
 package com.bizcom.vc.activity.conference;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import v2av.CaptureCapability;
@@ -37,7 +34,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
-import android.text.TextUtils;
 import android.text.TextUtils.TruncateAt;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -69,7 +65,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.V2.jni.ImRequest;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.bizcom.bo.GroupUserObject;

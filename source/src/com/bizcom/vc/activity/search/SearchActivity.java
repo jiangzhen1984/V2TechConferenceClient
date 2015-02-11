@@ -1,6 +1,7 @@
 package com.bizcom.vc.activity.search;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,6 +9,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -67,6 +69,11 @@ public class SearchActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
+		View v = getCurrentFocus();
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		if (imm != null && v != null) {
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		}
 		super.onBackPressed();
 	}
 
@@ -78,9 +85,9 @@ public class SearchActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
 		usService.clearCalledBack();
 		crowdService.clearCalledBack();
+		super.onDestroy();
 	}
 
 	private void initView(Type type) {
@@ -106,7 +113,7 @@ public class SearchActivity extends Activity {
 		mContentText.setText(contentRid);
 		mEditTextBelowText.setText(belowHit);
 	}
-	
+
 	private void showToast(int res) {
 		Toast.makeText(this, res, Toast.LENGTH_SHORT).show();
 	}
@@ -125,10 +132,12 @@ public class SearchActivity extends Activity {
 							.getText(R.string.search_text_required));
 					return;
 				}
-				
+
 				if (!GlobalHolder.getInstance().isServerConnected()) {
-					Toast.makeText(SearchActivity.this, R.string.error_local_connect_to_server, Toast.LENGTH_SHORT).show();
-					return ;
+					Toast.makeText(SearchActivity.this,
+							R.string.error_local_connect_to_server,
+							Toast.LENGTH_SHORT).show();
+					return;
 				}
 				mState = State.SEARCHING;
 
@@ -153,7 +162,6 @@ public class SearchActivity extends Activity {
 		@Override
 		public void onClick(View v) {
 			onBackPressed();
-
 		}
 
 	};
@@ -164,14 +172,16 @@ public class SearchActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case SEARCH_DONE:
-				ProgressUtils.showNormalWithHintProgress(SearchActivity.this,
-						getResources().getString(R.string.error_local_connect_to_server), false);
+				ProgressUtils.showNormalWithHintProgress(
+						SearchActivity.this,
+						getResources().getString(
+								R.string.error_local_connect_to_server), false);
 				synchronized (mState) {
 					mState = State.DONE;
 				}
 				JNIResponse jni = (JNIResponse) msg.obj;
 				if (jni.getResult() == JNIResponse.Result.SUCCESS) {
-					SearchedResult result = (SearchedResult)jni.resObj;
+					SearchedResult result = (SearchedResult) jni.resObj;
 					if (result.getList().size() <= 0) {
 						switch (mType) {
 						case CROWD:
@@ -183,7 +193,8 @@ public class SearchActivity extends Activity {
 						}
 					} else {
 						Intent i = new Intent();
-						i.setClass(getApplicationContext(), SearchedResultActivity.class);
+						i.setClass(getApplicationContext(),
+								SearchedResultActivity.class);
 						i.putExtra("result", result);
 						startActivity(i);
 					}

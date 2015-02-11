@@ -10,6 +10,7 @@ import android.util.DisplayMetrics;
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.provider.SearchContentProvider;
 import com.bizcom.util.SPUtil;
+import com.bizcom.util.StorageUtil;
 import com.bizcom.vc.application.GlobalConfig;
 import com.v2tech.R;
 
@@ -21,9 +22,9 @@ public class StartupActivity extends Activity {
 		if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
 			finish();
 			return;
-		} 
+		}
 		setContentView(R.layout.load);
-		
+
 		initSearchMap();
 		new LoaderThread().start();
 	}

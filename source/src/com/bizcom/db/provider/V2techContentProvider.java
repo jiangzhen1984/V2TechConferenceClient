@@ -23,7 +23,7 @@ public class V2techContentProvider extends ContentProvider {
 	@Override
 	public boolean onCreate() {
 		context = new DataBaseContext(getContext());
-		mOpenHelper = new V2TechDBHelper(context);
+		mOpenHelper = V2TechDBHelper.getInstance(context);
 		return true;
 	}
 

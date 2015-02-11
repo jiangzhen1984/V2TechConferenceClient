@@ -299,9 +299,8 @@ public class MultilevelListView extends ListView {
 			for (int i = 0; i < childGroup.size(); i++) {
 				updateAllGroupItemCheck(childGroup.get(i));
 			}
-		} else {
-			updateCheckItemWithoutNotification(group, false);
-		}
+		} 
+		updateCheckItemWithoutNotification(group, false);
 		adapter.notifyDataSetChanged();
 	}
 

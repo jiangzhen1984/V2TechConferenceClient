@@ -1049,8 +1049,7 @@ public class MessageLoader {
 			return false;
 		}
 
-		V2TechDBHelper dbHelper = new V2TechDBHelper(mContext);
-		SQLiteDatabase db = dbHelper.getReadableDatabase();
+		SQLiteDatabase db = V2TechDBHelper.getInstance(mContext).getReadableDatabase();
 		try {
 			if (db != null && db.isOpen())
 				db.execSQL(sql);
@@ -1068,9 +1067,6 @@ public class MessageLoader {
 							+ groupType + "  groupID : " + groupID
 							+ "  userID : " + userID);
 			return false;
-		} finally {
-			if (db != null)
-				db.close();
 		}
 
 		// 删除其他信息

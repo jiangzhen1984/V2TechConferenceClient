@@ -21,7 +21,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -456,14 +455,13 @@ public class MainApplication extends Application {
 				return;
 			}
 			synchronized (mLock) {
-
 				refCount++;
 				if (refCount == 1) {
+					Notificator
+							.cancelAllSystemNotification(getApplicationContext());
 					// Notificator.udpateApplicationNotification(
 					// getApplicationContext(), false, null);
 				}
-				Notificator
-						.cancelAllSystemNotification(getApplicationContext());
 			}
 		}
 

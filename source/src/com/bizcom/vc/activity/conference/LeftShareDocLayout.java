@@ -397,13 +397,16 @@ public class LeftShareDocLayout extends LinearLayout {
 								+ p.getFilePath());
 
 				recycleBitmap(mBackgroundBitMap);
+				recycleBitmap(mImageViewBitmap);
 				mBackgroundBitMap = BitmapUtil.getDocCompressBitmap(p
 						.getFilePath());
-				Matrix m = new Matrix();
-				m.postRotate(BitmapUtil.getBitmapRotation(p.getFilePath()));
-				mBackgroundBitMap = Bitmap.createBitmap(mBackgroundBitMap, 0,
-						0, mBackgroundBitMap.getWidth(),
-						mBackgroundBitMap.getHeight(), m, true);
+				if(mBackgroundBitMap != null){
+					Matrix m = new Matrix();
+					m.postRotate(BitmapUtil.getBitmapRotation(p.getFilePath()));
+					mBackgroundBitMap = Bitmap.createBitmap(mBackgroundBitMap, 0,
+							0, mBackgroundBitMap.getWidth(),
+							mBackgroundBitMap.getHeight(), m, true);
+				}
 
 				int[] params = new int[2];
 				BitmapUtil.getFullBitmapBounds(p.getFilePath(), params);
@@ -435,7 +438,7 @@ public class LeftShareDocLayout extends LinearLayout {
 					iv.setOnDoubleTapListener(mTouchImageViewGestureDetectorListener);
 					// Merge bitmap
 					mergeBitmapToImage(mBackgroundBitMap,mShapeBitmap);
-					if (!mImageViewBitmap.isRecycled()) {
+					if (mImageViewBitmap != null && !mImageViewBitmap.isRecycled()) {
 						iv.setImageBitmap(mImageViewBitmap);
 					} else {
 						iv.setImageBitmap(null);
@@ -530,6 +533,7 @@ public class LeftShareDocLayout extends LinearLayout {
 						shapesBm.getHeight(), Config.ARGB_8888);
 			} else {
 				V2Log.e(" No available bitmap");
+				return ;
 			}
 		}
 
@@ -825,14 +829,12 @@ public class LeftShareDocLayout extends LinearLayout {
 
 		@Override
 		public boolean onDoubleTapEvent(MotionEvent e) {
-			// TODO Auto-generated method stub
 			return false;
 		}
 
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
-			// TODO Auto-generated method stub
-			return false;
+  			return false;
 		}
 	}
 

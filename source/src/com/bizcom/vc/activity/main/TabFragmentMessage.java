@@ -1112,7 +1112,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 				else
 					content = applyName
 							+ String.format(
-									res.getString(R.string.conversation_agree_to_join),
+									res.getString(R.string.crowd_invitation_apply_join),
 									applyGroupName);
 			}
 			break;

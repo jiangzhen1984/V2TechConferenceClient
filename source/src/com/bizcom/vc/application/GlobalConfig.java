@@ -181,7 +181,7 @@ public class GlobalConfig {
 	}
 
 	public static long getGlobalServerTime() {
-		return (((SystemClock.elapsedRealtime() - GlobalConfig.LONGIN_LOCAL_TIME) / 1000) + GlobalConfig.LONGIN_SERVER_TIME) * 1000;
+		return (SystemClock.elapsedRealtime() - GlobalConfig.LONGIN_LOCAL_TIME + GlobalConfig.LONGIN_SERVER_TIME * 1000);
 	}
 	
 	public static void recordLoginTime(long serverTime){

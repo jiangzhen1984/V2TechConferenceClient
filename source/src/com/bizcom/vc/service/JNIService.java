@@ -870,11 +870,7 @@ public class JNIService extends Service implements
 						&& !GlobalHolder.getInstance().isOfflineLoaded()) {
 					return;
 				}
-			} else {
-				V2Log.d(TAG, "OnApplyJoinGroup --> group id : " + group.id
-						+ " group name : " + group.getName()
-						+ " group user id : " + user.uid);
-			}
+			} 
 
 			CrowdGroup crowd = (CrowdGroup) GlobalHolder.getInstance()
 					.getGroupById(group.id);
@@ -1094,7 +1090,7 @@ public class JNIService extends Service implements
 			if (!vUser.isDirty()) {
 				AddFriendHistroysHandler.addMeNeedAuthentication(
 						getApplicationContext(), vUser, additInfo);
-			} else { // 缁勭粐澶栫殑鐢ㄦ埛
+			} else { 
 				isOutORG = true;
 				User newUser = convertUser(user);
 				GlobalHolder.getInstance().putUser(newUser.getmUserId(),

@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.bizcom.db.DataBaseContext;
 import com.bizcom.db.V2TechDBHelper;
+import com.bizcom.util.CrashHandler;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.AddFriendHistorieNode;
@@ -321,42 +322,60 @@ public class AddFriendHistroysHandler {
 	}
 
 	public static void add(Context context, String sql) {
-		V2TechDBHelper dbHelper = new V2TechDBHelper(new DataBaseContext(
-				context));
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		if (db == null) {
-			return;
+		DataBaseContext mContext = new DataBaseContext(context);
+		V2TechDBHelper dbHelper = V2TechDBHelper.getInstance(mContext);
+		try {
+			SQLiteDatabase db = dbHelper.getWritableDatabase();
+			if (db != null && db.isOpen()) {
+				db.execSQL(sql);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
 		}
-		db.execSQL(sql);
 	}
 
 	public static void del(Context context, String sql) {
-		V2TechDBHelper dbHelper = new V2TechDBHelper(new DataBaseContext(
-				context));
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		if (db == null) {
-			return;
+		DataBaseContext mContext = new DataBaseContext(context);
+		V2TechDBHelper dbHelper = V2TechDBHelper.getInstance(mContext);
+		try {
+			SQLiteDatabase db = dbHelper.getWritableDatabase();
+			if (db != null && db.isOpen()) {
+				db.execSQL(sql);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
 		}
-		db.execSQL(sql);
 	}
 
 	public static void update(Context context, String sql) {
-		V2TechDBHelper dbHelper = new V2TechDBHelper(new DataBaseContext(
-				context));
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		if (db == null) {
-			return;
+		DataBaseContext mContext = new DataBaseContext(context);
+		V2TechDBHelper dbHelper = V2TechDBHelper.getInstance(mContext);
+		try {
+			SQLiteDatabase db = dbHelper.getWritableDatabase();
+			if (db != null && db.isOpen()) {
+				db.execSQL(sql);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
 		}
-		db.execSQL(sql);
 	}
 
 	public static Cursor select(Context context, String sql, String[] sqlArgs) {
-		V2TechDBHelper dbHelper = new V2TechDBHelper(new DataBaseContext(
-				context));
-		SQLiteDatabase db = dbHelper.getReadableDatabase();
-		if (db == null) {
+		DataBaseContext mContext = new DataBaseContext(context);
+		V2TechDBHelper dbHelper = V2TechDBHelper.getInstance(mContext);
+		try {
+			SQLiteDatabase db = dbHelper.getWritableDatabase();
+			if (db != null && db.isOpen()) {
+				return db.rawQuery(sql, sqlArgs);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			CrashHandler.getInstance().saveCrashInfo2File(e);
 			return null;
 		}
-		return db.rawQuery(sql, sqlArgs);
+		return null;
 	}
 }

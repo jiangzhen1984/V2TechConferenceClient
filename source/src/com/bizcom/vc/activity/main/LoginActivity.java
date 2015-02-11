@@ -561,7 +561,7 @@ public class LoginActivity extends Activity {
 	 */
 	private void initDataBaseTableCacheNames() {
 		DataBaseContext mContext = new DataBaseContext(getApplicationContext());
-		V2TechDBHelper mOpenHelper = new V2TechDBHelper(mContext);
+		V2TechDBHelper mOpenHelper = V2TechDBHelper.getInstance(mContext);
 		SQLiteDatabase dataBase = mOpenHelper.getReadableDatabase();
 		Cursor cursor = null;
 		try{
@@ -587,10 +587,6 @@ public class LoginActivity extends Activity {
 		finally{
 			if(cursor != null)
 				cursor.close();
-			
-			if(dataBase != null){
-				dataBase.close();
-			}
 		}
 	}
 	
@@ -599,7 +595,6 @@ public class LoginActivity extends Activity {
 	 * @param user
 	 */
 	private void createPersonFolder(User user){
-		
 		GlobalConfig.LOGIN_USER_ID = String.valueOf(user.getmUserId());
 		
 		File pa = new File(GlobalConfig.getGlobalUserAvatarPath());

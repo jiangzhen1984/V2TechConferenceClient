@@ -14,6 +14,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -50,6 +51,12 @@ public class ConversationSelectImage extends Activity {
 	private static final int SCROLL_STATE_TOUCH_SCROLL = 1;
 	private static final int UPDATE_BITMAP = 3;
 	protected static final int SCAN_SDCARD = 4;
+
+	private static final int DEFAULT_PATH = 0x0001;
+	private static final int SDCARD_PATH = 0x0002;
+	private int DEFAULT_PATH_INDEX;
+	private int SDCARD_PATH_INDEX;
+
 	private RelativeLayout buttomTitle;
 	private LinearLayout buttomDivider;
 	private LinearLayout loading;
@@ -67,10 +74,20 @@ public class ConversationSelectImage extends Activity {
 	private boolean isBack;
 	private boolean isClassify = true;
 	private HashMap<String, ArrayList<FileInfoBean>> listMap;
-	private String[][] selectArgs = {{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/png"} ,
-			{String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI) , "image/jpeg"} ,
-			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/png"} ,
-			{String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI) , "image/jpeg"}};
+	private String[][] selectArgs = {
+			{ String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI),
+					"image/png" },
+			{ String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI),
+					"image/jpeg" },
+			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
+					"image/png" },
+			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
+					"image/jpeg" } };
+	private String[][] sdcardArgs = {
+			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
+					"image/png" },
+			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
+					"image/jpeg" } };
 	private final int LRU_MAX_MEMORY = (int) ((Runtime.getRuntime().maxMemory()) / 8);
 	private LruCache<String, Bitmap> lruCache = new LruCache<String, Bitmap>(
 			LRU_MAX_MEMORY) {
@@ -95,21 +112,21 @@ public class ConversationSelectImage extends Activity {
 		public void handleMessage(Message msg) {
 
 			switch (msg.what) {
-				case UPDATE_BITMAP:
-					ViewHolder holder = (ViewHolder) ((Object[]) msg.obj)[0];
-					Bitmap bt = (Bitmap) ((Object[]) msg.obj)[1];
-					FileInfoBean fb = (FileInfoBean) ((Object[]) msg.obj)[2];
-					if (!bt.isRecycled()) {
-						holder.fileIcon.setImageBitmap(bt);
-					} else {
-						startLoadBitmap(holder, fb);
-					}
-					break;
-				case SCAN_SDCARD:
-					loading.setVisibility(View.GONE);
-					classifyAdapter = new ImageClassifyAdapter();
-					listViews.setAdapter(classifyAdapter);
-					break;
+			case UPDATE_BITMAP:
+				ViewHolder holder = (ViewHolder) ((Object[]) msg.obj)[0];
+				Bitmap bt = (Bitmap) ((Object[]) msg.obj)[1];
+				FileInfoBean fb = (FileInfoBean) ((Object[]) msg.obj)[2];
+				if (!bt.isRecycled()) {
+					holder.fileIcon.setImageBitmap(bt);
+				} else {
+					startLoadBitmap(holder, fb);
+				}
+				break;
+			case SCAN_SDCARD:
+				loading.setVisibility(View.GONE);
+				classifyAdapter = new ImageClassifyAdapter();
+				listViews.setAdapter(classifyAdapter);
+				break;
 			}
 		}
 	};
@@ -129,19 +146,37 @@ public class ConversationSelectImage extends Activity {
 		findview();
 		init();
 		setListener();
+		initPath();
 		mContext = this;
+	}
+
+	private void initPath() {
+		boolean sdExist = android.os.Environment.MEDIA_MOUNTED
+				.equals(android.os.Environment.getExternalStorageState());
+		if (sdExist) {// 如果不存在,
+			String sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+			V2Log.d("test", "sdPath : " + sdPath);
+			String[] split = sdPath.split("/");
+			DEFAULT_PATH_INDEX = split.length;
+			V2Log.d("test", "dir name : " + split[split.length - 1]);
+		}
+
+		String defPath = getApplicationContext().getFilesDir().getParent();
+		V2Log.d("test", "DEFAULT : " + defPath);
+		String[] split = defPath.split("/");
+		SDCARD_PATH_INDEX = split.length;
+		V2Log.d("test", "dir name : " + split[split.length - 1]);
 	}
 
 	private void findview() {
 
-		
 		title = (TextView) findViewById(R.id.ws_common_activity_title_content);
 		title.setText(R.string.conversation_select_image_file_title);
 		backButton = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
 		backButton.setText(R.string.common_return_name);
 		finishButton = (TextView) findViewById(R.id.ws_common_activity_title_right_button);
 		finishButton.setText(R.string.conversation_select_file_cannel);
-		
+
 		buttomTitle = (RelativeLayout) findViewById(R.id.activity_selectfile_buttom);
 		buttomDivider = (LinearLayout) findViewById(R.id.ws_selectFile_buttom_divider);
 		gridViews = (GridView) findViewById(R.id.selectfile_gridview);
@@ -168,15 +203,23 @@ public class ConversationSelectImage extends Activity {
 			public void run() {
 				loading.setVisibility(View.VISIBLE);
 				for (int i = 0; i < selectArgs.length; i++) {
-					
-					initPictures(Uri.parse(selectArgs[i][0]) , selectArgs[i][1]);
+
+					initPictures(DEFAULT_PATH, Uri.parse(selectArgs[i][0]),
+							selectArgs[i][1]);
 				}
+
+				for (int i = 0; i < sdcardArgs.length; i++) {
+
+					initPictures(SDCARD_PATH, Uri.parse(selectArgs[i][0]),
+							selectArgs[i][1]);
+				}
+
 				handler.sendEmptyMessage(SCAN_SDCARD);
 			}
 		}).start();
 	}
 
-	private void initPictures(Uri uri , String select) {
+	private void initPictures(int type, Uri uri, String select) {
 
 		ContentResolver resolver = getContentResolver();
 		String[] projection = { MediaStore.Images.Media._ID,
@@ -200,14 +243,26 @@ public class ConversationSelectImage extends Activity {
 				bean.fileName = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
 				bean.fileType = 1;
+				String parentName;
 				String[] s = filePath.split("/");
-				String parentName = s[3];
-				if(listMap.containsKey(parentName)){
-					currentList = listMap.get(parentName);
-					if(currentList == null)
-						currentList = new ArrayList<FileInfoBean>();
+				V2Log.w("test", filePath);
+				if (type == DEFAULT_PATH) {
+					if(DEFAULT_PATH_INDEX < s.length)
+						parentName = s[DEFAULT_PATH_INDEX];
+					else
+						continue ;
+				} else {
+					if(SDCARD_PATH_INDEX < s.length)
+						parentName = s[SDCARD_PATH_INDEX];
+					else
+						continue ;
 				}
-				else{
+
+				if (listMap.containsKey(parentName)) {
+					currentList = listMap.get(parentName);
+					if (currentList == null)
+						currentList = new ArrayList<FileInfoBean>();
+				} else {
 					pictresClassify.add(parentName);
 					currentList = new ArrayList<FileInfoBean>();
 				}
@@ -226,21 +281,20 @@ public class ConversationSelectImage extends Activity {
 			@Override
 			public void onClick(View v) {
 
-				if(isBack){
+				if (isBack) {
 					listViews.setVisibility(View.VISIBLE);
 					gridViews.setVisibility(View.GONE);
 					classifyAdapter = new ImageClassifyAdapter();
 					listViews.setAdapter(classifyAdapter);
 					isClassify = true;
 					isBack = false;
-				}
-				else{
+				} else {
 					finish();
 					setResult(Activity.RESULT_CANCELED);
 				}
 			}
 		});
-		
+
 		gridViews.setOnScrollListener(new OnScrollListener() {
 
 			@Override
@@ -272,15 +326,16 @@ public class ConversationSelectImage extends Activity {
 							Toast.LENGTH_SHORT).show();
 				} else {
 					Intent intent = new Intent();
-					intent.putExtra("checkedImage", pictures.get(position).filePath);
+					intent.putExtra("checkedImage",
+							pictures.get(position).filePath);
 					setResult(100, intent);
 					onBackPressed();
 				}
 			}
 		});
-		
+
 		listViews.setOnItemClickListener(new OnItemClickListener() {
-			
+
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
@@ -295,8 +350,8 @@ public class ConversationSelectImage extends Activity {
 			}
 		});
 	}
-	
-	class ImageClassifyAdapter extends BaseAdapter{
+
+	class ImageClassifyAdapter extends BaseAdapter {
 
 		@Override
 		public int getCount() {
@@ -330,12 +385,14 @@ public class ConversationSelectImage extends Activity {
 
 				holder = (ViewHolder) convertView.getTag();
 			}
-			
+
 			String classifyName = pictresClassify.get(position);
 			ArrayList<FileInfoBean> arrayList = listMap.get(classifyName);
 			FileInfoBean fb = arrayList.get(0);
-			holder.fileName.setText(classifyName + "( " + arrayList.size() + " )");
-			fb.fileName = fb.filePath.substring(fb.filePath.lastIndexOf("/") + 1);
+			holder.fileName.setText(classifyName + "( " + arrayList.size()
+					+ " )");
+			fb.fileName = fb.filePath
+					.substring(fb.filePath.lastIndexOf("/") + 1);
 			Bitmap bit = lruCache.get(fb.fileName);
 			if (bit == null || bit.isRecycled()) {
 
@@ -410,16 +467,16 @@ public class ConversationSelectImage extends Activity {
 						Toast.LENGTH_SHORT).show();
 				finish();
 			}
-			
+
 			FileInfoBean fb = pictures.get(position);
-			if(TextUtils.isEmpty(fb.fileName)){
-				if(TextUtils.isEmpty(fb.filePath)){
+			if (TextUtils.isEmpty(fb.fileName)) {
+				if (TextUtils.isEmpty(fb.filePath)) {
 					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
 					V2Log.e(TAG, "error that this file name is vaild!");
 					return convertView;
-				}
-				else{
-					fb.fileName = fb.filePath.substring(fb.filePath.lastIndexOf("/") + 1);
+				} else {
+					fb.fileName = fb.filePath.substring(fb.filePath
+							.lastIndexOf("/") + 1);
 				}
 			}
 			Bitmap bit = lruCache.get(fb.fileName);
@@ -456,22 +513,23 @@ public class ConversationSelectImage extends Activity {
 				try {
 
 					Bitmap bitmap = null;
-					if(isClassify)
+					if (isClassify)
 						bitmap = BitmapUtil.getSizeBitmap(fb.filePath);
 					else
 						bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
-						
+
 					if (fb.fileName == null && bitmap != null) {
-						if (!bitmap.isRecycled()) {  
+						if (!bitmap.isRecycled()) {
 							bitmap.recycle();
 							bitmap = null;
-						} 
+						}
 						return;
 					}
-					
-					if(bitmap == null){
-						V2Log.e(TAG, "get null when loading "+fb.fileName+" picture.");
-						return ;
+
+					if (bitmap == null) {
+						V2Log.e(TAG, "get null when loading " + fb.fileName
+								+ " picture.");
+						return;
 					}
 
 					lruCache.put(fb.fileName, bitmap);

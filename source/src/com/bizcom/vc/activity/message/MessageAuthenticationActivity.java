@@ -164,7 +164,7 @@ public class MessageAuthenticationActivity extends Activity {
 		if (showFriendNotification && !isFriendAuthentication)
 			updateTabPrompt(PROMPT_TYPE_FRIEND, true);
 		V2Log.d(TAG, "Is show friend notification : " + showFriendNotification);
-		
+
 		boolean showCrwodNotification = getIntent().getBooleanExtra(
 				"isCrowdShowNotification", false);
 		if (showCrwodNotification && isFriendAuthentication)
@@ -1010,8 +1010,9 @@ public class MessageAuthenticationActivity extends Activity {
 					// 库中删除
 					String sql = "delete from " + tableName + " where _id="
 							+ list.get(position).dbRecordIndex;
-					V2TechDBHelper dbh = new V2TechDBHelper(
-							new DataBaseContext(getApplicationContext()));
+					V2TechDBHelper dbh = V2TechDBHelper
+							.getInstance(new DataBaseContext(
+									getApplicationContext()));
 					SQLiteDatabase db = dbh.getWritableDatabase();
 					db.execSQL(sql);
 					// data中删除
@@ -1211,34 +1212,39 @@ public class MessageAuthenticationActivity extends Activity {
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_accepted);
-				item.mContentTV.setText(String.format(res
-						.getString(R.string.crowd_invitation_apply_join), vqac.getCrowdGroup().getName()));
+				item.mContentTV.setText(String.format(
+						res.getString(R.string.crowd_invitation_apply_join),
+						vqac.getCrowdGroup().getName()));
 			} else if (vqac.getQualState() == QualificationState.REJECT) {
 				item.mRes.setVisibility(View.VISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mRes.setText(R.string.crowd_invitation_rejected);
-				item.mContentTV.setText(String.format(res
-						.getString(R.string.crowd_invitation_apply_join), vqac.getCrowdGroup().getName()));
+				item.mContentTV.setText(String.format(
+						res.getString(R.string.crowd_invitation_apply_join),
+						vqac.getCrowdGroup().getName()));
 			} else if (vqac.getQualState() == QualificationState.BE_REJECT) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
 				// item.mRejectContentTV.setText(vqac.getApplyReason());
-				item.mContentTV.setText(String.format(res
-						.getString(R.string.crowd_invitation_reject_join), vqac.getCrowdGroup().getName()));
+				item.mContentTV.setText(String.format(
+						res.getString(R.string.crowd_invitation_reject_join),
+						vqac.getCrowdGroup().getName()));
 			} else if (vqac.getQualState() == QualificationState.BE_ACCEPTED) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				item.mAcceptButton.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
-				item.mContentTV.setText(String.format(res
-						.getString(R.string.crowd_invitation_accept_join), vqac.getCrowdGroup().getName()));
+				item.mContentTV.setText(String.format(
+						res.getString(R.string.crowd_invitation_accept_join),
+						vqac.getCrowdGroup().getName()));
 			} else if (vqac.getQualState() == QualificationState.WAITING) {
 				item.mRes.setVisibility(View.INVISIBLE);
 				// item.mRejectContentTV.setVisibility(View.GONE);
 				item.mAcceptButton.setVisibility(View.VISIBLE);
-				item.mContentTV.setText(String.format(res
-						.getString(R.string.crowd_invitation_apply_join), vqac.getCrowdGroup().getName()));
+				item.mContentTV.setText(String.format(
+						res.getString(R.string.crowd_invitation_apply_join),
+						vqac.getCrowdGroup().getName()));
 			}
 		}
 
@@ -1635,9 +1641,12 @@ public class MessageAuthenticationActivity extends Activity {
 					handleAcceptDone(Type.CROWD_INVITATION, crowd.getmGId(),
 							crowd.getOwnerUser().getmUserId());
 				} else {
-					Toast.makeText(mContext,
-							R.string.common_networkConnection_timeout, 0)
-							.show();
+					if (jni.getResult().ordinal() != JNIResponse.Result.SERVER_REJECT
+							.ordinal()) {
+						Toast.makeText(mContext,
+								R.string.common_networkConnection_timeout, 0)
+								.show();
+					}
 				}
 				break;
 			case ACCEPT_APPLY_DONE:

@@ -577,24 +577,6 @@ public class CrowdGroupService extends AbstractHandler {
 			this.mCallbackHandler = mCallbackHandler;
 		}
 
-		/**
-		 * @deprecated never called
-		 */
-		@Override
-		public void OnAcceptInviteJoinGroup(int groupType, long groupId,
-				long nUserID) {
-			JNIResponse jniRes = new JNIResponse(
-					CreateCrowdResponse.Result.SUCCESS);
-			Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD, jniRes)
-					.sendToTarget();
-		}
-
-		@Override
-		public void OnAcceptApplyJoinGroup(V2Group group) {
-			// 阻止onAddGroupInfo重复去更新数据库，让JNI广播处理
-			// mPendingCrowdId = 0;
-		}
-
 		@Override
 		public void OnModifyGroupInfoCallback(V2Group group) {
 			if (group == null) {
@@ -659,10 +641,6 @@ public class CrowdGroupService extends AbstractHandler {
 								CreateCrowdResponse.Result.SUCCESS);
 						Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD,
 								jniRes).sendToTarget();
-//						MessageBuilder.updateQualicationMessageState(group.id,
-//								group.creator.uid, new GroupQualicationState(
-//										Type.CROWD_INVITATION,
-//										QualificationState.ACCEPTED, null));
 					} else {
 						V2Log.e("CrowdGroupService onAddGroupInfo--> mPendingCrowdId isn't equals groupID , MayBe this callback"
 								+ "already time out , group id is : "
@@ -756,6 +734,17 @@ public class CrowdGroupService extends AbstractHandler {
 					notifyListener(KEY_FILE_REMOVED_NOTIFICATION_LISTNER, 0, 0,
 							jniRes);
 				}
+			}
+		}
+		
+		@Override
+		public void OnJoinGroupError(int eGroupType, long nGroupID, int nErrorNo) {
+			if (mPendingCrowdId == nGroupID) {
+				mPendingCrowdId = 0;
+				JNIResponse jniRes = new JNIResponse(
+						CreateCrowdResponse.Result.SERVER_REJECT);
+				Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD,
+						jniRes).sendToTarget();
 			}
 		}
 
