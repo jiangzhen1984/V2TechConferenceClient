@@ -308,11 +308,14 @@ public class MainActivity extends FragmentActivity implements
 		mContext.unregisterReceiver(receiver);
 		// unregister for headset
 		mContext.unregisterReceiver(localReceiver);
-		mContext.stopService(new Intent(this.getApplicationContext(),
-				JNIService.class));
+		// mContext.stopService(new Intent(this.getApplicationContext(),
+		// JNIService.class));
 		// Just for user remove application from recent task list
-		Notificator.cancelAllSystemNotification(getApplicationContext());
+		// Notificator.cancelAllSystemNotification(getApplicationContext());
+
+		((MainApplication) getApplication()).uninitForExitProcess();
 		V2Log.d("system destroyed v2tech");
+
 	}
 
 	public void updateNotificator(int type, boolean flag) {

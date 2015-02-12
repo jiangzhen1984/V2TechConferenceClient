@@ -18,6 +18,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MotionEvent;
@@ -45,8 +46,10 @@ import com.bizcom.request.jni.RequestLogInResponse;
 import com.bizcom.util.ProgressUtils;
 import com.bizcom.util.SPUtil;
 import com.bizcom.util.V2Toast;
+import com.bizcom.vc.activity.conversation.MessageBuilder;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
+import com.bizcom.vc.application.MainApplication;
 import com.bizcom.vo.User;
 import com.v2tech.R;
 
@@ -86,10 +89,12 @@ public class LoginActivity extends Activity {
 	private Boolean isLoggingIn = false;
 	
 	private final String TAG = "LoginActivity";
+	private boolean isFward = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Log.i("20150211 1","LoginActivity onCreate()");
 		setContentView(R.layout.activity_login);
 		mContext = this;
 
@@ -278,7 +283,12 @@ public class LoginActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		us.clearCalledBack();
+		
+		if (!isFward) {
+			((MainApplication) getApplication()).uninitForExitProcess();
+		}
 	}
+	
 
 	private TextWatcher userNameTextWAtcher = new TextWatcher() {
 
@@ -545,6 +555,7 @@ public class LoginActivity extends Activity {
 							GlobalConfig.KEY_LOGGED_IN, 1);
 					mContext.startActivity(new Intent(mContext,
 							MainActivity.class));
+					isFward=true;
 					//init all database table names;
 					initDataBaseTableCacheNames();
 					finish();

@@ -73,6 +73,7 @@ import com.bizcom.vc.activity.main.MainActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.GlobalState;
+import com.bizcom.vc.application.MainApplication;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.listener.CommonCallBack;
@@ -1787,21 +1788,13 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			// 濡傛灉鍦╬2p鐣岄潰鍒欐嫆缁�
-			ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
-			List<RunningTaskInfo> listRunningTaskInfo = activityManager
-					.getRunningTasks(1);
-			if ((listRunningTaskInfo != null) && listRunningTaskInfo.size() > 0) {
-				if (listRunningTaskInfo.get(0).topActivity.getClassName()
-						.equals(ConversationP2PAVActivity.class.getName())) {
-					V2Log.i("OnVideoChatInvite --> The video chat invite coming ! Ignore video call ");
-					updateVideoRecord(ind);
-					VideoRequest.getInstance().refuseVideoChat(
-							ind.getSzSessionID(), ind.getFromUserId(),
-							ind.getDeviceId());
-					return;
-				}
-
+			if (((MainApplication) mContext.getApplicationContext())
+					.isRunningBackgound()) {
+				updateVideoRecord(ind);
+				VideoRequest.getInstance().refuseVideoChat(
+						ind.getSzSessionID(), ind.getFromUserId(),
+						ind.getDeviceId());
+				return;
 			}
 
 			Message.obtain(mLocalHandlerThreadHandler,

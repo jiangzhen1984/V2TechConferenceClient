@@ -83,6 +83,7 @@ import com.bizcom.vc.activity.crow.CrowdDetailActivity;
 import com.bizcom.vc.activity.crow.CrowdFilesActivity.CrowdFileActivityType;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
+import com.bizcom.vc.application.MainApplication;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.listener.CommonCallBack;
@@ -2448,8 +2449,8 @@ public class ConversationTextActivity extends Activity implements
 				} else
 					isReLoading = false;
 				// 用于onNewIntent判断是否需要重新加载界面聊天数据，以及是否阻断广播 , true 后台
-				boolean isAppBack = GlobalConfig
-						.isApplicationBackground(mContext);
+				boolean isAppBack = ((MainApplication) mContext.getApplicationContext())
+						.isRunningBackgound();
 				if (isReLoading && !isLoading) {
 					boolean result = queryAndAddMessage((int) msgID);
 					if (result) {

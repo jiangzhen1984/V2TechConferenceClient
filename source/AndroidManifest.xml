@@ -54,7 +54,7 @@
 
         <!-- activity -->
         <activity
-            android:name="com.bizcom.vc.activity.main.StartupActivity"
+            android:name="com.bizcom.vc.activity.main.SplashActivity"
             android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -111,7 +111,7 @@
             android:name="com.bizcom.vc.activity.conversation.ConversationTextActivity"
             android:configChanges="orientation|screenSize"
             android:launchMode="singleTop"
-            android:parentActivityName="com.bizcom.vc.activity.main.StartupActivity"
+            android:parentActivityName="com.bizcom.vc.activity.main.SplashActivity"
             android:screenOrientation="nosensor"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
             <intent-filter>

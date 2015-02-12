@@ -21,6 +21,10 @@ import com.v2tech.R;
 public class BitmapUtil {
 
 	public static Context context;
+	
+	public static void init(Context context){
+		BitmapUtil.context=context;
+	}
 
 	public static Bitmap loadAvatarFromPath(String path) {
 		boolean isOwnerAvatar = true;

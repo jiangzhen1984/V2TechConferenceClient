@@ -52,6 +52,7 @@ import com.bizcom.vc.activity.conference.ConferenceActivity;
 import com.bizcom.vc.activity.conference.GroupLayout;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
+import com.bizcom.vc.application.MainApplication;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.listener.ConferenceListener;
@@ -454,7 +455,8 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 			return;
 		}
 
-		if (!GlobalConfig.isApplicationBackground(mContext)) {
+		if (!((MainApplication) mContext.getApplicationContext())
+				.isRunningBackgound()) {
 			sendVoiceNotify();
 			return;
 		}
@@ -493,7 +495,8 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 		if (GlobalHolder.getInstance().isInMeeting()
 				|| GlobalHolder.getInstance().isInAudioCall()
 				|| GlobalHolder.getInstance().isInVideoCall()) {
-			if (GlobalConfig.isApplicationBackground(mContext)) {
+			if (((MainApplication) mContext.getApplicationContext())
+					.isRunningBackgound()) {
 				sendVoiceNotify();
 			}
 			return true;

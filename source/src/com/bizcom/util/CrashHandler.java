@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.Thread.UncaughtExceptionHandler;
@@ -39,10 +40,10 @@ public class CrashHandler implements UncaughtExceptionHandler {
     private Context mContext;  
     //用来存储设备信息和异常信息  
     private Map<String, String> infos = new HashMap<String, String>();  
-  
     //用于格式化日期,作为日志文件名的一部分  
     private DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());  
   
+    
     /** 保证只有一个CrashHandler实例 */  
     private CrashHandler() {  
     }  
@@ -130,7 +131,8 @@ public class CrashHandler implements UncaughtExceptionHandler {
             }  
         } catch (NameNotFoundException e) {  
             Log.e(TAG, "an error occured when collect package info", e);  
-        }  
+        } 
+        
         Field[] fields = Build.class.getDeclaredFields();  
         for (Field field : fields) {  
             try {  
@@ -195,12 +197,11 @@ public class CrashHandler implements UncaughtExceptionHandler {
         return null;  
     } 
     
-    
-    private void catchLog() {
+    //把所有的log输出到文件
+    @SuppressWarnings("unused")
+	private void catchNomalLogToFile() {
     	String logName = StorageUtil.getSdcardPath()+"/v2tech/crash/"+System.currentTimeMillis()+"_crash_log.log" ;
-    	
-    	
-    	V2Log.i("Catching log to  "+ logName);;
+    	V2Log.i("Catching log to  "+ logName);
     	String cmd ="logcat -v time -d -f  " + logName;
     	try {
 			Runtime.getRuntime().exec(cmd);

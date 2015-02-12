@@ -20,18 +20,22 @@ import com.v2tech.R;
 public class FileUitls {
 
 	public static Context context;
-	
-	public static int adapterFileIcon(String fileName){
+
+	public static void init(Context context) {
+		FileUitls.context = context;
+	}
+
+	public static int adapterFileIcon(String fileName) {
 		FileType fileType;
-		if(fileName.indexOf(".") == -1)
+		if (fileName.indexOf(".") == -1)
 			fileType = FileType.UNKNOW;
-		else{
+		else {
 			String postfixName = fileName.substring(fileName.indexOf("."));
-			fileType  = getFileType(postfixName);
+			fileType = getFileType(postfixName);
 		}
 		return adapterFileIcon(fileType);
 	}
-	
+
 	public static int adapterFileIcon(FileType fileType) {
 		switch (fileType) {
 		case IMAGE:
@@ -99,7 +103,8 @@ public class FileUitls {
 		} else if (checkEndsWithInStringArray(postfixName, context
 				.getResources().getStringArray(R.array.fileEndingVis))) {
 			return FileType.VIS;
-		} {
+		}
+		{
 			return FileType.UNKNOW;
 		}
 	}
@@ -122,25 +127,29 @@ public class FileUitls {
 			int dot = filePath.lastIndexOf(".");
 			String postfixName = filePath.substring(dot);
 			Intent intent;
-			try{
-				if (checkEndsWithInStringArray(postfixName, context.getResources()
-						.getStringArray(R.array.fileEndingImage))) {
+			try {
+				if (checkEndsWithInStringArray(postfixName, context
+						.getResources().getStringArray(R.array.fileEndingImage))) {
 					intent = FileUitls.getImageFileIntent(file);
 					context.startActivity(intent);
-				} else if (checkEndsWithInStringArray(postfixName, context
-						.getResources().getStringArray(R.array.fileEndingWebText))) {
+				} else if (checkEndsWithInStringArray(
+						postfixName,
+						context.getResources().getStringArray(
+								R.array.fileEndingWebText))) {
 					intent = FileUitls.getHtmlFileIntent(file);
 					context.startActivity(intent);
 				} else if (checkEndsWithInStringArray(postfixName, context
 						.getResources().getStringArray(R.array.fileEndingAPK))) {
 					intent = FileUitls.getApkFileIntent(file);
 					context.startActivity(intent);
-	
-				} else if (checkEndsWithInStringArray(postfixName, context
-						.getResources().getStringArray(R.array.fileEndingPackage))) {
+
+				} else if (checkEndsWithInStringArray(
+						postfixName,
+						context.getResources().getStringArray(
+								R.array.fileEndingPackage))) {
 					intent = FileUitls.getApplicationFileIntent(file);
 					context.startActivity(intent);
-	
+
 				} else if (checkEndsWithInStringArray(postfixName, context
 						.getResources().getStringArray(R.array.fileEndingAudio))) {
 					intent = FileUitls.getAudioFileIntent(file);
@@ -182,7 +191,7 @@ public class FileUitls {
 			}
 		}
 	}
-	
+
 	// 3、定义用于检查要打开的文件的后缀是否在遍历后缀数组中
 	private static boolean checkEndsWithInStringArray(String checkItsEnd,
 			String[] fileEndings) {
@@ -192,7 +201,7 @@ public class FileUitls {
 		}
 		return false;
 	}
-	
+
 	// android获取一个用于打开HTML文件的intent
 	public static Intent getHtmlFileIntent(File file) {
 		Uri uri = Uri.parse(file.toString()).buildUpon()
@@ -248,9 +257,9 @@ public class FileUitls {
 		Intent intent = new Intent("android.intent.action.VIEW");
 		intent.addCategory("android.intent.category.DEFAULT");
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//		intent.putExtra("oneshot", 0);
-//		intent.putExtra("configchange", 0);
+		// intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		// intent.putExtra("oneshot", 0);
+		// intent.putExtra("configchange", 0);
 		Uri uri = Uri.fromFile(file);
 		intent.setDataAndType(uri, "video/*");
 		return intent;
@@ -295,7 +304,7 @@ public class FileUitls {
 		intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
 		return intent;
 	}
-	
+
 	// android获取一个用于打开apk文件的intent
 	public static Intent getApkFileIntent(File file) {
 		Intent intent = new Intent();
@@ -311,8 +320,7 @@ public class FileUitls {
 		Intent intent = new Intent();
 		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		intent.setAction(android.content.Intent.ACTION_VIEW);
-		intent.setDataAndType(Uri.fromFile(file),
-				"application/*");
+		intent.setDataAndType(Uri.fromFile(file), "application/*");
 		return intent;
 	}
 }

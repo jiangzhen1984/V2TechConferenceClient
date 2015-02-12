@@ -31,7 +31,6 @@ import com.bizcom.vo.VMessageTextItem;
 import com.bizcom.vo.VideoBean;
 
 public class MessageBuilder {
-
 	private static final int MESSAGE_TYPE_IMAGE = 0;
 	private static final int MESSAGE_TYPE_AUDIO = 1;
 	public static DataBaseContext mContext;

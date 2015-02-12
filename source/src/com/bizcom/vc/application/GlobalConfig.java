@@ -201,25 +201,25 @@ public class GlobalConfig {
 
 	}
 
-	/**
-	 * 判断当前应用程序是在后台还是在前台
-	 * 
-	 * @param context
-	 * @return true is background , false is Foreground
-	 */
-	public static boolean isApplicationBackground(Context context) {
-		ActivityManager am = (ActivityManager) context
-				.getSystemService(Context.ACTIVITY_SERVICE);
-		List<RunningTaskInfo> tasks = am.getRunningTasks(1);
-		if (!tasks.isEmpty()) {
-			ComponentName topActivity = tasks.get(0).topActivity;
-			if (!topActivity.getPackageName().equals(context.getPackageName())) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
+//	/**
+//	 * 判断当前应用程序是在后台还是在前台
+//	 * 
+//	 * @param context
+//	 * @return true is background , false is Foreground
+//	 */
+////	public static boolean isApplicationBackground(Context context) {
+////		ActivityManager am = (ActivityManager) context
+////				.getSystemService(Context.ACTIVITY_SERVICE);
+////		List<RunningTaskInfo> tasks = am.getRunningTasks(1);
+////		if (!tasks.isEmpty()) {
+////			ComponentName topActivity = tasks.get(0).topActivity;
+////			if (!topActivity.getPackageName().equals(context.getPackageName())) {
+////				return true;
+////			}
+////		}
+////		return false;
+////	}
+//	
 	public static class Resource {
 		public static String CONTACT_DEFAULT_GROUP_NAME ="";
 	}

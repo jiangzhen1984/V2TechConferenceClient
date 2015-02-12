@@ -16,6 +16,7 @@ import com.v2tech.R;
 public class Notificator {
 
 	static long lastNotificatorTime = 0;
+
 	public static void updateSystemNotification(Context context, String title,
 			String content, int tone, Intent trigger, int notificationID) {
 		if (tone > 0
@@ -25,9 +26,10 @@ public class Notificator {
 			Ringtone r = RingtoneManager.getRingtone(context, notification);
 			r.play();
 			lastNotificatorTime = System.currentTimeMillis() / 1000;
-//			MediaPlayer mPlayer = MediaPlayer.create(context, R.raw.chat_audio);
-//			if (!mPlayer.isPlaying())
-//				mPlayer.start();
+			// MediaPlayer mPlayer = MediaPlayer.create(context,
+			// R.raw.chat_audio);
+			// if (!mPlayer.isPlaying())
+			// mPlayer.start();
 		}
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(
@@ -58,9 +60,10 @@ public class Notificator {
 			Ringtone r = RingtoneManager.getRingtone(context, notification);
 			r.play();
 			lastNotificatorTime = System.currentTimeMillis() / 1000;
-//			MediaPlayer mPlayer = MediaPlayer.create(context, R.raw.chat_audio);
-//			if (!mPlayer.isPlaying())
-//				mPlayer.start();
+			// MediaPlayer mPlayer = MediaPlayer.create(context,
+			// R.raw.chat_audio);
+			// if (!mPlayer.isPlaying())
+			// mPlayer.start();
 		}
 
 		NotificationCompat.Builder builder = new NotificationCompat.Builder(
@@ -85,29 +88,27 @@ public class Notificator {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		// mId allows you to update the notification later on.
-//		mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
-//		mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
-//		mNotificationManager
-//				.cancel(PublicIntent.APPLICATION_STATUS_BAR_NOTIFICATION);
+		// mNotificationManager.cancel(PublicIntent.MESSAGE_NOTIFICATION_ID);
+		// mNotificationManager.cancel(PublicIntent.VIDEO_NOTIFICATION_ID);
+		// mNotificationManager
+		// .cancel(PublicIntent.APPLICATION_STATUS_BAR_NOTIFICATION);
 		mNotificationManager.cancelAll();
 	}
 
 	public static void udpateApplicationNotification(Context context,
-			boolean flag,Intent intent) {
+			boolean flag, Intent intent) {
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
 		if (flag) {
+			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
+					context, 0, new Intent[] { intent },
+					PendingIntent.FLAG_UPDATE_CURRENT);
+
 			NotificationCompat.Builder builder = new NotificationCompat.Builder(
 					context).setSmallIcon(R.drawable.ic_launcher)
 					.setContentTitle(context.getText(R.string.app_name))
 					.setContentText(context.getText(R.string.status_bar_title))
-					.setAutoCancel(false);
-
-			PendingIntent notifyPendingIntent = PendingIntent.getActivities(
-					context, 0, new Intent[] {intent },
-					PendingIntent.FLAG_UPDATE_CURRENT);
-
-			builder.setContentIntent(notifyPendingIntent);
+					.setAutoCancel(false).setContentIntent(notifyPendingIntent);
 			Notification noti = builder.build();
 			noti.flags |= Notification.FLAG_NO_CLEAR;
 

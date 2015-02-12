@@ -13,6 +13,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;

@@ -185,4 +185,5 @@
     <string name="vo_attendee_mixed_device_mix_video">Video mixing</string>
     <string name="vo_conference_crowd_conversation_creation">@string/vo_conference_conversation_creation</string>
     <string name="vo_conference_department_conversation_creation">@string/vo_conference_conversation_creation</string>
+    <string name="conversation_waiting">Calling...</string>
 </resources>

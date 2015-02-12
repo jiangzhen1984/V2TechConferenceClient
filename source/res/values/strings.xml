@@ -76,7 +76,7 @@
     <string name="error_request_enter_conference_not_exist">无法登录，会议不存在</string>
     <string name="requesting_delete_conference">通知</string>
     <string name="requesting_enter_conference">正在登入.....</string>
-    <string name="error_can_not_connect_server">无法链接到服务器</string>
+    <string name="error_can_not_connect_server">无法连接到服务器</string>
     <string name="conversations_delete_conf">删除该会议</string>
     <string name="conversations_delete_conversaion">删除该会话</string>
     <string name="conversations_kick_notification">已经被主席请出会议室</string>
@@ -164,7 +164,7 @@
     <string name="activiy_contact_group_name_content">请输入分组名称</string>
     <string name="activiy_contact_group_dialog_title_update">编辑分组</string>
     <string name="activiy_contact_group_dialog_group_name_required">分组名不能为空，请重新输入</string>
-    <string name="activiy_contact_update_group_error_msg_in_progess">正在更新..请稍后</string>
+    <string name="activiy_contact_update_group_error_msg_in_progess">正在更新请稍后...</string>
 
     <!-- activity_contacts -->
     <string name="contacts_default_group_name">我的好友</string>
@@ -233,7 +233,7 @@
     <string name="select_file_title_cancel">取消</string>
 
     <!-- activity_conversation -->
-    <string name="conversation_waiting">正在呼叫..</string>
+    <string name="conversation_waiting">正在呼叫...</string>
     <string name="conversation_waiting_voice_incoming">语音通话</string>
     <string name="conversation_waiting_video_incoming">视频通话</string>
     <string name="conversation_end">通话结束</string>
@@ -399,11 +399,11 @@
     <!-- activity_conference_groupLayout -->
     <string name="conference_groupLayout_creation">创建人:</string>
     <!-- util -->
-    <string name="util_crash_handler_toast_abnormal">很抱歉,程序出现异常,即将退出.</string>
+    <string name="util_crash_handler_toast_abnormal">很抱歉,程序crash,即将退出.</string>
     <string name="util_date_yesterday">昨天</string>
     <string name="util_file_toast_error">没有应用程序可执行此操作</string>
     <string name="util_message_toast_error">聊天信息不能为空</string>
-    <string name="util_progress_waiting">正在处理中...请稍后</string>
+    <string name="util_progress_waiting">正在处理中请稍后...</string>
 
     <!-- crowd -->
 
@@ -469,7 +469,7 @@
     <string name="crowd_files_title_uploaded">上传文件</string>
     <string name="crowd_files_deleted_notification">该文件已被删除!</string>
     <string name="crowd_files_delete_file_no_rights_notification">你无法删除其他人上传的文件!</string>
-    <string name="crowd_files_delete_file_no_rights_for_uploading_notification">请先暂停，在删除文件!</string>
+    <string name="crowd_files_delete_file_no_rights_for_uploading_notification">请先暂停，再删除文件!</string>
     <string name="crowd_files_resume_uploading_failed">请先先退出删除模式!</string>
     <string name="crowd_files_in_deletion_failed">请先先退出删除模式!</string>
     <string name="crowd_message_deletion_mode_quit_required">请先先退出删除模式!</string>
@@ -586,7 +586,7 @@
     <string name="title_bar_item_setting">设置</string>
     <string name="title_bar_item_help">帮助</string>
     <string name="title_bar_item_about">关于</string>
-    <string name="error_connect_to_server">无法链接到服务器，请确认网络链接</string>
+    <string name="error_connect_to_server">无法连接到服务器，请确认网络连接</string>
     <string name="error_local_connect_to_server">当前网络不可用，请确认网络连接</string>
     <!-- <string name="error_offline_of_no_network">您已处于离线状态，无法发送该请求，请上线后在尝试</string> -->
     <string name="error_offline_of_no_network">网络连接不可用，请稍后再试 </string>
@@ -615,4 +615,5 @@
     <string name="vo_conference_crowd_conversation_creation">@string/vo_conference_conversation_creation</string>
     <string name="vo_conference_department_conversation_creation">@string/vo_conference_conversation_creation</string>
     <string name="vo_vmessage_face">[表情]</string>
-</resources>
+
+</resources>

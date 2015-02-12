@@ -8,17 +8,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Vector;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Application;
+import android.app.ActivityManager.RunningTaskInfo;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
 import android.media.AudioManager;
@@ -26,6 +32,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.Printer;
 import android.view.WindowManager;
 
 import com.V2.jni.AudioRequest;
@@ -50,7 +58,7 @@ import com.bizcom.vc.activity.conference.ConferenceActivity;
 import com.bizcom.vc.activity.conversation.MessageBuilder;
 import com.bizcom.vc.activity.conversation.MessageLoader;
 import com.bizcom.vc.activity.main.LoginActivity;
-import com.bizcom.vc.activity.main.StartupActivity;
+import com.bizcom.vc.activity.main.SplashActivity;
 import com.bizcom.vc.service.JNIService;
 import com.bizcom.vc.service.LogService;
 import com.v2tech.R;
@@ -61,53 +69,49 @@ public class MainApplication extends Application {
 	private Vector<WeakReference<Activity>> list = new Vector<WeakReference<Activity>>();
 	private final String DATABASE_FILENAME = "hzpy.db";
 	private boolean needCopy;
+	private boolean isPad = false;
+	private int startedActivityCount = 0;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		Log.i("20150211 1", "MainApplication onCreate()");
+
+		if (getResources().getConfiguration().smallestScreenWidthDp >= 600) {
+			isPad = true;
+		} else {
+			isPad = false;
+		}
 
 		V2Log.isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
 		V2Log.d(TAG, "isDebuggable : " + V2Log.isDebuggable);
 
 		try {
-			String app_ver = this.getPackageManager().getPackageInfo(
-					this.getPackageName(), 0).versionName;
-			GlobalConfig.GLOBAL_VERSION_NAME = app_ver;
+			GlobalConfig.GLOBAL_VERSION_NAME = this.getPackageManager()
+					.getPackageInfo(this.getPackageName(), 0).versionName;
 		} catch (NameNotFoundException e) {
 			e.printStackTrace();
 		}
-		if (!V2Log.isDebuggable) {
-			new Thread() {
-
-				@Override
-				public void run() {
-					PinyinHelper.toHanyuPinyinStringArray('c');
-				}
-
-			}.start();
-		}
 
 		initGloblePath();
-		String path = GlobalConfig.getGlobalPath();
 		initConfigSP();
-		initConfFile();
+		initConfigFile();
 
 		DatabaseProvider.init(getApplicationContext());
 		MessageBuilder.init(getApplicationContext());
 		MessageLoader.init(getApplicationContext());
-		BitmapUtil.context = getApplicationContext();
-		FileUitls.context = getApplicationContext();
+		BitmapUtil.init(getApplicationContext());
+		FileUitls.init(getApplicationContext());
 
 		// Load native library
 		System.loadLibrary("event");
 		System.loadLibrary("v2vi");
 		System.loadLibrary("v2ve");
-		// System.loadLibrary("NetEvent");
 		System.loadLibrary("v2client");
 
 		// Initialize native library
-		NativeInitializer.getIntance()
-				.initialize(getApplicationContext(), path);
+		NativeInitializer.getIntance().initialize(getApplicationContext(),
+				GlobalConfig.getGlobalPath());
 		ImRequest.getInstance(getApplicationContext());
 		GroupRequest.getInstance();
 		VideoRequest.getInstance(getApplicationContext());
@@ -118,33 +122,39 @@ public class MainApplication extends Application {
 		VideoMixerRequest.getInstance();
 		FileRequest.getInstance(getApplicationContext());
 
-		// Start deamon service
+		// Start service
 		getApplicationContext().startService(
 				new Intent(getApplicationContext(), JNIService.class));
+
 		if (!V2Log.isDebuggable) {
-			getApplicationContext().startService(
-					new Intent(getApplicationContext(), LogService.class));
+			// log1
 			CrashHandler crashHandler = CrashHandler.getInstance();
 			crashHandler.init(getApplicationContext());
+			// log2
+			getApplicationContext().startService(
+					new Intent(getApplicationContext(), LogService.class));
+
 		}
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			this.registerActivityLifecycleCallbacks(new LocalActivityLifecycleCallBack());
 		}
 
-		initSQLiteFile();
+		initHZPYDBFile();
 		initDPI();
 		initResource();
+
 	}
 
 	private void initConfigSP() {
-		SharedPreferences sf = getSharedPreferences("config",
+		SharedPreferences sp = getSharedPreferences("config",
 				Context.MODE_PRIVATE);
-		Editor ed = sf.edit();
+
+		Editor ed = sp.edit();
 		ed.putInt("LoggedIn", 0);
 		ed.commit();
 
-		boolean isAppFirstLoad = sf.getBoolean("isAppFirstLoad", true);
+		boolean isAppFirstLoad = sp.getBoolean("isAppFirstLoad", true);
 		if (isAppFirstLoad) {
 			new Thread(new Runnable() {
 				@Override
@@ -174,7 +184,7 @@ public class MainApplication extends Application {
 				}
 			}).start();
 
-			Editor editor = sf.edit();
+			Editor editor = sp.edit();
 			editor.putBoolean("isAppFirstLoad", false);
 			editor.commit();
 		}
@@ -211,7 +221,7 @@ public class MainApplication extends Application {
 	/**
 	 * 初始化搜索用到的hzpy.db文件
 	 */
-	private void initSQLiteFile() {
+	private void initHZPYDBFile() {
 
 		try {
 			// 获得.db文件的绝对路径
@@ -264,11 +274,12 @@ public class MainApplication extends Application {
 		}
 	}
 
-	private void initConfFile() {
+	private void initConfigFile() {
 		// Initialize global configuration file
 		File path = new File(GlobalConfig.getGlobalPath());
-		if (!path.exists())
+		if (!path.exists()) {
 			path.mkdir();
+		}
 
 		File optionsFile = new File(path, "log_options.xml");
 		if (!optionsFile.exists()) {
@@ -278,47 +289,44 @@ public class MainApplication extends Application {
 				e.printStackTrace();
 			}
 		}
-		{
-			String content = "<xml><path>log</path><v2platform><outputdebugstring>0</outputdebugstring><level>5</level><basename>v2platform</basename><path>log</path><size>1024</size></v2platform></xml>";
-			OutputStream os = null;
-			try {
-				os = new FileOutputStream(optionsFile);
-				os.write(content.getBytes());
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				if (os != null) {
-					try {
-						os.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+
+		String content = "<xml><path>log</path><v2platform><outputdebugstring>0</outputdebugstring><level>5</level><basename>v2platform</basename><path>log</path><size>1024</size></v2platform></xml>";
+		OutputStream os = null;
+		try {
+			os = new FileOutputStream(optionsFile);
+			os.write(content.getBytes());
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
 		}
 
-		{
-			File cfgFile = new File(GlobalConfig.getGlobalPath()
-					+ "/v2platform.cfg");
-			String contentCFG = "<v2platform><C2SProxy><ipv4 value=''/><tcpport value=''/></C2SProxy></v2platform>";
+		File cfgFile = new File(GlobalConfig.getGlobalPath()
+				+ "/v2platform.cfg");
+		String contentCFG = "<v2platform><C2SProxy><ipv4 value=''/><tcpport value=''/></C2SProxy></v2platform>";
 
-			OutputStream os = null;
-			try {
-				os = new FileOutputStream(cfgFile);
-				os.write(contentCFG.getBytes());
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				if (os != null) {
-					try {
-						os.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+		OutputStream os1 = null;
+		try {
+			os1 = new FileOutputStream(cfgFile);
+			os1.write(contentCFG.getBytes());
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (os1 != null) {
+				try {
+					os1.close();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			}
 		}
@@ -340,34 +348,33 @@ public class MainApplication extends Application {
 	}
 
 	@Override
-	public void onTerminate() {
-		super.onTerminate();
-		V2Log.d(" terminating....");
-		ImRequest.getInstance(this).unInitialize();
-		GroupRequest.getInstance().unInitialize();
-		VideoRequest.getInstance(this).unInitialize();
-		ConfRequest.getInstance(this).unInitialize();
-		AudioRequest.getInstance(this).unInitialize();
-		WBRequest.getInstance(this).unInitialize();
-		ChatRequest.getInstance(this).unInitialize();
-		this.getApplicationContext().stopService(
-				new Intent(this.getApplicationContext(), JNIService.class));
-		this.getApplicationContext().stopService(
-				new Intent(this.getApplicationContext(), LogService.class));
-		V2Log.d(" terminated");
-
-	}
-
-	@Override
 	public void onLowMemory() {
+		// 后台进程已经被全部回收，但系统内存还是低
+		V2Log.e("MainApplication.onLowMemory()");
 		super.onLowMemory();
-		V2Log.e("=================== low memeory :");
 	}
 
 	@Override
 	public void onTrimMemory(int level) {
+		V2Log.e("onLowMemory()");
+		switch (level) {
+		case Application.TRIM_MEMORY_RUNNING_MODERATE:
+			break;
+		case Application.TRIM_MEMORY_RUNNING_LOW:
+			break;
+		case Application.TRIM_MEMORY_RUNNING_CRITICAL:
+			break;
+		case Application.TRIM_MEMORY_UI_HIDDEN:
+			break;
+		case Application.TRIM_MEMORY_BACKGROUND:
+			break;
+		case Application.TRIM_MEMORY_MODERATE:
+			break;
+		case Application.TRIM_MEMORY_COMPLETE:// 下个被回收进程就是此进程
+			break;
+		}
+
 		super.onTrimMemory(level);
-		V2Log.e("=================== trim memeory :" + level);
 	}
 
 	public void requestQuit() {
@@ -378,59 +385,99 @@ public class MainApplication extends Application {
 				((Activity) obj).finish();
 			}
 		}
+	}
 
-		Handler h = new Handler();
-		h.postDelayed(new Runnable() {
+	public void uninitForExitProcess() {
+		super.onTerminate();
+		V2Log.d("uninitForExit....");
 
-			@Override
-			public void run() {
-				GlobalConfig.saveLogoutFlag(getApplicationContext());
-				Notificator
-						.cancelAllSystemNotification(getApplicationContext());
-				System.exit(0);
+		this.getApplicationContext().stopService(
+				new Intent(this.getApplicationContext(), JNIService.class));
+		this.getApplicationContext().stopService(
+				new Intent(this.getApplicationContext(), LogService.class));
+		GlobalConfig.saveLogoutFlag(getApplicationContext());
+		Notificator.cancelAllSystemNotification(getApplicationContext());
+		ImRequest.getInstance(this).unInitialize();
+		GroupRequest.getInstance().unInitialize();
+		VideoRequest.getInstance(this).unInitialize();
+		ConfRequest.getInstance(this).unInitialize();
+		AudioRequest.getInstance(this).unInitialize();
+		WBRequest.getInstance(this).unInitialize();
+		ChatRequest.getInstance(this).unInitialize();
+
+		V2Log.d("uninitForExited");
+
+		System.exit(0);
+
+	}
+
+	public boolean isRunningBackgound() {
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			if (startedActivityCount == 0) {
+				return true;
+			} else {
+				return false;
 			}
+		} else {
+			ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+			List<RunningTaskInfo> tasks = am.getRunningTasks(1);
+			if (!tasks.isEmpty()) {
+				ComponentName topActivity = tasks.get(0).topActivity;
+				if (!topActivity.getPackageName().equals(getPackageName())) {
+					return true;
+				}
+			}
+			return false;
+		}
 
-		}, 1000);
+	}
+
+	public static boolean isApplicationBackground(Context context) {
+		ActivityManager am = (ActivityManager) context
+				.getSystemService(Context.ACTIVITY_SERVICE);
+		List<RunningTaskInfo> tasks = am.getRunningTasks(1);
+		if (!tasks.isEmpty()) {
+			ComponentName topActivity = tasks.get(0).topActivity;
+			if (!topActivity.getPackageName().equals(context.getPackageName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	class LocalActivityLifecycleCallBack implements ActivityLifecycleCallbacks {
 
-		private Object mLock = new Object();
-		private int refCount = 0;
-
 		@Override
 		public void onActivityCreated(Activity activity,
 				Bundle savedInstanceState) {
-			Configuration conf = getResources().getConfiguration();
-			activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
-			if (conf.smallestScreenWidthDp >= 600
-					|| activity instanceof ConferenceActivity) {
+			// 为什么要该声音模式？暂时注释
+			// activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+			if (isPad || activity instanceof ConferenceActivity) {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 			} else {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			}
-			V2Log.d(TAG, "add new activity.. : " + activity);
+
 			list.add(0, new WeakReference<Activity>(activity));
+			V2Log.d(TAG, "MainApplication 添加一个activity ");
+
 		}
 
 		@Override
 		public void onActivityDestroyed(Activity activity) {
-			boolean flag = false;
 			for (int i = 0; i < list.size(); i++) {
 				WeakReference<Activity> w = list.get(i);
 				Object obj = w.get();
 				if (obj != null && ((Activity) obj) == activity) {
 					list.remove(i--);
-					flag = true;
-					V2Log.d(TAG, "find target activity : " + activity
-							+ " --remove it..");
+					V2Log.d(TAG, "MainApplication 删除一个activity ");
 				}
 			}
+
 			// activity.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
-			if (!flag)
-				V2Log.d(TAG, "no find the target activity : " + activity
-						+ " -- remove failed");
-			V2Log.d(TAG, "集合中还剩下 : " + list.size() + " 个activity ");
+
 		}
 
 		@Override
@@ -451,36 +498,24 @@ public class MainApplication extends Application {
 		@Override
 		public void onActivityStarted(Activity activity) {
 			if (activity instanceof LoginActivity
-					|| activity instanceof StartupActivity) {
+					|| activity instanceof SplashActivity) {
 				return;
 			}
-			synchronized (mLock) {
-				refCount++;
-				if (refCount == 1) {
-					Notificator
-							.cancelAllSystemNotification(getApplicationContext());
-					// Notificator.udpateApplicationNotification(
-					// getApplicationContext(), false, null);
-				}
+			//测试证明activity跳转时，先start后stop
+			startedActivityCount++;
+			if (startedActivityCount == 1) {
+
 			}
+
 		}
 
 		@Override
 		public void onActivityStopped(Activity activity) {
 			if (activity instanceof LoginActivity
-					|| activity instanceof StartupActivity) {
+					|| activity instanceof SplashActivity) {
 				return;
 			}
-			synchronized (mLock) {
-				refCount--;
-				if (refCount == 0) {
-					// Intent i = activity.getIntent();
-					// i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-					// | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-					// Notificator.udpateApplicationNotification(
-					// getApplicationContext(), true, i);
-				}
-			}
+			startedActivityCount--;
 		}
 	}
 }

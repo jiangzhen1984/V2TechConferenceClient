@@ -9,17 +9,17 @@ import android.text.TextUtils;
 
 public class StorageUtil {
 
-	
-	public static final String CT_S_Sdcard_Sign_Storage_emulated = "storage/emulated/";  
-	public static final String CT_S_Sdcard_Sign_Storage_sdcard = "storage/sdcard"; 
-	
+	public static final String CT_S_Sdcard_Sign_Storage_emulated = "storage/emulated/";
+	public static final String CT_S_Sdcard_Sign_Storage_sdcard = "storage/sdcard";
+
 	private static String CD_S_SdcardPath = "";
 	private static String CD_S_SdcardPathAbsolute = "";
 
 	public static String getSdcardPath() {
-		if (TextUtils.isEmpty(CD_S_SdcardPath))
+		if (TextUtils.isEmpty(CD_S_SdcardPath)) {
 			CD_S_SdcardPath = Environment.getExternalStorageDirectory()
 					.getPath();
+		}
 
 		CD_S_SdcardPath = checkAndReplaceEmulatedPath(CD_S_SdcardPath);
 
@@ -27,12 +27,11 @@ public class StorageUtil {
 	}
 
 	public static String getAbsoluteSdcardPath() {
-		if (TextUtils.isEmpty(CD_S_SdcardPathAbsolute))
+		if (TextUtils.isEmpty(CD_S_SdcardPathAbsolute)) {
 			CD_S_SdcardPathAbsolute = Environment.getExternalStorageDirectory()
 					.getAbsolutePath();
-
+		}
 		CD_S_SdcardPathAbsolute = checkAndReplaceEmulatedPath(CD_S_SdcardPathAbsolute);
-
 		return CD_S_SdcardPathAbsolute;
 	}
 
@@ -45,8 +44,7 @@ public class StorageUtil {
 		Pattern p = Pattern.compile("/?storage/emulated/\\d{1,2}");
 		Matcher m = p.matcher(strSrc);
 		if (m.find()) {
-			strSrc = strSrc.replace(
-					CT_S_Sdcard_Sign_Storage_emulated,
+			strSrc = strSrc.replace(CT_S_Sdcard_Sign_Storage_emulated,
 					CT_S_Sdcard_Sign_Storage_sdcard);
 		}
 		return strSrc;

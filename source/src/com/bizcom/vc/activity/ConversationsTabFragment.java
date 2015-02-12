@@ -83,6 +83,7 @@ import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.activity.message.VoiceMessageActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
+import com.bizcom.vc.application.MainApplication;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.listener.CommonCallBack;
@@ -1870,7 +1871,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			return;
 		}
 
-		if (!GlobalConfig.isApplicationBackground(mContext)) {
+		if (!((MainApplication) mContext.getApplicationContext())
+				.isRunningBackgound()) {
 			sendVoiceNotify();
 			return;
 		}
@@ -1951,7 +1953,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			return;
 		}
 
-		if (!GlobalConfig.isApplicationBackground(mContext)) {
+		if (!((MainApplication) mContext.getApplicationContext())
+				.isRunningBackgound()) {
 			sendVoiceNotify();
 			return;
 		}
@@ -1978,7 +1981,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 			return;
 		}
 
-		if (!GlobalConfig.isApplicationBackground(mContext)) {
+		if (!((MainApplication) mContext.getApplicationContext())
+				.isRunningBackgound()) {
 			sendVoiceNotify();
 			return;
 		}
@@ -2202,7 +2206,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		if (GlobalHolder.getInstance().isInMeeting()
 				|| GlobalHolder.getInstance().isInAudioCall()
 				|| GlobalHolder.getInstance().isInVideoCall()) {
-			if (GlobalConfig.isApplicationBackground(mContext)) {
+			if (((MainApplication) mContext.getApplicationContext())
+					.isRunningBackgound()) {
 				sendVoiceNotify();
 			}
 			return true;
