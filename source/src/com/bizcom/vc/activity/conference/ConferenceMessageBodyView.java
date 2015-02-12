@@ -53,6 +53,8 @@ public class ConferenceMessageBodyView extends LinearLayout {
 
 	public ConferenceMessageBodyView(Context context, VMessage m) {
 		super(context);
+		if(m == null)
+			return ;
 		this.mVMessage = m;
 		this.mContext = context;
 		initLayout();

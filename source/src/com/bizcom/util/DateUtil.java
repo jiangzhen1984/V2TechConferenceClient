@@ -4,10 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.v2tech.R;
-
-import android.text.format.DateUtils;
-
+import com.bizcom.vc.application.GlobalConfig;
 import com.v2tech.R;
 
 public class DateUtil {
@@ -25,15 +22,21 @@ public class DateUtil {
 	 */
 	public static String getStringDate(long longDate) {
 		SimpleDateFormat format = null;
-		if (DateUtils.isToday(longDate))
-			return getShortDate(longDate);
 
 		Date dates = new Date(longDate);
 		Calendar cale = Calendar.getInstance();
 		cale.setTime(dates);
+
+		Date nowDates = new Date(GlobalConfig.LONGIN_SERVER_TIME * 1000);
 		Calendar currentCale = Calendar.getInstance();
+		currentCale.setTime(nowDates);
+
 		int days = cale.get(Calendar.DAY_OF_MONTH);
 		int currentCaleDays = currentCale.get(Calendar.DAY_OF_MONTH);
+
+		if (currentCaleDays - days == 0)
+			return getShortDate(longDate);
+
 		if (currentCaleDays - 1 == days) {
 			// need get context
 			return FileUitls.context.getResources().getString(
@@ -90,13 +93,13 @@ public class DateUtil {
 			return (minute < 10 ? "0" + minute : minute) + "分"
 					+ (second < 10 ? "0" + second : second) + "秒";
 		} else {
-			if(minute <= 0 && second > 0){
+			if (minute <= 0 && second > 0) {
 				return (hour < 10 ? "0" + hour : hour) + "时"
 						+ (second < 10 ? "0" + second : second) + "秒";
-			} else if(second <= 0 && minute > 0){
+			} else if (second <= 0 && minute > 0) {
 				return (hour < 10 ? "0" + hour : hour) + "时"
 						+ (minute < 10 ? "0" + minute : minute) + "分";
-			} else if(second <= 0 && minute <= 0){
+			} else if (second <= 0 && minute <= 0) {
 				return (hour < 10 ? "0" + hour : hour) + "时";
 			} else {
 				return (hour < 10 ? "0" + hour : hour) + "时"

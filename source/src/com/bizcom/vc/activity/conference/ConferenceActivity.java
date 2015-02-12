@@ -68,6 +68,7 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.bizcom.bo.GroupUserObject;
+import com.bizcom.bo.MessageObject;
 import com.bizcom.bo.UserStatusObject;
 import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.request.AsyncResult;
@@ -1342,8 +1343,9 @@ public class ConferenceActivity extends Activity {
 					@Override
 					public void confirmCallBack() {
 						mQuitDialog.dismiss();
-						VerificationProvider.deleteCrowdVerificationMessage(
-								conf.getId(), -1);
+						MessageLoader.deleteMessageByID(mContext, 
+								V2GlobalConstants.GROUP_TYPE_CONFERENCE, conf.getId(),
+								-1, false);
 						finish();
 					}
 
@@ -1551,7 +1553,7 @@ public class ConferenceActivity extends Activity {
 		att.setJoined(false);
 		att.setSpeakingState(false);
 		att.setLectureState(Attendee.LECTURE_STATE_NOT);
-		if(att.getLectureState() == Attendee.LECTURE_STATE_NOT ){
+		if (att.getLectureState() == Attendee.LECTURE_STATE_NOT) {
 			hasUnreadChiremanControllMsg = false;
 			mMsgNotification.setVisibility(View.GONE);
 			if (mConfMsgRedDot != null) {
@@ -2720,16 +2722,18 @@ public class ConferenceActivity extends Activity {
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_NEW_CONF_MESSAGE.equals(intent
 					.getAction())) {
-				long mid = intent.getLongExtra("mid", 0);
-				VMessage vm = MessageLoader.loadGroupMessageById(mContext,
-						V2GlobalConstants.GROUP_TYPE_CONFERENCE,
-						intent.getLongExtra("groupID", 0), mid);
+				MessageObject msgObj = intent.getParcelableExtra("msgObj");
+				long msgID = msgObj.messageColsID;
+				long groupID = msgObj.remoteGroupID;
+				VMessage vm = MessageLoader
+						.loadGroupMessageById(mContext,
+								V2GlobalConstants.GROUP_TYPE_CONFERENCE,
+								groupID, msgID);
 				if (mMessageContainer != null) {
 					mMessageContainer.addNewMessage(vm);
 				} else {
 					mPendingMessageList.add(vm);
 				}
-				V2Log.e(TAG, "JNI_BROADCAST_NEW_CONF_MESSAGE is coming");
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
 

@@ -189,7 +189,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 			return false;
 		}
 
-		if ((new Date().getTime() / 60000) - (st.getTime() / 60000) > 10) {
+		if ((new Date(GlobalConfig.getGlobalServerTime()).getTime() / 60000) - (st.getTime() / 60000) > 10) {
 			mConfStartTimeET
 					.setError(getString(R.string.error_conf_do_not_permit_create_piror_conf));
 			mConfStartTimeET.requestFocus();
@@ -405,7 +405,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 				if (conference != null)
 					startDate = conference.getDate();
 				else
-					startDate = new Date();
+					startDate = new Date(GlobalConfig.getGlobalServerTime());
 
 				RequestConfCreateResponse rc = (RequestConfCreateResponse) rccr;
 				ConferenceGroup g = new ConferenceGroup(rc.getConfId(),
