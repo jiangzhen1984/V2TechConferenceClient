@@ -23,7 +23,7 @@ import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.request.CrowdGroupService;
 import com.bizcom.request.MessageListener;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.util.ProgressUtils;
+import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -304,17 +304,17 @@ public class CrowdInvitationActivity extends Activity {
 		if (isInRejectReasonMode != isInReject) {
 			if (isInReject) {
 				Animation out = AnimationUtils.loadAnimation(mContext,
-						R.animator.left_in);
+						R.anim.left_in);
 				mRejectResasonLayout.startAnimation(out);
 				Animation in = AnimationUtils.loadAnimation(mContext,
-						R.animator.left_out);
+						R.anim.left_out);
 				mBoxLy.startAnimation(in);
 			} else {
 				Animation out = AnimationUtils.loadAnimation(mContext,
-						R.animator.right_in);
+						R.anim.right_in);
 				mBoxLy.startAnimation(out);
 				Animation in = AnimationUtils.loadAnimation(mContext,
-						R.animator.right_out);
+						R.anim.right_out);
 				mRejectResasonLayout.startAnimation(in);
 			}
 
@@ -340,7 +340,7 @@ public class CrowdInvitationActivity extends Activity {
 				else {
 					service.acceptInvitation(crowd, new MessageListener(
 							mLocalHandler, ACCEPT_INVITATION_DONE, null));
-					ProgressUtils.showNormalWithHintProgress(mContext, true);
+					WaitDialogBuilder.showNormalWithHintProgress(mContext, true);
 				}
 			}
 		}
@@ -418,7 +418,7 @@ public class CrowdInvitationActivity extends Activity {
 		public void onReceive(Context context, Intent intent) {
 			if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
 					.getAction())) {
-				ProgressUtils.showNormalWithHintProgress(mContext, false);
+				WaitDialogBuilder.showNormalWithHintProgress(mContext, false);
 				mButtonLayout.setVisibility(View.GONE);
 				mSendMsgButton.setVisibility(View.GONE);
 				mAcceptedLy.setVisibility(View.GONE);
@@ -511,7 +511,7 @@ public class CrowdInvitationActivity extends Activity {
 				mBriefTV.setText(crowdGroup.getBrief());
 				break;
 			}
-			ProgressUtils.showNormalWithHintProgress(mContext, false);
+			WaitDialogBuilder.showNormalWithHintProgress(mContext, false);
 		}
 
 	};

@@ -175,10 +175,10 @@ public class CrowdApplicationActivity extends Activity {
 			mTitleTV.setText(R.string.crowd_application_qualification);
 
 			Animation out = AnimationUtils.loadAnimation(mContext,
-					R.animator.left_in);
+					R.anim.left_in);
 			mMessageLy.startAnimation(out);
 			Animation in = AnimationUtils.loadAnimation(mContext,
-					R.animator.left_out);
+					R.anim.left_out);
 			mItemLy.startAnimation(in);
 
 		} else {
@@ -207,10 +207,10 @@ public class CrowdApplicationActivity extends Activity {
 			}
 
 			Animation out = AnimationUtils.loadAnimation(mContext,
-					R.animator.right_in);
+					R.anim.right_in);
 			mItemLy.startAnimation(out);
 			Animation in = AnimationUtils.loadAnimation(mContext,
-					R.animator.right_out);
+					R.anim.right_out);
 			mMessageLy.startAnimation(in);
 		}
 	}

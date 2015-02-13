@@ -9,13 +9,13 @@ import android.os.Looper;
 import android.view.animation.RotateAnimation;
 import android.widget.Toast;
 
-public class ProgressDialog extends Dialog {
+public class WaitDialog extends Dialog {
 
 	public static final int TIME_OUT = 10000;
 	private Timer timer = new Timer();
 	private RotateAnimation animation;
 
-	public ProgressDialog(Context context, int theme, RotateAnimation animation) {
+	public WaitDialog(Context context, int theme, RotateAnimation animation) {
 		super(context, theme);
 		this.animation = animation;
 	}

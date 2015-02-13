@@ -26,7 +26,7 @@ import com.bizcom.request.CrowdGroupService;
 import com.bizcom.request.MessageListener;
 import com.bizcom.request.BitmapManager.BitmapChangedListener;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.util.ProgressUtils;
+import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.util.V2Toast;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.application.GlobalHolder;
@@ -254,7 +254,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 				service.acceptApplication(crowd, applicant,
 						new MessageListener(mLocalHandler,
 								ACCEPT_INVITATION_DONE, null));
-				ProgressUtils.showNormalWithHintProgress(mContext, true)
+				WaitDialogBuilder.showNormalWithHintProgress(mContext, true)
 						.initTimeOut();
 			}
 		}
@@ -386,7 +386,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 				break;
 
 			}
-			ProgressUtils.showNormalWithHintProgress(mContext, false);
+			WaitDialogBuilder.showNormalWithHintProgress(mContext, false);
 		}
 	};
 

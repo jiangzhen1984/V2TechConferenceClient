@@ -62,13 +62,13 @@ public class DiscussionBoardTopicUpdateActivity extends Activity {
 
 
 		mContentET.setText(crowd.getName());
-		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		overridePendingTransition(R.anim.left_in, R.anim.left_out);
 	}
 
 	@Override
 	public void finish() {
 		super.finish();
-		overridePendingTransition(R.animator.right_in, R.animator.right_out);
+		overridePendingTransition(R.anim.right_in, R.anim.right_out);
 	}
 
 	@Override

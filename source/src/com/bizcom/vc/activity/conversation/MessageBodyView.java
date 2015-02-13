@@ -40,7 +40,7 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.bizcom.util.FileUitls;
 import com.bizcom.util.MessageUtil;
-import com.bizcom.util.SPUtil;
+import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.vc.activity.crow.CrowdFilesActivity.CrowdFileActivityType;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
@@ -1133,7 +1133,7 @@ public class MessageBodyView extends LinearLayout {
 	private OnClickListener mResendButtonListener = new OnClickListener() {
 		@Override
 		public void onClick(View view) {
-			if (SPUtil.checkCurrentAviNetwork(getContext())) {
+			if (LocalSharedPreferencesStorage.checkCurrentAviNetwork(getContext())) {
 				if (callback != null) {
 					View fileRootView = mContentContainer.getChildAt(0);
 					if (mMsg.isLocal()) {

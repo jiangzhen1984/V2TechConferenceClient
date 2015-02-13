@@ -35,7 +35,7 @@
     <!-- Login form -->
 
     <RelativeLayout
-        android:id="@+id/login_form_ll"
+        android:id="@+id/login_layout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@color/logo_background"
@@ -46,13 +46,13 @@
             android:id="@+id/login_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/login_layout"
+            android:layout_above="@+id/login_form"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="20dp"
             android:src="@drawable/login_logo" />
 
         <LinearLayout
-            android:id="@+id/login_layout"
+            android:id="@+id/login_form"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignLeft="@+id/login_logo"
@@ -148,7 +148,7 @@
                     android:src="@drawable/login_setting_button_selector" />
 
                 <TextView
-                    android:id="@+id/sign_in_button"
+                    android:id="@+id/login_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBottom="@+id/show_setting"

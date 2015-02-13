@@ -13,7 +13,7 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
 
-import com.bizcom.util.SPUtil;
+import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.v2tech.R;
 
 public class GlobalConfig {
@@ -94,7 +94,7 @@ public class GlobalConfig {
 	}
 
 	public static void saveLogoutFlag(Context context) {
-		SPUtil.putConfigIntValue(context, KEY_LOGGED_IN, 0);
+		LocalSharedPreferencesStorage.putIntValue(context, KEY_LOGGED_IN, 0);
 	}
 
 	public static String getEmojiStrByIndex(int index) {

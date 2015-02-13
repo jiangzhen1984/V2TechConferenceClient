@@ -169,7 +169,7 @@ public class CrowdFilesActivity extends Activity {
 		adapter = new FileListAdapter();
 		mListView.setAdapter(adapter);
 		mListView.setOnItemLongClickListener(mDeleteModeListener);
-		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		overridePendingTransition(R.anim.left_in, R.anim.left_out);
 		mLocalSaveFile = new HashMap<String, VMessageFileItem>();
 		crowd = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 				GroupType.CHATING.intValue(),
@@ -190,7 +190,7 @@ public class CrowdFilesActivity extends Activity {
 	@Override
 	public void finish() {
 		super.finish();
-		overridePendingTransition(R.animator.right_in, R.animator.right_out);
+		overridePendingTransition(R.anim.right_in, R.anim.right_out);
 	}
 
 	@Override

@@ -78,7 +78,7 @@ public class SearchedResultActivity extends Activity {
 		// Register listener for avatar changed
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				listener);
-		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		overridePendingTransition(R.anim.left_in, R.anim.left_out);
 	}
 	
 	private void initReceiver() {
@@ -97,7 +97,7 @@ public class SearchedResultActivity extends Activity {
 	@Override
 	public void finish() {
 		super.finish();
-		overridePendingTransition(R.animator.right_in, R.animator.right_out);
+		overridePendingTransition(R.anim.right_in, R.anim.right_out);
 	}
 
 	@Override

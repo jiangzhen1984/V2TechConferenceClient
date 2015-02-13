@@ -80,7 +80,7 @@ public class SelectJionGroupActivity extends Activity {
 		// build radio button first
 		buildList();
 		mGroupListLy.setOnCheckedChangeListener(mGroupChangedListener);
-		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		overridePendingTransition(R.anim.left_in, R.anim.left_out);
 	}
 	
 	@Override
@@ -162,7 +162,7 @@ public class SelectJionGroupActivity extends Activity {
 			}
 		}
 		super.finish();
-		overridePendingTransition(R.animator.right_in, R.animator.right_out);
+		overridePendingTransition(R.anim.right_in, R.anim.right_out);
 	}
 	
 	

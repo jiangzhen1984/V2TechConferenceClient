@@ -44,7 +44,7 @@ import com.bizcom.request.BitmapManager;
 import com.bizcom.request.MessageListener;
 import com.bizcom.request.UserService;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.util.SPUtil;
+import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.vc.activity.conversation.ConversationSelectFileEntry;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.application.GlobalConfig;
@@ -164,8 +164,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			v.setOnTouchListener(this);
 		}
 
-		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
-				R.animator.alpha_from_1_to_0);
+//		this.overridePendingTransition(R.anim.alpha_from_0_to_1,
+//				R.anim.alpha_from_1_to_0);
 		initViewShow();
 
 		initBroadcastReceiver();
@@ -350,8 +350,8 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	@Override
 	public void finish() {
 		super.finish();
-		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
-				R.animator.alpha_from_1_to_0);
+//		this.overridePendingTransition(R.anim.alpha_from_0_to_1,
+//				R.anim.alpha_from_1_to_0);
 	}
 
 	@Override
@@ -776,7 +776,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 					|| u.getMobile().isEmpty();
 			boolean offline = (u.getmStatus() == User.Status.OFFLINE || u
 					.getmStatus() == User.Status.HIDDEN);
-			boolean localOffLine = !SPUtil.checkCurrentAviNetwork(mContext);
+			boolean localOffLine = !LocalSharedPreferencesStorage.checkCurrentAviNetwork(mContext);
 
 			if (offline || localOffLine) {
 				if (isPad) {
@@ -914,7 +914,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			if (SPUtil.checkCurrentAviNetwork(mContext)) {
+			if (LocalSharedPreferencesStorage.checkCurrentAviNetwork(mContext)) {
 				Intent intent = new Intent(ContactDetail.this,
 						ConversationSelectFileEntry.class);
 				startActivityForResult(intent, FILE_SELECT_CODE);

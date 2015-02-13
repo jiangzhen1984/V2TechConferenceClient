@@ -18,7 +18,7 @@ import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.request.CrowdGroupService;
 import com.bizcom.request.MessageListener;
-import com.bizcom.util.SPUtil;
+import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.service.JNIService;
 import com.bizcom.vo.CrowdGroup;
@@ -73,14 +73,14 @@ public class CrowdContentUpdateActivity extends Activity {
 
 		mType = getIntent().getExtras().getInt("type");
 		updateView(mType, inEditMode);
-		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		overridePendingTransition(R.anim.left_in, R.anim.left_out);
 		initReceiver();
 	}
 
 	@Override
 	public void finish() {
 		super.finish();
-		overridePendingTransition(R.animator.right_in, R.animator.right_out);
+		overridePendingTransition(R.anim.right_in, R.anim.right_out);
 	}
 
 	@Override

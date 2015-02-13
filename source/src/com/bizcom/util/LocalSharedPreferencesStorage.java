@@ -7,11 +7,11 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 
-public class SPUtil {
+public class LocalSharedPreferencesStorage {
 
 	private static final String CONFIG_NAME = "config";
 
-	public SPUtil() {
+	public LocalSharedPreferencesStorage() {
 	}
 
 	public static String getConfigStrValue(Context context, String key) {
@@ -39,7 +39,7 @@ public class SPUtil {
 		return e.commit();
 	}
 
-	public static boolean putConfigIntValue(Context context, String key,
+	public static boolean putIntValue(Context context, String key,
 			int value) {
 		SharedPreferences sf = context.getSharedPreferences(CONFIG_NAME,
 				Context.MODE_PRIVATE);
@@ -48,7 +48,7 @@ public class SPUtil {
 		return e.commit();
 	}
 
-	public static boolean putConfigStrValue(Context context, String[] keys,
+	public static boolean putStrValue(Context context, String[] keys,
 			String[] values) {
 		if (keys == null || values == null) {
 			return false;
@@ -57,9 +57,9 @@ public class SPUtil {
 			throw new RuntimeException(
 					" keys's length is different with values's length");
 		}
-		SharedPreferences sf = context.getSharedPreferences(CONFIG_NAME,
+		SharedPreferences sp = context.getSharedPreferences(CONFIG_NAME,
 				Context.MODE_PRIVATE);
-		Editor e = sf.edit();
+		Editor e = sp.edit();
 		for (int index = 0; index < keys.length; index++) {
 			e.putString(keys[index], values[index]);
 		}

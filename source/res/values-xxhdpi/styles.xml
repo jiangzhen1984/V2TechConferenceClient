@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Application theme. -->
-    <style name="AppTheme" parent="@android:style/Theme.NoTitleBar">
-        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-    </style>
-
     <style name="IpSettingDialog" parent="@android:style/Theme.Translucent.NoTitleBar">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -25,15 +20,14 @@
         <item name="android:windowIsFloating">true</item>
     </style>
 
-
     <style name="InMeetingCameraSettingAnim">
-        <item name="@android:windowEnterAnimation">@animator/nonam_scale_0_100</item>
-        <item name="@android:windowExitAnimation">@animator/nonam_scale_100_0</item>
+        <item name="@android:windowEnterAnimation">@anim/nonam_scale_0_100</item>
+        <item name="@android:windowExitAnimation">@anim/nonam_scale_100_0</item>
     </style>
 
     <style name="TitleBarPopupWindowAnim">
-        <item name="@android:windowEnterAnimation">@animator/translation_down_to_up_related_self</item>
-        <item name="@android:windowExitAnimation">@animator/translation_up_to_down_related_self</item>
+        <item name="@android:windowEnterAnimation">@anim/translation_down_to_up_related_self</item>
+        <item name="@android:windowExitAnimation">@anim/translation_up_to_down_related_self</item>
     </style>
 
     <style name="MessageVoiceDialog" parent="@android:style/Theme.Translucent.NoTitleBar">

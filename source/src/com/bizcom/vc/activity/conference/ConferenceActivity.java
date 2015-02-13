@@ -407,8 +407,8 @@ public class ConferenceActivity extends Activity {
 		initBroadcastReceiver();
 
 		// Start animation
-		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
-				R.animator.nonam_scale_null);
+		this.overridePendingTransition(R.anim.nonam_scale_center_0_100,
+				R.anim.nonam_scale_null);
 
 		bindService(new Intent(mContext, ConferencMessageSyncService.class),
 				mLocalServiceConnection, Context.BIND_AUTO_CREATE);
@@ -2269,7 +2269,7 @@ public class ConferenceActivity extends Activity {
 		public void onClick(View view) {
 			if (mMenuButtonContainer.getVisibility() == View.GONE) {
 				Animation animation = AnimationUtils.loadAnimation(mContext,
-						R.animator.nonam_scale_y_0_100);
+						R.anim.nonam_scale_y_0_100);
 				animation.setDuration(400);
 				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.VISIBLE);
@@ -2284,7 +2284,7 @@ public class ConferenceActivity extends Activity {
 				// showOrHidenMsgContainer(View.GONE);
 				// showOrHidenDocContainer(View.GONE);
 				Animation animation = AnimationUtils.loadAnimation(mContext,
-						R.animator.nonam_scale_y_100_0);
+						R.anim.nonam_scale_y_100_0);
 				animation.setDuration(400);
 				mMenuButtonContainer.startAnimation(animation);
 				mMenuButtonContainer.setVisibility(View.GONE);

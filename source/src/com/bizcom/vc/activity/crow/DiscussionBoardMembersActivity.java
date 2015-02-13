@@ -82,7 +82,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 		sortMembers();
 		adapter = new MembersAdapter();
 		mMembersContainer.setAdapter(adapter);
-		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		overridePendingTransition(R.anim.left_in, R.anim.left_out);
 		service = new CrowdGroupService();
 		
 	}
@@ -127,7 +127,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 	@Override
 	public void finish() {
 		super.finish();
-		overridePendingTransition(R.animator.right_in, R.animator.right_out);
+		overridePendingTransition(R.anim.right_in, R.anim.right_out);
 	}
 
 	private void sortMembers() {

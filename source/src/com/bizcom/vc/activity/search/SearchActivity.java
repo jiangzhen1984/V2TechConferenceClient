@@ -19,7 +19,7 @@ import com.bizcom.request.MessageListener;
 import com.bizcom.request.SearchService;
 import com.bizcom.request.UserService;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.util.ProgressUtils;
+import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.SearchedResult;
 import com.v2tech.R;
@@ -64,7 +64,7 @@ public class SearchActivity extends Activity {
 			mType = Type.MEMBER;
 		}
 		initView(mType);
-		overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		overridePendingTransition(R.anim.left_in, R.anim.left_out);
 	}
 
 	@Override
@@ -80,7 +80,7 @@ public class SearchActivity extends Activity {
 	@Override
 	public void finish() {
 		super.finish();
-		overridePendingTransition(R.animator.right_in, R.animator.right_out);
+		overridePendingTransition(R.anim.right_in, R.anim.right_out);
 	}
 
 	@Override
@@ -148,7 +148,7 @@ public class SearchActivity extends Activity {
 							mType == Type.CROWD ? SearchService.Type.CROWD
 									: SearchService.Type.MEMBER, mSearchedText
 									.getText().toString(), 1);
-			ProgressUtils.showNormalWithHintProgress(SearchActivity.this,
+			WaitDialogBuilder.showNormalWithHintProgress(SearchActivity.this,
 					getResources().getString(R.string.status_searching), true);
 			searchService.search(par, new MessageListener(mLocalHandler,
 					SEARCH_DONE, null));
@@ -172,7 +172,7 @@ public class SearchActivity extends Activity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 			case SEARCH_DONE:
-				ProgressUtils.showNormalWithHintProgress(
+				WaitDialogBuilder.showNormalWithHintProgress(
 						SearchActivity.this,
 						getResources().getString(
 								R.string.error_local_connect_to_server), false);

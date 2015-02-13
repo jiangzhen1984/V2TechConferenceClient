@@ -74,15 +74,16 @@ public class MainActivity extends FragmentActivity implements
 
 	private TabClass[] mTabClasses = new TabClass[] {
 
+			new TabClass(PublicIntent.TAG_ORG,
+					R.drawable.selector_tab_org_button, R.string.tab_org_name,
+					R.string.tab_org_name,
+					TabFragmentOrganization.class.getName()),
+
 			new TabClass(PublicIntent.TAG_CONTACT,
 					R.drawable.selector_tab_contact_button,
 					R.string.tab_contact_name, R.string.tab_contact_name,
 					TabFragmentContacts.class.getName()),
 
-			new TabClass(PublicIntent.TAG_ORG,
-					R.drawable.selector_tab_org_button, R.string.tab_org_name,
-					R.string.tab_org_name,
-					TabFragmentOrganization.class.getName()),
 			new TabClass(PublicIntent.TAG_GROUP,
 					R.drawable.selector_tab_group_button,
 					R.string.tab_group_name, R.string.tab_group_name,
@@ -158,7 +159,7 @@ public class MainActivity extends FragmentActivity implements
 		this.intialiseViewPager(index);
 		initReceiver();
 		// Start animation
-		this.overridePendingTransition(R.animator.left_in, R.animator.left_out);
+		// this.overridePendingTransition(R.anim.left_in, R.anim.left_out);
 		updateFileState();
 	}
 

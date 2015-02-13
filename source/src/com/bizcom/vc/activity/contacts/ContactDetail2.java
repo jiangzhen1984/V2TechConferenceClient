@@ -35,7 +35,7 @@ import com.bizcom.request.ContactsService;
 import com.bizcom.request.MessageListener;
 import com.bizcom.request.UserService;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.util.ProgressUtils;
+import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.activity.main.MainActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -156,8 +156,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mUpdateContactGroupButton
 				.setOnClickListener(mUpdateContactGroupButtonListener);
 
-		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
-				R.animator.alpha_from_1_to_0);
+//		this.overridePendingTransition(R.anim.alpha_from_0_to_1,
+//				R.anim.alpha_from_1_to_0);
 
 		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
 				GroupType.CONTACT.intValue());
@@ -223,8 +223,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	@Override
 	public void finish() {
 		super.finish();
-		this.overridePendingTransition(R.animator.alpha_from_0_to_1,
-				R.animator.alpha_from_1_to_0);
+//		this.overridePendingTransition(R.anim.alpha_from_0_to_1,
+//				R.anim.alpha_from_1_to_0);
 	}
 
 	private void hindSoftInput(View v) {
@@ -403,7 +403,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				deleteContactDialog.dismiss();
 				contactService.delContact(u, new MessageListener(lh,
 						DELETE_CONTACT_USER, null));
-				ProgressUtils.showNormalWithHintProgress(mContext, true);
+				WaitDialogBuilder.showNormalWithHintProgress(mContext, true);
 			}
 		});
 
@@ -602,7 +602,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				}
 				break;
 			case DELETE_CONTACT_USER:
-				ProgressUtils.showNormalWithHintProgress(mContext, false);
+				WaitDialogBuilder.showNormalWithHintProgress(mContext, false);
 				JNIResponse response = (JNIResponse) msg.obj;
 				if (response.getResult() == JNIResponse.Result.SUCCESS) {
 					// belongs = null;

@@ -77,7 +77,7 @@ import com.bizcom.request.jni.FileTransStatusIndication.FileTransProgressStatusI
 import com.bizcom.request.jni.JNIResponse.Result;
 import com.bizcom.util.FileUitls;
 import com.bizcom.util.MessageUtil;
-import com.bizcom.util.SPUtil;
+import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.vc.activity.contacts.ContactDetail;
 import com.bizcom.vc.activity.crow.CrowdDetailActivity;
 import com.bizcom.vc.activity.crow.CrowdFilesActivity.CrowdFileActivityType;
@@ -287,8 +287,8 @@ public class ConversationTextActivity extends Activity implements
 		mGroupChat.registerFileTransStatusListener(this.lh,
 				FILE_STATUS_LISTENER, null);
 		// Start animation
-		this.overridePendingTransition(R.animator.nonam_scale_center_0_100,
-				R.animator.nonam_scale_null);
+//		this.overridePendingTransition(R.anim.nonam_scale_center_0_100,
+//				R.anim.nonam_scale_null);
 		// initalize vioce function that showing dialog
 		createVideoDialog();
 		// request ConversationTabFragment to update
@@ -599,8 +599,8 @@ public class ConversationTextActivity extends Activity implements
 	public void onBackPressed() {
 		V2Log.d(TAG, "entry onBackPressed");
 		checkMessageEmpty();
-		this.overridePendingTransition(R.animator.nonam_scale_null,
-				R.animator.nonam_scale_center_100_0);
+//		this.overridePendingTransition(R.anim.nonam_scale_null,
+//				R.anim.nonam_scale_center_100_0);
 		super.onBackPressed();
 	}
 
@@ -1641,7 +1641,7 @@ public class ConversationTextActivity extends Activity implements
 	private View.OnClickListener mfileSelectionButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			if (SPUtil.checkCurrentAviNetwork(mContext)) {
+			if (LocalSharedPreferencesStorage.checkCurrentAviNetwork(mContext)) {
 				Intent intent = null;
 				if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER) {
 					intent = new Intent(ConversationTextActivity.this,
@@ -1668,7 +1668,7 @@ public class ConversationTextActivity extends Activity implements
 	private View.OnClickListener mVideoCallButtonListener = new View.OnClickListener() {
 		@Override
 		public void onClick(View arg0) {
-			if (!SPUtil.checkCurrentAviNetwork(mContext)) {
+			if (!LocalSharedPreferencesStorage.checkCurrentAviNetwork(mContext)) {
 				Toast.makeText(mContext,
 						R.string.conversation_no_network_notification,
 						Toast.LENGTH_SHORT).show();

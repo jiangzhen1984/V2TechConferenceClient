@@ -50,7 +50,7 @@ import com.bizcom.request.CrowdGroupService;
 import com.bizcom.request.MessageListener;
 import com.bizcom.request.BitmapManager.BitmapChangedListener;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.util.ProgressUtils;
+import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
 import com.bizcom.vc.activity.contacts.ContactDetail;
 import com.bizcom.vc.activity.contacts.ContactDetail2;
@@ -1377,7 +1377,7 @@ public class MessageAuthenticationActivity extends Activity {
 						crowdService.acceptInvitation(crowd,
 								new MessageListener(mLocalHandler,
 										ACCEPT_INVITATION_DONE, cg));
-						ProgressUtils
+						WaitDialogBuilder
 								.showNormalWithHintProgress(mContext, true);
 					}
 				} else if (msg.getType() == VMessageQualification.Type.CROWD_APPLICATION) {
@@ -1398,7 +1398,7 @@ public class MessageAuthenticationActivity extends Activity {
 									vqac.getCrowdGroup(), vqac.getApplicant(),
 									new MessageListener(mLocalHandler,
 											ACCEPT_APPLY_DONE, group));
-							ProgressUtils.showNormalWithHintProgress(mContext,
+							WaitDialogBuilder.showNormalWithHintProgress(mContext,
 									true);
 						}
 					} else {
@@ -1490,7 +1490,7 @@ public class MessageAuthenticationActivity extends Activity {
 				// this.abortBroadcast();
 			} else if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
 					.getAction())) {
-				ProgressUtils.showNormalWithHintProgress(mContext, false);
+				WaitDialogBuilder.showNormalWithHintProgress(mContext, false);
 				handleFailedDone();
 			} else if (PublicIntent.BROADCAST_CROWD_DELETED_NOTIFICATION
 					.equals(intent.getAction())
@@ -1663,7 +1663,7 @@ public class MessageAuthenticationActivity extends Activity {
 				}
 				break;
 			}
-			ProgressUtils.showNormalWithHintProgress(mContext, false);
+			WaitDialogBuilder.showNormalWithHintProgress(mContext, false);
 		}
 
 	};
