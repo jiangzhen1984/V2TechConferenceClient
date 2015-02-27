@@ -29,7 +29,7 @@ import com.bizcom.vo.Group.GroupType;
  * @author jiangzhen
  * 
  */
-public class ContactsService extends AbstractHandler {
+public class ContactsService extends V2AbstractHandler {
 
 	private static final int CREATE_CONTACTS_GROUP = 10;
 	private static final int UPDATE_CONTACTS_GROUP = 11;

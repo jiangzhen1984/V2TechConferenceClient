@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.DataBaseContext;
@@ -38,7 +39,7 @@ public class SplashActivity extends Activity {
 		}
 
 		setContentView(R.layout.load);
-
+		((TextView)findViewById(R.id.versionNumber)).setText(GlobalConfig.GLOBAL_VERSION_NAME);
 		new LoaderThread().start();
 	}
 

@@ -21,7 +21,7 @@ import com.bizcom.vo.UserDeviceConfig;
  * @author 28851274
  * 
  */
-public class DeviceService extends AbstractHandler {
+public class DeviceService extends V2AbstractHandler {
 
 	private static final int JNI_REQUEST_OPEN_VIDEO = 0x00100001;
 	private static final int JNI_REQUEST_CLOSE_VIDEO = 0x00100002;

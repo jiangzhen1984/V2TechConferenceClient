@@ -21,7 +21,7 @@ import com.bizcom.vo.User;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class UserService extends AbstractHandler {
+public class UserService extends V2AbstractHandler {
 
 	// 此处的消息类型只与AbstractHandler的REQUEST_TIME_OUT消息并列。
 	// 与参数caller中的消息类型what完全没有关系，上层传什么消息what回调就是什么消息what

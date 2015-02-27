@@ -23,7 +23,7 @@ import com.bizcom.vo.Group.GroupType;
  * @author 28851274
  * 
  */
-public class SearchService extends AbstractHandler {
+public class SearchService extends V2AbstractHandler {
 
 	private static final int SEARCH = 1;
 

@@ -24,7 +24,7 @@ import com.bizcom.request.jni.JNIResponse;
  * @author jiangzhen
  * 
  */
-public abstract class AbstractHandler extends Handler {
+public abstract class V2AbstractHandler extends Handler {
 
 	protected static final int REQUEST_TIME_OUT = 0;
 
@@ -266,17 +266,17 @@ public abstract class AbstractHandler extends Handler {
 			break;
 		// Handle normal message
 		default:
-			MessageListener resgister = removeTimeoutMessage(msg.what);
-			if (resgister == null) {
+			MessageListener messageListener = removeTimeoutMessage(msg.what);
+			if (messageListener == null) {
 				V2Log.w(this.getClass().getName()
 						+ " Igore message client don't expect callback :"
 						+ msg.what);
 				return;
 			}
-			Object origObject = resgister.getObject();
-			if (resgister.getHandler() != null) {
-				caller = Message.obtain(resgister.getHandler(),
-						resgister.getWhat());
+			Object origObject = messageListener.getObject();
+			if (messageListener.getHandler() != null) {
+				caller = Message.obtain(messageListener.getHandler(),
+						messageListener.getWhat());
 				JNIResponse jniRes = (JNIResponse) msg.obj;
 				jniRes.callerObject = origObject;
 				caller.obj = jniRes;

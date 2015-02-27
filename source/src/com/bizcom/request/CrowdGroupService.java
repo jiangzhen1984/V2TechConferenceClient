@@ -47,7 +47,7 @@ import com.bizcom.vo.Group.GroupType;
  * @author 28851274
  * 
  */
-public class CrowdGroupService extends AbstractHandler {
+public class CrowdGroupService extends V2AbstractHandler {
 
 	private static final int ACCEPT_JOIN_CROWD = 0x0002;
 	private static final int UPDATE_CROWD = 0x0004;

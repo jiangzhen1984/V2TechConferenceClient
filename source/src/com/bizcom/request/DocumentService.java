@@ -25,7 +25,7 @@ import com.bizcom.vo.Group.GroupType;
  * @author jiangzhen
  * 
  */
-public class DocumentService extends AbstractHandler {
+public class DocumentService extends V2AbstractHandler {
 
 	private static final int KEY_NEW_DOC_LISTENER = 50;
 

@@ -667,7 +667,6 @@ public class JNIService extends Service implements
 				long serverTime, String sDBID) {
 			if (JNIResponse.Result.fromInt(nResult) == JNIResponse.Result.SUCCESS) {
 				// Just request current logged in user information
-				Log.i("20150203 1", "6");
 				ImRequest.getInstance().getUserBaseInfo(nUserID);
 			}
 		}

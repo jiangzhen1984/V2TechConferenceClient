@@ -84,7 +84,7 @@ public class LoginActivity extends Activity {
 	private Activity mContext;
 	// Keep track of the login task to ensure we can cancel it if requested.
 	private ConfigRequest mConfigRequest = new ConfigRequest();
-	private UserService us = new UserService();
+	private UserService mUserService = new UserService();
 
 	private Boolean isLoggingIn = false;
 	private boolean isFward = false;
@@ -171,7 +171,7 @@ public class LoginActivity extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-		us.clearCalledBack();
+		mUserService.clearCalledBack();
 
 		if (!isFward) {
 			((MainApplication) getApplication()).uninitForExitProcess();
@@ -284,7 +284,7 @@ public class LoginActivity extends Activity {
 				// perform the user login attempt.
 				mTvLoginStatus.setText(R.string.login_progress_signing_in);
 				WaitDialogBuilder.showNormalProgress(mContext, true);
-				us.login(mEtUserName.getText().toString(), mEtPassword
+				mUserService.login(mEtUserName.getText().toString(), mEtPassword
 						.getText().toString(), new MessageListener(mHandler,
 						LOG_IN_CALL_BACK, null));
 			}
@@ -392,7 +392,6 @@ public class LoginActivity extends Activity {
 			}
 			return false;
 		}
-
 	}
 
 	private class EtPasswordOnTouchListener implements OnTouchListener {
@@ -411,8 +410,8 @@ public class LoginActivity extends Activity {
 				et.setError(null);
 			}
 			return true;
+			
 		}
-
 	}
 
 	private class EtPasswordOnEditorActionListener implements
@@ -446,10 +445,12 @@ public class LoginActivity extends Activity {
 	private class TvLoginButtonOnClickListener implements View.OnClickListener {
 		@Override
 		public void onClick(View view) {
+			
 			InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 			imm.hideSoftInputFromWindow(mEtUserName.getWindowToken(), 0);
 			imm.hideSoftInputFromWindow(mEtPassword.getWindowToken(), 0);
 			attemptLogin();
+			
 		}
 	}
 
