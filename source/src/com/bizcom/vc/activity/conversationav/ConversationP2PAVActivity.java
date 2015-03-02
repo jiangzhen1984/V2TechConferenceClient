@@ -49,11 +49,11 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.V2.jni.util.V2Log;
-import com.bizcom.request.AsyncResult;
-import com.bizcom.request.ChatService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2ChatRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestChatServiceResponse;
+import com.bizcom.request.util.AsyncResult;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vc.activity.conversation.MessageBuilder;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
@@ -94,7 +94,7 @@ public class ConversationP2PAVActivity extends Activity implements
 	public static final String P2P_BROADCAST_MEDIA_UPDATE = "com.v2tech.p2p.broadcast.media_update";
 
 	private Context mContext;
-	private ChatService chatService = new ChatService();
+	private V2ChatRequest chatService = new V2ChatRequest();
 	private UserChattingObject uad;
 	private LocalHandler mLocalHandler = new LocalHandler();
 	private BroadcastReceiver receiver = new LocalReceiver();

@@ -21,11 +21,11 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.provider.VerificationProvider;
-import com.bizcom.request.BitmapManager;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
-import com.bizcom.request.BitmapManager.BitmapChangedListener;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.BitmapManager;
+import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.BitmapManager.BitmapChangedListener;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.util.V2Toast;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
@@ -73,8 +73,8 @@ public class CrowdApplicantDetailActivity extends Activity {
 	private CrowdGroup crowd;
 	private User applicant;
 	private VMessageQualificationApplicationCrowd msg;
-	private CrowdGroupService service = new CrowdGroupService();
-	private CrowdGroupService cg = new CrowdGroupService();
+	private V2CrowdGroupRequest service = new V2CrowdGroupRequest();
+	private V2CrowdGroupRequest cg = new V2CrowdGroupRequest();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

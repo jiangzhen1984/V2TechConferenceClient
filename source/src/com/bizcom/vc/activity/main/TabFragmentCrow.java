@@ -43,8 +43,8 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.bo.GroupUserObject;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2CrowdGroupRequest;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.DateUtil;
 import com.bizcom.util.Notificator;
 import com.bizcom.util.SearchUtils;
@@ -76,7 +76,7 @@ public class TabFragmentCrow extends Fragment implements TextWatcher {
 	private BroadcastReceiver receiver;
 	private IntentFilter intentFilter;
 
-	private CrowdGroupService chatService;
+	private V2CrowdGroupRequest chatService;
 
 	private List<ScrollItem> mItemList = new ArrayList<ScrollItem>();
 	private List<ScrollItem> searchList = new ArrayList<ScrollItem>();
@@ -124,7 +124,7 @@ public class TabFragmentCrow extends Fragment implements TextWatcher {
 		service = Executors.newCachedThreadPool();
 		initReceiver();
 
-		chatService = new CrowdGroupService();
+		chatService = new V2CrowdGroupRequest();
 		Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 	}
 

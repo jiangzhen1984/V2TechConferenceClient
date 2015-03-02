@@ -27,7 +27,7 @@ import android.widget.Toast;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.db.ContentDescriptor;
 import com.bizcom.db.DataBaseContext;
-import com.bizcom.request.BitmapManager;
+import com.bizcom.request.util.BitmapManager;
 import com.bizcom.util.DateUtil;
 import com.bizcom.vc.activity.conversation.MessageLoader;
 import com.bizcom.vc.activity.conversationav.ConversationP2PAVActivity;

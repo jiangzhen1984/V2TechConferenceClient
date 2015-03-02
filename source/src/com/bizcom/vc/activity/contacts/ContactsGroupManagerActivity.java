@@ -27,10 +27,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
-import com.bizcom.request.ContactsService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2ContactsRequest;
 import com.bizcom.request.jni.GroupServiceJNIResponse;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vc.adapter.CommonAdapter;
 import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemDateAndViewWrapper;
 import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterGetViewListener;
@@ -56,7 +56,7 @@ public class ContactsGroupManagerActivity extends Activity {
 	private List<CommonAdapterItemDateAndViewWrapper> mDataset;
 	private BaseAdapter adapter;
 
-	private ContactsService contactService = new ContactsService();
+	private V2ContactsRequest contactService = new V2ContactsRequest();
 
 	private boolean changed;
 	private boolean inDeleteMode = true;

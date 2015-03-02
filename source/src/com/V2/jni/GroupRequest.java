@@ -234,8 +234,11 @@ public class GroupRequest {
 	 */
 	private void OnAcceptInviteJoinGroup(int groupType, long groupId,
 			long nUserID) {
-		V2Log.d("Group Request  OnAcceptInviteJoinGroup  ==>" + groupType
-				+ "   " + groupId + "  " + nUserID);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnAcceptInviteJoinGroup()"
+						+ " groupType = " + groupType + " groupId = " + groupId
+						+ " nUserID = " + nUserID);
+
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -246,7 +249,9 @@ public class GroupRequest {
 	}
 
 	public void OnConfSyncOpenVideo(String str) {
-
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnConfSyncOpenVideo()"
+						+ " str = " + str);
 	}
 
 	/**
@@ -402,8 +407,8 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f736
-	 * 1 8 0 1 . g i f ' / > < / f i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78
+	 * f 0 f 7 3 6 1 8 0 1 . g i f ' / > < / f i l e l i s t >
 	 * 
 	 * @param groupType
 	 * @param nGroupId
@@ -517,7 +522,7 @@ public class GroupRequest {
 		}
 
 		Log.i("20150203 1", "4");
-		ImRequest.getInstance().getUserBaseInfo(remoteUser.uid);
+		ImRequest.getInstance().proxy.getUserBaseInfo(remoteUser.uid);
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
@@ -838,8 +843,9 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnAcceptApplyJoinGroup(int groupType, String sXml) {
-		V2Log.d("OnAcceptApplyJoinGroup ==>" + "groupType:" + groupType + ","
-				+ "sXml:" + sXml);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnAcceptApplyJoinGroup()"
+						+ " groupType = " + groupType + " sXml = " + sXml);
 
 		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml,
 				null);

@@ -71,14 +71,14 @@ import com.bizcom.bo.GroupUserObject;
 import com.bizcom.bo.MessageObject;
 import com.bizcom.bo.UserStatusObject;
 import com.bizcom.db.provider.VerificationProvider;
-import com.bizcom.request.AsyncResult;
-import com.bizcom.request.ChatService;
-import com.bizcom.request.ConferencMessageSyncService;
-import com.bizcom.request.ConferenceService;
-import com.bizcom.request.DocumentService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2ChatRequest;
+import com.bizcom.request.V2ConferenceRequest;
+import com.bizcom.request.V2DocumentRequest;
 import com.bizcom.request.jni.PermissionRequestIndication;
 import com.bizcom.request.jni.PermissionUpdateIndication;
+import com.bizcom.request.util.AsyncResult;
+import com.bizcom.request.util.ConferencMessageSyncService;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.DensityUtils;
 import com.bizcom.util.DialogManager;
 import com.bizcom.util.OrderedHashMap;
@@ -224,9 +224,9 @@ public class ConferenceActivity extends Activity {
 	private ConferenceGroup cg;
 	private Conference conf;
 
-	private ConferenceService cb;
-	private DocumentService ds;
-	private ChatService cs = new ChatService();
+	private V2ConferenceRequest cb;
+	private V2DocumentRequest ds;
+	private V2ChatRequest cs = new V2ChatRequest();
 
 	private Set<Attendee> mAttendeeList = new HashSet<Attendee>();
 	private List<Attendee> mFastAttendeeList = new ArrayList<Attendee>();

@@ -12,9 +12,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.service.JNIService;
@@ -50,7 +50,7 @@ public class DiscussionBoardDetailActivity extends Activity {
 	private TextView mDialogTitleTV;
 
 	private DiscussionGroup crowd;
-	private CrowdGroupService service = new CrowdGroupService();
+	private V2CrowdGroupRequest service = new V2CrowdGroupRequest();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

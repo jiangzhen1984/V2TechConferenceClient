@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.bizcom.request.ConferenceService;
+import com.bizcom.request.V2ConferenceRequest;
 import com.bizcom.vo.ConferencePermission;
 import com.bizcom.vo.PermissionState;
 import com.bizcom.vo.User;
@@ -29,11 +29,11 @@ public class ConferenceMsgDialog extends Dialog {
 	private List<listViewItemData> mList;
 	private ListView lv;
 	private LayoutInflater inflater;
-	private ConferenceService service;
+	private V2ConferenceRequest service;
 	private BaseAdapter mAdapter = new ListAdapter();
 
 	public ConferenceMsgDialog(Context context, Set<User> list,
-			ConferenceService service) {
+			V2ConferenceRequest service) {
 		super(context, R.style.DialogStyle1);
 		setCanceledOnTouchOutside(true);
 		users = list;

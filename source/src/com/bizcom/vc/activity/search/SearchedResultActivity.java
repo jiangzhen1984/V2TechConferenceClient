@@ -25,8 +25,8 @@ import android.widget.TextView;
 import com.V2.jni.ImRequest;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
-import com.bizcom.request.BitmapManager;
-import com.bizcom.request.BitmapManager.BitmapChangedListener;
+import com.bizcom.request.util.BitmapManager;
+import com.bizcom.request.util.BitmapManager.BitmapChangedListener;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.service.JNIService;
@@ -160,7 +160,7 @@ public class SearchedResultActivity extends Activity {
 				
 				if(!isGetInfo) {
 					Log.i("20150203 1","5");
-                    ImRequest.getInstance().getUserBaseInfo(item.id);
+                    ImRequest.getInstance().proxy.getUserBaseInfo(item.id);
                     Intent intent = new Intent(PublicIntent.SHOW_CONTACT_DETAIL_DETAIL_ACTIVITY);
                     intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
                     intent.putExtra("uid", u.getmUserId());

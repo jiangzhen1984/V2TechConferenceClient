@@ -34,7 +34,7 @@ import android.widget.TextView;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.bo.UserStatusObject;
-import com.bizcom.request.BitmapManager;
+import com.bizcom.request.util.BitmapManager;
 import com.bizcom.vc.activity.contacts.ContactsGroupManagerActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;

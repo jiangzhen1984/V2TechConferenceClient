@@ -30,11 +30,11 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.bo.GroupUserObject;
-import com.bizcom.request.BitmapManager;
-import com.bizcom.request.ContactsService;
-import com.bizcom.request.MessageListener;
-import com.bizcom.request.UserService;
+import com.bizcom.request.V2ContactsRequest;
+import com.bizcom.request.V2ImRequest;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.BitmapManager;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.activity.main.MainActivity;
 import com.bizcom.vc.application.GlobalHolder;
@@ -65,8 +65,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	private long mUid;
 	private User u;
 	private LocalHandler lh = new LocalHandler();
-	private UserService us = new UserService();
-	private ContactsService contactService = new ContactsService();
+	private V2ImRequest us = new V2ImRequest();
+	private V2ContactsRequest contactService = new V2ContactsRequest();
 
 	// R.id.contact_detail_main_layout
 	private View contactDetailMainLayout;
@@ -585,7 +585,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUser(u, new MessageListener(this,
+				us.updateUserInfo(u, new MessageListener(this,
 						UPDATE_USER_INFO_DONE, null));
 				break;
 			case UPDATE_USER_INFO_DONE:

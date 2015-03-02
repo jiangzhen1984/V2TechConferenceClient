@@ -8,8 +8,8 @@ import android.view.View.OnClickListener;
 import android.widget.RadioGroup;
 import android.widget.Toast;
 
-import com.bizcom.request.MessageListener;
-import com.bizcom.request.UserService;
+import com.bizcom.request.V2ImRequest;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.User;
 import com.v2tech.R;
@@ -18,7 +18,7 @@ public class SettingAuthenticationActivity extends Activity {
 
 	// rg_authentication
 	private RadioGroup rgAutentication;
-	private UserService service;
+	private V2ImRequest service;
 	private static final int UPDATEUSER_CALLBACK = 0;
 	private Handler mHandler = new Handler() {
 		public void handleMessage(android.os.Message msg) {
@@ -33,7 +33,7 @@ public class SettingAuthenticationActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.tab_fragment_setting_authentication);
-		service = new UserService();
+		service = new V2ImRequest();
 		findViewById(R.id.setting_back).setOnClickListener(
 				new OnClickListener() {
 					@Override
@@ -81,7 +81,7 @@ public class SettingAuthenticationActivity extends Activity {
 
 			User currentUser = GlobalHolder.getInstance().getCurrentUser();
 			currentUser.setAuthtype(authtype);
-			service.updateUser(currentUser, new MessageListener(mHandler,
+			service.updateUserInfo(currentUser, new MessageListener(mHandler,
 					UPDATEUSER_CALLBACK, null));
 		}
 		super.onBackPressed();

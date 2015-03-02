@@ -39,11 +39,11 @@ import android.widget.Toast;
 import com.V2.jni.ImRequest;
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.provider.ConversationProvider;
-import com.bizcom.request.ConferencMessageSyncService;
-import com.bizcom.request.ConferenceService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2ConferenceRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestEnterConfResponse;
+import com.bizcom.request.util.ConferencMessageSyncService;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.DateUtil;
 import com.bizcom.util.Notificator;
 import com.bizcom.util.SearchUtils;
@@ -91,7 +91,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 	private Context mContext;
 	private NotificationListener notificationListener;
 	private IntentFilter intentFilter;
-	private ConferenceService mConferenceService;
+	private V2ConferenceRequest mConferenceService;
 	private Set<Conversation> mUnreadConvList = new HashSet<Conversation>();;
 	private List<ScrollItem> mItemList = new ArrayList<ScrollItem>();
 	private List<ScrollItem> searchList = new ArrayList<ScrollItem>();
@@ -113,7 +113,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		V2Log.d(TAG, "ConversationsTabFragment onCreate...");
-		mConferenceService = new ConferenceService();
+		mConferenceService = new V2ConferenceRequest();
 		mContext = getActivity();
 		service = Executors.newCachedThreadPool();
 		initReceiver();
@@ -566,7 +566,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 									newGroup.getOwnerUser().getmUserId());
 							if (TextUtils.isEmpty(owner.getName())) {
 								Log.i("20150203 1", "7");
-								ImRequest.getInstance().getUserBaseInfo(
+								ImRequest.getInstance().proxy.getUserBaseInfo(
 										owner.getmUserId());
 							} else {
 								newGroup.setOwnerUser(owner);

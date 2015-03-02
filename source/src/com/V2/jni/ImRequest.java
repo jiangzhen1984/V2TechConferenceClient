@@ -18,6 +18,9 @@ public class ImRequest {
 
 	public boolean loginResult;
 	private static ImRequest mImRequest;
+	public Proxy proxy = new Proxy();
+
+	private boolean haslogin = false;
 
 	private ImRequest(Context context) {
 		mCallbacks = new ArrayList<WeakReference<ImRequestCallback>>();
@@ -58,6 +61,19 @@ public class ImRequest {
 		}
 
 		return mImRequest;
+	}
+
+	
+	//尽量使用代理，方便在请求前做一些通用的操作
+	public class Proxy {
+		public void initialize(ImRequest request) {
+			ImRequest.this.initialize(request);
+		}
+
+		public void getUserBaseInfo(long nUserID) {
+			V2Log.d("JNIRequest", "getUserBaseInfo");
+			ImRequest.this.getUserBaseInfo(nUserID);
+		}
 	}
 
 	public native boolean initialize(ImRequest request);
@@ -102,9 +118,13 @@ public class ImRequest {
 	 */
 	private void OnLogin(long nUserID, int nStatus, long serverTime,
 			String sDBID, int nResult) {
-		V2Log.d("ImRequest UI", "OnLogin ---> nUserID: " + nUserID
-				+ " | nStatus: " + nStatus + " | serverTime: " + serverTime
-				+ " | sDBID: " + sDBID + " | nResult: " + nResult);
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnLogin() nUserID= " + nUserID
+						+ " nStatus = " + nStatus + " serverTime = "
+						+ serverTime + " sDBID = " + sDBID + " nResult = "
+						+ nResult);
+
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
@@ -125,7 +145,9 @@ public class ImRequest {
 	 *            device type of logged
 	 */
 	private void OnLogout(int nType) {
-		V2Log.d("OnLogout::" + nType);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnLogout() nType= " + nType);
+
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
@@ -146,7 +168,7 @@ public class ImRequest {
 	 * @param nUserID
 	 *            user ID which want to get user information
 	 */
-	public native void getUserBaseInfo(long nUserID);
+	private native void getUserBaseInfo(long nUserID);
 
 	/**
 	 * <ul>
@@ -161,8 +183,9 @@ public class ImRequest {
 	 * 
 	 */
 	private void OnUpdateBaseInfo(long nUserID, String updatexml) {
-		V2Log.d("ImRequest UI", "OnUpdateBaseInfo ---> nUserID: " + nUserID
-				+ " | updatexml: " + updatexml);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnUpdateBaseInfo() nUserID= "
+						+ nUserID + " updatexml = " + updatexml);
 
 		V2User user = XmlAttributeExtractor.fromXml(nUserID, updatexml);
 		if (user == null) {
@@ -462,8 +485,6 @@ public class ImRequest {
 	private void OnGetGroupsInfoBegin() {
 		Log.e("ImRequest UI", "OnGetGroupsInfoBegin");
 	}
-
-	private boolean haslogin = false;
 
 	private void OnGetGroupsInfoEnd() {
 		Log.e("ImRequest UI", "OnGetGroupsInfoEnd");

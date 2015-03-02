@@ -30,9 +30,9 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
-import com.bizcom.request.BitmapManager;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.BitmapManager.BitmapChangedListener;
+import com.bizcom.request.V2CrowdGroupRequest;
+import com.bizcom.request.util.BitmapManager;
+import com.bizcom.request.util.BitmapManager.BitmapChangedListener;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.service.JNIService;
@@ -54,7 +54,7 @@ public class CrowdMembersActivity extends Activity {
 	private CrowdGroup crowd;
 
 	private boolean isInDeleteMode;
-	private CrowdGroupService service;
+	private V2CrowdGroupRequest service;
 	private LocalReceiver localReceiver;
 
 	@Override
@@ -80,7 +80,7 @@ public class CrowdMembersActivity extends Activity {
 		adapter = new MembersAdapter();
 		mMembersContainer.setAdapter(adapter);
 		overridePendingTransition(R.anim.left_in, R.anim.left_out);
-		service = new CrowdGroupService();
+		service = new V2CrowdGroupRequest();
 		if (crowd.getOwnerUser().getmUserId() != GlobalHolder.getInstance()
 				.getCurrentUserId()) {
 			mInvitationButton.setVisibility(View.INVISIBLE);

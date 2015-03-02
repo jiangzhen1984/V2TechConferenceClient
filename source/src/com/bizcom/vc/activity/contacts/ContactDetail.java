@@ -40,10 +40,10 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
-import com.bizcom.request.BitmapManager;
-import com.bizcom.request.MessageListener;
-import com.bizcom.request.UserService;
+import com.bizcom.request.V2ImRequest;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.BitmapManager;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.vc.activity.conversation.ConversationSelectFileEntry;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
@@ -121,7 +121,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	private long mUid;
 	private User u;
 	private LocalHandler lh = new LocalHandler();
-	private UserService us = new UserService();
+	private V2ImRequest us = new V2ImRequest();
 	private int state = -1;
 	private String fromActivity;
 	private boolean isUpdating;
@@ -1062,7 +1062,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUser(u, new MessageListener(this,
+				us.updateUserInfo(u, new MessageListener(this,
 						UPDATE_USER_INFO_DONE, null));
 				isUpdating = false;
 				break;

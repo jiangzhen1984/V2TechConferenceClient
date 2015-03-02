@@ -47,7 +47,7 @@ import com.bizcom.db.ContentDescriptor;
 import com.bizcom.db.provider.ConversationProvider;
 import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.db.provider.VoiceProvider;
-import com.bizcom.request.BitmapManager;
+import com.bizcom.request.util.BitmapManager;
 import com.bizcom.util.DateUtil;
 import com.bizcom.util.MessageUtil;
 import com.bizcom.util.Notificator;

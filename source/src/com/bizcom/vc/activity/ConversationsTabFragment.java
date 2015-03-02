@@ -61,13 +61,13 @@ import com.bizcom.db.ContentDescriptor;
 import com.bizcom.db.provider.ConversationProvider;
 import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.db.provider.VoiceProvider;
-import com.bizcom.request.BitmapManager;
-import com.bizcom.request.ConferencMessageSyncService;
-import com.bizcom.request.ConferenceService;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2ConferenceRequest;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestEnterConfResponse;
+import com.bizcom.request.util.BitmapManager;
+import com.bizcom.request.util.ConferencMessageSyncService;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.DateUtil;
 import com.bizcom.util.MessageUtil;
 import com.bizcom.util.Notificator;
@@ -148,8 +148,8 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 	private BroadcastReceiver receiver;
 	private IntentFilter intentFilter;
 
-	private ConferenceService cb;
-	private CrowdGroupService chatService;
+	private V2ConferenceRequest cb;
+	private V2CrowdGroupRequest chatService;
 
 	private Set<Conversation> mUnreadConvList;
 	private List<ScrollItem> mItemList = new ArrayList<ScrollItem>();
@@ -232,12 +232,12 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 		String tag = this.getArguments().getString("tag");
 		if (PublicIntent.TAG_CONF.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONFERNECE;
-			cb = new ConferenceService();
+			cb = new V2ConferenceRequest();
 		} else if (PublicIntent.TAG_COV.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_CONTACT;
 		} else if (PublicIntent.TAG_GROUP.equals(tag)) {
 			mCurrentTabFlag = Conversation.TYPE_GROUP;
-			chatService = new CrowdGroupService();
+			chatService = new V2CrowdGroupRequest();
 		}
 		mContext = getActivity();
 		service = Executors.newCachedThreadPool();
@@ -2465,7 +2465,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 														.getmUserId());
 								if (TextUtils.isEmpty(owner.getName())) {
 									Log.i("20150203 1","8");
-									ImRequest.getInstance().getUserBaseInfo(
+									ImRequest.getInstance().proxy.getUserBaseInfo(
 											owner.getmUserId());
 								} else {
 									newGroup.setOwnerUser(owner);

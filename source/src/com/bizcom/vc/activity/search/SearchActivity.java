@@ -14,11 +14,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
-import com.bizcom.request.SearchService;
-import com.bizcom.request.UserService;
+import com.bizcom.request.V2CrowdGroupRequest;
+import com.bizcom.request.V2SearchRequest;
+import com.bizcom.request.V2ImRequest;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.SearchedResult;
@@ -36,12 +36,12 @@ public class SearchActivity extends Activity {
 	private TextView mContentText;
 	private TextView mEditTextBelowText;
 
-	private UserService usService = new UserService();
-	private CrowdGroupService crowdService = new CrowdGroupService();
+	private V2ImRequest usService = new V2ImRequest();
+	private V2CrowdGroupRequest crowdService = new V2CrowdGroupRequest();
 
 	private Type mType = Type.CROWD;
 
-	private SearchService searchService = new SearchService();
+	private V2SearchRequest searchService = new V2SearchRequest();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -143,10 +143,10 @@ public class SearchActivity extends Activity {
 
 			}
 
-			SearchService.SearchParameter par = searchService
+			V2SearchRequest.SearchParameter par = searchService
 					.generateSearchPatameter(
-							mType == Type.CROWD ? SearchService.Type.CROWD
-									: SearchService.Type.MEMBER, mSearchedText
+							mType == Type.CROWD ? V2SearchRequest.Type.CROWD
+									: V2SearchRequest.Type.MEMBER, mSearchedText
 									.getText().toString(), 1);
 			WaitDialogBuilder.showNormalWithHintProgress(SearchActivity.this,
 					getResources().getString(R.string.status_searching), true);

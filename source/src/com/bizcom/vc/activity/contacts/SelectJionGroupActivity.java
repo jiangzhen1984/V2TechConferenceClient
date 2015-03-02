@@ -22,9 +22,9 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bizcom.request.ContactsService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2ContactsRequest;
 import com.bizcom.request.jni.GroupServiceJNIResponse;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.service.JNIService;
@@ -44,7 +44,7 @@ public class SelectJionGroupActivity extends Activity {
 	private Context mContext;
 	private RadioGroup mGroupListLy;
 	private View mRadioGroupLy;
-	private ContactsService contactService = new ContactsService();
+	private V2ContactsRequest contactService = new V2ContactsRequest();
 
 	private STATE state = STATE.NONE;
 	private boolean changed;

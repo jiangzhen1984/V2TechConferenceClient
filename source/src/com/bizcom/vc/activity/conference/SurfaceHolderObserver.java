@@ -4,9 +4,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.view.SurfaceHolder;
 
-import com.bizcom.request.DeviceService;
-import com.bizcom.request.MessageListener;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.DeviceRequest;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vo.Group;
 import com.bizcom.vo.UserDeviceConfig;
 
@@ -15,7 +15,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 	private final static int OPEN_DEVICE_DONE = 1;
 	private final static int CLOSE_DEVICE_DONE = 2;
 
-	private DeviceService service;
+	private DeviceRequest service;
 	private UserDeviceConfig udc;
 	//FIXME this observer should not care this 
 	private Group g; 
@@ -23,7 +23,7 @@ public class SurfaceHolderObserver implements SurfaceHolder.Callback {
 	private boolean isCreate;
 	private boolean isValid;
 
-	public SurfaceHolderObserver(Group g, DeviceService service, UserDeviceConfig udc) {
+	public SurfaceHolderObserver(Group g, DeviceRequest service, UserDeviceConfig udc) {
 		super();
 		this.g = g;
 		this.service = service;

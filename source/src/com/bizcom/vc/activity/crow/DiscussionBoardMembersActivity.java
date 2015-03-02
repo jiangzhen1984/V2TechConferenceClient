@@ -26,7 +26,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bizcom.request.CrowdGroupService;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vo.DiscussionGroup;
@@ -57,7 +57,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 	private DiscussionGroup crowd;
 
 	private boolean isInDeleteMode;
-	private CrowdGroupService service;
+	private V2CrowdGroupRequest service;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +83,7 @@ public class DiscussionBoardMembersActivity extends Activity {
 		adapter = new MembersAdapter();
 		mMembersContainer.setAdapter(adapter);
 		overridePendingTransition(R.anim.left_in, R.anim.left_out);
-		service = new CrowdGroupService();
+		service = new V2CrowdGroupRequest();
 		
 	}
 

@@ -29,10 +29,10 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.db.provider.VerificationProvider;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.CreateCrowdResponse;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vc.activity.BaseCreateActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
@@ -71,7 +71,7 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 
 	private List<Group> mGroupList;
 	private CrowdGroup crowd;
-	private CrowdGroupService cg = new CrowdGroupService();
+	private V2CrowdGroupRequest cg = new V2CrowdGroupRequest();
 
 	private boolean isInInvitationMode = false;
 

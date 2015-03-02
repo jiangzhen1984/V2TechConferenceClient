@@ -32,10 +32,10 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.UserStatusObject;
-import com.bizcom.request.ConferenceService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2ConferenceRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestConfCreateResponse;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.DateUtil;
 import com.bizcom.vc.activity.BaseCreateActivity;
 import com.bizcom.vc.application.GlobalConfig;
@@ -64,7 +64,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 	private EditText mConfTitleET;
 	private EditText mConfStartTimeET;
 
-	private ConferenceService cs = new ConferenceService();
+	private V2ConferenceRequest cs = new V2ConferenceRequest();
 	private Conference conf;
 
 	private long preSelectedUID;

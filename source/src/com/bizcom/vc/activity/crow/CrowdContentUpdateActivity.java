@@ -16,8 +16,8 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2CrowdGroupRequest;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.service.JNIService;
@@ -39,7 +39,7 @@ public class CrowdContentUpdateActivity extends Activity {
 	private TextView mUpdateButton;
 
 	private CrowdGroup crowd;
-	private CrowdGroupService service = new CrowdGroupService();
+	private V2CrowdGroupRequest service = new V2CrowdGroupRequest();
 	private State mState = State.NONE;
 	private boolean inEditMode;
 	private int mType;

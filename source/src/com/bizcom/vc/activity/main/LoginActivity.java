@@ -35,10 +35,10 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.util.V2Log;
-import com.bizcom.request.MessageListener;
-import com.bizcom.request.UserService;
+import com.bizcom.request.V2ImRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestLogInResponse;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.util.V2Toast;
@@ -84,7 +84,7 @@ public class LoginActivity extends Activity {
 	private Activity mContext;
 	// Keep track of the login task to ensure we can cancel it if requested.
 	private ConfigRequest mConfigRequest = new ConfigRequest();
-	private UserService mUserService = new UserService();
+	private V2ImRequest mUserService = new V2ImRequest();
 
 	private Boolean isLoggingIn = false;
 	private boolean isFward = false;
@@ -141,6 +141,7 @@ public class LoginActivity extends Activity {
 			mEtUserName.setText(user);
 			mEtUserName.setTextColor(Color.BLACK);
 		}
+		
 		if (password != null && !password.trim().isEmpty()) {
 			mEtPassword.setText(password);
 		}
@@ -176,6 +177,8 @@ public class LoginActivity extends Activity {
 		if (!isFward) {
 			((MainApplication) getApplication()).uninitForExitProcess();
 		}
+		
+		Log.i("20150228 1","LoginActivity onDestroy");
 	}
 
 	private boolean checkIPorDNS(String str) {
@@ -295,10 +298,10 @@ public class LoginActivity extends Activity {
 	private void createPersonFolder(User user) {
 		GlobalConfig.LOGIN_USER_ID = String.valueOf(user.getmUserId());
 
-		File pa = new File(GlobalConfig.getGlobalUserAvatarPath());
-		if (!pa.exists()) {
-			boolean res = pa.mkdirs();
-			V2Log.i(" create avatar dir " + pa.getAbsolutePath() + "  " + res);
+		File avatarPath = new File(GlobalConfig.getGlobalUserAvatarPath());
+		if (!avatarPath.exists()) {
+			boolean res = avatarPath.mkdirs();
+			V2Log.i(" create avatar dir " + avatarPath.getAbsolutePath() + "  " + res);
 		}
 
 		File image = new File(GlobalConfig.getGlobalPicsPath());
@@ -619,6 +622,7 @@ public class LoginActivity extends Activity {
 					isFward = true;
 					finish();
 				}
+				//关闭等待对话框
 				WaitDialogBuilder.showNormalProgress(mContext, false);
 				break;
 			}

@@ -36,14 +36,14 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
-import com.bizcom.request.AsyncResult;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.FileOperationEnum;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.FileTransStatusIndication;
 import com.bizcom.request.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestFetchGroupFilesResponse;
+import com.bizcom.request.util.AsyncResult;
+import com.bizcom.request.util.FileOperationEnum;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.FileUitls;
 import com.bizcom.util.V2Toast;
 import com.bizcom.vc.activity.conversation.ConversationSelectFile;
@@ -117,7 +117,7 @@ public class CrowdFilesActivity extends Activity {
 	private boolean isFromChatActivity; // 如果从聊天界面点击正在上传的文件，进入正在上传界面，就直接返回聊天界面
 	private boolean isFromStartState = true;
 
-	private CrowdGroupService service;
+	private V2CrowdGroupRequest service;
 	private CrowdGroup crowd;
 	private LocalReceiver localReceiver;
 	private NewFileMonitorReceiver mNewFileMonitorReceiver;
@@ -155,7 +155,7 @@ public class CrowdFilesActivity extends Activity {
 		mUploadingVMFiles = new HashMap<String, VMessage>();
 
 		initReceiver();
-		service = new CrowdGroupService();
+		service = new V2CrowdGroupRequest();
 		// register file transport listener
 		service.registerFileTransStatusListener(mLocalHandler,
 				FILE_TRANS_NOTIFICATION, null);

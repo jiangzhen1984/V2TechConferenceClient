@@ -2,7 +2,7 @@ package com.bizcom.vc.activity.contacts;
 
 import java.util.List;
 
-import com.bizcom.request.ContactsService;
+import com.bizcom.request.V2ContactsRequest;
 import com.bizcom.vc.activity.ConversationsTabFragment;
 import com.bizcom.vc.activity.main.MainActivity;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
@@ -48,7 +48,7 @@ public class InputRemarkActivity extends Activity {
 	private User detailUser;
 	private String verificationInfo;
 	private String startedCause;
-	private ContactsService contactService = new ContactsService();
+	private V2ContactsRequest contactService = new V2ContactsRequest();
 	private String selectGroupName;
 	private long selectGroupID;
 

@@ -11,8 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2CrowdGroupRequest;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vo.DiscussionGroup;
@@ -39,7 +39,7 @@ public class DiscussionBoardTopicUpdateActivity extends Activity {
 	private TextView mUpdateButton;
 
 	private DiscussionGroup crowd;
-	private CrowdGroupService service = new CrowdGroupService();
+	private V2CrowdGroupRequest service = new V2CrowdGroupRequest();
 	private State mState = State.NONE;
 	private Toast mToast;
 

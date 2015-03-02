@@ -13,7 +13,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bizcom.request.ContactsService;
+import com.bizcom.request.V2ContactsRequest;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.User;
@@ -38,7 +38,7 @@ public class InputAuthenticationActivity extends Activity {
 	String startedCause;
 	long mUid;
 	User detailUser;
-	private ContactsService contactService = new ContactsService();
+	private V2ContactsRequest contactService = new V2ContactsRequest();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

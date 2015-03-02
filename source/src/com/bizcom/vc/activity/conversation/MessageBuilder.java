@@ -70,7 +70,7 @@ public class MessageBuilder {
 		imagePath = newFile.getAbsolutePath();
 		VMessage vm = new VMessage(groupType, groupID, fromUser, toUser,
 				new Date(GlobalConfig.getGlobalServerTime()));
-		VMessageImageItem item = new VMessageImageItem(vm, uuid , imagePath , 0);
+		VMessageImageItem item = new VMessageImageItem(vm, uuid, imagePath, 0);
 		item.setState(VMessageAbstractItem.STATE_NORMAL);
 		return item.getVm();
 	}
@@ -125,8 +125,9 @@ public class MessageBuilder {
 		long groupType = vm.getMsgCode();
 		long groupID = vm.getGroupId();
 		if (!MessageLoader.isTableExist(context, groupType, groupID, remote,
-				type))
+				type)) {
 			return null;
+		}
 		// 直接将xml存入数据库中，方便以后扩展。
 		ContentValues values = new ContentValues();
 		values.put(

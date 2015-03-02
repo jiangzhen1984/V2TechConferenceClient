@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.V2.jni.ImRequest;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
-import com.bizcom.request.BitmapManager;
+import com.bizcom.request.util.BitmapManager;
 import com.bizcom.vo.AddFriendHistorieNode;
 import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.ContactGroup;
@@ -196,13 +196,13 @@ public class GlobalHolder {
 				if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
 					// if receive this callback , the dirty change false;
 					Log.i("20150203 1", "1");
-					ImRequest.getInstance().getUserBaseInfo(userID);
+					ImRequest.getInstance().proxy.getUserBaseInfo(userID);
 				}
 			} else if (TextUtils.isEmpty(tmp.getName())) {
 				if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
 					// if receive this callback , the dirty change false;
 					Log.i("20150203 1", "1");
-					ImRequest.getInstance().getUserBaseInfo(userID);
+					ImRequest.getInstance().proxy.getUserBaseInfo(userID);
 				}
 			}
 

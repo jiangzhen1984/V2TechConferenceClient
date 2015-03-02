@@ -67,14 +67,14 @@ import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.bo.MessageObject;
-import com.bizcom.request.AsyncResult;
-import com.bizcom.request.BitmapManager;
-import com.bizcom.request.ChatService;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.FileOperationEnum;
+import com.bizcom.request.V2ChatRequest;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.FileTransStatusIndication;
 import com.bizcom.request.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.bizcom.request.jni.JNIResponse.Result;
+import com.bizcom.request.util.AsyncResult;
+import com.bizcom.request.util.BitmapManager;
+import com.bizcom.request.util.FileOperationEnum;
 import com.bizcom.util.FileUitls;
 import com.bizcom.util.MessageUtil;
 import com.bizcom.util.LocalSharedPreferencesStorage;
@@ -199,8 +199,8 @@ public class ConversationTextActivity extends Activity implements
 
 	private MessageReceiver receiver = new MessageReceiver();
 
-	private ChatService mChat = new ChatService();
-	private CrowdGroupService mGroupChat = new CrowdGroupService();
+	private V2ChatRequest mChat = new V2ChatRequest();
+	private V2CrowdGroupRequest mGroupChat = new V2CrowdGroupRequest();
 
 	private ListView mMessagesContainer;
 

@@ -26,8 +26,8 @@ import android.widget.TextView;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2CrowdGroupRequest;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
@@ -74,7 +74,7 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 	private View mNewFileNotificator;
 
 	private CrowdGroup crowd;
-	private CrowdGroupService service = new CrowdGroupService();
+	private V2CrowdGroupRequest service = new V2CrowdGroupRequest();
 	private State mState = State.NONE;
 	private LocalReceiver localReceiver;
 	private Context mContext;

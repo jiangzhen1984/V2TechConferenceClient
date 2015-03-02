@@ -401,7 +401,7 @@
         <!-- service -->
         <service android:name="com.bizcom.vc.service.JNIService" >
         </service>
-        <service android:name="com.bizcom.request.ConferencMessageSyncService" >
+        <service android:name="com.bizcom.request.util.ConferencMessageSyncService" >
         </service>
         <service android:name="com.bizcom.vc.service.FileService" >
         </service>

@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.bizcom.bo.UserAvatarObject;
-import com.bizcom.request.BitmapManager;
+import com.bizcom.request.util.BitmapManager;
 import com.bizcom.vc.service.JNIService;
 
 public class AvatarChangedReceiver extends BroadcastReceiver {

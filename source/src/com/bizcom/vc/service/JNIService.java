@@ -60,9 +60,9 @@ import com.bizcom.bo.UserAvatarObject;
 import com.bizcom.bo.UserStatusObject;
 import com.bizcom.db.ContentDescriptor;
 import com.bizcom.db.provider.VerificationProvider;
-import com.bizcom.request.BitmapManager;
 import com.bizcom.request.jni.FileDownLoadErrorIndication;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.BitmapManager;
 import com.bizcom.util.Notificator;
 import com.bizcom.util.XmlParser;
 import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
@@ -129,7 +129,7 @@ public class JNIService extends Service implements
 	/**
 	 * Notify user avatar changed, notice please do not listen this broadcast if
 	 * you are UI. Use
-	 * {@link BitmapManager#registerBitmapChangedListener(com.bizcom.request.BitmapManager.BitmapChangedListener)}
+	 * {@link BitmapManager#registerBitmapChangedListener(com.bizcom.request.util.BitmapManager.BitmapChangedListener)}
 	 * to listener bitmap change if you are UI.<br>
 	 * key avatar : #UserAvatarObject
 	 */
@@ -467,7 +467,7 @@ public class JNIService extends Service implements
 											+ existU.getmUserId() + " dirty!"
 											+ " Need to get user base infos");
 							Log.i("20150203 1", "2");
-							ImRequest.getInstance().getUserBaseInfo(
+							ImRequest.getInstance().proxy.getUserBaseInfo(
 									existU.getmUserId());
 						}
 
@@ -667,7 +667,7 @@ public class JNIService extends Service implements
 				long serverTime, String sDBID) {
 			if (JNIResponse.Result.fromInt(nResult) == JNIResponse.Result.SUCCESS) {
 				// Just request current logged in user information
-				ImRequest.getInstance().getUserBaseInfo(nUserID);
+				ImRequest.getInstance().proxy.getUserBaseInfo(nUserID);
 			}
 		}
 

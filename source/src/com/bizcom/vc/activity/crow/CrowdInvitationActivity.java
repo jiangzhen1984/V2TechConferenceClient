@@ -20,9 +20,9 @@ import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.db.provider.VerificationProvider;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.application.GlobalHolder;
@@ -70,7 +70,7 @@ public class CrowdInvitationActivity extends Activity {
 	private Context mContext;
 
 	private Crowd crowd;
-	private CrowdGroupService service = new CrowdGroupService();
+	private V2CrowdGroupRequest service = new V2CrowdGroupRequest();
 	private CrowdInviteBroadcast inviteReceiver;
 	private VMessageQualification vq;
 	private State mState = State.DONE;

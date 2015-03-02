@@ -21,10 +21,10 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.CreateDiscussionBoardResponse;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.MessageListener;
 import com.bizcom.vc.activity.BaseCreateActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -58,7 +58,7 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 
 	private List<Group> mGroupList;
 	private DiscussionGroup discussion;
-	private CrowdGroupService cg = new CrowdGroupService();
+	private V2CrowdGroupRequest cg = new V2CrowdGroupRequest();
 
 	private boolean isInInvitationMode = false;
 

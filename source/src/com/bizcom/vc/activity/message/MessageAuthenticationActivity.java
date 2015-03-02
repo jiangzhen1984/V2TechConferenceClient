@@ -45,11 +45,11 @@ import com.bizcom.db.DataBaseContext;
 import com.bizcom.db.V2TechDBHelper;
 import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.db.vo.FriendMAData;
-import com.bizcom.request.BitmapManager;
-import com.bizcom.request.CrowdGroupService;
-import com.bizcom.request.MessageListener;
-import com.bizcom.request.BitmapManager.BitmapChangedListener;
+import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
+import com.bizcom.request.util.BitmapManager;
+import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.BitmapManager.BitmapChangedListener;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
 import com.bizcom.vc.activity.contacts.ContactDetail;
@@ -119,7 +119,7 @@ public class MessageAuthenticationActivity extends Activity {
 	private boolean isGroupInDeleteMode = false;
 	private int currentRadioType; // 当前所在的是哪个RadioButton界面
 	private ListItemWrapper waitingQualification = null; // 当前所在的是哪个RadioButton界面
-	private CrowdGroupService crowdService;
+	private V2CrowdGroupRequest crowdService;
 	private Resources res;
 	private View listViewFootView;
 
@@ -134,7 +134,7 @@ public class MessageAuthenticationActivity extends Activity {
 		setContentView(R.layout.message_authentication);
 		connectView();
 		bindViewEnvent();
-		crowdService = new CrowdGroupService();
+		crowdService = new V2CrowdGroupRequest();
 		res = getResources();
 		initReceiver();
 		BitmapManager.getInstance().registerBitmapChangedListener(listener);
