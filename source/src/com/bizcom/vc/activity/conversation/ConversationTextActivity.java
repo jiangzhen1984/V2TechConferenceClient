@@ -39,7 +39,6 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -76,8 +75,8 @@ import com.bizcom.request.util.AsyncResult;
 import com.bizcom.request.util.BitmapManager;
 import com.bizcom.request.util.FileOperationEnum;
 import com.bizcom.util.FileUitls;
-import com.bizcom.util.MessageUtil;
 import com.bizcom.util.LocalSharedPreferencesStorage;
+import com.bizcom.util.MessageUtil;
 import com.bizcom.vc.activity.contacts.ContactDetail;
 import com.bizcom.vc.activity.crow.CrowdDetailActivity;
 import com.bizcom.vc.activity.crow.CrowdFilesActivity.CrowdFileActivityType;
@@ -116,6 +115,12 @@ public class ConversationTextActivity extends Activity implements
 		CommonUpdateMessageBodyPopupWindowInterface,
 		CommonUpdateCrowdFileStateInterface, CommonNotifyChatInterToReplace {
 
+	private static final String TAG = "ConversationTextActivity";
+	private static final int SEND_MESSAGE_SUCCESS = 0;
+	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
+	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
+	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
+	
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
 	private final int END_LOAD_MESSAGE = 3;
@@ -128,13 +133,7 @@ public class ConversationTextActivity extends Activity implements
 	private final int RECORD_STATUS_LISTENER = 21;
 
 	private final int BATCH_COUNT = 10;
-
-	private static final int SEND_MESSAGE_SUCCESS = 0;
-	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
-	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
-	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
-
-	private static final String TAG = "ConversationTextActivity";
+	private final int INTERVAL_TIME = 60000; 
 
 	/**
 	 * for activity result
@@ -220,8 +219,6 @@ public class ConversationTextActivity extends Activity implements
 	private ConversationNotificationObject cov = null;
 
 	private View root; // createVideoDialog的View
-	private SparseArray<VMessage> messageAllID;
-	private long intervalTime = 60000; // 显示消息时间状态的间隔时间
 	private boolean isReLoading; // 用于onNewIntent判断是否需要重新加载界面聊天数据
 	private boolean sendFile; // 用于从个人信息中传递过来的文件，只发送一次
 
@@ -233,6 +230,7 @@ public class ConversationTextActivity extends Activity implements
 	private MessageBodyView showingPopupWindow;
 	private boolean stopOhterAudio;
 	private boolean isCreate;
+	private long lastIntervalTime;
 
 	/**
 	 * executeConversationCreate only called once
@@ -337,7 +335,6 @@ public class ConversationTextActivity extends Activity implements
 	 * 初始化控件与监听器
 	 */
 	private void initModuleAndListener() {
-		messageAllID = new SparseArray<VMessage>();
 		messageArray = new ArrayList<VMessage>();
 
 		mMessagesContainer = (ListView) findViewById(R.id.conversation_message_list);
@@ -632,7 +629,6 @@ public class ConversationTextActivity extends Activity implements
 			currentItemPos = 0;
 			offset = 0;
 			messageArray.clear();
-			messageAllID.clear();
 			adapter.notifyDataSetChanged();
 			initConversationInfos();
 		}
@@ -746,7 +742,6 @@ public class ConversationTextActivity extends Activity implements
 
 	private void finishWork() {
 		messageArray = null;
-		messageAllID = null;
 		mCheckedList = null;
 		unregisterReceiver(receiver);
 		GlobalConfig.isConversationOpen = false;
@@ -2130,14 +2125,7 @@ public class ConversationTextActivity extends Activity implements
 	}
 
 	private boolean pending = false;
-
 	private boolean queryAndAddMessage(final int msgId) {
-
-		if (messageAllID.get(msgId) != null) {
-			Log.e(TAG, "happen erupt , the message ：" + msgId
-					+ "  already save in messageArray!");
-			return false;
-		}
 
 		VMessage m;
 		if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_USER)
@@ -2197,8 +2185,7 @@ public class ConversationTextActivity extends Activity implements
 		List<VMessage> messagePages = MessageLoader.loadGroupMessageByPage(
 				mContext, Conversation.TYPE_GROUP, remoteGroupID, 1,
 				messageArray.size());
-		if (messagePages != null && messagePages.size() > 0
-				&& messageAllID.get((int) messagePages.get(0).getId()) == null) {
+		if (messagePages != null && messagePages.size() > 0) {
 			messageArray.add(0, messagePages.get(0));
 		}
 		V2Log.d(TAG, "现在集合长度：" + messageArray.size());
@@ -2210,14 +2197,17 @@ public class ConversationTextActivity extends Activity implements
 	 * @param message
 	 */
 	private void judgeShouldShowTime(VMessage message) {
-		if(messageArray != null && messageArray.size() > 1){
-			VMessage vMessage = messageArray.get(messageArray.size() - 1);
-			if (message.getmDateLong() - vMessage.getmDateLong() < intervalTime)
+		if(lastIntervalTime != 0){
+			if (GlobalConfig.getGlobalServerTime() - lastIntervalTime <= INTERVAL_TIME){
 				message.setShowTime(false);
-			else
+			}
+			else{
 				message.setShowTime(true);
+				lastIntervalTime = GlobalConfig.getGlobalServerTime();
+			}
 		} else {
 			message.setShowTime(true);
+			lastIntervalTime = GlobalConfig.getGlobalServerTime();
 		}
 	}
 
@@ -2684,42 +2674,16 @@ public class ConversationTextActivity extends Activity implements
 			case LOAD_MESSAGE:
 				List<VMessage> array = loadMessages();
 				if (array == null) {
-					V2Log.d(TAG, "没有加载到任何聊天数据！");
 					return;
 				}
 
 				int loadSize = array.size();
-				V2Log.d(TAG, "此次加载的消息数量:" + loadSize);
-
 				if (loadSize > 0 && messageArray == null) {
 					messageArray = new ArrayList<VMessage>();
 				}
 
-				if (loadSize > 0 && messageAllID == null) {
-					messageAllID = new SparseArray<VMessage>();
-				}
-
 				for (int i = 0; i < array.size(); i++) {
-					// 防止消息重复
 					VMessage vm = array.get(i);
-					if (messageAllID.get((int) vm.getId()) != null) {
-						Log.e(TAG, "happen erupt , the message ："
-								+ (int) array.get(i).getId()
-								+ "  already save in messageArray!");
-						loadSize = loadSize + 1;
-						continue;
-					}
-					// 设置VMessage是否应该显示时间
-					long currentMessage = vm.getmDateLong();
-					if (i + 1 == array.size()) {
-						array.get(i).setShowTime(true);
-					} else {
-						long lastMessage = array.get(i + 1).getmDateLong();
-						if (currentMessage - lastMessage > intervalTime)
-							array.get(i).setShowTime(true);
-						else
-							array.get(i).setShowTime(false);
-					}
 					// 群文件处理,如果是远端用户上传的文件，则强制更改状态为已上传，因为群中远端文件只有一种状态
 					if (vm.getFileItems().size() > 0
 							&& vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_CROWD) {
@@ -2739,10 +2703,25 @@ public class ConversationTextActivity extends Activity implements
 							}
 						}
 					}
-					messageAllID.append((int) vm.getId(), vm);
 					messageArray.add(0, vm);
+					
+					// 设置VMessage是否应该显示时间
+					if(lastIntervalTime == 0){
+						lastIntervalTime = vm.getmDateLong();
+						vm.setShowTime(true);
+					}
+					else {
+						
+						long currentMsgTime = vm.getmDateLong();
+						if(lastIntervalTime - currentMsgTime < INTERVAL_TIME){
+							vm.setShowTime(false);
+						} else {
+							vm.setShowTime(true);
+							lastIntervalTime = vm.getmDateLong();
+						}
+					}
 				}
-				V2Log.d(TAG, "当前消息集合大小" + messageArray.size());
+				
 				LastFistItem = LastFistItem + loadSize;
 				currentItemPos = loadSize - 1;
 				if (currentItemPos == -1)

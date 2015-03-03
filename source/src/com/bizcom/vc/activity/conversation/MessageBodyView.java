@@ -38,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
+import com.bizcom.util.AlgorithmUtil;
 import com.bizcom.util.FileUitls;
 import com.bizcom.util.MessageUtil;
 import com.bizcom.util.LocalSharedPreferencesStorage;
@@ -1005,6 +1006,9 @@ public class MessageBodyView extends LinearLayout {
 
 		@Override
 		public void onClick(View view) {
+			if(AlgorithmUtil.isFastClick())
+				return ;
+			
 			VMessageFileItem item = (VMessageFileItem) view.getTag();
 
 			if (callback != null) {

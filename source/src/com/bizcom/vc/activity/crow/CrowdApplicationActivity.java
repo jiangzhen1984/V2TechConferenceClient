@@ -73,7 +73,6 @@ public class CrowdApplicationActivity extends Activity {
 
 	private boolean disableAuth;
 	private boolean isReturnData;
-	private boolean shieldScreen;
 	private boolean isFailed;
 
 	@Override
@@ -141,9 +140,6 @@ public class CrowdApplicationActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		if (shieldScreen)
-			return;
-
 		if (isInApplicationMode) {
 			isInApplicationMode = false;
 			updateView();
@@ -289,7 +285,6 @@ public class CrowdApplicationActivity extends Activity {
 						mState = State.APPLYING;
 						service.applyCrowd(crowd, "", new MessageListener(
 								mLocalHandler, APPLY_DONE, null));
-						shieldScreen = true;
 					} else if (crowd.getAuth() == CrowdGroup.AuthType.QULIFICATION
 							.intValue()) {
 						isInApplicationMode = true;
@@ -420,7 +415,6 @@ public class CrowdApplicationActivity extends Activity {
 												mContext,
 												R.string.crowd_applicant_invite_finish,
 												Toast.LENGTH_SHORT).show();
-										shieldScreen = false;
 										onBackPressed();
 									}
 								}

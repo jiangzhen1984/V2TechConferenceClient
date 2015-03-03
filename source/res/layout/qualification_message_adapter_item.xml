@@ -4,84 +4,34 @@
     android:layout_height="wrap_content"
     android:background="@color/confs_group_list_bg" >
     <RelativeLayout
-        android:id="@+id/qualification_msg_adapter_item_left"
+        android:id="@+id/RelativeLayout1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:layout_marginBottom="@dimen/conversation_view_margin"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="@dimen/conversation_view_margin" >
+        android:layout_marginLeft="@dimen/common_delete_icon_padding" >
         <ImageView
             android:id="@+id/qualification_msg_delete_left_button"
             android:layout_width="@dimen/common_delete_icon_width"
             android:layout_height="@dimen/common_delete_icon_height"
             android:layout_alignParentLeft="true"
-            android:layout_centerInParent="true"
-            android:padding="@dimen/common_delete_icon_padding"
-            android:src="@drawable/ic_delete" />
-        <ImageView
-            android:id="@+id/qualification_msg_image_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_toRightOf="@+id/qualification_msg_delete_left_button"
-            android:paddingLeft="10dp"
-            android:src="@drawable/conference_icon_self" />
-        <ImageView
-            android:id="@+id/qualification_msg_notificator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/qualification_msg_image_view"
-            android:layout_marginRight="3dp"
-            android:layout_marginTop="3dp"
-            android:src="@drawable/red_nofificator"
-            android:visibility="invisible" />
+            android:layout_centerVertical="true"
+            android:layout_marginBottom="@dimen/conversation_view_margin"
+            android:layout_marginTop="@dimen/conversation_view_margin"
+            android:paddingBottom="@dimen/common_delete_icon_padding"
+            android:paddingRight="@dimen/common_delete_icon_padding"
+            android:paddingTop="@dimen/common_delete_icon_padding"
+            android:src="@drawable/ic_delete"
+            android:visibility="gone" />
     </RelativeLayout>
     <LinearLayout
-        android:id="@+id/group_list_conference_titlelayout"
+        android:id="@+id/common_conversation_ly"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/qualification_msg_adapter_item_left"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="30dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginLeft="5dp"
         android:layout_toLeftOf="@+id/linearlayout1"
-        android:layout_toRightOf="@+id/qualification_msg_adapter_item_left"
-        android:orientation="vertical" >
-        <TextView
-            android:id="@+id/qualification_msg_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="left|top"
-            android:singleLine="true"
-            android:text="TextView"
-            android:textColor="@color/conversation_view_name_color"
-            android:textSize="@dimen/conversation_view_name_text_size" />
-        <TextView
-            android:id="@+id/qualification_msg_content"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/conversation_view_title_margin"
-            android:ellipsize="end"
-            android:gravity="left|bottom"
-            android:singleLine="true"
-            android:text="TextView"
-            android:textColor="@color/conversation_view_text_color"
-            android:textSize="@dimen/common_item_text_size_16" />
-        <TextView
-            android:id="@+id/qualification_msg_content_reject"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:gravity="left|bottom"
-            android:singleLine="true"
-            android:text="TextView"
-            android:textColor="@color/conversation_view_text_color"
-            android:textSize="@dimen/common_item_text_size_16"
-            android:visibility="gone" />
+        android:layout_toRightOf="@+id/RelativeLayout1" >
+        <include layout="@layout/common_conversation_layout" />
     </LinearLayout>
     <FrameLayout
         android:id="@+id/linearlayout1"
@@ -95,6 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:gravity="center"
             android:paddingLeft="@dimen/button_padding_horizontal"
             android:paddingRight="@dimen/button_padding_horizontal"
             android:text="已同意"
@@ -121,19 +72,20 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/rounded_corners_contacts_group_delete_button"
+            android:gravity="center"
             android:paddingBottom="@dimen/button_padding_vertical"
             android:paddingLeft="@dimen/button_padding_horizontal"
             android:paddingRight="@dimen/button_padding_horizontal"
             android:paddingTop="@dimen/button_padding_vertical"
             android:text="@string/activiy_contact_group_item_button_delete"
             android:textColor="@color/common_white_color"
-            android:textSize="@dimen/common_item_text_size"
+            android:textSize="@dimen/common_item_text_size_16"
             android:visibility="invisible" />
     </FrameLayout>
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/group_list_conference_titlelayout"
+        android:layout_below="@+id/common_conversation_ly"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="3dp"
         android:background="@color/confs_group_widget_separation_line"

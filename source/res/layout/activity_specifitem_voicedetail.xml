@@ -95,7 +95,7 @@
             android:singleLine="true"
             android:text="王晓峰"
             android:textColor="@color/conversation_view_name_color"
-            android:textSize="@dimen/conversation_view_name_text_size" />
+            android:textSize="@dimen/common_item_text_size_16" />
         <TextView
             android:id="@+id/specific_voiceDetail_remark"
             android:layout_width="wrap_content"

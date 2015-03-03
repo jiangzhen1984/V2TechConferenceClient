@@ -13,13 +13,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -55,13 +53,14 @@ public class TitleBar {
 	private List<Wrapper> additionList;
 	private List<Wrapper> normalList;
 
+	//R.drawable.title_bar_item_help_button
 	private int[] imgs = new int[] { R.drawable.title_bar_item_detail_button,
 			R.drawable.title_bar_item_setting_button,
-			R.drawable.title_bar_item_help_button,
 			R.drawable.title_bar_item_about_button };
 
+	//R.string.title_bar_item_help
 	private int[] items = new int[] { R.string.title_bar_item_detail,
-			R.string.title_bar_item_setting, R.string.title_bar_item_help,
+			R.string.title_bar_item_setting,
 			R.string.title_bar_item_about };
 
 	private int[] plusImgs = new int[] { R.drawable.conversation_video_button,

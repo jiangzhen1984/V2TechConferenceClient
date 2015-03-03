@@ -46,9 +46,11 @@ public class Notificator {
 
 		NotificationManager mNotificationManager = (NotificationManager) context
 				.getSystemService(Context.NOTIFICATION_SERVICE);
+		
+		Notification build = builder.build();
+		build.flags = Notification.FLAG_AUTO_CANCEL;
 		// mId allows you to update the notification later on.
-		mNotificationManager.cancelAll();
-		mNotificationManager.notify(notificationID, builder.build());
+		mNotificationManager.notify(notificationID, build);
 	}
 
 	public static void updateSystemNotification(Context context, String title,

@@ -35,6 +35,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
+        android:layout_marginTop="2.5dp"
+        android:layout_marginBottom="2.5dp"
         android:layout_marginLeft="@dimen/common_margin_horizontal"
         android:layout_marginRight="10dp"
         android:layout_toRightOf="@+id/ws_common_conversation_layout_iconLayout" >
@@ -54,8 +56,8 @@
                 android:singleLine="true"
                 android:text="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
                 android:textColor="@color/common_item_text_color_black"
-                android:textSize="@dimen/conversation_view_name_text_size" />
-            <!-- VoiceMessageActivity.java -->
+                android:textSize="@dimen/common_item_text_size_16" />
+            <!-- VoiceMessageActivity.java conversation_view_name_text_size-->
             <TextView
                 android:id="@+id/ws_specific_voice_unreadNumber"
                 android:layout_width="wrap_content"
@@ -65,7 +67,7 @@
                 android:singleLine="true"
                 android:text="( 0 )"
                 android:textColor="@color/contacts_user_view_item_color_offline"
-                android:textSize="@dimen/conversation_view_name_text_size"
+                android:textSize="@dimen/common_item_text_size_16"
                 android:visibility="gone" />
             <!-- VoiceMessageActivity.java -->
         </LinearLayout>
@@ -95,6 +97,19 @@
             android:singleLine="true"
             android:text="other"
             android:textColor="@color/common_item_text_color_black"
-            android:textSize="@dimen/conversation_view_name_text_size" />
+            android:textSize="@dimen/common_item_text_size_16" />
     </RelativeLayout>
+    <TextView
+        android:id="@+id/ws_common_conversation_discussion_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/text_margin_left"
+        android:layout_toRightOf="@+id/ws_common_conversation_layout_iconLayout"
+        android:ellipsize="end"
+        android:gravity="left|top"
+        android:singleLine="true"
+        android:textColor="@color/conversation_view_name_color"
+        android:textSize="@dimen/common_item_text_size_16"
+        android:visibility="gone" />
 </RelativeLayout>

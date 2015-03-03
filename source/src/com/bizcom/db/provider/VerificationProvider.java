@@ -1192,17 +1192,20 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @param remoteUserID
 	 * @return
 	 */
-	public static long queryCrowdInviteWaitingQualMessageById(long remoteUserID) {
+	public static long queryCrowdInviteWaitingQualMessageById(long remoteUserID , long groupID) {
 		Cursor cursor = null;
 		try {
 			String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
 					+ " = ? and "
 					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
-					+ " = ?";
+					+ " = ? and "
+					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
+					+ " = ? ";
 			String[] selectionArgs = new String[] {
 					String.valueOf(remoteUserID),
 					String.valueOf(ReceiveQualificationType.LOCAL_INVITE_TYPE
-							.intValue()) };
+							.intValue()) ,
+					String.valueOf(groupID)};
 			cursor = MessageBuilder.mContext.getContentResolver().query(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
 					ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,

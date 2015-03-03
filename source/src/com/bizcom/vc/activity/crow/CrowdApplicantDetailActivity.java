@@ -316,7 +316,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 			crowd = new CrowdGroup(0, "", null);
 
 		long waitMessageExist = VerificationProvider
-				.queryCrowdInviteWaitingQualMessageById(user.getmUserId());
+				.queryCrowdInviteWaitingQualMessageById(user.getmUserId() , crowd == null ? 0 : crowd.getmGId());
 		if (waitMessageExist != -1) {
 			V2Log.d("CrowdApplicationDetailActivity  --> Save VMessageQualification Cache Object failed , "
 					+ "Because already exist in database...groupID is : "

@@ -16,6 +16,8 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="@color/confs_search_bar_bg"
+        android:focusable="true"  
+        android:focusableInTouchMode="true"
         android:orientation="horizontal" >
         <EditText
             android:id="@+id/search_edit"

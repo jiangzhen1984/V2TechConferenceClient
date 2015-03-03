@@ -4,80 +4,19 @@
     android:layout_height="wrap_content"
     android:background="@color/confs_group_list_bg" >
     <LinearLayout
-        android:id="@+id/group_list_conference_image_view_rl"
+        android:id="@+id/common_conversation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/group_list_conference_title_layout"
         android:layout_alignParentLeft="true"
-        android:layout_alignTop="@+id/group_list_conference_title_layout"
         android:layout_marginLeft="15dp"
-        android:layout_marginRight="5dp" >
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical" >
-            <ImageView
-                android:id="@+id/group_list_conference_image_view"
-                style="@style/Common_user_icon_style"/>
-            <ImageView
-                android:id="@+id/group_list_conference_notificator"
-                style="@style/Common_user_icon_notify_style"
-                android:layout_alignRight="@+id/group_list_conference_image_view"
-                android:layout_alignTop="@+id/group_list_conference_image_view"
-                android:visibility="invisible" />
-        </RelativeLayout>
+        android:layout_toLeftOf="@+id/gourp_list_conference_create_time_tv" >
+        <include layout="@layout/common_conversation_layout" />
     </LinearLayout>
-    <RelativeLayout
-        android:id="@+id/group_list_conference_title_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/conversation_view_margin"
-        android:layout_marginLeft="@dimen/text_margin_left"
-        android:layout_marginTop="@dimen/conversation_view_margin"
-        android:layout_toLeftOf="@+id/gourp_list_conference_create_time_tv"
-        android:layout_toRightOf="@+id/group_list_conference_image_view_rl" >
-        <TextView
-            android:id="@+id/group_list_conference_title_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:ellipsize="end"
-            android:gravity="left|top"
-            android:singleLine="true"
-            android:text=""
-            android:textColor="@color/conversation_view_name_color"
-            android:textSize="@dimen/common_item_text_size_16" />
-        <TextView
-            android:id="@+id/group_list_conference_owner_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/group_list_conference_title_tv"
-            android:layout_marginTop="10dp"
-            android:ellipsize="end"
-            android:gravity="left|bottom"
-            android:singleLine="true"
-            android:text=""
-            android:textColor="@color/conversation_view_text_color"
-            android:textSize="@dimen/common_item_text_size_16" />
-    </RelativeLayout>
-    <TextView
-        android:id="@+id/ws_fragment_conversation_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_marginLeft="@dimen/text_margin_left"
-        android:layout_toRightOf="@+id/group_list_conference_image_view_rl"
-        android:ellipsize="end"
-        android:gravity="left|top"
-        android:singleLine="true"
-        android:textColor="@color/conversation_view_name_color"
-        android:textSize="@dimen/conversation_view_name_text_size"
-        android:visibility="gone" />
     <TextView
         android:id="@+id/gourp_list_conference_create_time_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/group_list_conference_title_layout"
+        android:layout_alignBottom="@+id/common_conversation"
         android:layout_alignParentRight="true"
         android:layout_marginBottom="2dp"
         android:layout_marginLeft="@dimen/text_margin_left"
@@ -92,7 +31,7 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="1dp"
-        android:layout_below="@+id/group_list_conference_image_view_rl"
+        android:layout_below="@+id/common_conversation"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="3dp"
         android:background="@color/confs_group_widget_separation_line"

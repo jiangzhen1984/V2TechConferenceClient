@@ -243,9 +243,11 @@ public class ConversationSelectImage extends Activity {
 				bean.fileName = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
 				bean.fileType = 1;
+				if(TextUtils.isEmpty(filePath))
+					continue ;
+				
 				String parentName;
 				String[] s = filePath.split("/");
-				V2Log.w("test", filePath);
 				if (type == DEFAULT_PATH) {
 					if(DEFAULT_PATH_INDEX < s.length)
 						parentName = s[DEFAULT_PATH_INDEX];

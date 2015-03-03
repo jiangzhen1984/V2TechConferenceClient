@@ -236,10 +236,14 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
+		if(mChatPlayer != null){
+			mChatPlayer.release();
+			mChatPlayer = null;
+		}
 		getActivity().unregisterReceiver(receiver);
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
 				this.bitmapChangedListener);
+		super.onDestroy();
 	}
 
 	@Override
@@ -448,7 +452,6 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 		if (isLoadedCov) {
 			return;
 		}
-		V2Log.e(TAG, "LoadUserConversation was called!");
 		service.execute(new Runnable() {
 
 			@Override
@@ -504,7 +507,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 					Conversation cov = list.get(i);
 					if (cov == null) {
 						V2Log.e(TAG,
-								"when fillUserAdapter , get null Conversation , index :"
+								"when execute fillUserAdapter , get null Conversation , index :"
 										+ i);
 						continue;
 					}
@@ -1007,11 +1010,6 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 			if (msg.getReadState() == VMessageQualification.ReadState.UNREAD) {
 				verificationMessageItemData
 						.setReadFlag(Conversation.READ_FLAG_UNREAD);
-				if (verificationMessageItemData.getMsg() != null) {
-					updateVerificationStateBar(verificationMessageItemData
-							.getMsg().toString(),
-							VerificationMessageType.CROWD_TYPE);
-				}
 			} else {
 				verificationMessageItemData
 						.setReadFlag(Conversation.READ_FLAG_READ);
@@ -1024,7 +1022,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 				verificationMessageItemData
 						.setReadFlag(Conversation.READ_FLAG_READ);
 		}
-
+		
 		verificationItem.cov = verificationMessageItemData;
 		updateUnreadConversation(verificationItem);
 		sortAndUpdate();
@@ -2034,7 +2032,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 					.equals(intent.getAction())) {
 				GlobalHolder.getInstance().setOfflineLoaded(true);
 				V2Log.d(TAG,
-						"JNI_BROADCAST_OFFLINE_MESSAGE_END 到达 , 所有离线消息均接收完毕 , 全局变量置为TRUE!");
+						"All offline messages has received. Globle flag change to true!");
 				for (int i = 0; i < offlineCov.size(); i++) {
 					long key = offlineCov.keyAt(i);
 					V2Log.e(TAG, "off line conversaion id is : " + key);
@@ -2051,14 +2049,10 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 			} else if (JNIService.JNI_BROADCAST_GROUPS_LOADED.equals(intent
 					.getAction())) {
 				GlobalHolder.getInstance().setGroupLoaded();
-				V2Log.d(TAG, "JNI_BROADCAST_GROUPS_LOADED 到达 , 全局变量置为TRUE!");
-				// 检测是否有等待验证的好友
+				V2Log.d(TAG, "All group and group user info has received. Globle flag change to true!");
 				checkWaittingFriendExist();
-				// 检测群组是否存在
 				checkGroupIsExist();
-				// 当所有组织信息和组织内用户信息获取完毕后，检测当前验证消息显示的是否是组织外用户的群验证消息。
 				checkEmptyVerificationMessage();
-				// 检测是否有重复验证会话
 				checkRepeatVerification();
 			}
 		}
@@ -2113,6 +2107,10 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 
 				V2Log.d(TAG,
 						"having new crowd verification message coming ... update..");
+				updateCrowdVerificationConversation();
+				updateVerificationStateBar(verificationMessageItemData
+						.getMsg().toString(),
+						VerificationMessageType.CROWD_TYPE);
 
 				isShowVerificationNotify = true;
 				ConversationFirendAuthenticationData verification = ((ConversationFirendAuthenticationData) verificationMessageItemData);

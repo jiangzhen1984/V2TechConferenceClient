@@ -11,11 +11,10 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Vector;
 
-import net.sourceforge.pinyin4j.PinyinHelper;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.Application;
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -23,17 +22,11 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Configuration;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Printer;
 import android.view.WindowManager;
 
 import com.V2.jni.AudioRequest;
@@ -350,13 +343,13 @@ public class MainApplication extends Application {
 	@Override
 	public void onLowMemory() {
 		// 后台进程已经被全部回收，但系统内存还是低
-		V2Log.e("MainApplication.onLowMemory()");
+		V2Log.e(TAG , "MainApplication.onLowMemory()");
 		super.onLowMemory();
 	}
 
 	@Override
 	public void onTrimMemory(int level) {
-		V2Log.e("onLowMemory()");
+		V2Log.e(TAG , "onTrimMemory called , level is : " + level);
 		switch (level) {
 		case Application.TRIM_MEMORY_RUNNING_MODERATE:
 			break;
@@ -459,9 +452,8 @@ public class MainApplication extends Application {
 			} else {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			}
-
 			list.add(0, new WeakReference<Activity>(activity));
-			V2Log.d(TAG, "MainApplication 添加一个activity ");
+			V2Log.d(TAG, "MainApplication 添加一个activity : " + activity.getClass().getName());
 
 		}
 
@@ -472,7 +464,7 @@ public class MainApplication extends Application {
 				Object obj = w.get();
 				if (obj != null && ((Activity) obj) == activity) {
 					list.remove(i--);
-					V2Log.d(TAG, "MainApplication 删除一个activity ");
+					V2Log.d(TAG, "MainApplication 删除一个activity : " + activity.getClass().getName());
 				}
 			}
 

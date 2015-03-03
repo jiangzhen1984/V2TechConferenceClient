@@ -258,6 +258,7 @@ public class LeftMessageChattingLayout extends LinearLayout implements
 						adapter.notifyDataSetChanged();
 					}
 				});
+				break;
 			}
 		}
 	}

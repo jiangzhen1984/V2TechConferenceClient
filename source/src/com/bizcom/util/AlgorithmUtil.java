@@ -5,8 +5,9 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 
 public class AlgorithmUtil {
-	
-	
+
+	private static long lastClickTime;
+
 	/**
 	 * 获取单个文件的MD5值！
 	 * 
@@ -34,4 +35,12 @@ public class AlgorithmUtil {
 		return bigInt.toString(16);
 	}
 
+	public synchronized static boolean isFastClick() {
+		long time = System.currentTimeMillis();
+		if (time - lastClickTime < 500) {
+			return true;
+		}
+		lastClickTime = time;
+		return false;
+	}
 }

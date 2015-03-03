@@ -467,8 +467,8 @@ public class JNIService extends Service implements
 											+ existU.getmUserId() + " dirty!"
 											+ " Need to get user base infos");
 							Log.i("20150203 1", "2");
-							ImRequest.getInstance().proxy.getUserBaseInfo(
-									existU.getmUserId());
+							ImRequest.getInstance().proxy
+									.getUserBaseInfo(existU.getmUserId());
 						}
 
 						if (existU.getmUserId() == GlobalHolder.getInstance()
@@ -870,7 +870,7 @@ public class JNIService extends Service implements
 						&& !GlobalHolder.getInstance().isOfflineLoaded()) {
 					return;
 				}
-			} 
+			}
 
 			CrowdGroup crowd = (CrowdGroup) GlobalHolder.getInstance()
 					.getGroupById(group.id);
@@ -980,84 +980,6 @@ public class JNIService extends Service implements
 			}
 		}
 
-		/**
-		 * 
-		 * @param type
-		 * @param g
-		 * @param user
-		 * @param reason
-		 * @return
-		 */
-		private VMessageQualification checkMessageAndSendBroadcast(
-				VMessageQualification.Type type, CrowdGroup g, User user,
-				String reason) {
-			VMessageQualification crowdMsg = null;
-			if (type == Type.CROWD_APPLICATION) {
-				crowdMsg = VerificationProvider
-						.queryCrowdApplyQualMessageByUserId(g.getmGId(),
-								user.getmUserId());
-			} else {
-				crowdMsg = VerificationProvider.queryCrowdQualMessageByCrowdId(
-						user, g);
-			}
-
-			if (crowdMsg != null) {
-				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
-					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
-				}
-
-				CrowdGroup olderGroup = crowdMsg.getmCrowdGroup();
-				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
-				crowdMsg.setmCrowdGroup(g);
-				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
-					((VMessageQualificationApplicationCrowd) crowdMsg)
-							.setApplyReason(reason);
-				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
-					crowdMsg.setRejectReason(reason);
-				} else {
-					throw new RuntimeException(
-							"checkMessageAndSendBroadcast --> Unkown type");
-				}
-
-				if (olderGroup.getmGId() == g.getmGId())
-					VerificationProvider
-							.updateCrowdQualicationMessage(crowdMsg);
-				else
-					VerificationProvider.updateCrowdQualicationMessage(
-							olderGroup, crowdMsg);
-			} else {
-				// Save message to database
-				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
-					crowdMsg = new VMessageQualificationApplicationCrowd(g,
-							user);
-					((VMessageQualificationApplicationCrowd) crowdMsg)
-							.setApplyReason(reason);
-				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
-					crowdMsg = new VMessageQualificationInvitationCrowd(g,
-							GlobalHolder.getInstance().getCurrentUser());
-				} else {
-					throw new RuntimeException("Unkown type");
-				}
-
-				crowdMsg.setmTimestamp(new Date(GlobalConfig
-						.getGlobalServerTime()));
-				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
-				Uri uri = VerificationProvider.saveQualicationMessage(crowdMsg);
-				if (uri != null) {
-					crowdMsg.setId(Long.parseLong(uri.getLastPathSegment()));
-				}
-			}
-
-			if (crowdMsg != null && crowdMsg.getId() > 0) {
-				// Send broadcast
-				Intent i = new Intent(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-				i.addCategory(JNI_BROADCAST_CATEGROY);
-				i.putExtra("msgId", crowdMsg.getId());
-				mContext.sendOrderedBroadcast(i, null);
-			}
-			return crowdMsg;
-		}
-
 		@Override
 		public void OnRequestCreateRelationCallback(V2User user,
 				String additInfo) {
@@ -1090,7 +1012,7 @@ public class JNIService extends Service implements
 			if (!vUser.isDirty()) {
 				AddFriendHistroysHandler.addMeNeedAuthentication(
 						getApplicationContext(), vUser, additInfo);
-			} else { 
+			} else {
 				isOutORG = true;
 				User newUser = convertUser(user);
 				GlobalHolder.getInstance().putUser(newUser.getmUserId(),
@@ -1289,7 +1211,7 @@ public class JNIService extends Service implements
 				long msgID = -1;
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
 					long waitMessageExist = VerificationProvider
-							.queryCrowdInviteWaitingQualMessageById(user.uid);
+							.queryCrowdInviteWaitingQualMessageById(user.uid , nGroupID);
 					if (waitMessageExist != -1) {
 						boolean isTrue = VerificationProvider
 								.deleteCrowdInviteWattingQualMessage(waitMessageExist);
@@ -1338,11 +1260,7 @@ public class JNIService extends Service implements
 					return;
 				}
 
-				Intent intent = new Intent();
-				intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				intent.putExtra("msgId", msgID);
-				sendOrderedBroadcast(intent, null);
+				sendQualicationBroad(msgID);
 			} else if (gType == GroupType.DISCUSSION) {
 				DiscussionGroup dis = (DiscussionGroup) GlobalHolder
 						.getInstance().getGroupById(groupType, nGroupID);
@@ -1407,11 +1325,7 @@ public class JNIService extends Service implements
 					V2GlobalConstants.GROUP_TYPE_CROWD, group.id, -1));
 			sendBroadcast(i);
 
-			Intent intent = new Intent();
-			intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-			intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			intent.putExtra("msgId", msgID);
-			sendOrderedBroadcast(intent, null);
+			sendQualicationBroad(msgID);
 		}
 
 		@Override
@@ -1438,11 +1352,7 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			Intent intent = new Intent();
-			intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-			intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-			intent.putExtra("msgId", msgID);
-			sendOrderedBroadcast(intent, null);
+			sendQualicationBroad(msgID);
 		}
 
 		@Override
@@ -1474,7 +1384,7 @@ public class JNIService extends Service implements
 					return;
 				}
 				long waitMessageExist = VerificationProvider
-						.queryCrowdInviteWaitingQualMessageById(obj.userID);
+						.queryCrowdInviteWaitingQualMessageById(obj.userID , obj.groupID);
 				if (waitMessageExist != -1) {
 					boolean isTrue = VerificationProvider
 							.deleteCrowdInviteWattingQualMessage(waitMessageExist);
@@ -1500,11 +1410,7 @@ public class JNIService extends Service implements
 					return;
 				}
 
-				Intent intent = new Intent();
-				intent.setAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
-				intent.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
-				intent.putExtra("msgId", msgID);
-				sendOrderedBroadcast(intent, null);
+				sendQualicationBroad(msgID);
 			}
 		}
 
@@ -1652,6 +1558,90 @@ public class JNIService extends Service implements
 					nUserId));
 			sendBroadcast(kick);
 		}
+
+		/**
+		 * 
+		 * @param type
+		 * @param g
+		 * @param user
+		 * @param reason
+		 * @return
+		 */
+		private VMessageQualification checkMessageAndSendBroadcast(
+				VMessageQualification.Type type, CrowdGroup g, User user,
+				String reason) {
+			VMessageQualification crowdMsg = null;
+			if (type == Type.CROWD_APPLICATION) {
+				crowdMsg = VerificationProvider
+						.queryCrowdApplyQualMessageByUserId(g.getmGId(),
+								user.getmUserId());
+			} else {
+				crowdMsg = VerificationProvider.queryCrowdQualMessageByCrowdId(
+						user, g);
+			}
+
+			if (crowdMsg != null) {
+				if (crowdMsg.getQualState() != VMessageQualification.QualificationState.WAITING) {
+					crowdMsg.setQualState(VMessageQualification.QualificationState.WAITING);
+				}
+
+				CrowdGroup olderGroup = crowdMsg.getmCrowdGroup();
+				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
+				crowdMsg.setmCrowdGroup(g);
+				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
+					((VMessageQualificationApplicationCrowd) crowdMsg)
+							.setApplyReason(reason);
+				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
+					crowdMsg.setRejectReason(reason);
+				} else {
+					throw new RuntimeException(
+							"checkMessageAndSendBroadcast --> Unkown type");
+				}
+
+				if (olderGroup.getmGId() == g.getmGId())
+					VerificationProvider
+							.updateCrowdQualicationMessage(crowdMsg);
+				else
+					VerificationProvider.updateCrowdQualicationMessage(
+							olderGroup, crowdMsg);
+			} else {
+				// Save message to database
+				if (type == VMessageQualification.Type.CROWD_APPLICATION) {
+					crowdMsg = new VMessageQualificationApplicationCrowd(g,
+							user);
+					((VMessageQualificationApplicationCrowd) crowdMsg)
+							.setApplyReason(reason);
+				} else if (type == VMessageQualification.Type.CROWD_INVITATION) {
+					crowdMsg = new VMessageQualificationInvitationCrowd(g,
+							GlobalHolder.getInstance().getCurrentUser());
+				} else {
+					throw new RuntimeException("Unkown type");
+				}
+
+				crowdMsg.setmTimestamp(new Date(GlobalConfig
+						.getGlobalServerTime()));
+				crowdMsg.setReadState(VMessageQualification.ReadState.UNREAD);
+				Uri uri = VerificationProvider.saveQualicationMessage(crowdMsg);
+				if (uri != null) {
+					crowdMsg.setId(Long.parseLong(uri.getLastPathSegment()));
+				}
+			}
+
+			if (crowdMsg != null && crowdMsg.getId() > 0) {
+				// Send broadcast
+				sendQualicationBroad(crowdMsg.getId());
+			}
+			return crowdMsg;
+		}
+
+		private void sendQualicationBroad(long msgID) {
+			Intent i = new Intent(JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
+			i.addCategory(JNI_BROADCAST_CATEGROY);
+			i.putExtra("msgId", msgID);
+			mContext.sendBroadcast(i);
+
+		}
+
 	}
 
 	private class AudioRequestCB extends AudioRequestCallbackAdapter {

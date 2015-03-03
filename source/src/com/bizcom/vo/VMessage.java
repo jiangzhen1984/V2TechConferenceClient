@@ -105,10 +105,6 @@ public class VMessage {
 		return mDate.getTime();
 	}
 
-	public void setmDateLong(long mDateLong) {
-		this.mDateLong = mDateLong;
-	}
-
 	public String getmXmlDatas() {
 		return mXmlDatas;
 	}

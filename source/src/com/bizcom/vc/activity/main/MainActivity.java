@@ -29,7 +29,6 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.provider.SearchContentProvider;
-import com.bizcom.util.Notificator;
 import com.bizcom.vc.activity.conversation.MessageLoader;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.MainApplication;
@@ -78,13 +77,11 @@ public class MainActivity extends FragmentActivity implements
 					R.drawable.selector_tab_contact_button,
 					R.string.tab_contact_name, R.string.tab_contact_name,
 					TabFragmentContacts.class.getName()),
-			
+
 			new TabClass(PublicIntent.TAG_ORG,
 					R.drawable.selector_tab_org_button, R.string.tab_org_name,
 					R.string.tab_org_name,
 					TabFragmentOrganization.class.getName()),
-
-	
 
 			new TabClass(PublicIntent.TAG_GROUP,
 					R.drawable.selector_tab_group_button,
@@ -525,6 +522,7 @@ public class MainActivity extends FragmentActivity implements
 			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		}
 		SearchContentProvider.closedDataBase();
+		v.clearFocus();
 		return super.dispatchTouchEvent(ev);
 	}
 

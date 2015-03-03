@@ -1,11 +1,14 @@
 package com.bizcom.vc.activity.main;
 
 import java.io.File;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -35,6 +38,8 @@ import android.widget.TextView.OnEditorActionListener;
 
 import com.V2.jni.ConfigRequest;
 import com.V2.jni.util.V2Log;
+import com.bizcom.db.DataBaseContext;
+import com.bizcom.db.V2TechDBHelper;
 import com.bizcom.request.V2ImRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestLogInResponse;
@@ -325,6 +330,40 @@ public class LoginActivity extends Activity {
 		}
 
 	}
+	
+	/**
+	 * 初始化获取数据库中所有表
+	 */
+	private void initDataBaseTableCacheNames() {
+		DataBaseContext mContext = new DataBaseContext(getApplicationContext());
+		V2TechDBHelper mOpenHelper = V2TechDBHelper.getInstance(mContext);
+		SQLiteDatabase dataBase = mOpenHelper.getReadableDatabase();
+		Cursor cursor = null;
+		try {
+			cursor = dataBase.rawQuery(
+					"select name as c from sqlite_master where type ='table'",
+					null);
+			if (cursor != null) {
+				List<String> dataBaseTableCacheName = GlobalHolder
+						.getInstance().getDataBaseTableCacheName();
+				while (cursor.moveToNext()) {
+					// 遍历出表名
+					String name = cursor.getString(0);
+					V2Log.d("iteration DataBase table name : " + name);
+					dataBaseTableCacheName.add(name);
+				}
+			} else
+				throw new RuntimeException(
+						"init DataBase table names failed.. get null , please check");
+		} catch (Exception e) {
+			throw new RuntimeException(
+					"init DataBase table names failed.. get null , please check"
+							+ e.getStackTrace());
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+	}
 
 	private class EtUserNameOnFocusChangeListener implements
 			OnFocusChangeListener {
@@ -612,6 +651,7 @@ public class LoginActivity extends Activity {
 							+ GlobalConfig.getGlobalPath());
 					// 为登陆用户创建个人资料文件夹
 					createPersonFolder(user);
+					initDataBaseTableCacheNames();
 					// Save user info
 					saveUserNameAndPasswd(mEtUserName.getText().toString(), "");
 					GlobalHolder.getInstance().setCurrentUser(user);
@@ -627,7 +667,6 @@ public class LoginActivity extends Activity {
 				break;
 			}
 		}
-
 	}
 
 }

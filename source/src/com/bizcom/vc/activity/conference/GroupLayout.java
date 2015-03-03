@@ -62,20 +62,20 @@ public class GroupLayout extends LinearLayout {
 				R.layout.conversation_view, null, false);
 
 		mGroupIV = (ImageView) view
-				.findViewById(R.id.group_list_conference_image_view);
+				.findViewById(R.id.ws_common_conversation_layout_icon);
 		mGroupNameTV = (TextView) view
-				.findViewById(R.id.group_list_conference_title_tv);
+				.findViewById(R.id.ws_common_conversation_layout_topContent);
 		mGroupOwnerTV = (TextView) view
-				.findViewById(R.id.group_list_conference_owner_tv);
+				.findViewById(R.id.ws_common_conversation_layout_belowContent);
 		mGroupDateTV = (TextView) view
 				.findViewById(R.id.gourp_list_conference_create_time_tv);
 		mNotificatorIV = (ImageView) view
-				.findViewById(R.id.group_list_conference_notificator);
+				.findViewById(R.id.ws_common_conversation_layout_notificator);
 		/**
 		 * The second layout , the discussion layout use it...
 		 */
 		mConNameTV = (TextView) view
-				.findViewById(R.id.ws_fragment_conversation_name);
+				.findViewById(R.id.ws_common_conversation_discussion_name);
 		mNotificatorIV.bringToFront();
 
 		switch (mConv.getType()) {

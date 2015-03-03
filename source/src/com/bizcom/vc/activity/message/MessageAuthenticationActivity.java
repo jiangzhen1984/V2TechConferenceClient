@@ -822,7 +822,7 @@ public class MessageAuthenticationActivity extends Activity {
 			ImageView ibDelete;
 		}
 
-		private final int layoutId = R.layout.message_authentication_listview_item;
+		private final int layoutId = R.layout.qualification_message_adapter_item;
 		private LayoutInflater layoutInflater;
 		private List<FriendMAData> list;
 		private Context context;
@@ -856,18 +856,18 @@ public class MessageAuthenticationActivity extends Activity {
 				arg1 = layoutInflater.inflate(layoutId, null);
 				viewTag = new ViewTag();
 				viewTag.ivHeadImage = (ImageView) arg1
-						.findViewById(R.id.head_image);
-				viewTag.tvName = (TextView) arg1.findViewById(R.id.name);
+						.findViewById(R.id.ws_common_conversation_layout_icon);
+				viewTag.tvName = (TextView) arg1.findViewById(R.id.ws_common_conversation_layout_topContent);
 				viewTag.tvAuthenticationMessage = (TextView) arg1
-						.findViewById(R.id.authentication_message);
+						.findViewById(R.id.ws_common_conversation_layout_belowContent);
 				viewTag.bAccess = (TextView) arg1
-						.findViewById(R.id.authentication_access);
+						.findViewById(R.id.qualification_msgconfirm_button);
 				viewTag.tvAccessOrNo = (TextView) arg1
-						.findViewById(R.id.access_or_no);
+						.findViewById(R.id.qualification_msg_res);
 				viewTag.ibDelete = (ImageView) arg1
-						.findViewById(R.id.ib_delete);
+						.findViewById(R.id.qualification_msg_delete_left_button);
 				viewTag.bSuerDelete = (TextView) arg1
-						.findViewById(R.id.b_suer_delete);
+						.findViewById(R.id.qualification_msg_delete_button);
 				arg1.setTag(viewTag);
 			} else {
 				viewTag = (ViewTag) arg1.getTag();
@@ -915,19 +915,19 @@ public class MessageAuthenticationActivity extends Activity {
 			case 0:
 				viewTag.tvAuthenticationMessage
 						.setText(R.string.messageAuthenticationActivity_message_addedYouAsFriend);
-				viewTag.bAccess.setVisibility(View.GONE);
-				viewTag.tvAccessOrNo.setVisibility(View.GONE);
+				viewTag.bAccess.setVisibility(View.INVISIBLE);
+				viewTag.tvAccessOrNo.setVisibility(View.INVISIBLE);
 				break;
 			case 1:
 				viewTag.tvAuthenticationMessage
 						.setText(data.authenticationMessage);
 				viewTag.bAccess.setVisibility(View.VISIBLE);
-				viewTag.tvAccessOrNo.setVisibility(View.GONE);
+				viewTag.tvAccessOrNo.setVisibility(View.INVISIBLE);
 				break;
 			case 2:
 				viewTag.tvAuthenticationMessage
 						.setText(data.authenticationMessage);
-				viewTag.bAccess.setVisibility(View.GONE);
+				viewTag.bAccess.setVisibility(View.INVISIBLE);
 				viewTag.tvAccessOrNo.setVisibility(View.VISIBLE);
 				viewTag.tvAccessOrNo
 						.setText(R.string.messageAuthenticationActivity_message_allowed);
@@ -935,7 +935,7 @@ public class MessageAuthenticationActivity extends Activity {
 			case 3:
 				viewTag.tvAuthenticationMessage
 						.setText(data.authenticationMessage);
-				viewTag.bAccess.setVisibility(View.GONE);
+				viewTag.bAccess.setVisibility(View.INVISIBLE);
 				viewTag.tvAccessOrNo.setVisibility(View.VISIBLE);
 				viewTag.tvAccessOrNo
 						.setText(R.string.messageAuthenticationActivity_message_refused);
@@ -943,26 +943,26 @@ public class MessageAuthenticationActivity extends Activity {
 			case 4:// 你们已成为了好友
 				viewTag.tvAuthenticationMessage
 						.setText(R.string.messageAuthenticationActivity_message_youBecomeFriend);
-				viewTag.bAccess.setVisibility(View.GONE);
-				viewTag.tvAccessOrNo.setVisibility(View.GONE);
+				viewTag.bAccess.setVisibility(View.INVISIBLE);
+				viewTag.tvAccessOrNo.setVisibility(View.INVISIBLE);
 				break;
 			case 5:// 等待对方验证
 				viewTag.tvAuthenticationMessage
 						.setText(R.string.messageAuthenticationActivity_message_waitingForOtherAuthentication);
-				viewTag.bAccess.setVisibility(View.GONE);
-				viewTag.tvAccessOrNo.setVisibility(View.GONE);
+				viewTag.bAccess.setVisibility(View.INVISIBLE);
+				viewTag.tvAccessOrNo.setVisibility(View.INVISIBLE);
 				break;
 			case 6:// 6拒绝了你为好友
 				viewTag.tvAuthenticationMessage
 						.setText(R.string.messageAuthenticationActivity_message_refuseYourFriendRequests);
-				viewTag.bAccess.setVisibility(View.GONE);
-				viewTag.tvAccessOrNo.setVisibility(View.GONE);
+				viewTag.bAccess.setVisibility(View.INVISIBLE);
+				viewTag.tvAccessOrNo.setVisibility(View.INVISIBLE);
 				break;
 			default:
 				viewTag.tvAuthenticationMessage
 						.setText(R.string.messageAuthenticationActivity_message_youBecomeFriend);
-				viewTag.bAccess.setVisibility(View.GONE);
-				viewTag.tvAccessOrNo.setVisibility(View.GONE);
+				viewTag.bAccess.setVisibility(View.INVISIBLE);
+				viewTag.tvAccessOrNo.setVisibility(View.INVISIBLE);
 				break;
 
 			}
@@ -984,15 +984,15 @@ public class MessageAuthenticationActivity extends Activity {
 				@Override
 				public void onClick(View arg0) {
 					if (viewTag.bSuerDelete.getVisibility() == View.VISIBLE) {
-						viewTag.bSuerDelete.setVisibility(View.GONE);
+						viewTag.bSuerDelete.setVisibility(View.INVISIBLE);
 						if (data.state == 1)
 							viewTag.bAccess.setVisibility(View.VISIBLE);
 						else
 							viewTag.tvAccessOrNo.setVisibility(View.VISIBLE);
 					} else {
 						viewTag.bSuerDelete.setVisibility(View.VISIBLE);
-						viewTag.bAccess.setVisibility(View.GONE);
-						viewTag.tvAccessOrNo.setVisibility(View.GONE);
+						viewTag.bAccess.setVisibility(View.INVISIBLE);
+						viewTag.tvAccessOrNo.setVisibility(View.INVISIBLE);
 					}
 				}
 			});
@@ -1021,7 +1021,7 @@ public class MessageAuthenticationActivity extends Activity {
 				}
 			});
 
-			viewTag.bSuerDelete.setVisibility(View.GONE);
+			viewTag.bSuerDelete.setVisibility(View.INVISIBLE);
 			if (isFriendInDeleteMode) {
 				viewTag.ibDelete.setVisibility(View.VISIBLE);
 				// viewTag.bAccess.setVisibility(View.GONE);
@@ -1111,11 +1111,11 @@ public class MessageAuthenticationActivity extends Activity {
 						.setOnClickListener(mDeleteLeftButtonListener);
 
 				item.mMsgBanneriv = (ImageView) convertView
-						.findViewById(R.id.qualification_msg_image_view);
+						.findViewById(R.id.ws_common_conversation_layout_icon);
 				item.mNameTV = (TextView) convertView
-						.findViewById(R.id.qualification_msg_name);
+						.findViewById(R.id.ws_common_conversation_layout_topContent);
 				item.mContentTV = (TextView) convertView
-						.findViewById(R.id.qualification_msg_content);
+						.findViewById(R.id.ws_common_conversation_layout_belowContent);
 				item.mRes = (TextView) convertView
 						.findViewById(R.id.qualification_msg_res);
 				item.mAcceptButton = convertView
@@ -1486,8 +1486,6 @@ public class MessageAuthenticationActivity extends Activity {
 					if (currentRadioType != PROMPT_TYPE_GROUP)
 						updateTabPrompt(PROMPT_TYPE_GROUP, true);
 				}
-				// Cancel next broadcast
-				// this.abortBroadcast();
 			} else if (JNIService.JNI_BROADCAST_GROUP_JOIN_FAILED.equals(intent
 					.getAction())) {
 				WaitDialogBuilder.showNormalWithHintProgress(mContext, false);
@@ -1603,8 +1601,6 @@ public class MessageAuthenticationActivity extends Activity {
 				loadFriendMessage();
 				if (currentRadioType != PROMPT_TYPE_FRIEND)
 					updateTabPrompt(PROMPT_TYPE_FRIEND, true);
-				// Cancel next broadcast
-				// this.abortBroadcast();
 			} else if (arg1.getAction().equals(
 					JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 				GroupUserObject guo = (GroupUserObject) arg1.getExtras().get(
