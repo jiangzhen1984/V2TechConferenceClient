@@ -413,8 +413,7 @@ public class JNIService extends Service implements
 				V2User v2User = (V2User) msg.obj;
 				User user = v2UserToUser(v2User);
 				GlobalHolder.getInstance().putUser(user.getmUserId(), user);
-				
-				
+
 				Intent userInfos = new Intent(
 						JNI_BROADCAST_USER_UPDATE_BASE_INFO);
 				userInfos.addCategory(JNI_BROADCAST_CATEGROY);
@@ -1055,23 +1054,26 @@ public class JNIService extends Service implements
 					i.putExtra("gid", nGroupID);
 					sendBroadcast(i);
 
-					if (GlobalHolder.getInstance().isInMeeting()
-							|| GlobalHolder.getInstance().isInAudioCall()
-							|| GlobalHolder.getInstance().isInVideoCall()) {
-						Intent intent = new Intent(mContext, MainActivity.class);
-						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-						intent.putExtra("initFragment", 3);
-						Notificator
-								.updateSystemNotification(
-										mContext,
-										mContext.getText(
-												R.string.requesting_delete_conference)
-												.toString(),
-										gName
-												+ mContext
-														.getText(R.string.confs_is_deleted_notification),
-										1, intent,
-										PublicIntent.VIDEO_NOTIFICATION_ID);
+					if (((MainApplication) mContext.getApplicationContext())
+							.isRunningBackgound()) {
+						if (!GlobalHolder.getInstance().isInAudioCall()
+								|| !GlobalHolder.getInstance().isInVideoCall()) {
+							Intent intent = new Intent(mContext,
+									MainActivity.class);
+							intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+							intent.putExtra("initFragment", 3);
+							Notificator
+									.updateSystemNotification(
+											mContext,
+											mContext.getText(
+													R.string.requesting_delete_conference)
+													.toString(),
+											gName
+													+ mContext
+															.getText(R.string.confs_is_deleted_notification),
+											1, intent,
+											PublicIntent.VIDEO_NOTIFICATION_ID);
+						}
 					}
 				}
 			} else if (groupType == GroupType.CHATING.intValue()) {
@@ -1213,7 +1215,8 @@ public class JNIService extends Service implements
 				long msgID = -1;
 				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
 					long waitMessageExist = VerificationProvider
-							.queryCrowdInviteWaitingQualMessageById(user.uid , nGroupID);
+							.queryCrowdInviteWaitingQualMessageById(user.uid,
+									nGroupID);
 					if (waitMessageExist != -1) {
 						boolean isTrue = VerificationProvider
 								.deleteCrowdInviteWattingQualMessage(waitMessageExist);
@@ -1238,20 +1241,19 @@ public class JNIService extends Service implements
 						if (group == null) {
 							V2Log.e(TAG,
 									"OnAddGroupUserInfoCallback --> update crowd qualication message failed..group is null");
-							return;
-						}
-
-						if (group.getOwnerUser().getmUserId() == GlobalHolder
-								.getInstance().getCurrentUserId()
-								&& group.getAuthType() == AuthType.QULIFICATION) {
-							GroupQualicationState state = new GroupQualicationState(
-									Type.CROWD_APPLICATION,
-									QualificationState.ACCEPTED, null,
-									ReadState.UNREAD, false);
-							state.isUpdateTime = false;
-							msgID = VerificationProvider
-									.updateCrowdQualicationMessageState(
-											nGroupID, user.uid, state);
+						} else {
+							if (group.getOwnerUser().getmUserId() == GlobalHolder
+									.getInstance().getCurrentUserId()
+									&& group.getAuthType() == AuthType.QULIFICATION) {
+								GroupQualicationState state = new GroupQualicationState(
+										Type.CROWD_APPLICATION,
+										QualificationState.ACCEPTED, null,
+										ReadState.UNREAD, false);
+								state.isUpdateTime = false;
+								msgID = VerificationProvider
+										.updateCrowdQualicationMessageState(
+												nGroupID, user.uid, state);
+							}
 						}
 					}
 				}
@@ -1259,10 +1261,9 @@ public class JNIService extends Service implements
 				if (msgID == -1) {
 					V2Log.e(TAG,
 							"OnAddGroupUserInfoCallback --> update crowd qualication message failed..");
-					return;
+				} else {
+					sendQualicationBroad(msgID);
 				}
-
-				sendQualicationBroad(msgID);
 			} else if (gType == GroupType.DISCUSSION) {
 				DiscussionGroup dis = (DiscussionGroup) GlobalHolder
 						.getInstance().getGroupById(groupType, nGroupID);
@@ -1386,7 +1387,8 @@ public class JNIService extends Service implements
 					return;
 				}
 				long waitMessageExist = VerificationProvider
-						.queryCrowdInviteWaitingQualMessageById(obj.userID , obj.groupID);
+						.queryCrowdInviteWaitingQualMessageById(obj.userID,
+								obj.groupID);
 				if (waitMessageExist != -1) {
 					boolean isTrue = VerificationProvider
 							.deleteCrowdInviteWattingQualMessage(waitMessageExist);

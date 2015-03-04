@@ -43,6 +43,7 @@ import com.v2tech.R;
  */
 public abstract class BaseCreateActivity extends Activity {
 
+	protected static final String TAG = "BaseCreateActivity";
 	protected static final int CREATE_LAYOUT_TYPE_CONFERENCE = 0x001;
 	protected static final int CREATE_LAYOUT_TYPE_CROWD = 0x002;
 	protected static final int CREATE_LAYOUT_TYPE_DISCUSSION = 0x004;

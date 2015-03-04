@@ -12,7 +12,6 @@ import android.util.SparseArray;
 import android.view.View;
 
 import com.V2.jni.util.V2Log;
-import com.bizcom.db.provider.SearchContentProvider;
 import com.bizcom.vc.activity.conference.LeftAttendeeListLayout.Wrapper;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vo.Conversation;
@@ -295,7 +294,6 @@ public class SearchUtils {
 	}
 
 	public static void clearAll() {
-		SearchContentProvider.closedDataBase();
 		if (mIsStartedSearch) {
 			receiveList.clear();
 			searchCacheList.clear();

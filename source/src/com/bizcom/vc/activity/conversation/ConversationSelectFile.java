@@ -629,7 +629,6 @@ public class ConversationSelectFile extends Activity {
 			}
 
 			LayoutParams para = holder.fileIcon.getLayoutParams();
-
 			Configuration conf = getResources().getConfiguration();
 			if (conf.smallestScreenWidthDp >= 600) {
 				para.height = mScreenHeight / 3;//
@@ -648,10 +647,15 @@ public class ConversationSelectFile extends Activity {
 			}
 
 			FileInfoBean fb = mFileLists.get(position);
+            if(fb == null){
+                mFileLists.remove(position);
+                return convertView;
+            }
+
 			if (TextUtils.isEmpty(fb.fileName)) {
 				if (TextUtils.isEmpty(fb.filePath)) {
-					holder.fileIcon.setImageResource(R.drawable.ic_launcher);
 					V2Log.e(TAG, "error that this file name is vaild!");
+                    mFileLists.remove(position);
 					return convertView;
 				} else {
 					fb.fileName = fb.filePath.substring(fb.filePath

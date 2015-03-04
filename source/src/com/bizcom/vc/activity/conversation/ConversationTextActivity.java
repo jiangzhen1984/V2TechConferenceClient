@@ -2213,33 +2213,34 @@ public class ConversationTextActivity extends Activity implements
 
 	private void updateFileProgressView(String uuid, long tranedSize,
 			int progressType) {
-		for (int i = 0; i < messageArray.size(); i++) {
-			VMessage vm = messageArray.get(i);
-			if (vm.getFileItems().size() > 0) {
-				VMessageFileItem item = vm.getFileItems().get(0);
-				if (item.getUuid().equals(uuid)) {
-					VMessageFileItem vfi = ((VMessageFileItem) item);
-					switch (progressType) {
-					case FileTransStatusIndication.IND_TYPE_PROGRESS_END:
-						if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
-							vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
-						} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
-							vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
+		if(messageArray != null) {
+			for (int i = 0; i < messageArray.size(); i++) {
+				VMessage vm = messageArray.get(i);
+				if (vm.getFileItems().size() > 0) {
+					VMessageFileItem item = vm.getFileItems().get(0);
+					if (item.getUuid().equals(uuid)) {
+						VMessageFileItem vfi = ((VMessageFileItem) item);
+						switch (progressType) {
+						case FileTransStatusIndication.IND_TYPE_PROGRESS_END:
+							if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+								vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
+							} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
+								vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
+							}
+							break;
 						}
-						break;
+	
+						vfi.setDownloadedSize(tranedSize);
+						Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 					}
-
-					vfi.setDownloadedSize(tranedSize);
-					Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
-				}
-			} else if (vm.getAudioItems().size() > 0) {
-				VMessageAudioItem item = vm.getAudioItems().get(0);
-				if (item.getUuid().equals(uuid)) {
-					Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
+				} else if (vm.getAudioItems().size() > 0) {
+					VMessageAudioItem item = vm.getAudioItems().get(0);
+					if (item.getUuid().equals(uuid)) {
+						Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
+					}
 				}
 			}
 		}
-
 	}
 
 	/**

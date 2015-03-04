@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.media.ExifInterface;
+import android.media.ThumbnailUtils;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
@@ -21,9 +22,9 @@ import com.v2tech.R;
 public class BitmapUtil {
 
 	public static Context context;
-	
-	public static void init(Context context){
-		BitmapUtil.context=context;
+
+	public static void init(Context context) {
+		BitmapUtil.context = context;
 	}
 
 	public static Bitmap loadAvatarFromPath(String path) {
@@ -162,42 +163,34 @@ public class BitmapUtil {
 		return BitmapFactory.decodeFile(filePath, options);
 	}
 
-	/**
-	 * This function is used by {@link #ConversationSelectImage.startLoadBitmap}
-	 * 
-	 * @param context
-	 * @param file
-	 * @return
-	 */
-	public static Bitmap getSizeBitmap(String file) {
-		if (TextUtils.isEmpty(file)) {
-			throw new NullPointerException(" file is null");
-		}
-		File f = new File(file);
-		if (!f.exists()) {
-			throw new RuntimeException(" file is no exists :" + file);
-		}
-
+	public static Bitmap getImageThumbnail(String imagePath, int width, int height) {
+		Bitmap bitmap = null;
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
-		options.inPreferredConfig = Bitmap.Config.ALPHA_8;
-		BitmapFactory.decodeFile(file, options);
-		if (options.outWidth >= 1080 || options.outHeight >= 1080) {
-			options.inSampleSize = 8;
-		} else if (options.outWidth > 500 || options.outHeight > 500) {
-			options.inSampleSize = 4;
-		} else if (options.outWidth > 200 || options.outHeight > 200) {
-			options.inSampleSize = 2;
+		// 获取这个图片的宽和高，注意此处的bitmap为null
+		bitmap = BitmapFactory.decodeFile(imagePath, options);
+		options.inJustDecodeBounds = false; // 设为 false
+		// 计算缩放比
+		int h = options.outHeight;
+		int w = options.outWidth;
+		int beWidth = w / width;
+		int beHeight = h / height;
+		int be = 1;
+		if (beWidth < beHeight) {
+			be = beWidth;
 		} else {
-			options.inSampleSize = 1;
+			be = beHeight;
 		}
-		options.inJustDecodeBounds = false;
-		options.inPurgeable = true;
-		options.inInputShareable = true;// 。当系统内存不够时候图片自动被回收
-		DensityUtils.dip2px(context, 100);
-		options.outHeight = DensityUtils.dip2px(context, 100);
-		options.outWidth = DensityUtils.dip2px(context, 100);
-		return BitmapFactory.decodeFile(file, options);
+		if (be <= 0) {
+			be = 1;
+		}
+		options.inSampleSize = be;
+		// 重新读入图片，读取缩放后的bitmap，注意这次要把options.inJustDecodeBounds 设为 false
+		bitmap = BitmapFactory.decodeFile(imagePath, options);
+		// 利用ThumbnailUtils来创建缩略图，这里要指定要缩放哪个Bitmap对象
+		bitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height,
+				ThumbnailUtils.OPTIONS_RECYCLE_INPUT);
+		return bitmap;
 	}
 
 	public static void getCompressedBitmapBounds(String file, int[] r) {

@@ -78,7 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_alignRight="@+id/group_list_conference_image_view"
+                android:layout_alignRight="@+id/specific_voice_headIcon"
                 android:layout_marginRight="3dp"
                 android:layout_marginTop="3dp"
                 android:src="@drawable/red_nofificator"

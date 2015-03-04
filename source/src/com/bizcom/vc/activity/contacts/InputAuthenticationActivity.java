@@ -93,9 +93,9 @@ public class InputAuthenticationActivity extends Activity {
 	private void connectView() {
 		tvLeft = (TextView) findViewById(R.id.tv_left);
 		tvRightTextView = (TextView) findViewById(R.id.right_text_view);
-		mHeadIconIV = (ImageView) findViewById(R.id.ws_common_conversation_layout_icon);
-		mNameTitleIV = (TextView) findViewById(R.id.ws_common_conversation_layout_topContent);
-		mSignTV = (TextView) findViewById(R.id.ws_common_conversation_layout_belowContent);
+		mHeadIconIV = (ImageView) findViewById(R.id.ws_common_contact_conversation_icon);
+		mNameTitleIV = (TextView) findViewById(R.id.ws_common_contact_conversation_topContent);
+		mSignTV = (TextView) findViewById(R.id.ws_common_contact_conversation_belowContent);
 		if ((startedCause != null)
 				&& startedCause.equals("refuse_friend_authentication")) {
 			tvRightTextView.setText(R.string.contacts_authentication_complete);

@@ -74,6 +74,7 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 	private V2CrowdGroupRequest cg = new V2CrowdGroupRequest();
 
 	private boolean isInInvitationMode = false;
+	private boolean isHandling;
 
 	private ProgressDialog mWaitingDialog;
 	private ProgressDialog mCreateWaitingDialog;
@@ -393,11 +394,19 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 				mCreateWaitingDialog.dismiss();
 				JNIResponse recr = (JNIResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
+					if(isHandling)
+						return ;
+					isHandling = true;
+					
 					CrowdGroup cg = (CrowdGroup) recr.callerObject;
 					long id = ((CreateCrowdResponse) recr).getGroupId();
 					cg.setGId(id);
 					cg.setCreateDate(new Date());
 
+					// Create a new crowd group by current logined user
+					V2Log.d(TAG , "successful create a new crowd group , id is : "
+							+ cg.getmGId() + " group name is : " + cg.getName());
+					
 					// add group to global cache
 					GlobalHolder.getInstance().addGroupToList(
 							GroupType.CHATING.intValue(), cg);

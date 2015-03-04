@@ -2,11 +2,7 @@ package com.bizcom.vc.activity.message;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -20,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -46,11 +43,11 @@ import com.bizcom.vc.activity.conversationav.ConversationP2PAVActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vo.AudioVideoMessageBean;
+import com.bizcom.vo.AudioVideoMessageBean.ChildMessageBean;
 import com.bizcom.vo.Conversation;
 import com.bizcom.vo.User;
 import com.bizcom.vo.UserDeviceConfig;
 import com.bizcom.vo.VideoBean;
-import com.bizcom.vo.AudioVideoMessageBean.ChildMessageBean;
 import com.v2tech.R;
 
 public class VoiceMessageActivity extends Activity {
@@ -64,7 +61,7 @@ public class VoiceMessageActivity extends Activity {
 	private ListView mVoicesList;
 	private VoiceBaseAdapter adapter;
 	private List<AudioVideoMessageBean> mListItem;
-	private Map<Integer, AudioVideoMessageBean> deleteList;
+	private SparseArray<AudioVideoMessageBean> deleteList;
 	private Context mContext;
 	private ViewHolder holder = null;
 	private VoiceReceiverBroadcast receiver;
@@ -216,12 +213,11 @@ public class VoiceMessageActivity extends Activity {
 					return;
 				}
 
-				for (Iterator<Entry<Integer, AudioVideoMessageBean>> i = deleteList
-						.entrySet().iterator(); i.hasNext();) {
-					Entry<Integer, AudioVideoMessageBean> entry = i.next();
-					mListItem.remove(entry.getValue());
-					deleteList.remove(entry.getKey());
-					AudioVideoMessageBean value = entry.getValue();
+				for (int i = 0; i < deleteList.size(); i++) {
+					int key = deleteList.keyAt(i);
+					AudioVideoMessageBean value = deleteList.valueAt(i);
+					mListItem.remove(value);
+					deleteList.remove(key);
 					String where = ContentDescriptor.HistoriesMedia.Cols.HISTORY_MEDIA_REMOTE_USER_ID
 							+ " = ?";
 					String[] selectionArgs = new String[] { String.valueOf(value.remoteUserID) };
@@ -333,7 +329,7 @@ public class VoiceMessageActivity extends Activity {
 
 		}.execute();
 
-		deleteList = new HashMap<Integer, AudioVideoMessageBean>();
+		deleteList = new SparseArray<AudioVideoMessageBean>();
 		BitmapManager.getInstance().registerBitmapChangedListener(
 				this.bitmapChangedListener);
 	}

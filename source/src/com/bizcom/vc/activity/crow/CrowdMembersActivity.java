@@ -137,8 +137,8 @@ public class CrowdMembersActivity extends Activity {
 		localReceiver = new LocalReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
-		filter.addAction(JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE);
 		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
+		filter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 		filter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 		this.registerReceiver(localReceiver, filter);
 	}
@@ -227,10 +227,20 @@ public class CrowdMembersActivity extends Activity {
 					finish();
 				}
 			} else if (intent.getAction().equals(
-					JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE)) {
+					JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
 				updateMembersChange();
 			} else if (intent.getAction().equals(
-					JNIService.JNI_BROADCAST_GROUP_USER_REMOVED)) {
+					JNIService.JNI_BROADCAST_GROUP_USER_ADDED)) {
+//				GroupUserObject guo = (GroupUserObject) intent.getExtras().get(
+//						"obj");
+//				if (guo == null) 
+//					return;
+//				
+//				if(crowd.getmGId() == guo.getmGroupId()){
+//					User addUser = GlobalHolder.getInstance().getUser(guo.getmUserId());
+//					mMembers.add(addUser);
+//					adapter.notifyDataSetChanged();
+//				}
 				updateMembersChange();
 			}
 		}

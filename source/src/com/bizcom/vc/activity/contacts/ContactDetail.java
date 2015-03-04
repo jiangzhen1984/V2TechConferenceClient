@@ -435,8 +435,12 @@ public class ContactDetail extends Activity implements OnTouchListener {
 	}
 
 	private void initView() {
-		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
-		mNameTitleIV = (TextView) findViewById(R.id.contact_user_detail_title);
+		mHeadIconIV = (ImageView) findViewById(R.id.ws_common_contact_conversation_icon);
+		mNameTitleIV = (TextView) findViewById(R.id.ws_common_contact_conversation_topContent);
+        mSignTV = (TextView) findViewById(R.id.ws_common_contact_conversation_belowContent);
+
+        findViewById(R.id.contact_user_detail_head_company).setVisibility(
+                View.VISIBLE);
 
 		mReturnButtonTV = (TextView) findViewById(R.id.ws_common_activity_title_left_button);
 		mReturnButtonTV.setText(R.string.common_return_name);
@@ -444,7 +448,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 
 		findViewById(R.id.ws_common_activity_title_right_button).setVisibility(
 				View.INVISIBLE);
-		;
 
 		mMoreDetailButton = findViewById(R.id.ws_common_comtactDetail_title_feature_more_button);
 		mMoreDetailButton.setOnClickListener(mMoreDetailListener);
@@ -466,7 +469,6 @@ public class ContactDetail extends Activity implements OnTouchListener {
 		mTelephoneTV = (TextView) findViewById(R.id.contact_user_n_detail_telephone_tv);
 		mFaxTV = (TextView) findViewById(R.id.contact_user_n_detail_fax_tv);
 		mCompanyTitleTV = (TextView) findViewById(R.id.contact_user_company);
-		mSignTV = (TextView) findViewById(R.id.contact_user_detail_user_signature_tv);
 
 		mTVArr = new View[] { mItemsContainer, mCompanyTitleTV,
 				mContactButtonContainer, mMoreDetailButton, mSignTV };

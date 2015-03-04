@@ -62,13 +62,17 @@ public class SplashActivity extends Activity {
 	}
 
 	private void initSearchMap() {
-		HashMap<String, String> allChinese = SearchContentProvider
-				.queryAll(this);
-		if (allChinese == null) {
-			V2Log.e("loading dataBase data is fialed...");
-			return;
+		try {
+			HashMap<String, String> allChinese = SearchContentProvider
+					.queryAll(this);
+			if (allChinese == null) {
+				V2Log.e("loading dataBase data is fialed...");
+				return;
+			}
+			GlobalConfig.allChinese.putAll(allChinese);
+		} finally {
+			SearchContentProvider.closedDataBase();
 		}
-		GlobalConfig.allChinese.putAll(allChinese);
 	}
 
 	private void forward() {
@@ -81,7 +85,6 @@ public class SplashActivity extends Activity {
 					+ (sleepTime - (loadStopTime - loadStartTime)));
 			Thread.sleep(sleepTime - (loadStopTime - loadStartTime));
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -102,6 +105,5 @@ public class SplashActivity extends Activity {
 
 		finish();
 	}
-
 
 }

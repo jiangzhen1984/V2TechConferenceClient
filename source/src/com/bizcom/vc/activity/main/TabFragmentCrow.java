@@ -242,6 +242,7 @@ public class TabFragmentCrow extends Fragment implements TextWatcher {
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
+			intentFilter.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUPS_LOADED);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 			intentFilter
@@ -805,6 +806,8 @@ public class TabFragmentCrow extends Fragment implements TextWatcher {
 					V2Log.e(TAG,
 							"Received the broadcast to quit the crowd group , but crowd id is wroing... ");
 					return;
+				} else {
+					V2Log.d(TAG, "Received the new group broadcast !");
 				}
 
 				if (V2GlobalConstants.GROUP_TYPE_CROWD == obj.getmType()

@@ -459,12 +459,6 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 			return;
 		}
 
-		if (!((MainApplication) mContext.getApplicationContext())
-				.isRunningBackgound()) {
-			sendVoiceNotify();
-			return;
-		}
-
 		Intent enterConference = new Intent(mContext, MainActivity.class);
 		User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
 		enterConference.putExtra("conf", conf);
@@ -499,10 +493,6 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 		if (GlobalHolder.getInstance().isInMeeting()
 				|| GlobalHolder.getInstance().isInAudioCall()
 				|| GlobalHolder.getInstance().isInVideoCall()) {
-			if (((MainApplication) mContext.getApplicationContext())
-					.isRunningBackgound()) {
-				sendVoiceNotify();
-			}
 			return true;
 		}
 		return false;
@@ -930,6 +920,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 				}
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_INVATITION
 					.equals(intent.getAction())) {
+				sendVoiceNotify();
 				long gid = intent.getLongExtra("gid", 0);
 				int existPos = -1;
 				Group g = GlobalHolder.getInstance().getGroupById(

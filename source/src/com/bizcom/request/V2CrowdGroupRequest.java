@@ -193,10 +193,10 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 			return;
 		}
 		
-//		if (mPendingCrowdId > 0) {
-//			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
-//			return;
-//		}
+		if (mPendingCrowdId > 0) {
+			super.callerSendMessage(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			return;
+		}
 		mPendingCrowdId = crowd.getId();
 
 		// FIXME concurrency problem, if user use one crowdgroupservice instance
@@ -627,33 +627,21 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 		public void onAddGroupInfo(V2Group group) {
 			if (group.type == V2Group.TYPE_CROWD) {
 				if (GlobalHolder.getInstance().getCurrentUserId() == group.owner.uid) {
-					// Create a new crowd group by current logined user
-					V2Log.e("CrowdGroupService onAddGroupInfo--> successful create a new group , id is : "
-							+ group.id);
-					mPendingCrowdId = 0;
 					JNIResponse jniRes = new CreateCrowdResponse(group.id,
 							CreateCrowdResponse.Result.SUCCESS);
 					Message.obtain(mCallbackHandler, CREATE_DISCUSSION_BOARD,
 							jniRes).sendToTarget();
 				} else {
 					if (mPendingCrowdId == group.id) {
-						V2Log.e("CrowdGroupService onAddGroupInfo--> add a new group , id is : "
-								+ group.id);
 						mPendingCrowdId = 0;
 						JNIResponse jniRes = new JNIResponse(
 								CreateCrowdResponse.Result.SUCCESS);
 						Message.obtain(mCallbackHandler, ACCEPT_JOIN_CROWD,
 								jniRes).sendToTarget();
-					} else {
-						V2Log.e("CrowdGroupService onAddGroupInfo--> mPendingCrowdId isn't equals groupID , MayBe this callback"
-								+ "already time out , group id is : "
-								+ group.id + " group name is : " + group.getName());
 					}
 				}
 			} else if (group.type == V2Group.TYPE_DISCUSSION_BOARD) {
-				
 				if (GlobalHolder.getInstance().getCurrentUserId() == group.owner.uid) {
-					// Create a new discussion board group by current logged user
 					JNIResponse jniRes = new CreateDiscussionBoardResponse(group.id,
 							JNIResponse.Result.SUCCESS);
 					Message.obtain(mCallbackHandler, CREATE_DISCUSSION_BOARD,

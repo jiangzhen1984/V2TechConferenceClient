@@ -20,8 +20,8 @@
             android:layout_marginTop="@dimen/conversation_view_margin" >
             <ImageView
                 android:id="@+id/ws_selectFile_iamge_icon"
-                android:layout_width="100dp"
-                android:layout_height="100dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:src="@drawable/avatar" />
         </RelativeLayout>
@@ -31,14 +31,14 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/contacts_user_view_contact_user_name_margin_left"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="5dp"
             android:layout_toRightOf="@+id/contact_user_img_container"
             android:ellipsize="end"
-            android:maxWidth="@dimen/contacts_user_view_text_max_width"
-            android:singleLine="true"
+            android:layout_toLeftOf="@+id/select_image_arrow"
             android:textColor="@color/contacts_user_view_item_color_offline"
             android:textSize="@dimen/common_item_text_size" />
         <ImageView
+            android:id="@+id/select_image_arrow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"

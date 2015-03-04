@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+    <ImageView
+        android:id="@+id/ws_common_contact_conversation_icon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/button_padding_horizontal"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/avatar" />
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="@dimen/detail_detail_signature_margin_left"
+        android:layout_marginRight="@dimen/detail_detail_signature_margin_left"
+        android:layout_toLeftOf="@+id/contact_user_detail_button_layout"
+        android:layout_toRightOf="@+id/ws_common_contact_conversation_icon" >
+        <TextView
+            android:id="@+id/ws_common_contact_conversation_topContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:ellipsize="marquee"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:text="TextView"
+            android:textColor="@color/activiy_contact_detail_item_color"
+            android:textSize="@dimen/common_item_text_size_16" />
+        <com.bizcom.vc.widget.MarqueeTextView
+            android:id="@+id/ws_common_contact_conversation_belowContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ws_common_contact_conversation_topContent"
+            android:layout_marginTop="10dp"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:singleLine="true"
+            android:text="TextView"
+            android:textColor="@color/common_item_text_color" />
+    </RelativeLayout>
+    <!--for ContactDetail2-->
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/contact_user_detail_button_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="@dimen/button_gap_horizontal"
+        android:paddingBottom="@dimen/detail_detail_2_button_padding_vertical"
+        android:paddingLeft="@dimen/button_padding_horizontal"
+        android:paddingRight="@dimen/button_padding_horizontal"
+        android:paddingTop="@dimen/detail_detail_2_button_padding_vertical" >
+        <TextView
+            android:id="@+id/contact_user_detail_invite_video"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_bg_blue_bound"
+            android:gravity="center"
+            android:text="@string/contacts_user_detail_invite_video"
+            android:textColor="@color/button_text_color_blue"
+            android:textSize="@dimen/common_item_text_size_small"
+            android:visibility="gone" />
+        <TextView
+            android:id="@+id/contact_user_detail_add_friend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_bg_blue_bound"
+            android:gravity="center"
+            android:text="@string/contacts_user_detail_add_friend"
+            android:visibility="visible"
+            android:textColor="@color/button_text_color_blue"
+            android:textSize="@dimen/common_item_text_size" />
+        <TextView
+            android:id="@+id/contact_user_detail_delete_friend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_bg_blue_bound"
+            android:gravity="center"
+            android:text="删除好友"
+            android:textColor="#ff0000"
+            android:textSize="@dimen/common_item_text_size"
+            android:visibility="gone" />
+    </RelativeLayout>
+    <!--for ContactDetail-->
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/contact_user_detail_head_company"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true" >
+        <LinearLayout
+            android:id="@+id/text_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
+            <TextView
+                android:id="@+id/contact_user_company"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="15dp"
+                android:text="Company"
+                android:textColor="@color/common_item_text_color"
+                android:textSize="@dimen/common_item_text_size"
+                android:visibility="visible" />
+            <TextView
+                android:id="@+id/authentication_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:text="验证状态"
+                android:textColor="@color/common_item_text_color"
+                android:textSize="@dimen/common_item_text_size"
+                android:visibility="gone" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/button_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="@dimen/crowd_invitation_box_right_margin" >
+            <Button
+                android:id="@+id/access"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginRight="@dimen/crowd_invitation_box_right_margin"
+                android:background="@drawable/button_bg_blue_bound"
+                android:gravity="center"
+                android:paddingBottom="@dimen/crowd_invitation_button_padding_vertical"
+                android:paddingLeft="@dimen/crowd_invitation_button_padding_horizontal"
+                android:paddingRight="@dimen/crowd_invitation_button_padding_horizontal"
+                android:paddingTop="@dimen/crowd_invitation_button_padding_vertical"
+                android:text="@string/crowd_invitation_accept_button_name"
+                android:textColor="@color/button_text_color_blue"
+                android:textSize="@dimen/common_item_text_size" />
+            <Button
+                android:id="@+id/refuse"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@drawable/button_bg_blue_bound"
+                android:gravity="center"
+                android:paddingBottom="@dimen/crowd_invitation_button_padding_vertical"
+                android:paddingLeft="@dimen/crowd_invitation_button_padding_horizontal"
+                android:paddingRight="@dimen/crowd_invitation_button_padding_horizontal"
+                android:paddingTop="@dimen/crowd_invitation_button_padding_vertical"
+                android:text="@string/crowd_invitation_reject_button_name"
+                android:textColor="@color/button_text_color_blue"
+                android:textSize="@dimen/common_item_text_size" />
+        </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>

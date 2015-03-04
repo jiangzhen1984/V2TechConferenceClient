@@ -73,13 +73,9 @@
             android:id="@+id/RelativeLayout2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:paddingLeft="15dp"
-            android:paddingRight="5dp"
             android:layout_alignParentTop="true" >
 
-           <include layout="@layout/common_conversation_layout"/>
+           <include layout="@layout/common_contact_conversation_layout"/>
         </RelativeLayout>
 
         <LinearLayout

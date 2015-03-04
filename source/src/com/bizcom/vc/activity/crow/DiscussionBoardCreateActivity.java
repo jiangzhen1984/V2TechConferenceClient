@@ -61,6 +61,7 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 	private V2CrowdGroupRequest cg = new V2CrowdGroupRequest();
 
 	private boolean isInInvitationMode = false;
+	private boolean isHandling;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -320,12 +321,20 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 				mCreateWaitingDialog.dismiss();
 				JNIResponse recr = (JNIResponse) msg.obj;
 				if (recr.getResult() == JNIResponse.Result.SUCCESS) {
+					if(isHandling)
+						return ;
+					isHandling = true;
+					
 					DiscussionGroup cg = (DiscussionGroup) recr.callerObject;
 					long id = ((CreateDiscussionBoardResponse) recr)
 							.getGroupId();
 					cg.setGId(id);
 					cg.setCreateDate(new Date());
 
+					// Create a new crowd group by current logined user
+					V2Log.d(TAG , "successful create a new discussion group , id is : "
+							+ cg.getmGId() + " group name is : " + cg.getName());
+					
 					// add group to global cache
 					GlobalHolder.getInstance().addGroupToList(
 							GroupType.DISCUSSION.intValue(), cg);

@@ -23,6 +23,7 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -343,13 +344,13 @@ public class MainApplication extends Application {
 	@Override
 	public void onLowMemory() {
 		// 后台进程已经被全部回收，但系统内存还是低
-		V2Log.e(TAG , "MainApplication.onLowMemory()");
+		V2Log.e(TAG, "MainApplication.onLowMemory()");
 		super.onLowMemory();
 	}
 
 	@Override
 	public void onTrimMemory(int level) {
-		V2Log.e(TAG , "onTrimMemory called , level is : " + level);
+		V2Log.e(TAG, "onTrimMemory called , level is : " + level);
 		switch (level) {
 		case Application.TRIM_MEMORY_RUNNING_MODERATE:
 			break;
@@ -404,8 +405,11 @@ public class MainApplication extends Application {
 
 	}
 
+	/**
+	 * This function is used to determine whether the program runs in the background
+	 * @return true mean running in the backgroup , otherwise false.
+	 */
 	public boolean isRunningBackgound() {
-
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 			if (startedActivityCount == 0) {
 				return true;
@@ -445,7 +449,7 @@ public class MainApplication extends Application {
 		public void onActivityCreated(Activity activity,
 				Bundle savedInstanceState) {
 			// 为什么要该声音模式？暂时注释
-			// activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
+//			 activity.setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 			if (isPad || activity instanceof ConferenceActivity) {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -453,7 +457,8 @@ public class MainApplication extends Application {
 				activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 			}
 			list.add(0, new WeakReference<Activity>(activity));
-			V2Log.d(TAG, "MainApplication 添加一个activity : " + activity.getClass().getName());
+			V2Log.d(TAG, "MainApplication 添加一个activity : "
+					+ activity.getClass().getName());
 
 		}
 
@@ -464,7 +469,8 @@ public class MainApplication extends Application {
 				Object obj = w.get();
 				if (obj != null && ((Activity) obj) == activity) {
 					list.remove(i--);
-					V2Log.d(TAG, "MainApplication 删除一个activity : " + activity.getClass().getName());
+					V2Log.d(TAG, "MainApplication 删除一个activity : "
+							+ activity.getClass().getName());
 				}
 			}
 

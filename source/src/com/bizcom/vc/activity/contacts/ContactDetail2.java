@@ -261,9 +261,12 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		mTitleLeftTV.setText(R.string.contacts_user_detail_return_button);
 		mTitleLeftTV.setOnClickListener(mReturnButtonListener);
 
-		mHeadIconIV = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
-		mNameTitleIV = (TextView) findViewById(R.id.contact_user_detail_title);
+        View commonLy = findViewById(R.id.contact_user_detail_button_layout);
+        commonLy.setVisibility(View.VISIBLE);
 
+		mHeadIconIV = (ImageView) findViewById(R.id.ws_common_contact_conversation_icon);
+		mNameTitleIV = (TextView) findViewById(R.id.ws_common_contact_conversation_topContent);
+        mSignTV = (MarqueeTextView) findViewById(R.id.ws_common_contact_conversation_belowContent);
 		mAddContactButton = (TextView) findViewById(R.id.contact_user_detail_add_friend);
 
 		mAddContactButton.setOnClickListener(new OnClickListener() {
@@ -324,7 +327,6 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			}
 		});
 
-		mSignTV = (MarqueeTextView) findViewById(R.id.contact_user_detail_user_signature_tv);
 		mSignTVLayout = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_linearlayout);
 		mSignTVLine = (LinearLayout) findViewById(R.id.contact_user_detail_nick_name_et_belowline);
 

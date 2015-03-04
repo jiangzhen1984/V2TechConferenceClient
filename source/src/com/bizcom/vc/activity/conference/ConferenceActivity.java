@@ -416,7 +416,7 @@ public class ConferenceActivity extends Activity {
 		audioManager = (AudioManager) mContext
 				.getSystemService(Context.AUDIO_SERVICE);
 		isBluetoothHeadsetConnected = audioManager.isBluetoothA2dpOn();
-		audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		audioManager.setMode(AudioManager.MODE_NORMAL);
 		// Broadcast for user joined conference, to inform that quit P2P
 		// conversation
 		broadcastForJoined();
@@ -427,9 +427,9 @@ public class ConferenceActivity extends Activity {
 	protected void onStart() {
 		super.onStart();
 
-		// if (audioManager != null) {
-		// audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-		// }
+//		 if (audioManager != null) {
+//		 audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+//		 }
 
 		if (mServiceBound) {
 			suspendOrResume(true);
@@ -1284,7 +1284,7 @@ public class ConferenceActivity extends Activity {
 		mLocalHandler = null;
 		if (audioManager != null) {
 			// audioManager.setSpeakerphoneOn(false);
-			audioManager.setMode(AudioManager.MODE_NORMAL);
+			audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 		}
 
 		super.onDestroy();

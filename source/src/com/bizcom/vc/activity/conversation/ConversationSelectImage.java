@@ -20,7 +20,6 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.util.LruCache;
 import android.text.TextUtils;
-import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -41,6 +40,8 @@ import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.util.BitmapUtil;
+import com.bizcom.util.DensityUtils;
+import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vo.FileInfoBean;
 import com.v2tech.R;
 
@@ -53,9 +54,10 @@ public class ConversationSelectImage extends Activity {
 	protected static final int SCAN_SDCARD = 4;
 
 	private static final int DEFAULT_PATH = 0x0001;
-	private static final int SDCARD_PATH = 0x0002;
 	private int DEFAULT_PATH_INDEX;
 	private int SDCARD_PATH_INDEX;
+	private String SDCARD_ROOT_NAME;
+	private String SDCARD_ROOT;
 
 	private RelativeLayout buttomTitle;
 	private LinearLayout buttomDivider;
@@ -71,19 +73,14 @@ public class ConversationSelectImage extends Activity {
 	private ArrayList<FileInfoBean> pictures;
 	private Context mContext;
 	private long remoteID;
-	private boolean isBack;
 	private boolean isClassify = true;
+	private boolean isBack;
 	private HashMap<String, ArrayList<FileInfoBean>> listMap;
 	private String[][] selectArgs = {
 			{ String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI),
 					"image/png" },
 			{ String.valueOf(MediaStore.Images.Media.INTERNAL_CONTENT_URI),
 					"image/jpeg" },
-			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
-					"image/png" },
-			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
-					"image/jpeg" } };
-	private String[][] sdcardArgs = {
 			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
 					"image/png" },
 			{ String.valueOf(MediaStore.Images.Media.EXTERNAL_CONTENT_URI),
@@ -130,8 +127,6 @@ public class ConversationSelectImage extends Activity {
 			}
 		}
 	};
-	private int mScreenHeight;
-	private int mScreenWidth;
 	protected int isLoading;
 	private ExecutorService service;
 
@@ -139,10 +134,6 @@ public class ConversationSelectImage extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_selectfile);
-
-		Display display = getWindowManager().getDefaultDisplay();
-		mScreenHeight = display.getHeight();
-		mScreenWidth = display.getWidth();
 		findview();
 		init();
 		setListener();
@@ -150,22 +141,40 @@ public class ConversationSelectImage extends Activity {
 		mContext = this;
 	}
 
+	@Override
+	public void onBackPressed() {
+		if (isBack) {
+			listViews.setVisibility(View.VISIBLE);
+			gridViews.setVisibility(View.GONE);
+			classifyAdapter = new ImageClassifyAdapter();
+			listViews.setAdapter(classifyAdapter);
+			isBack = false;
+			isClassify = true;
+		} else {
+			setResult(Activity.RESULT_CANCELED);
+			super.onBackPressed();
+		}
+	}
+
 	private void initPath() {
 		boolean sdExist = android.os.Environment.MEDIA_MOUNTED
 				.equals(android.os.Environment.getExternalStorageState());
-		if (sdExist) {// 如果不存在,
-			String sdPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-			V2Log.d("test", "sdPath : " + sdPath);
+		if (sdExist) {
+			String sdPath = Environment.getExternalStorageDirectory()
+					.getAbsolutePath();
 			String[] split = sdPath.split("/");
-			DEFAULT_PATH_INDEX = split.length;
-			V2Log.d("test", "dir name : " + split[split.length - 1]);
+			SDCARD_PATH_INDEX = split.length;
+			SDCARD_ROOT = split[1];
+			SDCARD_ROOT_NAME = split[2];
+			V2Log.d(TAG, "sdcard path : " + sdPath);
+			V2Log.d(TAG, "sdcard SDCARD_ROOT_NAME : " + SDCARD_ROOT_NAME);
 		}
 
-		String defPath = getApplicationContext().getFilesDir().getParent();
-		V2Log.d("test", "DEFAULT : " + defPath);
-		String[] split = defPath.split("/");
-		SDCARD_PATH_INDEX = split.length;
-		V2Log.d("test", "dir name : " + split[split.length - 1]);
+		// String defPath = getApplicationContext().getFilesDir().getParent();
+		// String[] split = defPath.split("/");
+		// V2Log.d(TAG, "internal path : " + defPath);
+		// V2Log.d(TAG, "internal root name : " + split[split.length - 1]);
+		DEFAULT_PATH_INDEX = 2;
 	}
 
 	private void findview() {
@@ -204,13 +213,7 @@ public class ConversationSelectImage extends Activity {
 				loading.setVisibility(View.VISIBLE);
 				for (int i = 0; i < selectArgs.length; i++) {
 
-					initPictures(DEFAULT_PATH, Uri.parse(selectArgs[i][0]),
-							selectArgs[i][1]);
-				}
-
-				for (int i = 0; i < sdcardArgs.length; i++) {
-
-					initPictures(SDCARD_PATH, Uri.parse(selectArgs[i][0]),
+					initPictures(Uri.parse(selectArgs[i][0]),
 							selectArgs[i][1]);
 				}
 
@@ -219,7 +222,7 @@ public class ConversationSelectImage extends Activity {
 		}).start();
 	}
 
-	private void initPictures(int type, Uri uri, String select) {
+	private void initPictures(Uri uri, String select) {
 
 		ContentResolver resolver = getContentResolver();
 		String[] projection = { MediaStore.Images.Media._ID,
@@ -243,23 +246,37 @@ public class ConversationSelectImage extends Activity {
 				bean.fileName = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
 				bean.fileType = 1;
-				if(TextUtils.isEmpty(filePath))
-					continue ;
-				
+				if (TextUtils.isEmpty(filePath))
+					continue;
+
 				String parentName;
 				String[] s = filePath.split("/");
+				V2Log.i(TAG, "file path : " + filePath);
+				V2Log.i(TAG, "arr size : " + s.length);
+				
+				int type = 0;
+				if(!SDCARD_ROOT.equals(s[1]))
+					type = DEFAULT_PATH;
+				
 				if (type == DEFAULT_PATH) {
-					if(DEFAULT_PATH_INDEX < s.length)
+					if (DEFAULT_PATH_INDEX < s.length)
 						parentName = s[DEFAULT_PATH_INDEX];
 					else
-						continue ;
+						continue;
+					V2Log.i(TAG, "index name : " + s[DEFAULT_PATH_INDEX]);
 				} else {
-					if(SDCARD_PATH_INDEX < s.length)
-						parentName = s[SDCARD_PATH_INDEX];
-					else
-						continue ;
+					if (SDCARD_PATH_INDEX <= s.length
+							&& SDCARD_ROOT_NAME.equals(s[2])) {
+						if (SDCARD_PATH_INDEX == s.length - 1)
+							parentName = "root";
+						else
+							parentName = s[SDCARD_PATH_INDEX];
+					} else
+						continue;
+					V2Log.i(TAG, "index name : " + s[SDCARD_PATH_INDEX]);
 				}
-
+				V2Log.i(TAG, "parentName name : " + parentName);
+				V2Log.i("------------------------");
 				if (listMap.containsKey(parentName)) {
 					currentList = listMap.get(parentName);
 					if (currentList == null)
@@ -282,18 +299,7 @@ public class ConversationSelectImage extends Activity {
 
 			@Override
 			public void onClick(View v) {
-
-				if (isBack) {
-					listViews.setVisibility(View.VISIBLE);
-					gridViews.setVisibility(View.GONE);
-					classifyAdapter = new ImageClassifyAdapter();
-					listViews.setAdapter(classifyAdapter);
-					isClassify = true;
-					isBack = false;
-				} else {
-					finish();
-					setResult(Activity.RESULT_CANCELED);
-				}
+				onBackPressed();
 			}
 		});
 
@@ -331,7 +337,7 @@ public class ConversationSelectImage extends Activity {
 					intent.putExtra("checkedImage",
 							pictures.get(position).filePath);
 					setResult(100, intent);
-					onBackPressed();
+					ConversationSelectImage.super.onBackPressed();
 				}
 			}
 		});
@@ -387,6 +393,11 @@ public class ConversationSelectImage extends Activity {
 
 				holder = (ViewHolder) convertView.getTag();
 			}
+
+			LayoutParams para = holder.fileIcon.getLayoutParams();
+			para.width = DensityUtils.dip2px(mContext, 100);
+			para.height = DensityUtils.dip2px(mContext, 100);
+			holder.fileIcon.setLayoutParams(para);
 
 			String classifyName = pictresClassify.get(position);
 			ArrayList<FileInfoBean> arrayList = listMap.get(classifyName);
@@ -454,11 +465,11 @@ public class ConversationSelectImage extends Activity {
 
 			Configuration conf = getResources().getConfiguration();
 			if (conf.smallestScreenWidthDp >= 600) {
-				para.height = mScreenHeight / 3;//
+				para.height = GlobalConfig.SCREEN_WIDTH / 3;//
 			} else {
-				para.height = mScreenHeight / 4;//
+				para.height = GlobalConfig.SCREEN_HEIGHT / 4;//
 			}
-			para.width = (mScreenWidth - 20) / 3;// 一屏显示3列
+			para.width = (GlobalConfig.SCREEN_WIDTH - 20) / 3;// 一屏显示3列
 			holder.fileIcon.setLayoutParams(para);
 
 			if (pictures.size() <= 0) {
@@ -516,7 +527,8 @@ public class ConversationSelectImage extends Activity {
 
 					Bitmap bitmap = null;
 					if (isClassify)
-						bitmap = BitmapUtil.getSizeBitmap(fb.filePath);
+						bitmap = BitmapUtil.getImageThumbnail(fb.filePath, 100,
+								100);
 					else
 						bitmap = BitmapUtil.getCompressedBitmap(fb.filePath);
 

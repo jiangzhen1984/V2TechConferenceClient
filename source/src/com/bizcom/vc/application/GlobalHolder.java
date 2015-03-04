@@ -33,9 +33,9 @@ import com.bizcom.vo.User;
 import com.bizcom.vo.UserDeviceConfig;
 import com.v2tech.R;
 
-public class GlobalHolder {
+public enum GlobalHolder {
 
-	private static GlobalHolder holder;
+	INSTANCE;
 
 	private User mCurrentUser;
 
@@ -71,11 +71,8 @@ public class GlobalHolder {
 
 	private volatile boolean p2pAVNeedStickyBraodcast = false;
 
-	public static synchronized GlobalHolder getInstance() {
-		if (holder == null) {
-			holder = new GlobalHolder();
-		}
-		return holder;
+	public static GlobalHolder getInstance() {
+		return INSTANCE;
 	}
 
 	private GlobalHolder() {
@@ -430,8 +427,9 @@ public class GlobalHolder {
 		if (g != null) {
 			g.removeUserFromGroup(uid);
 		} else {
-			V2Log.e("GlobalHolder removeGroupUser", " Remove user failed ! get group is null "
-					+ " group id is : " + gid + " user id is : " + uid);
+			V2Log.e("GlobalHolder removeGroupUser",
+					" Remove user failed ! get group is null "
+							+ " group id is : " + gid + " user id is : " + uid);
 		}
 	}
 

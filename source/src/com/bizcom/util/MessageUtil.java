@@ -322,7 +322,7 @@ public class MessageUtil {
 								strTextContent.length());
 						VMessageTextItem vti = new VMessageTextItem(vm,
 								lastText);
-						// vti.setNewLine(true);
+						 vti.setNewLine(true);
 					}
 					strStart = index;
 				}

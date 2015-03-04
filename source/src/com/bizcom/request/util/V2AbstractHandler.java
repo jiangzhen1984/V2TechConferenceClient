@@ -112,13 +112,6 @@ public abstract class V2AbstractHandler extends Handler {
 			// Handle normal message
 			HandlerWrap handlerWrap = removeTimeoutMessage(msg.what);
 			
-			
-			
-			
-			
-			
-			
-			
 			if (handlerWrap == null) {
 				V2Log.w(this.getClass().getName()
 						+ " Igore message client don't expect callback :"

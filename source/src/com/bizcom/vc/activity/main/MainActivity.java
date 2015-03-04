@@ -510,7 +510,6 @@ public class MainActivity extends FragmentActivity implements
 		if (imm != null && v != null) {
 			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		}
-		SearchContentProvider.closedDataBase();
 		v.clearFocus();
 		return super.dispatchTouchEvent(ev);
 	}

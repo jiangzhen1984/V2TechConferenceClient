@@ -86,7 +86,7 @@
                 <LinearLayout
                     android:id="@+id/message_body_file_item_progress_state"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:background="@drawable/message_file_progress"
                     android:orientation="horizontal" />
             </LinearLayout>

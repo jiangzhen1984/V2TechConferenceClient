@@ -61,7 +61,6 @@ import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.activity.message.VoiceMessageActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
-import com.bizcom.vc.application.MainApplication;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.listener.CommonCallBack;
@@ -290,7 +289,6 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 
 			intentFilter
 					.addAction(ConversationP2PAVActivity.P2P_BROADCAST_MEDIA_UPDATE);
-			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_NEW_MESSAGE);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_CONTACTS_AUTHENTICATION);
@@ -627,7 +625,6 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 				if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD) {
 					voiceLayout.update(null, startDate, true);
 					voiceMessageItem.setReadFlag(Conversation.READ_FLAG_UNREAD);
-					sendVoiceNotify();
 				} else {
 					if (hasUnreadVoice == true) {
 						voiceLayout.update(null, startDate, true);
@@ -1447,12 +1444,6 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 			return;
 		}
 
-		if (!((MainApplication) mContext.getApplicationContext())
-				.isRunningBackgound()) {
-			sendVoiceNotify();
-			return;
-		}
-
 		String content;
 		if (vm.getAudioItems().size() > 0) {
 			content = mContext.getResources().getString(
@@ -1505,7 +1496,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 		resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		if (vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER) {
 			Notificator.updateSystemNotification(mContext, vm.getFromUser()
-					.getName(), content, 1, resultIntent,
+					.getName(), content, 0, resultIntent,
 					PublicIntent.MESSAGE_NOTIFICATION_ID);
 		} else {
 			Group group = GlobalHolder.getInstance().getGroupById(
@@ -1519,7 +1510,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 				return;
 			}
 			Notificator.updateSystemNotification(mContext, group.getName(),
-					content, 1, resultIntent,
+					content, 0, resultIntent,
 					PublicIntent.MESSAGE_NOTIFICATION_ID);
 		}
 	}
@@ -1533,12 +1524,6 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 			VerificationMessageType type) {
 
 		if (checkSendingState()) {
-			return;
-		}
-
-		if (!((MainApplication) mContext.getApplicationContext())
-				.isRunningBackgound()) {
-			sendVoiceNotify();
 			return;
 		}
 
@@ -1705,10 +1690,6 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 		if (GlobalHolder.getInstance().isInMeeting()
 				|| GlobalHolder.getInstance().isInAudioCall()
 				|| GlobalHolder.getInstance().isInVideoCall()) {
-			if (((MainApplication) mContext.getApplicationContext())
-					.isRunningBackgound()) {
-				sendVoiceNotify();
-			}
 			return true;
 		}
 		return false;
@@ -2071,6 +2052,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 			super.onReceive(context, intent);
 			String action = intent.getAction();
 			if (action.equals(JNIService.JNI_BROADCAST_NEW_MESSAGE)) {
+				sendVoiceNotify();
 				MessageObject msgObj = intent.getParcelableExtra("msgObj");
 				Message.obtain(mHandler, NEW_MESSAGE_UPDATE, msgObj)
 						.sendToTarget();
@@ -2114,6 +2096,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 				V2Log.d(TAG,
 						"having new crowd verification message coming ... update..");
 				updateCrowdVerificationConversation();
+				sendVoiceNotify();
 				updateVerificationStateBar(verificationMessageItemData
 						.getMsg().toString(),
 						VerificationMessageType.CROWD_TYPE);
@@ -2322,7 +2305,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 							+ " --> VideoBean is NULL ... update failed!!");
 					return;
 				}
-
+				sendVoiceNotify();
 				updateVoiceSpecificItemState(false, newestMediaMessage);
 				updateUnreadConversation(voiceItem);
 				mItemList.remove(voiceItem);

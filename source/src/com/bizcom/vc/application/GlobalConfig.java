@@ -12,6 +12,7 @@ import android.content.Context;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 
 import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.v2tech.R;
