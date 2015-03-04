@@ -25,7 +25,7 @@ import com.bizcom.request.jni.RequestChatServiceResponse;
 import com.bizcom.request.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.bizcom.request.util.DeviceRequest;
 import com.bizcom.request.util.FileOperationEnum;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.application.V2GlobalEnum;
@@ -41,28 +41,28 @@ import com.bizcom.vo.VMessageImageItem;
  * </ul>
  * <p>
  * <li>
- * Send message {@link #sendVMessage(VMessage, MessageListener)}</li>
+ * Send message {@link #sendVMessage(VMessage, HandlerWrap)}</li>
  * <li>
  * Invite User video or audio call
- * {@link #inviteUserChat(UserChattingObject, MessageListener)}</li>
+ * {@link #inviteUserChat(UserChattingObject, HandlerWrap)}</li>
  * <li>
  * Accept video or audio call
- * {@link #acceptChatting(UserChattingObject, MessageListener)}</li>
+ * {@link #acceptChatting(UserChattingObject, HandlerWrap)}</li>
  * 
  * <li>
  * decline video or audio call
- * {@link #refuseChatting(UserChattingObject, MessageListener)}</li>
+ * {@link #refuseChatting(UserChattingObject, HandlerWrap)}</li>
  * 
  * <li>
  * mute microphone when in conversation
- * {@link #muteChatting(UserChattingObject, MessageListener)}</li>
+ * {@link #muteChatting(UserChattingObject, HandlerWrap)}</li>
  * <li>
  * Operation file when transport file<br>
  * Notice: this operation doesn't contain send re-send operation. Send file use
- * {@link #sendVMessage(VMessage, MessageListener)}<br>
+ * {@link #sendVMessage(VMessage, HandlerWrap)}<br>
  * But when send file in progress, resume or cancel or suspend use this
  * function.
- * {@link #updateFileOperation(VMessageFileItem, FileOperationEnum, MessageListener)}
+ * {@link #updateFileOperation(VMessageFileItem, FileOperationEnum, HandlerWrap)}
  * <br>
  * </li>
  * 
@@ -81,7 +81,7 @@ public class V2ChatRequest extends DeviceRequest {
 
 	private FileRequestCB fileCallback;
 
-	private MessageListener mCaller;
+	private HandlerWrap mCaller;
 
 	private Handler thread;
 
@@ -199,7 +199,7 @@ public class V2ChatRequest extends DeviceRequest {
 	 * @param msg
 	 * @param caller
 	 */
-	public void sendVMessage(final VMessage msg, final MessageListener caller) {
+	public void sendVMessage(final VMessage msg, final HandlerWrap caller) {
 		if (msg == null) {
 			V2Log.e(TAG,
 					"Send Message fail ! Because VMessage Object is null ! please check!");
@@ -268,13 +268,13 @@ public class V2ChatRequest extends DeviceRequest {
 		});
 	}
 
-	public void sendFileMessage(VMessage vm, MessageListener caller) {
+	public void sendFileMessage(VMessage vm, HandlerWrap caller) {
 		List<VMessageFileItem> items = vm.getFileItems();
 		if (items == null || items.size() <= 0) {
 			if (caller != null) {
 				JNIResponse resp = new RequestChatServiceResponse(
 						RequestChatServiceResponse.Result.INCORRECT_PAR);
-				sendResult(caller, resp);
+				callerSendMessage(caller, resp);
 			} else {
 				V2Log.e(TAG, "Incorrect parameters");
 			}
@@ -309,11 +309,11 @@ public class V2ChatRequest extends DeviceRequest {
 	 * @see FileOperationEnum
 	 */
 	public void updateFileOperation(VMessageFileItem vfi,
-			FileOperationEnum opt, MessageListener caller) {
+			FileOperationEnum opt, HandlerWrap caller) {
 		if (vfi == null || (opt == null)) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 			return;
 		}
 
@@ -351,7 +351,7 @@ public class V2ChatRequest extends DeviceRequest {
 
 		JNIResponse resp = new RequestChatServiceResponse(
 				RequestChatServiceResponse.Result.SUCCESS);
-		sendResult(caller, resp);
+		callerSendMessage(caller, resp);
 
 	}
 
@@ -361,7 +361,7 @@ public class V2ChatRequest extends DeviceRequest {
 	 * @param ud
 	 * @param caller
 	 */
-	public void inviteUserChat(UserChattingObject ud, MessageListener caller) {
+	public void inviteUserChat(UserChattingObject ud, HandlerWrap caller) {
 		JNIResponse resp = null;
 		// if (mCaller != null) {
 		// V2Log.e(" audio call is on going");
@@ -375,7 +375,7 @@ public class V2ChatRequest extends DeviceRequest {
 		}
 
 		if (resp != null) {
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 			return;
 		}
 
@@ -408,11 +408,11 @@ public class V2ChatRequest extends DeviceRequest {
 	 * @param ud
 	 * @param caller
 	 */
-	public void closeChat(UserChattingObject ud, MessageListener caller) {
+	public void closeChat(UserChattingObject ud, HandlerWrap caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 			return;
 		}
 
@@ -448,7 +448,7 @@ public class V2ChatRequest extends DeviceRequest {
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.SUCCESS);
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 		}
 
 		this.mCaller = null;
@@ -460,11 +460,11 @@ public class V2ChatRequest extends DeviceRequest {
 	 * @param ud
 	 * @param caller
 	 */
-	public void acceptChatting(UserChattingObject ud, MessageListener caller) {
+	public void acceptChatting(UserChattingObject ud, HandlerWrap caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 			return;
 		}
 
@@ -478,7 +478,7 @@ public class V2ChatRequest extends DeviceRequest {
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.SUCCESS);
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 		}
 	}
 
@@ -488,11 +488,11 @@ public class V2ChatRequest extends DeviceRequest {
 	 * @param ud
 	 * @param caller
 	 */
-	public void refuseChatting(UserChattingObject ud, MessageListener caller) {
+	public void refuseChatting(UserChattingObject ud, HandlerWrap caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 			return;
 		}
 
@@ -506,7 +506,7 @@ public class V2ChatRequest extends DeviceRequest {
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.SUCCESS);
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 		}
 	}
 
@@ -516,11 +516,11 @@ public class V2ChatRequest extends DeviceRequest {
 	 * @param ud
 	 * @param caller
 	 */
-	public void muteChatting(UserChattingObject ud, MessageListener caller) {
+	public void muteChatting(UserChattingObject ud, HandlerWrap caller) {
 		if (ud == null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 			return;
 		}
 		AudioRequest.getInstance().MuteMic(ud.getGroupdId(),
@@ -529,7 +529,7 @@ public class V2ChatRequest extends DeviceRequest {
 		if (caller != null) {
 			JNIResponse resp = new RequestChatServiceResponse(
 					RequestChatServiceResponse.Result.SUCCESS);
-			sendResult(caller, resp);
+			callerSendMessage(caller, resp);
 		}
 
 	}
@@ -565,7 +565,7 @@ public class V2ChatRequest extends DeviceRequest {
 				Log.i("temptag20141030 1",
 						"VideoRequestCallbackImpl 1 ind.getDeviceId()"
 								+ ind.getDeviceId());
-				sendResult(mCaller, resp);
+				callerSendMessage(mCaller, resp);
 				mCaller = null;
 			} else {
 				Log.i("temptag20141030 1",
@@ -581,7 +581,7 @@ public class V2ChatRequest extends DeviceRequest {
 					RequestChatServiceResponse.REJCTED,
 					RequestChatServiceResponse.Result.SUCCESS);
 			if (mCaller != null) {
-				sendResult(mCaller, resp);
+				callerSendMessage(mCaller, resp);
 				mCaller = null;
 			} else {
 				Log.i("temptag20141030 1", "OnVideoChatRefused()");
@@ -613,7 +613,7 @@ public class V2ChatRequest extends DeviceRequest {
 					RequestChatServiceResponse.Result.SUCCESS);
 			resp.setUuid(ind.getSzSessionID());
 			if (mCaller != null) {
-				sendResult(mCaller, resp);
+				callerSendMessage(mCaller, resp);
 				mCaller = null;
 			} else {
 				Log.i("temptag20141030 1", "OnAudioChatAccepted");
@@ -628,7 +628,7 @@ public class V2ChatRequest extends DeviceRequest {
 					RequestChatServiceResponse.Result.SUCCESS,
 					ind.getFromUserId());
 			if (mCaller != null) {
-				sendResult(mCaller, resp);
+				callerSendMessage(mCaller, resp);
 				mCaller = null;
 				// Else means remote side is out and then cancel calling
 			} else

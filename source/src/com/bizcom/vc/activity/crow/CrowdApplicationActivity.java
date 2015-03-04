@@ -22,7 +22,7 @@ import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.JNIResponse.Result;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -277,13 +277,13 @@ public class CrowdApplicationActivity extends Activity {
 
 				if (disableAuth) {
 					mState = State.APPLYING;
-					service.applyCrowd(crowd, "", new MessageListener(
+					service.applyCrowd(crowd, "", new HandlerWrap(
 							mLocalHandler, APPLY_DONE, null));
 				} else {
 					if (crowd.getAuth() == CrowdGroup.AuthType.ALLOW_ALL
 							.intValue()) {
 						mState = State.APPLYING;
-						service.applyCrowd(crowd, "", new MessageListener(
+						service.applyCrowd(crowd, "", new HandlerWrap(
 								mLocalHandler, APPLY_DONE, null));
 					} else if (crowd.getAuth() == CrowdGroup.AuthType.QULIFICATION
 							.intValue()) {
@@ -310,7 +310,7 @@ public class CrowdApplicationActivity extends Activity {
 				}
 				mState = State.APPLYING;
 				service.applyCrowd(crowd, mApplicationMessage.getText()
-						.toString(), new MessageListener(mLocalHandler,
+						.toString(), new HandlerWrap(mLocalHandler,
 						APPLY_DONE, null));
 				isInApplicationMode = false;
 				updateView();

@@ -43,7 +43,7 @@ import com.bizcom.db.V2TechDBHelper;
 import com.bizcom.request.V2ImRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestLogInResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.util.V2Toast;
@@ -293,7 +293,7 @@ public class LoginActivity extends Activity {
 				mTvLoginStatus.setText(R.string.login_progress_signing_in);
 				WaitDialogBuilder.showNormalProgress(mContext, true);
 				mUserService.login(mEtUserName.getText().toString(), mEtPassword
-						.getText().toString(), new MessageListener(mHandler,
+						.getText().toString(), new HandlerWrap(mHandler,
 						LOG_IN_CALL_BACK, null));
 			}
 		}
@@ -329,40 +329,6 @@ public class LoginActivity extends Activity {
 					+ res);
 		}
 
-	}
-	
-	/**
-	 * 初始化获取数据库中所有表
-	 */
-	private void initDataBaseTableCacheNames() {
-		DataBaseContext mContext = new DataBaseContext(getApplicationContext());
-		V2TechDBHelper mOpenHelper = V2TechDBHelper.getInstance(mContext);
-		SQLiteDatabase dataBase = mOpenHelper.getReadableDatabase();
-		Cursor cursor = null;
-		try {
-			cursor = dataBase.rawQuery(
-					"select name as c from sqlite_master where type ='table'",
-					null);
-			if (cursor != null) {
-				List<String> dataBaseTableCacheName = GlobalHolder
-						.getInstance().getDataBaseTableCacheName();
-				while (cursor.moveToNext()) {
-					// 遍历出表名
-					String name = cursor.getString(0);
-					V2Log.d("iteration DataBase table name : " + name);
-					dataBaseTableCacheName.add(name);
-				}
-			} else
-				throw new RuntimeException(
-						"init DataBase table names failed.. get null , please check");
-		} catch (Exception e) {
-			throw new RuntimeException(
-					"init DataBase table names failed.. get null , please check"
-							+ e.getStackTrace());
-		} finally {
-			if (cursor != null)
-				cursor.close();
-		}
 	}
 
 	private class EtUserNameOnFocusChangeListener implements
@@ -668,5 +634,40 @@ public class LoginActivity extends Activity {
 			}
 		}
 	}
+	
+	/**
+	 * 初始化获取数据库中所有表
+	 */
+	private void initDataBaseTableCacheNames() {
+		DataBaseContext mContext = new DataBaseContext(getApplicationContext());
+		V2TechDBHelper mOpenHelper = V2TechDBHelper.getInstance(mContext);
+		SQLiteDatabase dataBase = mOpenHelper.getReadableDatabase();
+		Cursor cursor = null;
+		try {
+			cursor = dataBase.rawQuery(
+					"select name as c from sqlite_master where type ='table'",
+					null);
+			if (cursor != null) {
+				List<String> dataBaseTableCacheName = GlobalHolder
+						.getInstance().getDataBaseTableCacheName();
+				while (cursor.moveToNext()) {
+					// 遍历出表名
+					String name = cursor.getString(0);
+					V2Log.d("iteration DataBase table name : " + name);
+					dataBaseTableCacheName.add(name);
+				}
+			} else
+				throw new RuntimeException(
+						"init DataBase table names failed.. get null , please check");
+		} catch (Exception e) {
+			throw new RuntimeException(
+					"init DataBase table names failed.. get null , please check"
+							+ e.getStackTrace());
+		} finally {
+			if (cursor != null)
+				cursor.close();
+		}
+	}
+
 
 }

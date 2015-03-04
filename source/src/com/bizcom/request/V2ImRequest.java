@@ -3,15 +3,15 @@ package com.bizcom.request;
 import android.os.Message;
 
 import com.V2.jni.ImRequest;
-import com.V2.jni.V2ClientType;
 import com.V2.jni.callbacAdapter.ImRequestCallbackAdapter;
+import com.V2.jni.ind.V2ClientType;
 import com.V2.jni.ind.V2User;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestLogInResponse;
 import com.bizcom.request.jni.RequestUserUpdateResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.request.util.V2AbstractHandler;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
@@ -36,16 +36,16 @@ public class V2ImRequest extends V2AbstractHandler {
 		ImRequest.getInstance().addCallback(imCB);
 	}
 
-	public void login(String mail, String passwd, MessageListener caller) {
+	public void login(String mail, String passwd, HandlerWrap caller) {
 		initTimeoutMessage(JNI_REQUEST_LOG_IN, DEFAULT_TIME_OUT_SECS, caller);
-		ImRequest.getInstance().login(mail, passwd,
+		ImRequest.getInstance().proxy.login(mail, passwd,
 				V2GlobalEnum.USER_STATUS_ONLINE, V2ClientType.ANDROID, false);
 	}
 
-	public void updateUserInfo(User user, MessageListener caller) {
+	public void updateUserInfo(User user, HandlerWrap caller) {
 		if (user == null) {
 			if (caller != null && caller.getHandler() != null) {
-				sendResult(caller,
+				callerSendMessage(caller,
 						new RequestLogInResponse(null,
 								RequestLogInResponse.Result.INCORRECT_PAR,
 								caller.getObject()));
@@ -116,8 +116,9 @@ public class V2ImRequest extends V2AbstractHandler {
 
 		@Override
 		public void OnUpdateBaseInfoCallback(V2User user) {
-			if (user.uid != GlobalHolder.getInstance().getCurrentUserId())
+			if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
 				return;
+			}
 			Message m = Message.obtain(V2ImRequest.this,
 					JNI_REQUEST_UPDAE_USER, new JNIResponse(
 							JNIResponse.Result.SUCCESS));

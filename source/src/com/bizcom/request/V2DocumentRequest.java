@@ -9,7 +9,7 @@ import com.V2.jni.callbackInterface.WBRequestCallback;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.util.V2Log;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.request.util.V2AbstractHandler;
 import com.bizcom.util.XmlParser;
 import com.bizcom.vc.application.GlobalHolder;
@@ -193,10 +193,10 @@ public class V2DocumentRequest extends V2AbstractHandler {
 	}
 
 	public void switchDoc(long currentUserId, V2Doc doc, boolean isNotify,
-			MessageListener listener) {
+			HandlerWrap listener) {
 		if (doc == null || (doc != null && doc.getActivatePage() == null)) {
 			if (listener != null) {
-				super.sendResult(listener, new JNIResponse(
+				super.callerSendMessage(listener, new JNIResponse(
 						JNIResponse.Result.INCORRECT_PAR));
 			}
 			return;

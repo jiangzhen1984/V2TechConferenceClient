@@ -48,7 +48,7 @@ import com.bizcom.db.vo.FriendMAData;
 import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.util.BitmapManager;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.request.util.BitmapManager.BitmapChangedListener;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
@@ -1375,7 +1375,7 @@ public class MessageAuthenticationActivity extends Activity {
 						Crowd crowd = new Crowd(cg.getmGId(),
 								cg.getOwnerUser(), cg.getName(), cg.getBrief());
 						crowdService.acceptInvitation(crowd,
-								new MessageListener(mLocalHandler,
+								new HandlerWrap(mLocalHandler,
 										ACCEPT_INVITATION_DONE, cg));
 						WaitDialogBuilder
 								.showNormalWithHintProgress(mContext, true);
@@ -1396,7 +1396,7 @@ public class MessageAuthenticationActivity extends Activity {
 						} else {
 							crowdService.acceptApplication(
 									vqac.getCrowdGroup(), vqac.getApplicant(),
-									new MessageListener(mLocalHandler,
+									new HandlerWrap(mLocalHandler,
 											ACCEPT_APPLY_DONE, group));
 							WaitDialogBuilder.showNormalWithHintProgress(mContext,
 									true);

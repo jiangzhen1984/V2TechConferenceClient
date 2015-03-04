@@ -24,7 +24,7 @@ import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.CreateDiscussionBoardResponse;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.activity.BaseCreateActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -144,7 +144,7 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 				}
 
 				List<User> newMembers = new ArrayList<User>(mAttendeeList);
-				cg.inviteMember(discussion, newMembers, new MessageListener(
+				cg.inviteMember(discussion, newMembers, new HandlerWrap(
 						mLocalHandler, UPDATE_CROWD_RESPONSE, discussion));
 
 				mCreateWaitingDialog = ProgressDialog.show(
@@ -379,10 +379,10 @@ public class DiscussionBoardCreateActivity extends BaseCreateActivity {
 					// Do not add userList to crowd, because this just
 					// invitation.
 					cg.createDiscussionBoard(discussion, userList,
-							new MessageListener(mLocalHandler,
+							new HandlerWrap(mLocalHandler,
 									CREATE_GROUP_MESSAGE, discussion));
 				} else {
-					cg.inviteMember(discussion, userList, new MessageListener(
+					cg.inviteMember(discussion, userList, new HandlerWrap(
 							mLocalHandler, UPDATE_CROWD_RESPONSE, discussion));
 				}
 				break;

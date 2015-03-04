@@ -1,4 +1,4 @@
-package com.V2.jni;
+package com.V2.jni.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +22,7 @@ public class DataStoreUtils {
 			Runtime.getRuntime().exec(cmd);
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.out.println("¸ü¸ÄÈ¨ÏÞÊ§°Ü!");
+			System.out.println("ï¿½ï¿½ï¿½È¨ï¿½ï¿½Ê§ï¿½ï¿½!");
 		}
 		
 	}

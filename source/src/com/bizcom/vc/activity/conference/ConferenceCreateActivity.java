@@ -35,7 +35,7 @@ import com.bizcom.bo.UserStatusObject;
 import com.bizcom.request.V2ConferenceRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestConfCreateResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.DateUtil;
 import com.bizcom.vc.activity.BaseCreateActivity;
 import com.bizcom.vc.application.GlobalConfig;
@@ -155,7 +155,7 @@ public class ConferenceCreateActivity extends BaseCreateActivity {
 			public void run() {
 				List<User> userList = new ArrayList<User>(mAttendeeList);
 				conf = new Conference(title, startTimeStr, null, userList);
-				cs.createConference(conf, new MessageListener(mLocalHandler,
+				cs.createConference(conf, new HandlerWrap(mLocalHandler,
 						CREATE_CONFERENC_RESP, conf));
 			}
 		}).start();

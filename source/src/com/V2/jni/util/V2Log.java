@@ -13,6 +13,7 @@ public class V2Log {
 	public static final String TAG = "V2TECH";
 	// callback log tag
 	public static final String JNI_CALLBACK = "JNI_CALLBACK";
+	public static final String JNI_REQUEST = "JNI_REQUEST";
 	public static final String JNISERVICE_CALLBACK = "JNISERVICE_CALLBACK";
 	public static final String SERVICE_CALLBACK = "SERVICE_CALLBACK";
 	public static final String UI_MESSAGE = "UI_MESSAGE";

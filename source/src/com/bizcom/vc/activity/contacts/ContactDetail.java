@@ -43,7 +43,7 @@ import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.request.V2ImRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.util.BitmapManager;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.vc.activity.conversation.ConversationSelectFileEntry;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
@@ -1062,7 +1062,7 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUserInfo(u, new MessageListener(this,
+				us.updateUserInfo(u, new HandlerWrap(this,
 						UPDATE_USER_INFO_DONE, null));
 				isUpdating = false;
 				break;

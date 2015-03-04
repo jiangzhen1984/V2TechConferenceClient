@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.service.JNIService;
@@ -122,7 +122,7 @@ public class DiscussionBoardDetailActivity extends Activity {
 								Toast.LENGTH_SHORT).show();
 						return;
 					}
-					service.quitDiscussionBoard(crowd, new MessageListener(
+					service.quitDiscussionBoard(crowd, new HandlerWrap(
 							mLocalHandler, REQUEST_QUIT_CROWD_DONE, null));
 					Intent kick = new Intent();
 					kick.setAction(JNIService.JNI_BROADCAST_KICED_CROWD);

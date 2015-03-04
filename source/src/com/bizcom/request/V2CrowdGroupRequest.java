@@ -25,7 +25,7 @@ import com.bizcom.request.jni.RequestFetchGroupFilesResponse;
 import com.bizcom.request.jni.FileTransStatusIndication.FileTransErrorIndication;
 import com.bizcom.request.jni.FileTransStatusIndication.FileTransProgressStatusIndication;
 import com.bizcom.request.util.FileOperationEnum;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.request.util.V2AbstractHandler;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
@@ -98,7 +98,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 *            object is {@link com.bizcom.request.jni.CreateCrowdResponse}
 	 */
 	public void createCrowdGroup(CrowdGroup crowd, List<User> invationUserList,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		String sXml = XmlAttributeExtractor.buildAttendeeUsersXml(invationUserList);
 
 		this.initTimeoutMessage(CREATE_DISCUSSION_BOARD, DEFAULT_TIME_OUT_SECS,
@@ -117,7 +117,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param caller
 	 */
 	public void createDiscussionBoard(DiscussionGroup discussion, List<User> invationUserList,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		String sXml = XmlAttributeExtractor.buildAttendeeUsersXml(invationUserList);
 
 		this.initTimeoutMessage(CREATE_DISCUSSION_BOARD, DEFAULT_TIME_OUT_SECS,
@@ -139,7 +139,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 *            object is {@link com.bizcom.request.jni.JNIResponse}
 	 */
 	public void acceptApplication(CrowdGroup crowd, User applicant,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, applicant })) {
 			return;
 		}
@@ -164,7 +164,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param caller
 	 */
 	public void refuseApplication(CrowdGroup crowd, User applicant,
-			String reason, MessageListener caller) {
+			String reason, HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, applicant })) {
 			return;
 		}
@@ -188,7 +188,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 *            if input is null, ignore response Message. Response Message
 	 *            object is {@link com.bizcom.request.jni.JNIResponse}
 	 */
-	public void acceptInvitation(Crowd crowd, MessageListener caller) {
+	public void acceptInvitation(Crowd crowd, HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
@@ -216,13 +216,13 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param caller
 	 */
 	public void refuseInvitation(Crowd crowd, String reason,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
 
 		if (mPendingCrowdId > 0) {
-			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			super.callerSendMessage(caller, new JNIResponse(JNIResponse.Result.FAILED));
 			return;
 		}
 		mPendingCrowdId = crowd.getId();
@@ -236,7 +236,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 				crowd.getCreator().getmUserId(), reason == null ? "" : reason);
 
 		mPendingCrowdId = 0;
-		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
+		callerSendMessage(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
 	}
 
 	/**
@@ -247,7 +247,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param caller
 	 */
 	public void applyCrowd(Crowd crowd, String additional,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, additional })) {
 			return;
 		}
@@ -256,7 +256,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 		GroupRequest.getInstance().applyJoinGroup(
 				Group.GroupType.CHATING.intValue(), crowd.getId(),
 				additional == null ? "" : additional);
-		sendResult(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
+		callerSendMessage(caller, new JNIResponse(JNIResponse.Result.SUCCESS));
 	}
 
 	/**
@@ -265,12 +265,12 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param crowd
 	 * @param caller
 	 */
-	public void updateCrowd(CrowdGroup crowd, MessageListener caller) {
+	public void updateCrowd(CrowdGroup crowd, HandlerWrap caller) {
 		if (!checkParamNull(caller, crowd)) {
 			return;
 		}
 		if (mPendingCrowdId > 0) {
-			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			super.callerSendMessage(caller, new JNIResponse(JNIResponse.Result.FAILED));
 			return;
 		}
 		mPendingCrowdId = crowd.getmGId();
@@ -287,12 +287,12 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param crowd
 	 * @param caller
 	 */
-	public void updateDiscussion(DiscussionGroup discussion, MessageListener caller) {
+	public void updateDiscussion(DiscussionGroup discussion, HandlerWrap caller) {
 		if (!checkParamNull(caller, discussion)) {
 			return;
 		}
 		if (mPendingCrowdId > 0) {
-			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			super.callerSendMessage(caller, new JNIResponse(JNIResponse.Result.FAILED));
 			return;
 		}
 		mPendingCrowdId = discussion.getmGId();
@@ -310,13 +310,13 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param crowd
 	 * @param caller
 	 */
-	public void quitCrowd(CrowdGroup crowd, MessageListener caller) {
+	public void quitCrowd(CrowdGroup crowd, HandlerWrap caller) {
 		if (!checkParamNull(caller, crowd)) {
 			return;
 		}
 
 		if (mPendingCrowdId > 0) {
-			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			super.callerSendMessage(caller, new JNIResponse(JNIResponse.Result.FAILED));
 			return;
 		}
 		mPendingCrowdId = crowd.getmGId();
@@ -339,13 +339,13 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param crowd
 	 * @param caller
 	 */
-	public void quitDiscussionBoard(DiscussionGroup discussion, MessageListener caller) {
+	public void quitDiscussionBoard(DiscussionGroup discussion, HandlerWrap caller) {
 		if (!checkParamNull(caller, discussion)) {
 			return;
 		}
 
 		if (mPendingCrowdId > 0) {
-			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			super.callerSendMessage(caller, new JNIResponse(JNIResponse.Result.FAILED));
 			return;
 		}
 		mPendingCrowdId = discussion.getmGId();
@@ -365,14 +365,14 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param caller
 	 */
 	public void inviteMember(Group crowd, List<User> newMembers,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, newMembers })) {
 			return;
 		}
 		if (newMembers.size() <= 0) {
 			if (caller != null) {
 				JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
-				sendResult(caller, jniRes);
+				callerSendMessage(caller, jniRes);
 			}
 			return;
 		}
@@ -388,7 +388,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 				sXml , "");
 		if (caller != null) {
 			JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
-			sendResult(caller, jniRes);
+			callerSendMessage(caller, jniRes);
 		}
 	}
 
@@ -400,7 +400,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param caller
 	 */
 	public void removeMember(Group crowd, User member,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, member })) {
 			return;
 		}
@@ -422,13 +422,13 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param caller
 	 *            return List<VFile>
 	 */
-	public void fetchGroupFiles(CrowdGroup crowd, MessageListener caller) {
+	public void fetchGroupFiles(CrowdGroup crowd, HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { crowd })) {
 			return;
 		}
 
 		if (mPendingCrowdId > 0) {
-			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			super.callerSendMessage(caller, new JNIResponse(JNIResponse.Result.FAILED));
 			return;
 		}
 		mPendingCrowdId = crowd.getmGId();
@@ -448,18 +448,18 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param caller
 	 */
 	public void removeGroupFiles(CrowdGroup crowd, List<VCrowdFile> files,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { crowd, files })) {
 			return;
 		}
 		if (files.size() <= 0) {
 			JNIResponse jniRes = new JNIResponse(JNIResponse.Result.SUCCESS);
-			super.sendResult(caller, jniRes);
+			super.callerSendMessage(caller, jniRes);
 			return;
 		}
 
 		if (mPendingCrowdId > 0) {
-			super.sendResult(caller, new JNIResponse(JNIResponse.Result.FAILED));
+			super.callerSendMessage(caller, new JNIResponse(JNIResponse.Result.FAILED));
 			return;
 		}
 		mPendingCrowdId = crowd.getmGId();
@@ -482,7 +482,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	 * @param caller
 	 */
 	public void handleCrowdFile(VCrowdFile vf, FileOperationEnum opt,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { vf })) {
 			return;
 		}
@@ -542,7 +542,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 	/**
 	 * Register listener for group file is removed.<br>
 	 * Notice: If current user send remove file command by
-	 * {@link #removeGroupFiles(CrowdGroup, List, MessageListener)}, will not
+	 * {@link #removeGroupFiles(CrowdGroup, List, HandlerWrap)}, will not
 	 * notification
 	 * 
 	 * @param h

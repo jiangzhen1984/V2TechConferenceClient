@@ -69,6 +69,7 @@ public class TabFragmentContacts extends Fragment implements TextWatcher {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.i("20150303 1","TabFragmentContacts onCreate()");
 		super.onCreate(savedInstanceState);
 		mGroupList = new ArrayList<Group>();
 
@@ -82,7 +83,7 @@ public class TabFragmentContacts extends Fragment implements TextWatcher {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		Log.i("wzl", "ContactsTabFragment onCreateView");
+		Log.i("20150303 1","TabFragmentContacts onCreateView()");
 		if (rootView != null) {
 			return rootView;
 		}
@@ -98,12 +99,14 @@ public class TabFragmentContacts extends Fragment implements TextWatcher {
 
 	@Override
 	public void onDestroyView() {
+		Log.i("20150303 1","TabFragmentContacts onDestroyView()");
 		super.onDestroyView();
 		((ViewGroup) rootView.getParent()).removeView(rootView);
 	}
 
 	@Override
 	public void onDestroy() {
+		Log.i("20150303 1","TabFragmentContacts onDestroy()");
 		super.onDestroy();
 		mLoaded = false;
 		getActivity().unregisterReceiver(receiver);
@@ -113,6 +116,7 @@ public class TabFragmentContacts extends Fragment implements TextWatcher {
 
 	@Override
 	public void onStart() {
+		Log.i("20150303 1","TabFragmentContacts onStart()");
 		super.onStart();
 		if (!mLoaded) {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
@@ -121,6 +125,7 @@ public class TabFragmentContacts extends Fragment implements TextWatcher {
 
 	@Override
 	public void onStop() {
+		Log.i("20150303 1","TabFragmentContacts onStop()");
 		super.onStop();
 	}
 

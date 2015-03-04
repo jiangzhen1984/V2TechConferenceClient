@@ -16,6 +16,7 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,7 +36,7 @@ import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
-public class TabFragmentOrganization extends Fragment implements TextWatcher{
+public class TabFragmentOrganization extends Fragment implements TextWatcher {
 
 	private static final int FILL_CONTACTS_GROUP = 2;
 	private static final int UPDATE_GROUP_STATUS = 4;
@@ -57,8 +58,8 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher{
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Log.i("20150303 1", "TabFragmentOrganization onCreate()");
 		super.onCreate(savedInstanceState);
-
 		mGroupList = new ArrayList<Group>();
 		getActivity().registerReceiver(receiver, getIntentFilter());
 		BitmapManager.getInstance().registerBitmapChangedListener(
@@ -68,6 +69,7 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher{
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		Log.i("20150303 1", "TabFragmentOrganization onCreateView()");
 		if (rootView != null) {
 			return rootView;
 		}
@@ -85,12 +87,14 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher{
 
 	@Override
 	public void onDestroyView() {
+		Log.i("20150303 1", "TabFragmentOrganization onDestroyView()");
 		super.onDestroyView();
 		((ViewGroup) rootView.getParent()).removeView(rootView);
 	}
 
 	@Override
 	public void onDestroy() {
+		Log.i("20150303 1", "TabFragmentOrganization onDestroy()");
 		super.onDestroy();
 		mLoaded = false;
 		getActivity().unregisterReceiver(receiver);
@@ -100,20 +104,16 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher{
 
 	@Override
 	public void onStart() {
+		Log.i("20150303 1","TabFragmentOrganization onStart()");
 		super.onStart();
 		if (!mLoaded) {
 			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
 		}
-		//
-		// if (mContactsContainer != null) {
-		// mContactsContainer.updateDisplay();
-		// Log.i("20141223 1","mContactsContainer 刷新");
-		// }
-
 	}
 
 	@Override
 	public void onStop() {
+		Log.i("20150303 1","TabFragmentOrganization onStop()");
 		super.onStop();
 	}
 
@@ -131,7 +131,8 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher{
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			intentFilter.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			intentFilter.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+			intentFilter
+					.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_ADDED);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 			intentFilter
@@ -151,7 +152,7 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher{
 		}
 		new AsyncTaskLoader().execute();
 	}
-	
+
 	@Override
 	public void afterTextChanged(Editable s) {
 		if (mContactsContainer == null) {
@@ -175,7 +176,6 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher{
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 
 	}
-	
 
 	private Object mLock = new Object();
 
@@ -292,8 +292,6 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher{
 		}
 
 	}
-
-
 
 	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
 

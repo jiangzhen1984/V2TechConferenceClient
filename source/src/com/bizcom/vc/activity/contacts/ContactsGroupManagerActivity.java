@@ -30,7 +30,7 @@ import com.V2.jni.util.EscapedcharactersProcessing;
 import com.bizcom.request.V2ContactsRequest;
 import com.bizcom.request.jni.GroupServiceJNIResponse;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.adapter.CommonAdapter;
 import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterItemDateAndViewWrapper;
 import com.bizcom.vc.adapter.CommonAdapter.CommonAdapterGetViewListener;
@@ -192,13 +192,13 @@ public class ContactsGroupManagerActivity extends Activity {
 
 	private void updateGroup(ContactGroup group, OPT opt) {
 		if (opt == OPT.CREATE) {
-			contactService.createGroup(group, new MessageListener(mLocalHandler,
+			contactService.createGroup(group, new HandlerWrap(mLocalHandler,
 					CREATE_GROUP_DONE, null));
 		} else if (opt == OPT.UPDATE) {
-			contactService.updateGroup(group, new MessageListener(mLocalHandler,
+			contactService.updateGroup(group, new HandlerWrap(mLocalHandler,
 					UPDATE_GROUP_DONE, null));
 		} else {
-			contactService.removeGroup(group, new MessageListener(mLocalHandler,
+			contactService.removeGroup(group, new HandlerWrap(mLocalHandler,
 					REMOVE_GROUP_DONE, null));
 		}
 	}

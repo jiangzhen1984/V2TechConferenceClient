@@ -5,19 +5,17 @@
 
 
     <include
-        android:id="@+id/title_bar_ly"
+        android:id="@+id/head_layout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        layout="@layout/title_bar" />
-
-
+        layout="@layout/head_layout" />
 
     <TabHost
         android:id="@android:id/tabhost"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/title_bar_ly" >
+        android:layout_below="@+id/head_layout" >
 
         <LinearLayout
             android:layout_width="fill_parent"

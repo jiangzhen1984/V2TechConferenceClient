@@ -55,7 +55,6 @@ public class SplashActivity extends Activity {
 			getWindowManager().getDefaultDisplay().getMetrics(dm);
 			GlobalConfig.SCREEN_WIDTH = dm.widthPixels;
 			GlobalConfig.SCREEN_HEIGHT = dm.heightPixels;
-
 			initSearchMap();
 			forward();
 		}
@@ -103,4 +102,6 @@ public class SplashActivity extends Activity {
 
 		finish();
 	}
+
+
 }

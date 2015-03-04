@@ -63,15 +63,24 @@ public class ImRequest {
 		return mImRequest;
 	}
 
-	
-	//尽量使用代理，方便在请求前做一些通用的操作
+	// 尽量使用代理，方便在请求前做一些通用的操作
 	public class Proxy {
-		public void initialize(ImRequest request) {
-			ImRequest.this.initialize(request);
+
+		public void login(String szName, String szPassword, int status,
+				int nDeviceType, boolean isAnonymous) {
+			V2Log.d(V2Log.JNI_REQUEST, "CLASS = ImRequest METHOD = login()"
+					+ " szName = " + szName + " szPassword = " + szPassword
+					+ " status = " + status + " nDeviceType = " + nDeviceType
+					+ " isAnonymous = " + isAnonymous);
+			ImRequest.this.login(szName, szPassword, status, nDeviceType,
+					isAnonymous);
+
 		}
 
 		public void getUserBaseInfo(long nUserID) {
-			V2Log.d("JNIRequest", "getUserBaseInfo");
+			V2Log.d(V2Log.JNI_REQUEST,
+					"CLASS = ImRequest METHOD = getUserBaseInfo()"
+							+ " nUserID = " + nUserID);
 			ImRequest.this.getUserBaseInfo(nUserID);
 		}
 	}
@@ -97,8 +106,8 @@ public class ImRequest {
 	 * @param isAnonymous
 	 * 
 	 */
-	public native void login(String szName, String szPassword, int status,
-			int type, boolean isAnonymous);
+	private native void login(String szName, String szPassword, int status,
+			int nDeviceType, boolean isAnonymous);
 
 	/**
 	 * <ul>
@@ -231,24 +240,21 @@ public class ImRequest {
 	 * @see ImRequestCallback#OnUserStatusUpdatedCallback(long, int, int,
 	 *      String)
 	 */
-	private void OnUserStatusUpdated(long nUserID, int nType, int nStatus,
-			String szStatusDesc) {
-		V2Log.d("ImRequest UI", "OnUserStatusUpdated ---> nUserID: " + nUserID
-				+ " | nType: " + nType + " | nStatus: " + nStatus
-				+ " | szStatusDesc: " + szStatusDesc);
+	private void OnUserStatusUpdated(long nUserID, int nDeviceType,
+			int nStatus, String szStatusDesc) {
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnUserStatusUpdated()"
+						+ " nUserID = " + nUserID + " nDeviceType = "
+						+ nDeviceType + " nStatus = " + nStatus
+						+ " szStatusDesc = " + szStatusDesc);
 
-		if (nUserID == 113 || nUserID == 112) {
-			V2Log.d(" OnUserStatusUpdated--> nUserID:" + nUserID + "  nStatus:"
-					+ nStatus + " nType:" + nType + " szStatusDesc:"
-					+ szStatusDesc + "  " + new Date());
-		}
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnUserStatusUpdatedCallback(nUserID, nType, nStatus,
-						szStatusDesc);
+				callback.OnUserStatusUpdatedCallback(nUserID, nDeviceType,
+						nStatus, szStatusDesc);
 			}
 		}
 	}
@@ -267,8 +273,10 @@ public class ImRequest {
 	 * @see ImRequestCallback#OnChangeAvatarCallback(int, long, String)
 	 */
 	private void OnChangeAvatar(int nAvatarType, long nUserID, String AvatarName) {
-		V2Log.d("OnChangeAvatar--> nAvatarType:" + nAvatarType + "    nUserID:"
-				+ nUserID + " AvatarName:" + AvatarName);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnChangeAvatar()"
+						+ " nAvatarType = " + nAvatarType + " nUserID = "
+						+ nUserID + " AvatarName = " + AvatarName);
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
@@ -310,8 +318,10 @@ public class ImRequest {
 	 * @param sCommmentName
 	 */
 	private void OnModifyCommentName(long nUserId, String sCommmentName) {
-		V2Log.d("ImRequest UI --> OnModifyCommentName:: " + "nUserId:"
-				+ nUserId + "  sCommmentName : " + sCommmentName);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnModifyCommentName()"
+						+ " nUserId = " + nUserId + " sCommmentName = "
+						+ sCommmentName);
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
@@ -329,7 +339,9 @@ public class ImRequest {
 	 * @param nResult
 	 */
 	private void OnConnectResponse(int nResult) {
-		V2Log.d("OnConnectResponse::" + nResult);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnConnectResponse()"
+						+ " nResult = " + nResult);
 		for (WeakReference<ImRequestCallback> wf : this.mCallbacks) {
 			Object obj = wf.get();
 			if (obj != null) {
@@ -384,7 +396,9 @@ public class ImRequest {
 	 * @param xmlinfo
 	 */
 	private void OnGetSearchMember(String xmlinfo) {
-		Log.e("ImRequest UI", "OnGetSearchMember:" + xmlinfo);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnGetSearchMember()"
+						+ " xmlinfo = " + xmlinfo);
 		List<V2User> list = XmlAttributeExtractor
 				.parseUserList(xmlinfo, "user");
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
@@ -398,7 +412,8 @@ public class ImRequest {
 	}
 
 	private void OnOfflineStart() {
-		V2Log.d("ImRequest UI", "OnOfflineStart ---> START!");
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnOfflineStart()");
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
@@ -410,7 +425,7 @@ public class ImRequest {
 	}
 
 	private void OnOfflineEnd() {
-		V2Log.d("ImRequest UI", "OnOfflineStart ---> END!");
+		V2Log.d(V2Log.JNI_CALLBACK, "CLASS = ImRequest METHOD = OnOfflineEnd()");
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();
@@ -422,72 +437,101 @@ public class ImRequest {
 	}
 
 	private void OnUserPrivacyUpdated(long nUserID, int nPrivacy) {
-		Log.e("ImRequest UI", "OnUserPrivacyUpdated");
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnUserPrivacyUpdated()"
+						+ " nUserID = " + nUserID + " nPrivacy = " + nPrivacy);
 	}
 
 	private void OnCreateFriendGroup(long nGroupID, String szGroupName) {
-		Log.e("ImRequest UI", "OnCreateFriendGroup锛氾細" + nGroupID + ":"
-				+ szGroupName);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnCreateFriendGroup()--"
+						+ " nGroupID = " + nGroupID + " szGroupName = "
+						+ szGroupName);
 	}
 
 	private void OnModifyFriendGroup(long nGroupID, String szGroupName) {
-		Log.e("ImRequest UI", "OnModifyFriendGroup::" + nGroupID + ":"
-				+ szGroupName);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnModifyFriendGroup()--"
+						+ " nGroupID = " + nGroupID + " szGroupName = "
+						+ szGroupName);
 
 	}
 
 	private void OnMoveFriendsToGroup(long nDstUserID, long nDstGroupID) {
-		Log.e("ImRequest UI", "OnMoveFriendsToGroup" + nDstUserID + ":"
-				+ nDstGroupID);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnMoveFriendsToGroup()--"
+						+ " nDstUserID = " + nDstUserID + " nDstGroupID = "
+						+ nDstGroupID);
 	}
 
 	private void OnHaveUpdateNotify(String updatefilepath, String updatetext) {
-		Log.e("ImRequest UI", "OnHaveUpdateNotify");
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnHaveUpdateNotify()--"
+						+ " updatefilepath = " + updatefilepath
+						+ " updatetext = " + updatetext);
 	}
 
 	private void OnServerFaild(String sModuleName) {
-		Log.e("ImRequest UI", "OnServerFaild");
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnServerFaild()--"
+						+ " sModuleName = " + sModuleName);
 	}
 
 	private void OnUpdateDownloadBegin(long filesize) {
-		Log.e("ImRequest UI", "OnUpdateDownloadBegin::" + filesize);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnUpdateDownloadBegin()--"
+						+ " filesize = " + filesize);
 	}
 
 	private void OnUpdateDownloading(long size) {
-		Log.e("ImRequest UI", "OnUpdateDownloading::" + size);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnUpdateDownloading()--"
+						+ " size = " + size);
 	}
 
 	private void OnUpdateDownloadEnd(boolean error) {
-		Log.e("ImRequest UI", "OnUpdateDownloadEnd:" + error);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnUpdateDownloadEnd()--"
+						+ " error = " + error);
 	}
 
 	private void Oncrowdfile(long nCrowdId, String InfoXml) {
-		Log.e("ImRequest UI", "Oncrowdfile:" + nCrowdId);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = Oncrowdfile()--" + " nCrowdId = "
+						+ nCrowdId + " InfoXml = " + InfoXml);
 	}
 
 	private void OnGetCrowdFileInfo(long nCrowdId, String InfoXml) {
-		Log.e("ImRequest UI", "OnGetCrowdFileInfo:" + nCrowdId);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnDelCrowdFile()--"
+						+ " nCrowdId = " + nCrowdId + " InfoXml = " + InfoXml);
 	}
 
 	private void OnDelCrowdFile(long nCrowdId, String sFileID) {
-		Log.e("ImRequest UI", "OnDelCrowdFile:" + nCrowdId);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnDelCrowdFile()--"
+						+ " nCrowdId = " + nCrowdId + " sFileID = " + sFileID);
 	}
 
 	private void OnSignalDisconnected() {
-		Log.e("ImRequest UI", "OnSignalDisconnected");
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnSignalDisconnected()--");
 	}
 
 	private void OnDelGroupInfo(int type, long groupid, boolean isdel) {
-		Log.e("ImRequest UI", "OnDelGroupInfo" + type + ":" + groupid + ":"
-				+ isdel);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnDelGroupInfo()--" + " type = "
+						+ type + " groupid = " + groupid + " isdel = " + isdel);
 	}
 
 	private void OnGetGroupsInfoBegin() {
-		Log.e("ImRequest UI", "OnGetGroupsInfoBegin");
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnGetGroupsInfoBegin()--");
 	}
 
 	private void OnGetGroupsInfoEnd() {
-		Log.e("ImRequest UI", "OnGetGroupsInfoEnd");
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ImRequest METHOD = OnGetGroupsInfoEnd()");
 
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);

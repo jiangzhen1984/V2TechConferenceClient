@@ -16,7 +16,7 @@ import com.V2.jni.util.XmlAttributeExtractor;
 import com.bizcom.request.jni.GroupServiceJNIResponse;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestConfCreateResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.request.util.V2AbstractHandler;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.V2GlobalConstants;
@@ -85,7 +85,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	 * @param user
 	 * @return:
 	 */
-	public void delContact(User user , MessageListener caller) {
+	public void delContact(User user , HandlerWrap caller) {
 		
 		if(user == null)
 			return ;
@@ -171,7 +171,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	 * @param group
 	 * @param caller
 	 */
-	public void createGroup(ContactGroup group, MessageListener caller) {
+	public void createGroup(ContactGroup group, HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { group })) {
 			return;
 		}
@@ -189,7 +189,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	 * @param group
 	 * @param caller
 	 */
-	public void updateGroup(ContactGroup group, MessageListener caller) {
+	public void updateGroup(ContactGroup group, HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { group })) {
 			return;
 		}
@@ -207,7 +207,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	 * @param group
 	 * @param caller
 	 */
-	public void removeGroup(ContactGroup group, MessageListener caller) {
+	public void removeGroup(ContactGroup group, HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { group })) {
 			return;
 		}
@@ -247,7 +247,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	 * @param caller
 	 */
 	public void updateUserGroup(ContactGroup desGroup, ContactGroup srcGroup,
-			User user, MessageListener caller) {
+			User user, HandlerWrap caller) {
 		if (!checkParamNull(caller, new Object[] { user })) {
 			return;
 		}

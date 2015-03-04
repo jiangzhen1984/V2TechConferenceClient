@@ -22,7 +22,7 @@ import com.bizcom.bo.GroupUserObject;
 import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.application.GlobalHolder;
@@ -338,7 +338,7 @@ public class CrowdInvitationActivity extends Activity {
 						.intValue())
 					handleAcceptDone();
 				else {
-					service.acceptInvitation(crowd, new MessageListener(
+					service.acceptInvitation(crowd, new HandlerWrap(
 							mLocalHandler, ACCEPT_INVITATION_DONE, null));
 					WaitDialogBuilder.showNormalWithHintProgress(mContext, true);
 				}
@@ -392,7 +392,7 @@ public class CrowdInvitationActivity extends Activity {
 					else {
 						service.refuseInvitation(crowd, mReasonET
 								.getEditableText().toString(),
-								new MessageListener(mLocalHandler,
+								new HandlerWrap(mLocalHandler,
 										REFUSE_INVITATION_DONE, null));
 						handleDeclineDone();
 					}

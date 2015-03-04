@@ -29,7 +29,7 @@ import com.bizcom.request.jni.RequestExitedConfResponse;
 import com.bizcom.request.jni.RequestPermissionResponse;
 import com.bizcom.request.jni.RequestUpdateCameraParametersResponse;
 import com.bizcom.request.util.DeviceRequest;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.V2GlobalEnum;
 import com.bizcom.vo.CameraConfiguration;
@@ -55,15 +55,15 @@ import com.bizcom.vo.Group.GroupType;
  * </ul>
  * <ul>
  * <li>User request to enter conference :
- * {@link #requestEnterConference(Conference, MessageListener)}</li>
+ * {@link #requestEnterConference(Conference, HandlerWrap)}</li>
  * <li>User request to exit conference :
- * {@link #requestExitConference(Conference, MessageListener)}</li>
+ * {@link #requestExitConference(Conference, HandlerWrap)}</li>
  * <li>User request to request speak in meeting
- * {@link #applyForControlPermission(ConferencePermission, MessageListener)}</li>
+ * {@link #applyForControlPermission(ConferencePermission, HandlerWrap)}</li>
  * <li>User request to release speaker in meeting
- * {@link #applyForReleasePermission(ConferencePermission, MessageListener)}</li>
+ * {@link #applyForReleasePermission(ConferencePermission, HandlerWrap)}</li>
  * <li>User create conference:
- * {@link #createConference(Conference, MessageListener)}</li>
+ * {@link #createConference(Conference, HandlerWrap)}</li>
  * </ul>
  * 
  * @author 28851274
@@ -128,7 +128,7 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 * 
 	 * @see com.bizcom.request.jni.RequestEnterConfResponse
 	 */
-	public void requestEnterConference(Conference conf, MessageListener caller) {
+	public void requestEnterConference(Conference conf, HandlerWrap caller) {
 		initTimeoutMessage(JNI_REQUEST_ENTER_CONF, DEFAULT_TIME_OUT_SECS,
 				caller);
 		ConfRequest.getInstance().enterConf(conf.getId());
@@ -146,12 +146,12 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 *            object is
 	 *            {@link com.bizcom.request.jni.RequestExitedConfResponse}
 	 */
-	public void requestExitConference(Conference conf, MessageListener caller) {
+	public void requestExitConference(Conference conf, HandlerWrap caller) {
 		if (conf == null) {
 			if (caller != null && caller.getHandler() != null) {
 				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
 						RequestConfCreateResponse.Result.INCORRECT_PAR);
-				sendResult(caller, jniRes);
+				callerSendMessage(caller, jniRes);
 			}
 			return;
 		}
@@ -178,12 +178,12 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 *            object is
 	 *            {@link com.bizcom.request.jni.RequestConfCreateResponse}
 	 */
-	public void createConference(Conference conf, MessageListener caller) {
+	public void createConference(Conference conf, HandlerWrap caller) {
 		if (conf == null) {
 			if (caller != null && caller.getHandler() != null) {
 				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
 						RequestConfCreateResponse.Result.FAILED);
-				sendResult(caller, jniRes);
+				callerSendMessage(caller, jniRes);
 			}
 			return;
 		}
@@ -201,12 +201,12 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 * @param conf
 	 * @param caller
 	 */
-	public void quitConference(Conference conf, MessageListener caller) {
+	public void quitConference(Conference conf, HandlerWrap caller) {
 		if (conf == null) {
 			if (caller != null) {
 				JNIResponse jniRes = new RequestConfCreateResponse(0, 0,
 						RequestConfCreateResponse.Result.INCORRECT_PAR);
-				sendResult(caller, jniRes);
+				callerSendMessage(caller, jniRes);
 			}
 			return;
 		}
@@ -234,12 +234,12 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 *            caller
 	 */
 	public void inviteAttendee(Conference conf, List<User> list,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (list == null || conf == null || list.isEmpty()) {
 			if (caller != null) {
 				JNIResponse jniRes = new JNIResponse(
 						JNIResponse.Result.INCORRECT_PAR);
-				sendResult(caller, jniRes);
+				callerSendMessage(caller, jniRes);
 			}
 			return;
 		}
@@ -288,7 +288,7 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 * @see ConferencePermission
 	 */
 	public void applyForControlPermission(ConferencePermission type,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		initTimeoutMessage(JNI_REQUEST_SPEAK, DEFAULT_TIME_OUT_SECS, caller);
 
 		ConfRequest.getInstance().applyForControlPermission(type.intValue());
@@ -313,7 +313,7 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 * @see ConferencePermission
 	 */
 	public void applyForReleasePermission(ConferencePermission type,
-			MessageListener caller) {
+			HandlerWrap caller) {
 
 		initTimeoutMessage(JNI_REQUEST_RELEASE_SPEAK, DEFAULT_TIME_OUT_SECS,
 				caller);
@@ -337,12 +337,12 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 * @param caller
 	 */
 	public void grantPermission(User user, ConferencePermission type,
-			PermissionState state, MessageListener caller) {
+			PermissionState state, HandlerWrap caller) {
 		if (user == null || state == null || type == null) {
 			if (caller != null) {
 				JNIResponse jniRes = new JNIResponse(
 						JNIResponse.Result.INCORRECT_PAR);
-				sendResult(caller, jniRes);
+				callerSendMessage(caller, jniRes);
 			}
 			return;
 		}
@@ -371,12 +371,12 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 * @param caller
 	 */
 	public void updateConferenceAttribute(Conference conf, boolean isSync,
-			boolean invitation, MessageListener caller) {
+			boolean invitation, HandlerWrap caller) {
 		if (conf == null) {
 			if (caller != null) {
 				JNIResponse jniRes = new JNIResponse(
 						JNIResponse.Result.INCORRECT_PAR);
-				sendResult(caller, jniRes);
+				callerSendMessage(caller, jniRes);
 			}
 			return;
 		}
@@ -389,7 +389,7 @@ public class V2ConferenceRequest extends DeviceRequest {
 
 		JNIResponse jniRes = new RequestPermissionResponse(
 				RequestPermissionResponse.Result.SUCCESS);
-		sendResult(caller, jniRes);
+		callerSendMessage(caller, jniRes);
 	}
 
 	public void modifyGroupLayout(Conference conf) {
@@ -424,12 +424,12 @@ public class V2ConferenceRequest extends DeviceRequest {
 	 * @param file
 	 * @param listener
 	 */
-	public void shareDoc(Conference conf, String file, MessageListener listener) {
+	public void shareDoc(Conference conf, String file, HandlerWrap listener) {
 		if (conf == null || file == null) {
 			if (listener != null) {
 				JNIResponse jniRes = new JNIResponse(
 						JNIResponse.Result.INCORRECT_PAR);
-				sendResult(listener, jniRes);
+				callerSendMessage(listener, jniRes);
 			}
 			return;
 		}
@@ -440,7 +440,7 @@ public class V2ConferenceRequest extends DeviceRequest {
 		if (listener != null) {
 			JNIResponse jniRes = new JNIResponse(
 					RequestPermissionResponse.Result.SUCCESS);
-			sendResult(listener, jniRes);
+			callerSendMessage(listener, jniRes);
 		}
 	}
 

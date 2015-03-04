@@ -27,7 +27,7 @@ import android.widget.TextView;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.request.V2CrowdGroupRequest;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
@@ -251,7 +251,7 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 			confirmButton.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					service.quitCrowd(crowd, new MessageListener(mLocalHandler, REQUEST_QUIT_CROWD_DONE, null));
+					service.quitCrowd(crowd, new HandlerWrap(mLocalHandler, REQUEST_QUIT_CROWD_DONE, null));
 				}
 
 			});
@@ -333,7 +333,7 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 
 			if (at != crowd.getAuthType()) {
 				crowd.setAuthType(at);
-				service.updateCrowd(crowd, new MessageListener(mLocalHandler,
+				service.updateCrowd(crowd, new HandlerWrap(mLocalHandler,
 						REQUEST_UPDATE_CROWD_DONE, null));
 			}
 		}

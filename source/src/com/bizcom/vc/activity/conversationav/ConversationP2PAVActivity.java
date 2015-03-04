@@ -53,7 +53,7 @@ import com.bizcom.request.V2ChatRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestChatServiceResponse;
 import com.bizcom.request.util.AsyncResult;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.activity.conversation.MessageBuilder;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
@@ -281,7 +281,7 @@ public class ConversationP2PAVActivity extends Activity implements
 		if (!uad.isIncoming()) {
 			V2Log.d(TAG, "发起一个新的音视频邀请 , 等待回应中.... 此次通信的uuid ："
 					+ currentVideoBean.mediaChatID);
-			chatService.inviteUserChat(uad, new MessageListener(mLocalHandler,
+			chatService.inviteUserChat(uad, new HandlerWrap(mLocalHandler,
 					CHAT_CALL_RESPONSE, null));
 			if (uad.isVideoType()) {
 				// Update view
@@ -1934,7 +1934,7 @@ public class ConversationP2PAVActivity extends Activity implements
 								// this API will handler this case
 								Log.i("20150126 1", "发出音频申请");
 								chatService.inviteUserChat(uad,
-										new MessageListener(mLocalHandler,
+										new HandlerWrap(mLocalHandler,
 												CHAT_CALL_RESPONSE, null));
 
 								uad.setDeviceId(rcsr.getDeviceID());

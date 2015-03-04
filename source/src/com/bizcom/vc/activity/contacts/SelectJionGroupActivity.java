@@ -24,7 +24,7 @@ import android.widget.Toast;
 
 import com.bizcom.request.V2ContactsRequest;
 import com.bizcom.request.jni.GroupServiceJNIResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.service.JNIService;
@@ -253,7 +253,7 @@ public class SelectJionGroupActivity extends Activity {
 				User user = GlobalHolder.getInstance()
 						.getUser(userId);
 				contactService.updateUserGroup((ContactGroup) desGroup,
-						(ContactGroup) srcGroup, user, new MessageListener(mLocalHandler,
+						(ContactGroup) srcGroup, user, new HandlerWrap(mLocalHandler,
 								UPDATE_USER_GROUP_DONE, new LocalObject(user, srcGroup, desGroup)));
 
 			}

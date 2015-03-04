@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.request.V2CrowdGroupRequest;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.service.JNIService;
@@ -183,7 +183,7 @@ public class CrowdContentUpdateActivity extends Activity {
 				} else if (mType == UPDATE_TYPE_ANNOUNCEMENT) {
 					crowd.setAnnouncement(mContentET.getText().toString());
 				}
-				service.updateCrowd(crowd, new MessageListener(mLocalHandler,
+				service.updateCrowd(crowd, new HandlerWrap(mLocalHandler,
 						REQUEST_UPDATE_CROWD_DONE, null));
 			}
 		}

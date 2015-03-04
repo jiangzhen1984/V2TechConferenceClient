@@ -43,7 +43,7 @@ import com.bizcom.request.V2ConferenceRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestEnterConfResponse;
 import com.bizcom.request.util.ConferencMessageSyncService;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.DateUtil;
 import com.bizcom.util.Notificator;
 import com.bizcom.util.SearchUtils;
@@ -112,7 +112,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		V2Log.d(TAG, "ConversationsTabFragment onCreate...");
+		Log.i("20150303 1","TabFragmentConference onCreate()");
 		mConferenceService = new V2ConferenceRequest();
 		mContext = getActivity();
 		service = Executors.newCachedThreadPool();
@@ -124,6 +124,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		Log.i("20150303 1","TabFragmentConference onCreateView()");
 		if (rootView == null) {
 			rootView = inflater.inflate(R.layout.tab_fragment_conversations,
 					container, false);
@@ -142,12 +143,14 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
+		Log.i("20150303 1","TabFragmentConference onDestroy()");
 		getActivity().unregisterReceiver(receiver);
 	}
 
 	@Override
 	public void onDestroyView() {
 		super.onDestroyView();
+		Log.i("20150303 1","TabFragmentConference onDestroyView()");
 		((ViewGroup) rootView.getParent()).removeView(rootView);
 	}
 
@@ -182,11 +185,13 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 
 	@Override
 	public void onStart() {
+		Log.i("20150303 1","TabFragmentConference onStart()");
 		super.onStart();
 	}
 
 	@Override
 	public void onStop() {
+		Log.i("20150303 1","TabFragmentConference onStop()");
 		super.onStop();
 	}
 
@@ -252,7 +257,6 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 	}
 
 	public void updateSearchState() {
-
 		mIsStartedSearch = false;
 		searchList.clear();
 		adapter.notifyDataSetChanged();
@@ -856,7 +860,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 				mContext.startService(new Intent(mContext,
 						ConferencMessageSyncService.class));
 				mConferenceService.requestEnterConference(new Conference(
-						(Long) msg.obj), new MessageListener(this,
+						(Long) msg.obj), new HandlerWrap(this,
 						REQUEST_ENTER_CONF_RESPONSE, null));
 				break;
 			case REQUEST_ENTER_CONF_RESPONSE:

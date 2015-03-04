@@ -67,7 +67,7 @@ import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestEnterConfResponse;
 import com.bizcom.request.util.BitmapManager;
 import com.bizcom.request.util.ConferencMessageSyncService;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.DateUtil;
 import com.bizcom.util.MessageUtil;
 import com.bizcom.util.Notificator;
@@ -2254,7 +2254,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 						chatService.quitCrowd((CrowdGroup) crowd, null);
 					} else if (crowd.getGroupType() == GroupType.DISCUSSION) {
 						chatService.quitDiscussionBoard(
-								(DiscussionGroup) crowd, new MessageListener(
+								(DiscussionGroup) crowd, new HandlerWrap(
 										mHandler, QUIT_DISCUSSION_BOARD_DONE,
 										crowd));
 					}
@@ -3612,7 +3612,7 @@ public class ConversationsTabFragment extends Fragment implements TextWatcher,
 				mContext.startService(new Intent(mContext,
 						ConferencMessageSyncService.class));
 				cb.requestEnterConference(new Conference((Long) msg.obj),
-						new MessageListener(this, REQUEST_ENTER_CONF_RESPONSE,
+						new HandlerWrap(this, REQUEST_ENTER_CONF_RESPONSE,
 								null));
 				break;
 			case REQUEST_ENTER_CONF_RESPONSE:

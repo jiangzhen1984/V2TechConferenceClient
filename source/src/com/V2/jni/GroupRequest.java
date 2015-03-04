@@ -23,12 +23,13 @@ public class GroupRequest {
 	private static final String TAG = "GroupRequest UI";
 	public boolean loginResult;
 	private static GroupRequest mGroupRequest;
-
 	private List<WeakReference<GroupRequestCallback>> mCallbacks;
+
+	public Proxy proxy = new Proxy();
 
 	private GroupRequest() {
 		mCallbacks = new CopyOnWriteArrayList<WeakReference<GroupRequestCallback>>();
-	};
+	}
 
 	public static synchronized GroupRequest getInstance() {
 		if (mGroupRequest == null) {
@@ -39,6 +40,17 @@ public class GroupRequest {
 			}
 		}
 		return mGroupRequest;
+	}
+
+	// 尽量使用代理，方便在请求前做一些通用的操作
+	public class Proxy {
+
+		public void getGroupInfo(int type, long groupId) {
+			V2Log.d(V2Log.JNI_REQUEST,
+					"CLASS = GroupRequest METHOD = getGroupInfo()" + " type = "
+							+ type + " groupId = " + groupId);
+			GroupRequest.this.getGroupInfo(type, groupId);
+		}
 	}
 
 	public native boolean initialize(GroupRequest request);
@@ -145,7 +157,7 @@ public class GroupRequest {
 	 * @param type
 	 * @param groupId
 	 */
-	public native void getGroupInfo(int type, long groupId);
+	private native void getGroupInfo(int type, long groupId);
 
 	/**********************************************/
 
@@ -327,8 +339,12 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnAddGroupFile(int eGroupType, long nGroupId, String sXml) {
-		V2Log.d("GroupRequest UI", "OnAddGroupFile ---> eGroupType :"
-				+ eGroupType + " | nGroupId: " + nGroupId + " | sXml: " + sXml);
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnAddGroupFile()"
+						+ " eGroupType = " + eGroupType + " nGroupId = "
+						+ nGroupId + " sXml = " + sXml);
+
 		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
 		V2Group group = new V2Group(nGroupId, eGroupType);
 
@@ -343,14 +359,15 @@ public class GroupRequest {
 	}
 
 	/**
-	 * 
 	 * @param type
 	 * @param nGroupId
 	 * @param fileId
 	 */
 	private void OnDelGroupFile(int type, long nGroupId, String fileId) {
-		V2Log.e("GroupRequest  OnDelGroupFile" + type + "   " + nGroupId + "  "
-				+ fileId);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnDelGroupFile()" + " type = "
+						+ type + " nGroupId = " + nGroupId + " fileId = "
+						+ fileId);
 
 		List<FileJNIObject> list = new ArrayList<FileJNIObject>();
 		list.add(new FileJNIObject(null, fileId, null, 0, 0));
@@ -407,15 +424,19 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78
-	 * f 0 f 7 3 6 1 8 0 1 . g i f ' / > < / f i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4
+	 * b f b 2 4 f d b 8 d 1 0 3 4 f 7 8 f 0 f 7 3 6 1 8 0 1 . g i f ' / > < / f
+	 * i l e l i s t >
 	 * 
 	 * @param groupType
 	 * @param nGroupId
 	 * @param sXml
 	 */
 	private void OnGetGroupFileInfo(int groupType, long nGroupId, String sXml) {
-		V2Log.e("Group Request  OnGetGroupFileInfo" + nGroupId + "  " + sXml);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnGetGroupFileInfo()"
+						+ " groupType = " + groupType + " nGroupId = "
+						+ nGroupId + " sXml = " + sXml);
 		List<FileJNIObject> list = XmlAttributeExtractor.parseFiles(sXml);
 		V2Group group = new V2Group(nGroupId, groupType);
 
@@ -437,8 +458,9 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnGetGroupInfo(int groupType, String sXml) {
-		V2Log.d("OnGetGroupInfo==>" + "groupType:" + groupType + "," + "sXml:"
-				+ sXml);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnGetGroupInfo()"
+						+ " groupType = " + groupType + " sXml = " + sXml);
 		List<V2Group> list = null;
 		if (groupType == V2Group.TYPE_CONF) {
 			list = XmlAttributeExtractor.parseConference(sXml);
@@ -490,8 +512,10 @@ public class GroupRequest {
 	 * @return:
 	 */
 	private void OnGetGroupUserInfo(int groupType, long nGroupID, String sXml) {
-		V2Log.d("OnGetGroupUserInfo==>" + "groupType:" + groupType + ","
-				+ "nGroupID:" + nGroupID + "," + "sXml:" + sXml);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnGetGroupUserInfo()"
+						+ " groupType = " + groupType + " nGroupID = "
+						+ nGroupID + " sXml = " + sXml);
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -511,9 +535,10 @@ public class GroupRequest {
 	 * @param sXml
 	 */
 	private void OnAddGroupUserInfo(int groupType, long nGroupID, String sXml) {
-		V2Log.d("OnAddGroupUserInfo ->" + groupType + ":" + nGroupID + ":"
-				+ sXml);
-
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnAddGroupUserInfo()"
+						+ " groupType = " + groupType + " nGroupID = "
+						+ nGroupID + " sXml = " + sXml);
 		V2User remoteUser = XmlAttributeExtractor.fromGroupXml(sXml);
 		if (remoteUser == null) {
 			V2Log.e("OnAddGroupUserInfo -> parse xml failed ...get null user : "
@@ -535,8 +560,10 @@ public class GroupRequest {
 	}
 
 	private void OnDelGroupUser(int groupType, long nGroupID, long nUserID) {
-		V2Log.d("OnDelGroupUser -> " + groupType + ":" + nGroupID + ":"
-				+ nUserID);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnDelGroupUser()"
+						+ " groupType = " + groupType + " nGroupID = "
+						+ nGroupID + " nUserID = " + nUserID);
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -561,9 +588,11 @@ public class GroupRequest {
 	 */
 	private void OnAddGroupInfo(int groupType, long nParentID, long nGroupID,
 			String sXml) {
-		V2Log.e(TAG, "OnAddGroupInfo ---> groupType :" + groupType
-				+ " | nParentID: " + nParentID + " | nGroupID: " + nGroupID
-				+ " | sXml: " + sXml);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnAddGroupInfo()"
+						+ " groupType = " + groupType + " nParentID = "
+						+ nParentID + " nGroupID = " + nGroupID + " sXml = "
+						+ sXml);
 
 		String gid = XmlAttributeExtractor.extract(sXml, " id='", "'");
 		String name = XmlAttributeExtractor.extract(sXml, " name='", "'");
@@ -663,8 +692,11 @@ public class GroupRequest {
 	 * @param bMovetoRoot
 	 */
 	private void OnDelGroup(int groupType, long nGroupID, boolean bMovetoRoot) {
-		V2Log.d("OnDelGroup::==>" + groupType + ":" + nGroupID + ":"
-				+ bMovetoRoot);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnDelGroup()" + " groupType = "
+						+ groupType + " nGroupID = " + nGroupID
+						+ " bMovetoRoot = " + bMovetoRoot);
+
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -687,8 +719,11 @@ public class GroupRequest {
 	 */
 	private void OnInviteJoinGroup(int groupType, String groupInfo,
 			String userInfo, String additInfo) {
-		V2Log.d("OnInviteJoinGroup::==>" + groupType + ":" + groupInfo + ":"
-				+ userInfo + ":" + additInfo);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnInviteJoinGroup()"
+						+ " groupType = " + groupType + " groupInfo = "
+						+ groupInfo + " userInfo = " + userInfo
+						+ " additInfo = " + additInfo);
 		V2Group group = null;
 		V2User user = null;
 		if (groupType == V2Group.TYPE_CONF) {
@@ -758,9 +793,11 @@ public class GroupRequest {
 	 */
 	private void OnRefuseInviteJoinGroup(int groupType, long nGroupID,
 			long nUserID, String reason) {
-		V2Log.d("OnRefuseInviteJoinGroup ==>" + "groupType:" + groupType + ","
-				+ "nGroupID:" + nGroupID + "," + "nUserID:" + nUserID + ","
-				+ "reason:" + reason);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnRefuseInviteJoinGroup()"
+						+ " groupType = " + groupType + " nGroupID = "
+						+ nGroupID + " nUserID = " + nUserID + " reason = "
+						+ reason);
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
@@ -789,8 +826,13 @@ public class GroupRequest {
 
 	private void OnMoveUserToGroup(int groupType, long srcGroupID,
 			long dstGroupID, long nUserID) {
-		V2Log.d("OnMoveUserToGroup:: " + groupType + ":" + srcGroupID + ":"
-				+ dstGroupID + ":" + nUserID);
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnMoveUserToGroup()"
+						+ " groupType = " + groupType + " srcGroupID = "
+						+ srcGroupID + " dstGroupID = " + dstGroupID
+						+ " nUserID = " + nUserID);
+
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -814,8 +856,12 @@ public class GroupRequest {
 	 */
 	private void OnApplyJoinGroup(int groupType, long nGroupID,
 			String userInfo, String reason) {
-		V2Log.d("OnApplyJoinGroup:: " + groupType + ":" + nGroupID + ":"
-				+ userInfo + ":" + reason);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnApplyJoinGroup()"
+						+ " groupType = " + groupType + " nGroupID = "
+						+ nGroupID + " userInfo = " + userInfo + " reason = "
+						+ reason);
+
 		String id = XmlAttributeExtractor.extractAttribute(userInfo, "id");
 		String nickname = XmlAttributeExtractor.extractAttribute(userInfo,
 				"nickname");
@@ -871,8 +917,10 @@ public class GroupRequest {
 	 */
 	private void OnRefuseApplyJoinGroup(int groupType, String sXml,
 			String reason) {
-		V2Log.d("OnRefuseApplyJoinGroup ==>" + "groupType:" + groupType + ","
-				+ "sXml:" + sXml + "," + "reason:" + reason);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnRefuseApplyJoinGroup()"
+						+ " groupType = " + groupType + " sXml = " + sXml
+						+ " reason = " + reason);
 
 		V2Group parseSingleCrowd = XmlAttributeExtractor.parseSingleCrowd(sXml,
 				null);
@@ -897,9 +945,10 @@ public class GroupRequest {
 	 * @param nErrorNo
 	 */
 	private void OnJoinGroupError(int eGroupType, long nGroupID, int nErrorNo) {
-		V2Log.e("GroupRequest UI", "OnJoinGroupError ---> eGroupType :"
-				+ eGroupType + " | nGroupID: " + nGroupID + " | nErrorNo: "
-				+ nErrorNo);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnJoinGroupError()"
+						+ " eGroupType = " + eGroupType + " nGroupID = "
+						+ nGroupID + " nErrorNo = " + nErrorNo);
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wrcb = mCallbacks.get(i);
 			Object obj = wrcb.get();
@@ -920,9 +969,11 @@ public class GroupRequest {
 	 */
 	private void OnGroupCreateWBoard(int eGroupType, long nGroupID,
 			String szWBoardID, int nWhiteIndex) {
-		V2Log.e("GroupRequest UI", "OnGroupCreateWBoard ---> eGroupType :"
-				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
-				+ szWBoardID + " | nWhiteIndex: " + nWhiteIndex);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnGroupCreateWBoard()"
+						+ " eGroupType = " + eGroupType + " nGroupID = "
+						+ nGroupID + " szWBoardID = " + szWBoardID
+						+ " nWhiteIndex = " + nWhiteIndex);
 		// 20141225 wzl 暂时不要白板功能
 		// V2Document v2doc = new V2Document();
 		// v2doc.mId = szWBoardID;
@@ -952,9 +1003,12 @@ public class GroupRequest {
 	 */
 	private void OnRenameGroupFile(int eGroupType, long nGroupID,
 			String sFileID, String sNewName) {
-		V2Log.e("GroupRequest UI", "OnRenameGroupFile ---> eGroupType :"
-				+ eGroupType + " | nGroupID: " + nGroupID + " | sFileID: "
-				+ sFileID + " | sNewName: " + sNewName);
+
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnRenameGroupFile()"
+						+ " eGroupType = " + eGroupType + " nGroupID = "
+						+ nGroupID + " sFileID = " + sFileID + " sNewName = "
+						+ sNewName);
 	};
 
 	/**
@@ -966,9 +1020,10 @@ public class GroupRequest {
 	 */
 	private void OnWBoardDestroy(int eGroupType, long nGroupID,
 			String szWBoardID) {
-		V2Log.e("GroupRequest UI", "OnWBoardDestroy ---> eGroupType :"
-				+ eGroupType + " | nGroupID: " + nGroupID + " | szWBoardID: "
-				+ szWBoardID);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnWBoardDestroy()"
+						+ " eGroupType = " + eGroupType + " nGroupID = "
+						+ nGroupID + " szWBoardID = " + szWBoardID);
 
 		V2Document v2doc = new V2Document();
 		v2doc.mId = szWBoardID;
@@ -1007,12 +1062,6 @@ public class GroupRequest {
 						+ " szFileName = " + szFileName + " eWhiteShowType = "
 						+ eWhiteShowType);
 
-		V2Log.i("20141229 1", "ThreadID = " + Thread.currentThread().getId()
-				+ " CLASS = GroupRequest METHOD = OnGroupCreateDocShare()"
-				+ " eGroupType = " + eGroupType + " nGroupID = " + nGroupID
-				+ " szWBoardID = " + szWBoardID + " szFileName = " + szFileName
-				+ " eWhiteShowType = " + eWhiteShowType);
-
 		V2Document v2doc = new V2Document();
 		v2doc.mId = szWBoardID;
 		V2Group v2group = new V2Group(nGroupID, eGroupType);
@@ -1041,8 +1090,10 @@ public class GroupRequest {
 	 * @param InfoXml
 	 */
 	private void OnSearchGroup(int eGroupType, String InfoXml) {
-		V2Log.e("GroupRequest UI", "onSearchGroup ---> eGroupType :"
-				+ eGroupType + " | InfoXml: " + InfoXml);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnSearchGroup()"
+						+ " eGroupType = " + eGroupType + " InfoXml = "
+						+ InfoXml);
 		List<V2Group> list = XmlAttributeExtractor.parseCrowd(InfoXml);
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wf = this.mCallbacks.get(i);
@@ -1062,9 +1113,10 @@ public class GroupRequest {
 	 * @param nUserID
 	 */
 	private void OnKickGroupUser(int eGroupType, long nGroupID, long nUserID) {
-		V2Log.e("GroupRequest UI", "OnKickGroupUser ---> eGroupType :"
-				+ eGroupType + " | nGroupID: " + nGroupID + " | nUserID: "
-				+ nUserID);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = GroupRequest METHOD = OnKickGroupUser()"
+						+ " eGroupType = " + eGroupType + " nGroupID = "
+						+ nGroupID + " nUserID = " + nUserID);
 
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<GroupRequestCallback> wf = this.mCallbacks.get(i);

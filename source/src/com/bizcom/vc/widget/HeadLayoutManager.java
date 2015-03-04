@@ -35,7 +35,7 @@ import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vo.NetworkStateCode;
 import com.v2tech.R;
 
-public class TitleBar {
+public class HeadLayoutManager {
 
 	public static int TITLE_BAR_TYPE_PLUS = 1;
 	public static int TITLE_BAR_TYPE_MORE = 2;
@@ -68,10 +68,6 @@ public class TitleBar {
 			R.drawable.conversation_discussion_button,
 			R.drawable.conversation_seach_crowd_button,
 			R.drawable.conversation_seach_member_button };
-	// R.drawable.conversation_call_button,
-	// R.drawable.conversation_sms_button,
-	// R.drawable.conversation_email_button,
-	// R.drawable.conversation_files_button };
 
 	private int[] plusItems = new int[] {
 			R.string.conversation_popup_menu_video_call_button,
@@ -89,13 +85,13 @@ public class TitleBar {
 	private PopupWindow plusWindow;
 	private PopupWindow moreWindow;
 
-	public TitleBar(Context context, View rootContainer) {
+	public HeadLayoutManager(Context context, View rootContainer) {
 		this.context = context;
 		this.rootContainer = rootContainer;
-		initTitleBarLayout();
+		initHeadLayout();
 	}
 
-	private void initTitleBarLayout() {
+	private void initHeadLayout() {
 		normalList = new ArrayList<Wrapper>();
 		additionList = new ArrayList<Wrapper>();
 

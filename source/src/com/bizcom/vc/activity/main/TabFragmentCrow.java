@@ -22,6 +22,7 @@ import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,7 +45,7 @@ import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.request.V2CrowdGroupRequest;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.DateUtil;
 import com.bizcom.util.Notificator;
 import com.bizcom.util.SearchUtils;
@@ -118,7 +119,7 @@ public class TabFragmentCrow extends Fragment implements TextWatcher {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		V2Log.d(TAG, "TabFragmentCrow onCreate...");
+		Log.i("20150303 1","TabFragmentCrow onCreate()");
 
 		mContext = getActivity();
 		service = Executors.newCachedThreadPool();
@@ -131,6 +132,7 @@ public class TabFragmentCrow extends Fragment implements TextWatcher {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		Log.i("20150303 1","TabFragmentCrow onCreateView()");
 		if (rootView == null) {
 			rootView = inflater.inflate(R.layout.tab_fragment_conversations,
 					container, false);
@@ -186,6 +188,7 @@ public class TabFragmentCrow extends Fragment implements TextWatcher {
 
 	@Override
 	public void onDestroy() {
+		Log.i("20150303 1","TabFragmentCrow onDestroy()");
 		super.onDestroy();
 		getActivity().unregisterReceiver(receiver);
 		mItemList = null;
@@ -193,8 +196,21 @@ public class TabFragmentCrow extends Fragment implements TextWatcher {
 
 	@Override
 	public void onDestroyView() {
+		Log.i("20150303 1","TabFragmentCrow onDestroyView()");
 		super.onDestroyView();
 		((ViewGroup) rootView.getParent()).removeView(rootView);
+	}
+	
+	@Override
+	public void onStop() {
+		Log.i("20150303 1","TabFragmentCrow onStop()");
+		super.onStop();
+	}
+	
+	@Override
+	public void onStart() {
+		Log.i("20150303 1","TabFragmentCrow onStart()");
+		super.onStart();
 	}
 	
 	@Override
@@ -513,7 +529,7 @@ public class TabFragmentCrow extends Fragment implements TextWatcher {
 						chatService.quitCrowd((CrowdGroup) crowd, null);
 					} else if (crowd.getGroupType() == GroupType.DISCUSSION) {
 						chatService.quitDiscussionBoard(
-								(DiscussionGroup) crowd, new MessageListener(
+								(DiscussionGroup) crowd, new HandlerWrap(
 										mHandler, QUIT_DISCUSSION_BOARD_DONE,
 										crowd));
 					}

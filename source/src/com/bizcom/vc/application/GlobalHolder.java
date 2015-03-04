@@ -116,6 +116,8 @@ public class GlobalHolder {
 		synchronized (mUserLock) {
 			Long key = Long.valueOf(id);
 			User cu = mUserHolder.get(key);
+			
+			//不为空时更新
 			if (cu != null) {
 				// Update user property for received user information
 				cu.updateUser(false);

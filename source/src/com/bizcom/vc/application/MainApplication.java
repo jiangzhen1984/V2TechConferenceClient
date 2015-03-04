@@ -426,18 +426,18 @@ public class MainApplication extends Application {
 
 	}
 
-	public static boolean isApplicationBackground(Context context) {
-		ActivityManager am = (ActivityManager) context
-				.getSystemService(Context.ACTIVITY_SERVICE);
-		List<RunningTaskInfo> tasks = am.getRunningTasks(1);
-		if (!tasks.isEmpty()) {
-			ComponentName topActivity = tasks.get(0).topActivity;
-			if (!topActivity.getPackageName().equals(context.getPackageName())) {
-				return true;
-			}
-		}
-		return false;
-	}
+	// public static boolean isApplicationBackground(Context context) {
+	// ActivityManager am = (ActivityManager) context
+	// .getSystemService(Context.ACTIVITY_SERVICE);
+	// List<RunningTaskInfo> tasks = am.getRunningTasks(1);
+	// if (!tasks.isEmpty()) {
+	// ComponentName topActivity = tasks.get(0).topActivity;
+	// if (!topActivity.getPackageName().equals(context.getPackageName())) {
+	// return true;
+	// }
+	// }
+	// return false;
+	// }
 
 	class LocalActivityLifecycleCallBack implements ActivityLifecycleCallbacks {
 
@@ -493,7 +493,7 @@ public class MainApplication extends Application {
 					|| activity instanceof SplashActivity) {
 				return;
 			}
-			//测试证明activity跳转时，先start后stop
+			// 测试证明activity跳转时，先start后stop
 			startedActivityCount++;
 			if (startedActivityCount == 1) {
 

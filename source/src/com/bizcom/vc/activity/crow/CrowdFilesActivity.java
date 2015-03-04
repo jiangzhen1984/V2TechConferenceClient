@@ -43,7 +43,7 @@ import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.jni.RequestFetchGroupFilesResponse;
 import com.bizcom.request.util.AsyncResult;
 import com.bizcom.request.util.FileOperationEnum;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.FileUitls;
 import com.bizcom.util.V2Toast;
 import com.bizcom.vc.activity.conversation.ConversationSelectFile;
@@ -329,7 +329,7 @@ public class CrowdFilesActivity extends Activity {
 		// loading local files and judging whether show uploading icon
 		loadLocalSaveFile();
 		// fetch files from server
-		service.fetchGroupFiles(crowd, new MessageListener(mLocalHandler,
+		service.fetchGroupFiles(crowd, new HandlerWrap(mLocalHandler,
 				FETCH_FILES_DONE, null));
 	}
 

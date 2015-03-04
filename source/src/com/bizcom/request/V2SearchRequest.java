@@ -12,7 +12,7 @@ import com.V2.jni.callbacAdapter.ImRequestCallbackAdapter;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.V2User;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.request.util.V2AbstractHandler;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.SearchedResult;
@@ -47,7 +47,7 @@ public class V2SearchRequest extends V2AbstractHandler {
 	 * @param par
 	 * @param caller
 	 */
-	public void search(SearchParameter par, MessageListener caller) {
+	public void search(SearchParameter par, HandlerWrap caller) {
 		if (!this.checkParamNull(caller, par)) {
 			return;
 		}

@@ -9,7 +9,7 @@ import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.bizcom.request.V2ImRequest;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.User;
 import com.v2tech.R;
@@ -81,7 +81,7 @@ public class SettingAuthenticationActivity extends Activity {
 
 			User currentUser = GlobalHolder.getInstance().getCurrentUser();
 			currentUser.setAuthtype(authtype);
-			service.updateUserInfo(currentUser, new MessageListener(mHandler,
+			service.updateUserInfo(currentUser, new HandlerWrap(mHandler,
 					UPDATEUSER_CALLBACK, null));
 		}
 		super.onBackPressed();

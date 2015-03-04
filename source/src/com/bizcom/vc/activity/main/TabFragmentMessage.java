@@ -171,7 +171,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		V2Log.d(TAG, "TabFragmentMessage onCreate...");
+		Log.i("20150303 1", "TabFragmentMessage onCreate()");
 		mContext = getActivity();
 		res = getResources();
 		service = Executors.newCachedThreadPool();
@@ -221,6 +221,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+		Log.i("20150303 1", "TabFragmentMessage onCreateView()");
 		if (rootView == null) {
 			rootView = inflater.inflate(R.layout.tab_fragment_conversations,
 					container, false);
@@ -236,6 +237,8 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 
 	@Override
 	public void onDestroy() {
+		Log.i("20150303 1", "TabFragmentMessage onDestroy()");
+		super.onDestroy();
 		if(mChatPlayer != null){
 			mChatPlayer.release();
 			mChatPlayer = null;
@@ -248,6 +251,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 
 	@Override
 	public void onDestroyView() {
+		Log.i("20150303 1", "TabFragmentMessage onDestroyView()");
 		super.onDestroyView();
 		((ViewGroup) rootView.getParent()).removeView(rootView);
 	}
@@ -307,6 +311,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 
 	@Override
 	public void onStart() {
+		Log.i("20150303 1","TabFragmentMessage onStart()");
 		super.onStart();
 		if (!isCreate)
 			sortAndUpdate();
@@ -315,6 +320,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 
 	@Override
 	public void onStop() {
+		Log.i("20150303 1","TabFragmentMessage onStop()");
 		super.onStop();
 	}
 

@@ -78,7 +78,7 @@ import com.bizcom.request.jni.PermissionRequestIndication;
 import com.bizcom.request.jni.PermissionUpdateIndication;
 import com.bizcom.request.util.AsyncResult;
 import com.bizcom.request.util.ConferencMessageSyncService;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.DensityUtils;
 import com.bizcom.util.DialogManager;
 import com.bizcom.util.OrderedHashMap;
@@ -3727,11 +3727,11 @@ public class ConferenceActivity extends Activity {
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == TAG_CLOSE_DEVICE) {
 					cb.requestCloseVideoDevice(cg, (UserDeviceConfig) msg.obj,
-							new MessageListener(mLocalHandler,
+							new HandlerWrap(mLocalHandler,
 									REQUEST_CLOSE_DEVICE_RESPONSE, null));
 				} else if (msg.arg1 == TAG_OPEN_DEVICE) {
 					cb.requestOpenVideoDevice(cg, (UserDeviceConfig) msg.obj,
-							new MessageListener(mLocalHandler,
+							new HandlerWrap(mLocalHandler,
 									REQUEST_OPEN_DEVICE_RESPONSE, null));
 				}
 				break;

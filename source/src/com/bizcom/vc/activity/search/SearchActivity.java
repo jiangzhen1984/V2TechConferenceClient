@@ -18,7 +18,7 @@ import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.V2SearchRequest;
 import com.bizcom.request.V2ImRequest;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.SearchedResult;
@@ -150,7 +150,7 @@ public class SearchActivity extends Activity {
 									.getText().toString(), 1);
 			WaitDialogBuilder.showNormalWithHintProgress(SearchActivity.this,
 					getResources().getString(R.string.status_searching), true);
-			searchService.search(par, new MessageListener(mLocalHandler,
+			searchService.search(par, new HandlerWrap(mLocalHandler,
 					SEARCH_DONE, null));
 
 		}

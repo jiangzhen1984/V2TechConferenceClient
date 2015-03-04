@@ -24,7 +24,7 @@ import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.util.BitmapManager;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.request.util.BitmapManager.BitmapChangedListener;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.util.V2Toast;
@@ -252,7 +252,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 				handleAcceptDone();
 			else {
 				service.acceptApplication(crowd, applicant,
-						new MessageListener(mLocalHandler,
+						new HandlerWrap(mLocalHandler,
 								ACCEPT_INVITATION_DONE, null));
 				WaitDialogBuilder.showNormalWithHintProgress(mContext, true)
 						.initTimeOut();
@@ -275,7 +275,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 			// true).initTimeOut();
 			// }
 			service.refuseApplication(crowd, applicant, "",
-					new MessageListener(mLocalHandler, REFUSE_INVITATION_DONE,
+					new HandlerWrap(mLocalHandler, REFUSE_INVITATION_DONE,
 							null));
 			handleDeclineDone();
 		}

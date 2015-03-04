@@ -38,7 +38,7 @@ import com.bizcom.vc.listener.ConferenceListener;
 import com.bizcom.vc.listener.NotificationListener;
 import com.bizcom.vc.receiver.HeadSetPlugReceiver;
 import com.bizcom.vc.service.JNIService;
-import com.bizcom.vc.widget.TitleBar;
+import com.bizcom.vc.widget.HeadLayoutManager;
 import com.bizcom.vo.Conference;
 import com.bizcom.vo.Conversation;
 import com.bizcom.vo.NetworkStateCode;
@@ -49,193 +49,140 @@ import com.v2tech.R;
 
 public class MainActivity extends FragmentActivity implements
 		NotificationListener {
+	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
+	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
+	private static final String TAG = "MainActivity";
 
-	private Context mContext;
-	private boolean exitedFlag = false;
-	private Conference conf;
-
-	private TitleBar titleBar;
+	private HeadLayoutManager mHeadLayoutManager;
 	private EditText searchEdit;
 	private TabHost mTabHost;
 	private ViewPager mViewPager;
 	private MyFragmentPagerAdapter mPagerAdapter;
-
+	private LocalReceiver receiver = new LocalReceiver();
 	private ConferenceListener mConfListener;
-
 	private List<Fragment> fragments;
-
 	private HeadSetPlugReceiver localReceiver = new HeadSetPlugReceiver();
-
-	public static final String SERVICE_BOUNDED_EVENT = "com.v2tech.SERVICE_BOUNDED_EVENT";
-	public static final String SERVICE_UNBOUNDED_EVENT = "com.v2tech.SERVICE_UNBOUNDED_EVENT";
-	private static final String TAG = "MainActivity";
 	private TabHostOnTabChangeListener mOnTabChangeListener = new TabHostOnTabChangeListener();
 
-	private TabClass[] mTabClasses = new TabClass[] {
+	private Context mContext;
+	private Conference conf;
+	private boolean exitedFlag = false;
 
-			new TabClass(PublicIntent.TAG_CONTACT,
+	private TabWrap[] mTabClasses = new TabWrap[] {
+
+			new TabWrap(PublicIntent.TAG_CONTACT, R.string.tab_contact_name,
+					R.string.tab_contact_name,
 					R.drawable.selector_tab_contact_button,
-					R.string.tab_contact_name, R.string.tab_contact_name,
 					TabFragmentContacts.class.getName()),
-
-			new TabClass(PublicIntent.TAG_ORG,
-					R.drawable.selector_tab_org_button, R.string.tab_org_name,
-					R.string.tab_org_name,
+			new TabWrap(PublicIntent.TAG_ORG, R.string.tab_org_name,
+					R.string.tab_org_name, R.drawable.selector_tab_org_button,
 					TabFragmentOrganization.class.getName()),
-
-			new TabClass(PublicIntent.TAG_GROUP,
+			new TabWrap(PublicIntent.TAG_GROUP, R.string.tab_group_name,
+					R.string.tab_group_name,
 					R.drawable.selector_tab_group_button,
-					R.string.tab_group_name, R.string.tab_group_name,
 					TabFragmentCrow.class.getName()),
-			new TabClass(PublicIntent.TAG_CONF,
+			new TabWrap(PublicIntent.TAG_CONF, R.string.tab_conference_name,
+					R.string.tab_conference_name,
 					R.drawable.selector_tab_conference_button,
-					R.string.tab_conference_name, R.string.tab_conference_name,
 					TabFragmentConference.class.getName()),
-			new TabClass(PublicIntent.TAG_COV,
+			new TabWrap(PublicIntent.TAG_COV, R.string.tab_conversation_name,
+					R.string.tab_conversation_name,
 					R.drawable.selector_tab_conversation_button,
-					R.string.tab_conversation_name,
-					R.string.tab_conversation_name,
 					TabFragmentMessage.class.getName()) };
 
-	private LocalReceiver receiver = new LocalReceiver();
-
-	/**
-	 * A simple factory that returns dummy views to the Tabhost
-	 * 
-	 */
-	class TabFactory implements TabContentFactory {
-
-		private final Context mContext;
-
-		/**
-		 * @param context
-		 */
-		public TabFactory(Context context) {
-			mContext = context;
-		}
-
-		/**
-		 * (non-Javadoc)
-		 * 
-		 * @see android.widget.TabHost.TabContentFactory#createTabContent(java.lang.String)
-		 */
-		public View createTabContent(String tag) {
-			View v = new View(mContext);
-			v.setMinimumWidth(0);
-			v.setMinimumHeight(0);
-			return v;
-		}
-
-	}
-
-	/**
-	 * (non-Javadoc)
-	 * 
-	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-	 */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// Inflate the layout
 		setContentView(R.layout.activity_main);
-		// Initialise the TabHost
 		mContext = this;
 		searchEdit = (EditText) findViewById(R.id.search_edit);
-		// Init title bar
-		View titleBarLayout = findViewById(R.id.title_bar_ly);
-		titleBar = new TitleBar(mContext, titleBarLayout);
-		titleBar.regsiterSearchedTextListener(listenerOfSearchTextWatcher);
+		mHeadLayoutManager = new HeadLayoutManager(mContext,
+				findViewById(R.id.head_layout));
+		mHeadLayoutManager
+				.regsiterSearchedTextListener(listenerOfSearchTextWatcher);
+		mHeadLayoutManager.updateTitle(mTabClasses[0].mTabTitle);
 
-		// Initialize first title name
-		titleBar.updateTitle(mTabClasses[0].mTabTitleId);
-
-		this.initialiseTabHost(savedInstanceState);
+		initialiseTabHost();
 		if (savedInstanceState != null) {
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
 		}
 
 		int index = getIntent().getIntExtra("initFragment", 0);
-		// Intialise ViewPager
-		this.intialiseViewPager(index);
+		intialiseViewPager(index);
+
 		initReceiver();
-		// Start animation
-		// this.overridePendingTransition(R.anim.left_in, R.anim.left_out);
 		updateFileState();
 	}
 
-	/**
-	 * (non-Javadoc)
-	 * 
-	 * @see android.support.v4.app.FragmentActivity#onSaveInstanceState(android.os.Bundle)
-	 */
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putString("tab", mTabHost.getCurrentTabTag());
 		super.onSaveInstanceState(outState);
 	}
 
-	/**
-	 * Initialise ViewPager
-	 */
-	private void intialiseViewPager(int index) {
-
-		fragments = new Vector<Fragment>();
-
-		for (TabClass tc : mTabClasses) {
-			Bundle bundle = new Bundle();
-			bundle.putString("tag", tc.mTabName);
-			Fragment frg = Fragment.instantiate(this, tc.clsName, bundle);
-			if (frg instanceof ConferenceListener
-					&& tc.mTabName.equals(PublicIntent.TAG_CONF)) {
-				mConfListener = (ConferenceListener) frg;
-			}
-			fragments.add(frg);
-		}
-
-		this.mPagerAdapter = new MyFragmentPagerAdapter(
-				super.getSupportFragmentManager(), fragments);
-		this.mViewPager = (ViewPager) super.findViewById(R.id.viewpager);
-		this.mViewPager.setAdapter(this.mPagerAdapter);
-		this.mViewPager.setOnPageChangeListener(listenerOfPageChange);
-		this.mViewPager.setOffscreenPageLimit(5);
-		this.mViewPager.setCurrentItem(index);
-	}
-
-	/**
-	 * Initialize the Tab Host
-	 */
-	private void initialiseTabHost(Bundle args) {
+	private void initialiseTabHost() {
 		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
 		mTabHost.setup();
 
-		for (TabClass tc : mTabClasses) {
-			TabHost.TabSpec confTabSpec = this.mTabHost.newTabSpec(tc.mTabName)
-					.setIndicator(getTabView(tc));
-			confTabSpec.setContent(new TabFactory(this));
-			mTabHost.addTab(confTabSpec);
+		for (TabWrap tabWrap : mTabClasses) {
+			TabHost.TabSpec tabSpec = this.mTabHost
+					.newTabSpec(tabWrap.mTabName).setIndicator(
+							getTabView(tabWrap));
+			tabSpec.setContent(new TabFactory(this));
+			mTabHost.addTab(tabSpec);
 		}
 
 		mTabHost.setOnTabChangedListener(mOnTabChangeListener);
 	}
 
-	private View getTabView(TabClass tcl) {
+	private View getTabView(TabWrap tabWrap) {
 
 		LayoutInflater inflater = LayoutInflater.from(this);
 		View v = inflater.inflate(R.layout.tab_widget_view, null, false);
 		ImageView iv = (ImageView) v.findViewById(R.id.tab_image);
 		if (iv != null) {
-			iv.setImageDrawable(this.getResources().getDrawable(tcl.mDraId));
+			iv.setImageDrawable(this.getResources().getDrawable(
+					tabWrap.mDrawableId));
 			iv.bringToFront();
 		}
 
 		TextView tv = (TextView) v.findViewById(R.id.tab_name);
 		if (tv != null) {
-			tv.setText(this.getResources().getText(tcl.mTabNameId));
+			tv.setText(this.getResources().getText(tabWrap.mShowText));
 			tv.bringToFront();
 		}
 
 		View notifi = v.findViewById(R.id.tab_notificator);
-		tcl.notificator = notifi;
-		tcl.notificator.setVisibility(View.INVISIBLE);
+		tabWrap.mViewNotificator = notifi;
+		tabWrap.mViewNotificator.setVisibility(View.INVISIBLE);
 		return v;
+	}
+
+	private void intialiseViewPager(int index) {
+
+		fragments = new Vector<Fragment>();
+
+		for (TabWrap tabWrap : mTabClasses) {
+			Bundle bundle = new Bundle();
+			bundle.putString("tag", tabWrap.mTabName);
+			Fragment fragment = Fragment.instantiate(this, tabWrap.mFragmentClassName,
+					bundle);
+			
+			if (fragment instanceof ConferenceListener
+					&& tabWrap.mTabName.equals(PublicIntent.TAG_CONF)) {
+				mConfListener = (ConferenceListener) fragment;
+			}
+			
+			fragments.add(fragment);
+		}
+
+		mViewPager = (ViewPager) super.findViewById(R.id.viewpager);
+		
+		mPagerAdapter = new MyFragmentPagerAdapter(
+				super.getSupportFragmentManager(), fragments);
+		mViewPager.setAdapter(this.mPagerAdapter);
+		
+		mViewPager.setOnPageChangeListener(listenerOfPageChange);
+		mViewPager.setOffscreenPageLimit(5);
+		mViewPager.setCurrentItem(index);
 	}
 
 	private void initReceiver() {
@@ -323,11 +270,11 @@ public class MainActivity extends FragmentActivity implements
 		View noticator = null;
 		if (type == Conversation.TYPE_GROUP
 				|| type == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
-			noticator = mTabClasses[2].notificator;
+			noticator = mTabClasses[2].mViewNotificator;
 		} else if (type == Conversation.TYPE_CONFERNECE) {
-			noticator = mTabClasses[3].notificator;
+			noticator = mTabClasses[3].mViewNotificator;
 		} else if (type == Conversation.TYPE_CONTACT) {
-			noticator = mTabClasses[4].notificator;
+			noticator = mTabClasses[4].mViewNotificator;
 		} else {
 			V2Log.e(TAG, "Error TabFragment Type Value : " + type);
 			return;
@@ -367,6 +314,48 @@ public class MainActivity extends FragmentActivity implements
 
 	};
 
+	/**
+	 * Detecting all VMessageFileItem Object that state is sending or
+	 * downloading in the database , and change their status to failed..
+	 */
+	public void updateFileState() {
+		new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				List<VMessageFileItem> loadFileMessages = MessageLoader
+						.loadFileMessages(-1, -1);
+				if (loadFileMessages != null) {
+					for (VMessageFileItem fileItem : loadFileMessages) {
+						V2Log.d(TAG,
+								"Iterator VMessageFileItem -- name is : "
+										+ fileItem.getFileName() + " state : "
+										+ State.fromInt(fileItem.getState()));
+						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
+								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING)
+							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
+						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING
+								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
+							fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
+						int update = MessageLoader.updateFileItemState(
+								mContext, fileItem);
+						if (update == -1) {
+							V2Log.e(TAG,
+									"update file state failed... file id is : "
+											+ fileItem.getUuid());
+						}
+
+						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD) {
+							GlobalHolder.getInstance().mFailedFiles
+									.add(fileItem.getUuid());
+						}
+					}
+				} else
+					V2Log.e(TAG, "load all files failed... get null");
+			}
+		}).start();
+	}
+
 	private class TabHostOnTabChangeListener implements
 			TabHost.OnTabChangeListener {
 		/**
@@ -382,7 +371,7 @@ public class MainActivity extends FragmentActivity implements
 				return;
 			}
 			// 恢复搜索状态
-			TabClass tab = mTabClasses[pos];
+			TabWrap tab = mTabClasses[pos];
 			Fragment fragment = fragments.get(pos);
 			if (tab.mTabName.equals(PublicIntent.TAG_CONTACT)) {
 			} else if (tab.mTabName.equals(PublicIntent.TAG_ORG)) {
@@ -395,7 +384,7 @@ public class MainActivity extends FragmentActivity implements
 			}
 
 			mViewPager.setCurrentItem(pos);
-			titleBar.updateTitle(mTabClasses[pos].mTabTitleId);
+			mHeadLayoutManager.updateTitle(mTabClasses[pos].mTabTitle);
 		}
 
 	};
@@ -416,7 +405,7 @@ public class MainActivity extends FragmentActivity implements
 		public void onPageSelected(int pos) {
 			searchEdit.setText("");
 			mTabHost.setCurrentTab(pos);
-			titleBar.updateTitle(mTabClasses[pos].mTabTitleId);
+			mHeadLayoutManager.updateTitle(mTabClasses[pos].mTabTitle);
 		}
 
 	};
@@ -477,8 +466,8 @@ public class MainActivity extends FragmentActivity implements
 								+ code.name());
 				V2Log.d("CONNECT",
 						"--------------------------------------------------------------------");
-				if (titleBar != null) {
-					titleBar.updateConnectState(code);
+				if (mHeadLayoutManager != null) {
+					mHeadLayoutManager.updateConnectState(code);
 				} else {
 					V2Log.d("CONNECT", "TitleBar is null !");
 				}
@@ -488,28 +477,28 @@ public class MainActivity extends FragmentActivity implements
 		}
 	}
 
-	class TabClass {
+	class TabWrap {
 		String mTabName;
-		int mDraId;
-		int mTabNameId;
-		int mTabTitleId;
-		String clsName;
-		View notificator;
+		int mTabTitle;
+		int mShowText;
+		int mDrawableId;
+		String mFragmentClassName;
+		View mViewNotificator;
 
-		public TabClass(String mTabName, int mDraId, int mTabNameId,
-				int tabTitleId, String clsName, View notificator) {
+		public TabWrap(String tabName, int tabTitle, int showText,
+				int drawableId, String clsName, View viewNotificator) {
 			super();
-			this.mTabName = mTabName;
-			this.mDraId = mDraId;
-			this.mTabNameId = mTabNameId;
-			this.mTabTitleId = tabTitleId;
-			this.clsName = clsName;
-			this.notificator = notificator;
+			this.mTabName = tabName;
+			this.mTabTitle = tabTitle;
+			this.mShowText = showText;
+			this.mDrawableId = drawableId;
+			this.mFragmentClassName = clsName;
+			this.mViewNotificator = viewNotificator;
 		}
 
-		public TabClass(String tabName, int draId, int tabNameId,
-				int tabTitleId, String clsName) {
-			this(tabName, draId, tabNameId, tabTitleId, clsName, null);
+		public TabWrap(String tabName, int tabTitle, int showText,
+				int drawableId, String clsName) {
+			this(tabName, tabTitle, showText, drawableId, clsName, null);
 		}
 
 	}
@@ -527,44 +516,31 @@ public class MainActivity extends FragmentActivity implements
 	}
 
 	/**
-	 * Detecting all VMessageFileItem Object that state is sending or
-	 * downloading in the database , and change their status to failed..
+	 * A simple factory that returns dummy views to the Tabhost
+	 * 
 	 */
-	public void updateFileState() {
-		new Thread(new Runnable() {
+	class TabFactory implements TabContentFactory {
 
-			@Override
-			public void run() {
-				List<VMessageFileItem> loadFileMessages = MessageLoader
-						.loadFileMessages(-1, -1);
-				if (loadFileMessages != null) {
-					for (VMessageFileItem fileItem : loadFileMessages) {
-						V2Log.d(TAG,
-								"Iterator VMessageFileItem -- name is : "
-										+ fileItem.getFileName() + " state : "
-										+ State.fromInt(fileItem.getState()));
-						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING
-								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING)
-							fileItem.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED);
-						else if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_SENDING
-								|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_SENDING)
-							fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT_FALIED);
-						int update = MessageLoader.updateFileItemState(
-								mContext, fileItem);
-						if (update == -1) {
-							V2Log.e(TAG,
-									"update file state failed... file id is : "
-											+ fileItem.getUuid());
-						}
+		private final Context mContext;
 
-						if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_UNDOWNLOAD) {
-							GlobalHolder.getInstance().mFailedFiles
-									.add(fileItem.getUuid());
-						}
-					}
-				} else
-					V2Log.e(TAG, "load all files failed... get null");
-			}
-		}).start();
+		/**
+		 * @param context
+		 */
+		public TabFactory(Context context) {
+			mContext = context;
+		}
+
+		/**
+		 * (non-Javadoc)
+		 * 
+		 * @see android.widget.TabHost.TabContentFactory#createTabContent(java.lang.String)
+		 */
+		public View createTabContent(String tag) {
+			View v = new View(mContext);
+			v.setMinimumWidth(0);
+			v.setMinimumHeight(0);
+			return v;
+		}
+
 	}
 }

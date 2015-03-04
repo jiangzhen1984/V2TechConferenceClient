@@ -345,7 +345,7 @@ public class JNIService extends Service implements
 				mContext, isAdd, remoteID, tag);
 	}
 
-	private User convertUser(V2User user) {
+	private User v2UserToUser(V2User user) {
 		if (user == null) {
 			return null;
 		}
@@ -410,13 +410,15 @@ public class JNIService extends Service implements
 			switch (msg.what) {
 
 			case JNI_UPDATE_USER_INFO:
-				V2User user = (V2User) msg.obj;
-				User u = convertUser(user);
-				GlobalHolder.getInstance().putUser(u.getmUserId(), u);
+				V2User v2User = (V2User) msg.obj;
+				User user = v2UserToUser(v2User);
+				GlobalHolder.getInstance().putUser(user.getmUserId(), user);
+				
+				
 				Intent userInfos = new Intent(
 						JNI_BROADCAST_USER_UPDATE_BASE_INFO);
 				userInfos.addCategory(JNI_BROADCAST_CATEGROY);
-				userInfos.putExtra("uid", user.uid);
+				userInfos.putExtra("uid", v2User.uid);
 				mContext.sendBroadcast(userInfos);
 				break;
 			case JNI_UPDATE_USER_STATE:
@@ -558,7 +560,7 @@ public class JNIService extends Service implements
 					sendBroadcast(i);
 					return;
 				} else {
-					GroupRequest.getInstance().getGroupInfo(
+					GroupRequest.getInstance().proxy.getGroupInfo(
 							GroupType.CONFERENCE.intValue(), g.getmGId());
 					if (g != null) {
 						GlobalHolder.getInstance().addGroupToList(
@@ -883,7 +885,7 @@ public class JNIService extends Service implements
 
 			User remoteUser = GlobalHolder.getInstance().getUser(user.uid);
 			if (remoteUser.isDirty()) {
-				remoteUser = convertUser(user);
+				remoteUser = v2UserToUser(user);
 				GlobalHolder.getInstance().putUser(user.uid, remoteUser);
 			}
 
@@ -1014,7 +1016,7 @@ public class JNIService extends Service implements
 						getApplicationContext(), vUser, additInfo);
 			} else {
 				isOutORG = true;
-				User newUser = convertUser(user);
+				User newUser = v2UserToUser(user);
 				GlobalHolder.getInstance().putUser(newUser.getmUserId(),
 						newUser);
 				AddFriendHistroysHandler.addMeNeedAuthentication(
@@ -1198,7 +1200,7 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			User newUser = convertUser(user);
+			User newUser = v2UserToUser(user);
 			GroupType gType = GroupType.fromInt(groupType);
 			newUser = GlobalHolder.getInstance().putUser(newUser.getmUserId(),
 					newUser);

@@ -34,7 +34,7 @@ import com.bizcom.request.V2ContactsRequest;
 import com.bizcom.request.V2ImRequest;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.util.BitmapManager;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.util.WaitDialogBuilder;
 import com.bizcom.vc.activity.main.MainActivity;
 import com.bizcom.vc.application.GlobalHolder;
@@ -401,7 +401,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			public void onClick(View v) {
 				// 删除好友
 				deleteContactDialog.dismiss();
-				contactService.delContact(u, new MessageListener(lh,
+				contactService.delContact(u, new HandlerWrap(lh,
 						DELETE_CONTACT_USER, null));
 				WaitDialogBuilder.showNormalWithHintProgress(mContext, true);
 			}
@@ -585,7 +585,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			switch (msg.what) {
 			case UPDATE_USER_INFO:
 				gatherUserData();
-				us.updateUserInfo(u, new MessageListener(this,
+				us.updateUserInfo(u, new HandlerWrap(this,
 						UPDATE_USER_INFO_DONE, null));
 				break;
 			case UPDATE_USER_INFO_DONE:

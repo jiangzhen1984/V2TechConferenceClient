@@ -32,7 +32,7 @@ import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.request.V2CrowdGroupRequest;
 import com.bizcom.request.jni.CreateCrowdResponse;
 import com.bizcom.request.jni.JNIResponse;
-import com.bizcom.request.util.MessageListener;
+import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.vc.activity.BaseCreateActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
@@ -450,10 +450,10 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 				if (opType == SEND_SERVER_TYPE_CREATE) {
 					// Do not add userList to crowd, because this just
 					// invitation.
-					cg.createCrowdGroup(crowd, userList, new MessageListener(
+					cg.createCrowdGroup(crowd, userList, new HandlerWrap(
 							mLocalHandler, CREATE_GROUP_MESSAGE, crowd));
 				} else {
-					cg.inviteMember(crowd, userList, new MessageListener(
+					cg.inviteMember(crowd, userList, new HandlerWrap(
 							mLocalHandler, UPDATE_CROWD_RESPONSE, crowd));
 				}
 				break;

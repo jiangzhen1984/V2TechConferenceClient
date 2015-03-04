@@ -41,11 +41,11 @@ public class DeviceRequest extends V2AbstractHandler {
 	 * @see UserDeviceConfig
 	 */
 	public void requestOpenVideoDevice(UserDeviceConfig userDevice,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (userDevice == null) {
 			JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0,
 					RequestConfCreateResponse.Result.INCORRECT_PAR);
-			sendResult(caller, jniRes);
+			callerSendMessage(caller, jniRes);
 			return;
 		}
 		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, DEFAULT_TIME_OUT_SECS,
@@ -80,12 +80,12 @@ public class DeviceRequest extends V2AbstractHandler {
 	 * @see UserDeviceConfig
 	 */
 	public void requestCloseVideoDevice(UserDeviceConfig userDevice,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (userDevice == null) {
 			JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
 					System.currentTimeMillis() / 1000,
 					RequestCloseUserVideoDeviceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, jniRes);
+			callerSendMessage(caller, jniRes);
 			return;
 		}
 		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
@@ -120,11 +120,11 @@ public class DeviceRequest extends V2AbstractHandler {
 	 * @see UserDeviceConfig
 	 */
 	public void requestOpenVideoDevice(Group group, UserDeviceConfig userDevice,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (userDevice == null || group == null) {
 			JNIResponse jniRes = new RequestOpenUserVideoDeviceResponse(0,
 					RequestConfCreateResponse.Result.INCORRECT_PAR);
-			sendResult(caller, jniRes);
+			callerSendMessage(caller, jniRes);
 			return;
 		}
 		initTimeoutMessage(JNI_REQUEST_OPEN_VIDEO, DEFAULT_TIME_OUT_SECS,
@@ -161,12 +161,12 @@ public class DeviceRequest extends V2AbstractHandler {
 	 * @see UserDeviceConfig
 	 */
 	public void requestCloseVideoDevice(Group group, UserDeviceConfig userDevice,
-			MessageListener caller) {
+			HandlerWrap caller) {
 		if (userDevice == null || group == null) {
 			JNIResponse jniRes = new RequestCloseUserVideoDeviceResponse(
 					System.currentTimeMillis() / 1000,
 					RequestCloseUserVideoDeviceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, jniRes);
+			callerSendMessage(caller, jniRes);
 			return;
 		}
 		initTimeoutMessage(JNI_REQUEST_CLOSE_VIDEO, DEFAULT_TIME_OUT_SECS,
@@ -196,12 +196,12 @@ public class DeviceRequest extends V2AbstractHandler {
 	 *            if input is null, ignore response Message.object is
 	 *            {@link com.bizcom.request.jni.RequestUpdateCameraParametersResponse}
 	 */
-	public void updateCameraParameters(CameraConfiguration cc, MessageListener caller) {
+	public void updateCameraParameters(CameraConfiguration cc, HandlerWrap caller) {
 		if (cc == null) {
 			JNIResponse jniRes = new RequestUpdateCameraParametersResponse(
 					null,
 					RequestCloseUserVideoDeviceResponse.Result.INCORRECT_PAR);
-			sendResult(caller, jniRes);
+			callerSendMessage(caller, jniRes);
 			return;
 		}
 		initTimeoutMessage(JNI_UPDATE_CAMERA_PAR, DEFAULT_TIME_OUT_SECS, caller);
