@@ -1532,7 +1532,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 				MessageAuthenticationActivity.class);
 		i = startAuthenticationActivity(i, type);
 		Notificator.updateSystemNotification(mContext,
-				res.getString(R.string.status_bar_notification), msg, 1, i,
+				res.getString(R.string.status_bar_notification), msg, 0, i,
 				PublicIntent.MESSAGE_NOTIFICATION_ID);
 	}
 
@@ -2374,21 +2374,21 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 					name);
 		} else if ((tempNode.fromUserID == tempNode.remoteUserID)
 				&& (tempNode.ownerAuthType == 1)) {// 别人加我不管我有没有处理
-			content = String.format(
-					res.getString(R.string.friend_apply_add_you_friend), name);
+			if(tempNode.addState == 0){
+				content = String.format(
+						res.getString(R.string.friend_apply_add_you_friend), name);
+			} else if(tempNode.addState == 1){ // 我加别人已被同意或我加别人不需验证
+				content = String.format(res.getString(R.string.friend_relation),
+						name);
+			} else if (tempNode.addState == 2){
+				content = String.format(
+						res.getString(R.string.friend_was_reject_apply), name);
+			}
 		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
 				&& (tempNode.addState == 0)) {// 我加别人等待验证
 			content = String.format(
 					res.getString(R.string.friend_apply_add_waiting_verify),
 					name);
-		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-				&& (tempNode.addState == 1)) {// 我加别人已被同意或我加别人不需验证
-			content = String.format(res.getString(R.string.friend_relation),
-					name);
-		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-				&& (tempNode.addState == 2)) {// 我加别人已被拒绝
-			content = String.format(
-					res.getString(R.string.friend_was_reject_apply), name);
 		}
 		return content;
 	}

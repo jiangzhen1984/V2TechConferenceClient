@@ -426,10 +426,7 @@ public class ConversationTextActivity extends Activity implements
 				remoteChatUser = new User(remoteChatUserID);
 			}
 
-			if (!TextUtils.isEmpty(remoteChatUser.getCommentName_NickName()))
-				mUserTitleTV.setText(remoteChatUser.getCommentName_NickName());
-			else
-				mUserTitleTV.setText(remoteChatUser.getDisplayName());
+			mUserTitleTV.setText(remoteChatUser.getDisplayName());
 			mButtonCreateMetting.setVisibility(View.GONE);
 			mVideoCallButton.setVisibility(View.VISIBLE);
 			mAudioCallButton.setVisibility(View.VISIBLE);
@@ -2797,7 +2794,7 @@ public class ConversationTextActivity extends Activity implements
 					} else {
 						String filePath = GlobalConfig.getGlobalAudioPath()
 								+ "/" + fileID + ".mp3";
-						if (successRecord) {
+						if (successRecord && !isStopped) {
 							V2Log.d(TAG,
 									"the record file sending successfully! id is : "
 											+ fileID);
@@ -2807,14 +2804,14 @@ public class ConversationTextActivity extends Activity implements
 									(int) recordTimes);
 							// Send message to server
 							sendMessageToRemote(vm);
-							successRecord = false;
-							recordTimes = 0;
 						} else {
 							// delete audio file
 							File f = new File(filePath);
 							if (f.exists())
 								f.delete();
 						}
+						successRecord = false;
+						recordTimes = 0;
 					}
 				} else {
 					if (recordType == V2GlobalConstants.RECORD_TYPE_START) {

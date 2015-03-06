@@ -190,7 +190,7 @@ public class CrowdApplicationActivity extends Activity {
 					mRefuseTV.setText(vq.getRejectReason());
 					mApplicationButton.setVisibility(View.VISIBLE);
 					mNotesLy.setVisibility(View.GONE);
-					mTitleTV.setText(R.string.crowd_applicant_invite_title);
+					mTitleTV.setText(R.string.crowd_applicant_title);
 				} else {
 					mRefuseLy.setVisibility(View.GONE);
 					mApplicationButton.setVisibility(View.VISIBLE);
@@ -348,11 +348,11 @@ public class CrowdApplicationActivity extends Activity {
 						getResources().getString(
 								R.string.crowd_Authentication_hit),
 						Toast.LENGTH_SHORT).show();
-				if(vq != null){
-					vq.setQualState(VMessageQualification.QualificationState.INVALID);
-					VerificationProvider.updateCrowdQualicationMessage(vq);
-					isReturnData = true;
-				}
+//				if(vq != null){
+//					vq.setQualState(VMessageQualification.QualificationState.INVALID);
+//					VerificationProvider.updateCrowdQualicationMessage(vq);
+//					isReturnData = true;
+//				}
 				mReturnButton.performClick();
 			} else if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE
 					.equals(intent.getAction())) {

@@ -83,7 +83,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 		setContentView(R.layout.crowd_applicant_detail);
 		mContext = this;
 		BitmapManager.getInstance().registerBitmapChangedListener(listener);
-		headIcon = (ImageView) findViewById(R.id.contact_user_detail_head_icon);
+		
 		mTitleText = (TextView) findViewById(R.id.crowd_applicant_title_text);
 		mChildButtonLy = findViewById(R.id.crowd_application_ly);
 
@@ -125,10 +125,15 @@ public class CrowdApplicantDetailActivity extends Activity {
 	}
 
 	private void updateView() {
-		((TextView) findViewById(R.id.crowd_applicant_name)).setText(applicant
-				.getDisplayName());
-		((TextView) findViewById(R.id.crowd_applicant_signature))
-				.setText(applicant.getSignature());
+		
+		View view = findViewById(R.id.common_contact_crowd_applicant_ly);
+		view.setVisibility(View.VISIBLE);
+		headIcon = (ImageView) findViewById(R.id.ws_common_contact_conversation_icon);
+		TextView nameIcon = (TextView) findViewById(R.id.ws_common_contact_conversation_topContent);
+		nameIcon.setText(applicant.getDisplayName());
+		TextView signatureIcon = (TextView) findViewById(R.id.ws_common_contact_conversation_belowContent);
+		signatureIcon.setText(applicant.getSignature());
+		
 		((TextView) findViewById(R.id.contact_user_detail_title_tv))
 				.setText(applicant.getJob());
 		((TextView) findViewById(R.id.contact_user_detail_address_tv))
@@ -186,7 +191,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 			mNotesLayout.setVisibility(View.GONE);
 			mChildButtonLy.setVisibility(View.GONE);
 			mInviteButton.setVisibility(View.VISIBLE);
-			mTitleText.setText(R.string.crowd_applicant_invite_title);
+			mTitleText.setText(R.string.crowd_invitation_titile);
 		} else if (msg.getQualState() == VMessageQualification.QualificationState.BE_ACCEPTED) {
 			mButtonLayout.setVisibility(View.GONE);
 			mChildButtonLy.setVisibility(View.VISIBLE);

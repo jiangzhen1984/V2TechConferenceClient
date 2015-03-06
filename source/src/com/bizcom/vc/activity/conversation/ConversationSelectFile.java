@@ -415,29 +415,33 @@ public class ConversationSelectFile extends Activity {
 		String[] selectionArgs = { select };
 		// 排序
 		String sortOrder = MediaStore.Images.Media.DATE_MODIFIED + " desc";
-		// 查询sd卡上的图片
-		Cursor cursor = contentResolver.query(uri, projection, selection,
-				selectionArgs, sortOrder);
-		if (cursor != null) {
-			FileInfoBean bean = null;
-			while (cursor.moveToNext()) {
-				bean = new FileInfoBean();
-				// 获得图片uri
-				String filePath = cursor.getString(cursor
-						.getColumnIndex(MediaStore.Images.Media.DATA));
-				bean.filePath = filePath;
-				bean.fileSize = Long.valueOf(cursor.getString(cursor
-						.getColumnIndex(MediaStore.Images.Media.SIZE)));
-				bean.fileName = cursor.getString(cursor
-						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
-				bean.fileType = 1;
-				if (mCheckedNameList.contains(bean.fileName)) {
-					bean.isCheck = ITEM_CHECKED;
+		Cursor cursor = null;
+		try {
+			// 查询sd卡上的图片
+			cursor = contentResolver.query(uri, projection, selection,
+					selectionArgs, sortOrder);
+			if (cursor != null) {
+				FileInfoBean bean = null;
+				while (cursor.moveToNext()) {
+					bean = new FileInfoBean();
+					// 获得图片uri
+					String filePath = cursor.getString(cursor
+							.getColumnIndex(MediaStore.Images.Media.DATA));
+					bean.filePath = filePath;
+					bean.fileSize = Long.valueOf(cursor.getString(cursor
+							.getColumnIndex(MediaStore.Images.Media.SIZE)));
+					bean.fileName = cursor.getString(cursor
+							.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
+					bean.fileType = 1;
+					if (mCheckedNameList.contains(bean.fileName)) {
+						bean.isCheck = ITEM_CHECKED;
+					}
+					mFileLists.add(bean);
 				}
-				mFileLists.add(bean);
 			}
-			// 关闭cursor
-			cursor.close();
+		} finally {
+			if(cursor != null)
+				cursor.close();
 		}
 	}
 

@@ -28,7 +28,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.V2.jni.util.V2Log;
-import com.bizcom.db.provider.SearchContentProvider;
 import com.bizcom.vc.activity.conversation.MessageLoader;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.MainApplication;

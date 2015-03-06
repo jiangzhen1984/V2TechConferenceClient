@@ -213,8 +213,7 @@ public class ConversationSelectImage extends Activity {
 				loading.setVisibility(View.VISIBLE);
 				for (int i = 0; i < selectArgs.length; i++) {
 
-					initPictures(Uri.parse(selectArgs[i][0]),
-							selectArgs[i][1]);
+					initPictures(Uri.parse(selectArgs[i][0]), selectArgs[i][1]);
 				}
 
 				handler.sendEmptyMessage(SCAN_SDCARD);
@@ -231,65 +230,71 @@ public class ConversationSelectImage extends Activity {
 		String selection = MediaStore.Images.Media.MIME_TYPE + "=?";
 		String[] selectionArgs = { select };
 		String sortOrder = MediaStore.Images.Media.DATE_MODIFIED + " desc";
-		Cursor cursor = resolver.query(uri, projection, selection,
-				selectionArgs, sortOrder);
-		if (cursor != null) {
-			FileInfoBean bean = null;
-			ArrayList<FileInfoBean> currentList = null;
-			while (cursor.moveToNext()) {
-				bean = new FileInfoBean();
-				String filePath = cursor.getString(cursor
-						.getColumnIndex(MediaStore.Images.Media.DATA));
-				bean.filePath = filePath;
-				bean.fileSize = Long.valueOf(cursor.getString(cursor
-						.getColumnIndex(MediaStore.Images.Media.SIZE)));
-				bean.fileName = cursor.getString(cursor
-						.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
-				bean.fileType = 1;
-				if (TextUtils.isEmpty(filePath))
-					continue;
+		Cursor cursor = null;
+		try {
+			cursor = resolver.query(uri, projection, selection, selectionArgs,
+					sortOrder);
+			if (cursor != null) {
+				FileInfoBean bean = null;
+				ArrayList<FileInfoBean> currentList = null;
+				while (cursor.moveToNext()) {
+					bean = new FileInfoBean();
+					String filePath = cursor.getString(cursor
+							.getColumnIndex(MediaStore.Images.Media.DATA));
+					bean.filePath = filePath;
+					bean.fileSize = Long.valueOf(cursor.getString(cursor
+							.getColumnIndex(MediaStore.Images.Media.SIZE)));
+					bean.fileName = cursor
+							.getString(cursor
+									.getColumnIndex(MediaStore.Images.Media.DISPLAY_NAME));
+					bean.fileType = 1;
+					if (TextUtils.isEmpty(filePath))
+						continue;
 
-				String parentName;
-				String[] s = filePath.split("/");
-				V2Log.i(TAG, "file path : " + filePath);
-				V2Log.i(TAG, "arr size : " + s.length);
-				
-				int type = 0;
-				if(!SDCARD_ROOT.equals(s[1]))
-					type = DEFAULT_PATH;
-				
-				if (type == DEFAULT_PATH) {
-					if (DEFAULT_PATH_INDEX < s.length)
-						parentName = s[DEFAULT_PATH_INDEX];
-					else
-						continue;
-					V2Log.i(TAG, "index name : " + s[DEFAULT_PATH_INDEX]);
-				} else {
-					if (SDCARD_PATH_INDEX <= s.length
-							&& SDCARD_ROOT_NAME.equals(s[2])) {
-						if (SDCARD_PATH_INDEX == s.length - 1)
-							parentName = "root";
+					String parentName;
+					String[] s = filePath.split("/");
+					V2Log.i(TAG, "file path : " + filePath);
+					V2Log.i(TAG, "arr size : " + s.length);
+
+					int type = 0;
+					if (!SDCARD_ROOT.equals(s[1]))
+						type = DEFAULT_PATH;
+
+					if (type == DEFAULT_PATH) {
+						if (DEFAULT_PATH_INDEX < s.length)
+							parentName = s[DEFAULT_PATH_INDEX];
 						else
-							parentName = s[SDCARD_PATH_INDEX];
-					} else
-						continue;
-					V2Log.i(TAG, "index name : " + s[SDCARD_PATH_INDEX]);
-				}
-				V2Log.i(TAG, "parentName name : " + parentName);
-				V2Log.i("------------------------");
-				if (listMap.containsKey(parentName)) {
-					currentList = listMap.get(parentName);
-					if (currentList == null)
+							continue;
+						V2Log.i(TAG, "index name : " + s[DEFAULT_PATH_INDEX]);
+					} else {
+						if (SDCARD_PATH_INDEX <= s.length
+								&& SDCARD_ROOT_NAME.equals(s[2])) {
+							if (SDCARD_PATH_INDEX == s.length - 1)
+								parentName = "root";
+							else
+								parentName = s[SDCARD_PATH_INDEX];
+						} else
+							continue;
+						V2Log.i(TAG, "index name : " + s[SDCARD_PATH_INDEX]);
+					}
+					V2Log.i(TAG, "parentName name : " + parentName);
+					V2Log.i("------------------------");
+					if (listMap.containsKey(parentName)) {
+						currentList = listMap.get(parentName);
+						if (currentList == null)
+							currentList = new ArrayList<FileInfoBean>();
+					} else {
+						pictresClassify.add(parentName);
 						currentList = new ArrayList<FileInfoBean>();
-				} else {
-					pictresClassify.add(parentName);
-					currentList = new ArrayList<FileInfoBean>();
+					}
+					currentList.add(bean);
+					listMap.put(parentName, currentList);
+					bean = null;
 				}
-				currentList.add(bean);
-				listMap.put(parentName, currentList);
-				bean = null;
 			}
-			cursor.close();
+		} finally {
+			if (cursor != null)
+				cursor.close();
 		}
 	}
 

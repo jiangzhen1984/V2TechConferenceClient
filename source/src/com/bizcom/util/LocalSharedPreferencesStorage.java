@@ -39,8 +39,7 @@ public class LocalSharedPreferencesStorage {
 		return e.commit();
 	}
 
-	public static boolean putIntValue(Context context, String key,
-			int value) {
+	public static boolean putIntValue(Context context, String key, int value) {
 		SharedPreferences sf = context.getSharedPreferences(CONFIG_NAME,
 				Context.MODE_PRIVATE);
 		Editor e = sf.edit();
@@ -71,7 +70,6 @@ public class LocalSharedPreferencesStorage {
 			String[] projection = { "_data" };
 
 			Cursor cursor = null;
-
 			try {
 				cursor = context.getContentResolver().query(uri, projection,
 						null, null, null);
@@ -79,21 +77,19 @@ public class LocalSharedPreferencesStorage {
 				if (cursor.moveToFirst()) {
 					return cursor.getString(column_index);
 				}
-			} catch (Exception e) {
-
+			} finally {
+				if (cursor != null)
+					cursor.close();
 			}
 		} else if ("file".equalsIgnoreCase(uri.getScheme())) {
 			return uri.getPath();
 		}
-
 		return null;
-
 	}
-	
+
 	/**
 	 * @param context
-	 * @return
-	 * 		true if current network is connected , otherwise false
+	 * @return true if current network is connected , otherwise false
 	 */
 	public static boolean checkCurrentAviNetwork(Context context) {
 		if (context == null) {
@@ -107,12 +103,12 @@ public class LocalSharedPreferencesStorage {
 
 		android.net.NetworkInfo mobile = connMgr
 				.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-		//need to check mobile !=null, because no mobile network data in PAD
+		// need to check mobile !=null, because no mobile network data in PAD
 		if (wifi.isConnected() || (mobile != null && mobile.isConnected())) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-	
+
 }

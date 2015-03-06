@@ -21,8 +21,8 @@
             android:src="@drawable/selectfile_type_pdf" />
         <ImageView
             android:id="@+id/ws_common_conversation_layout_notificator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="@dimen/conversation_view_notification_size"
+            android:layout_height="@dimen/conversation_view_notification_size"
             android:layout_alignRight="@+id/ws_common_conversation_layout_icon"
             android:layout_alignTop="@+id/ws_common_conversation_layout_icon"
             android:layout_marginRight="@dimen/conversation_view_notification_margin"

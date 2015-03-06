@@ -136,7 +136,7 @@ public class HeadLayoutManager {
 				&& conf.densityDpi < 240) {
 			padding = DensityUtils.dip2px(context, 2);
 		} else {
-			padding = DensityUtils.dip2px(context, 5);
+			padding = DensityUtils.dip2px(context, 4);
 		}
 		marginRight = DensityUtils.dip2px(context, 5);
 	}

@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
@@ -607,6 +608,15 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 				WaitDialogBuilder.showNormalWithHintProgress(mContext, false);
 				JNIResponse response = (JNIResponse) msg.obj;
 				if (response.getResult() == JNIResponse.Result.SUCCESS) {
+					//Send a broadcast to all interface to update user nickname
+					if(!TextUtils.isEmpty(u.getNickName())){
+						Intent i = new Intent();
+						i.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+						i.addCategory(PublicIntent.DEFAULT_CATEGORY);
+						i.putExtra("modifiedUser", u.getmUserId());
+						sendBroadcast(i);
+					}
+					
 					// belongs = null;
 					// isRelation = false;
 					// updateContactGroup();

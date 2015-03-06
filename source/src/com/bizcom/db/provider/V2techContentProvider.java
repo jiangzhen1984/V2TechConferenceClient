@@ -9,6 +9,7 @@ import android.net.Uri;
 import com.bizcom.db.ContentDescriptor;
 import com.bizcom.db.DataBaseContext;
 import com.bizcom.db.V2TechDBHelper;
+import com.bizcom.vc.widget.cus.V2Cursor;
 
 public class V2techContentProvider extends ContentProvider {
 

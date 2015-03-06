@@ -55,6 +55,7 @@ import com.bizcom.vc.activity.contacts.AddFriendHistroysHandler;
 import com.bizcom.vc.activity.contacts.ContactDetail;
 import com.bizcom.vc.activity.contacts.ContactDetail2;
 import com.bizcom.vc.activity.contacts.InputRemarkActivity;
+import com.bizcom.vc.activity.conversation.MessageBuilder;
 import com.bizcom.vc.activity.crow.CrowdApplicantDetailActivity;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.PublicIntent;
@@ -1438,8 +1439,10 @@ public class MessageAuthenticationActivity extends Activity {
 					vm.getCrowdGroup().getName()
 							+ res.getString(R.string.crowd_Authentication_hit),
 					Toast.LENGTH_SHORT).show();
-			// vm.setQualState(QualificationState.INVALID);
-			// MessageBuilder.updateQualicationMessage(mContext , vm);
+//			 vm.setQualState(QualificationState.INVALID);
+//			 MessageBuilder.updateQualicationMessage(mContext , vm);
+			
+			//now don't delete message
 			mMessageList.remove(waitingQualification);
 			waitingQualification = null;
 			VerificationProvider.deleteCrowdQualMessage(vm.getId());

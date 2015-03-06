@@ -53,8 +53,6 @@ public class PublicIntent {
 	//                            for crowd
 	//======================================================================================
 	
-	public static final String START_CROWD_MEMBERS_ACTIVITY = "com.v2tech.start_crowd_members_activity";
-
 	public static final String START_CROWD_FILES_ACTIVITY = "com.v2tech.start_crowd_files_activity";
 
 	public static final String SHOW_CROWD_CONTENT_ACTIVITY = "com.v2tech.crowd_content_activity";
@@ -90,13 +88,6 @@ public class PublicIntent {
 	 *      cid  : discussion board id<br>
 	 */
 	public static final String SHOW_DISCUSSION_BOARD_TOPIC_ACTIVITY = "com.v2tech.discussion_board_topic_activity";
-	
-	/**
-	 * for DiscussionBoardMembersActivity<br>
-	 * Intent key:<br>
-	 *      cid  : discussion board id<br>
-	 */
-	public static final String SHOW_DISCUSSION_BOARD_MEMBERS_ACTIVITY = "com.v2tech.discussion_board_members_activity";
 	
 
 	/**

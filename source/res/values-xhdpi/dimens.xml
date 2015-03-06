@@ -20,7 +20,7 @@
 
     <!-- conversation view -->
     <dimen name="conversation_view_margin">5dp</dimen>
-    <dimen name="conversation_view_notification_margin">7dp</dimen>
+    <dimen name="conversation_view_notification_margin">2dp</dimen>
     <dimen name="conversation_view_name_text_size">17sp</dimen>
     <dimen name="conversation_view_title_margin">20dp</dimen>
     <dimen name="conversation_view_text_max_width">100dp</dimen>
@@ -104,7 +104,7 @@
  <!-- 三角距内容气泡的上边界的距离 -->
     <dimen name="message_body_view_item_bubble_space">-1.5dp</dimen>
  <!-- 气泡间隙，三角与内容之间 -->
-    <dimen name="message_selected_pop_up_window">-6dp</dimen>
+    <dimen name="message_selected_pop_up_window">-8dp</dimen>
     <dimen name="message_body_file_item_progress_layout_margin_right">300dp</dimen>
     <dimen name="message_body_file_item_file_name_text_size">7sp</dimen>
     <dimen name="message_body_failed_size">15dp</dimen>

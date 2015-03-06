@@ -69,9 +69,11 @@ public class GroupMemberView extends LinearLayout {
 			@Override
 			public void onClick(View v) {
 				if (mUser.isShowDelete) {
+					callBack.changeDeletedMembers(false, mUser);
 					mUser.isShowDelete = false;
 					mDeleteButtonTV.setVisibility(View.GONE);
 				} else {
+					callBack.changeDeletedMembers(true, mUser);
 					mUser.isShowDelete = true;
 					mDeleteButtonTV.setVisibility(View.VISIBLE);
 				}
@@ -183,6 +185,8 @@ public class GroupMemberView extends LinearLayout {
 
 	public interface ClickListener {
 
+		public void changeDeletedMembers(boolean isAdd , User user);
+		
 		public void removeMember(User user);
 	}
 }

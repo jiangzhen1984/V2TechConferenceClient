@@ -58,6 +58,7 @@
     <!-- conversation view -->
     <dimen name="conversation_view_margin">5dp</dimen>
     <dimen name="conversation_view_notification_margin">2dp</dimen>
+    <dimen name="conversation_view_notification_size">14dp</dimen>
     <dimen name="conversation_view_name_text_size">17sp</dimen>
     <dimen name="conversation_view_text_max_width">100dp</dimen>
 

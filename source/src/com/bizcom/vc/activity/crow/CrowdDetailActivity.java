@@ -365,9 +365,10 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 
 		@Override
 		public void onClick(View view) {
-			Intent i = new Intent(PublicIntent.START_CROWD_MEMBERS_ACTIVITY);
+			Intent i = new Intent(mContext , GroupMemberActivity.class);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("cid", crowd.getmGId());
+			i.putExtra("memberType", GroupMemberActivity.GROUP_MEMBER_TYPE_CROWD);
 			startActivityForResult(i, TYPE_UPDATE_MEMBERS);
 		}
 

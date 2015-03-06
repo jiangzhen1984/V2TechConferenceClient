@@ -191,10 +191,10 @@ public class DiscussionBoardDetailActivity extends Activity {
 
 		@Override
 		public void onClick(View view) {
-			Intent i = new Intent(
-					PublicIntent.SHOW_DISCUSSION_BOARD_MEMBERS_ACTIVITY);
+			Intent i = new Intent(DiscussionBoardDetailActivity.this , GroupMemberActivity.class);
 			i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 			i.putExtra("cid", crowd.getmGId());
+			i.putExtra("memberType", GroupMemberActivity.GROUP_MEMBER_TYPE_DISCUSSION);
 			startActivityForResult(i, TYPE_UPDATE_MEMBERS);
 		}
 
