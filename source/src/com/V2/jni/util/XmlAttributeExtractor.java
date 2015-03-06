@@ -24,7 +24,7 @@ import android.text.TextUtils;
 
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vo.User;
 
@@ -44,36 +44,39 @@ public class XmlAttributeExtractor {
 		if (end == -1) {
 			return null;
 		}
-		
-		return EscapedcharactersProcessing.reverse(str.substring(start + len, end));
-	}
-	
-	/**
-	 * <crowd announcement='ss' authtype='0' creatoruserid='12176' id='423' name='ccc' size='500' summary='bb'/>
 
+		return EscapedcharactersProcessing.reverse(str.substring(start + len,
+				end));
+	}
+
+	/**
+	 * <crowd announcement='ss' authtype='0' creatoruserid='12176' id='423'
+	 * name='ccc' size='500' summary='bb'/>
+	 * 
 	 * @param str
-	 * @param attribute   just input creatoruserid
+	 * @param attribute
+	 *            just input creatoruserid
 	 * @return
 	 */
 	public static String extractAttribute(String str, String attribute) {
 		if (TextUtils.isEmpty(str) || TextUtils.isEmpty(attribute)) {
 			return null;
 		}
-		
-		String key =" "+ attribute+"=";
+
+		String key = " " + attribute + "=";
 		int start = str.indexOf(key);
 		if (start == -1) {
 			return null;
 		}
-		int len = key.length()+ 1;
-		
-		String flag = str.substring( start + len -1 , start + len);
-		
-		int end = str.indexOf(flag.toString(), start + len );
+		int len = key.length() + 1;
+
+		String flag = str.substring(start + len - 1, start + len);
+
+		int end = str.indexOf(flag.toString(), start + len);
 		if (end == -1) {
 			return null;
 		}
-		
+
 		String check = str.substring(start + len, end);
 		return EscapedcharactersProcessing.reverse(check);
 	}
@@ -84,20 +87,20 @@ public class XmlAttributeExtractor {
 	 * @param tag
 	 * @return
 	 */
-	public static List<V2User> parseUserList(String xml, String tag) {
+	public static List<BoUserInfoBase> parseUserList(String xml, String tag) {
 		Document doc = buildDocument(xml);
-		List<V2User> listUser = new ArrayList<V2User>();
+		List<BoUserInfoBase> listUser = new ArrayList<BoUserInfoBase>();
 		NodeList userNodeList = doc.getElementsByTagName(tag);
 		Element userElement;
 
 		for (int i = 0; i < userNodeList.getLength(); i++) {
 			userElement = (Element) userNodeList.item(i);
-			V2User user = null;
+			BoUserInfoBase user = null;
 			String uid = userElement.getAttribute("id");
 			if (uid != null && !uid.isEmpty()) {
-				user = new V2User(Long.parseLong(uid));
+				user = new BoUserInfoBase(Long.parseLong(uid));
 				String name = userElement.getAttribute("nickname");
-				user.setName(name);
+				user.setNickName_name(name);
 				listUser.add(user);
 			}
 		}
@@ -126,24 +129,24 @@ public class XmlAttributeExtractor {
 			Date date = new Date(times);
 			String name = conferenceElement.getAttribute("subject");
 			String uid = conferenceElement.getAttribute("createuserid");
-			V2User user = null;
+			BoUserInfoBase user = null;
 			if (uid != null && !uid.isEmpty()) {
-				user = new V2User(Long.parseLong(uid));
+				user = new BoUserInfoBase(Long.parseLong(uid));
 			}
 
 			listConf.add(new V2Group(Long.parseLong(conferenceElement
 					.getAttribute("id")), name, V2Group.TYPE_CONF, user, date,
-					new V2User(cid)));
+					new BoUserInfoBase(cid)));
 		}
 		return listConf;
 	}
-	
+
 	/**
 	 * <pre>
 	 *  xml示例
 	 *  OnGetGroupInfo==>groupType:3 
-	 *	sXml: < crowd announcement='' authtype='0' creatoruserid='11112130'
-	 *			id='411172' name='zzz' size='500' summary=''/>
+	 * sXml: < crowd announcement='' authtype='0' creatoruserid='11112130'
+	 * 		id='411172' name='zzz' size='500' summary=''/>
 	 *  IOS发送：
 	 *  OnInviteJoinGroup::==>3:
 	 *  	sXml:< crowd id='14000144' name='nmm'/>:
@@ -159,48 +162,56 @@ public class XmlAttributeExtractor {
 	 *  OnAcceptApplyJoinGroup::==> groupType:3:
 	 *  	sXml:< crowd announcement='' authtype='0' creatoruserid='1290' id='492' name='12' size='0' summary=''/>
 	 * </pre>
+	 * 
 	 * @param sXml
 	 * @param userInfos
 	 * @return
 	 */
-	public static V2Group parseSingleCrowd(String sXml , String userInfos){
-		if(TextUtils.isEmpty(sXml)){
+	public static V2Group parseSingleCrowd(String sXml, String userInfos) {
+		if (TextUtils.isEmpty(sXml)) {
 			V2Log.e("XmlAttributeExtractor parseSingleCrowd --> parse failed , given xml is null");
 			return null;
 		}
-		
+
 		try {
-			XmlPullParser pull = XmlPullParserFactory.newInstance().newPullParser();
+			XmlPullParser pull = XmlPullParserFactory.newInstance()
+					.newPullParser();
 			pull.setInput(new ByteArrayInputStream(sXml.getBytes()), "UTF-8");
-			int eventCode = pull.getEventType(); 
+			int eventCode = pull.getEventType();
 			V2Group v2Group = null;
-			while(eventCode!=XmlPullParser.END_DOCUMENT){
-				switch(eventCode){
+			while (eventCode != XmlPullParser.END_DOCUMENT) {
+				switch (eventCode) {
 				case XmlPullParser.START_TAG:
-					if("crowd".equals(pull.getName())){
+					if ("crowd".equals(pull.getName())) {
 						String id = pull.getAttributeValue(null, "id");
-						if(TextUtils.isEmpty(id)){
+						if (TextUtils.isEmpty(id)) {
 							V2Log.e("XmlAttributeExtractor parseSingleCrowd --> parse failed ,Unknow group information,"
-									+ " parse group id is null , xml is : " + sXml);
+									+ " parse group id is null , xml is : "
+									+ sXml);
 							return null;
 						}
-						
-						String name = pull.getAttributeValue(null, "name");
-						v2Group = new V2Group(Long.parseLong(id), name, V2GlobalConstants.GROUP_TYPE_CROWD);
 
-						String summary = pull.getAttributeValue(null, "summary");
-						String announcement = pull.getAttributeValue(null, "announcement");
-						String authtype = pull.getAttributeValue(null, "authtype");
-						String creatoruserid = pull.getAttributeValue(null, "creatoruserid");
+						String name = pull.getAttributeValue(null, "name");
+						v2Group = new V2Group(Long.parseLong(id), name,
+								V2GlobalConstants.GROUP_TYPE_CROWD);
+
+						String summary = pull
+								.getAttributeValue(null, "summary");
+						String announcement = pull.getAttributeValue(null,
+								"announcement");
+						String authtype = pull.getAttributeValue(null,
+								"authtype");
+						String creatoruserid = pull.getAttributeValue(null,
+								"creatoruserid");
 						v2Group.setAnnounce(announcement);
 						v2Group.setBrief(summary);
 						if (authtype != null) {
 							v2Group.authType = Integer.parseInt(authtype);
 						}
-						
-						if(!TextUtils.isEmpty(creatoruserid)){
-							V2User u = new V2User();
-							u.uid = Long.parseLong(creatoruserid);
+
+						if (!TextUtils.isEmpty(creatoruserid)) {
+							BoUserInfoBase u = new BoUserInfoBase();
+							u.mId = Long.parseLong(creatoruserid);
 							v2Group.owner = u;
 							v2Group.creator = u;
 						}
@@ -211,30 +222,34 @@ public class XmlAttributeExtractor {
 				}
 				eventCode = pull.next();
 			}
-			
-			if(v2Group == null){
+
+			if (v2Group == null) {
 				V2Log.e("XmlAttributeExtractor parseSingleCrowd --> Parse Failed! , Unknow Group Information , "
 						+ "parse group infos is null , xml is : " + sXml);
 				return null;
 			}
-			
-			if(v2Group.owner == null){
-				if(!TextUtils.isEmpty(userInfos)){
-					String creatorID = XmlAttributeExtractor.extractAttribute(userInfos, "id");
-					if(TextUtils.isEmpty(creatorID)){
+
+			if (v2Group.owner == null) {
+				if (!TextUtils.isEmpty(userInfos)) {
+					String creatorID = XmlAttributeExtractor.extractAttribute(
+							userInfos, "id");
+					if (TextUtils.isEmpty(creatorID)) {
 						V2Log.e("XmlAttributeExtractor parseSingleCrowd --> Parse Failed! , Unknow Group Createor User Information , "
-								+ "parse creator id is null , sXml is : " + sXml + " and userInfo: " + userInfos);
+								+ "parse creator id is null , sXml is : "
+								+ sXml + " and userInfo: " + userInfos);
 						return null;
 					}
-					
-					V2User u = new V2User();
-					u.uid = Long.parseLong(creatorID);
+
+					BoUserInfoBase u = new BoUserInfoBase();
+					u.mId = Long.parseLong(creatorID);
 					v2Group.owner = u;
 					v2Group.creator = u;
-				}
-				else{
+				} else {
 					V2Log.e("XmlAttributeExtractor parseSingleCrowd --> Parse Failed! , Unknow Group Createor User Information , "
-							+ "sXml is : " + sXml + " and userInfo: " + userInfos);
+							+ "sXml is : "
+							+ sXml
+							+ " and userInfo: "
+							+ userInfos);
 					return null;
 				}
 			}
@@ -248,8 +263,9 @@ public class XmlAttributeExtractor {
 
 	public static List<V2Group> parseCrowd(String xml) {
 		Document doc = buildDocument(xml);
-		if(doc == null){
-			V2Log.e("XmlAttributeExtractor parseCrowd --> parse xml failed...get Document is null...xml is : " + xml);
+		if (doc == null) {
+			V2Log.e("XmlAttributeExtractor parseCrowd --> parse xml failed...get Document is null...xml is : "
+					+ xml);
 			return null;
 		}
 		List<V2Group> listCrowd = new ArrayList<V2Group>();
@@ -258,31 +274,30 @@ public class XmlAttributeExtractor {
 
 		for (int i = 0; i < crowdList.getLength(); i++) {
 			crowdElement = (Element) crowdList.item(i);
-			V2User creator = null;
+			BoUserInfoBase creator = null;
 			String uid = crowdElement.getAttribute("creatoruserid");
 			if (uid != null && !uid.isEmpty()) {
-				creator = new V2User(Long.parseLong(uid),
+				creator = new BoUserInfoBase(Long.parseLong(uid),
 						crowdElement.getAttribute("creatornickname"));
 			}
 
 			String id = crowdElement.getAttribute("id");
-			if(TextUtils.isEmpty(id)){
+			if (TextUtils.isEmpty(id)) {
 				V2Log.e("parseCrowd the id is wroing...break");
 				continue;
 			}
-			
+
 			if (crowdElement.getAttribute("name") == null)
 				V2Log.e("parseCrowd the name is wroing...the group is :"
 						+ crowdElement.getAttribute("id"));
-			long gid = Long.parseLong(crowdElement
-					.getAttribute("id"));
-			
+			long gid = Long.parseLong(crowdElement.getAttribute("id"));
+
 			String crowdName = crowdElement.getAttribute("name");
 			crowdName = EscapedcharactersProcessing.reverse(crowdName);
-			
-			V2Group crowd = new V2Group(gid, crowdName,
-					V2Group.TYPE_CROWD, creator);
-			
+
+			V2Group crowd = new V2Group(gid, crowdName, V2Group.TYPE_CROWD,
+					creator);
+
 			crowd.setAnnounce(crowdElement.getAttribute("announcement"));
 			crowd.setBrief(crowdElement.getAttribute("summary"));
 			crowd.creator = creator;
@@ -322,8 +337,7 @@ public class XmlAttributeExtractor {
 
 		return list;
 	}
-	
-	
+
 	public static List<V2Group> parseDiscussionGroup(String xml) {
 		Document doc = buildDocument(xml);
 		if (doc == null) {
@@ -333,8 +347,8 @@ public class XmlAttributeExtractor {
 			return null;
 		}
 		List<V2Group> list = new ArrayList<V2Group>();
-		iterateNodeList(V2Group.TYPE_DISCUSSION_BOARD, null, doc.getChildNodes().item(0)
-				.getChildNodes(), list);
+		iterateNodeList(V2Group.TYPE_DISCUSSION_BOARD, null, doc
+				.getChildNodes().item(0).getChildNodes(), list);
 
 		return list;
 	}
@@ -353,11 +367,12 @@ public class XmlAttributeExtractor {
 				group.isDefault = true;
 				group.setName("");
 			}
-			
+
 			if (type == V2Group.TYPE_DISCUSSION_BOARD) {
 				String uid = subGroupEl.getAttribute("creatoruserid");
 				if (uid != null && !uid.isEmpty()) {
-					V2User creator = new V2User(Long.parseLong(uid),"");
+					BoUserInfoBase creator = new BoUserInfoBase(
+							Long.parseLong(uid), "");
 					group.owner = creator;
 				} else {
 					continue;
@@ -378,11 +393,13 @@ public class XmlAttributeExtractor {
 
 	/**
 	 * <file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
-	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'
-	 * size='497236'
-	 * time='1411112464' uploader='11029'
-	 * url='http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/
-	 * C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif'/>
+	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
+	 * time='1411112464' uploader='11029' url=
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/
+	 * C2A65B9B
+	 * -63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4bfb24fdb8d1034f78f0f7361801
+	 * .gif'/>
+	 * 
 	 * @param xml
 	 */
 	public static List<FileJNIObject> parseFiles(String xml) {
@@ -396,11 +413,10 @@ public class XmlAttributeExtractor {
 
 		List<FileJNIObject> list = new ArrayList<FileJNIObject>();
 		NodeList nList = doc.getChildNodes().item(0).getChildNodes();
-		if(nList.getLength() <= 0){
+		if (nList.getLength() <= 0) {
 			Element el = (Element) doc.getChildNodes().item(0);
 			buildUploadFiles(list, el);
-		}
-		else{
+		} else {
 			for (int j = 0; j < nList.getLength(); j++) {
 				Element el = (Element) nList.item(j);
 				buildUploadFiles(list, el);
@@ -411,6 +427,7 @@ public class XmlAttributeExtractor {
 
 	/**
 	 * build upload file Object
+	 * 
 	 * @param list
 	 * @param el
 	 */
@@ -425,28 +442,28 @@ public class XmlAttributeExtractor {
 			name = name.substring(index);
 		}
 
-		FileJNIObject file = new FileJNIObject(new V2User(
-				Long.parseLong(uploader)), id, name, Long.parseLong(size),
-				1);
+		FileJNIObject file = new FileJNIObject(new BoUserInfoBase(
+				Long.parseLong(uploader)), id, name, Long.parseLong(size), 1);
 		file.url = url;
-		list.add(0 , file);
+		list.add(0, file);
 	}
-	
-	public static String buildAttendeeUsersXml(User at){
+
+	public static String buildAttendeeUsersXml(User at) {
 		String target;
-		if(at.getName() != null){
-			String nickname = EscapedcharactersProcessing.convert(at.getName());
-			target = " <user id='" + at.getmUserId() + "' nickname='" + nickname + "' />";
-		}
-		else{
+		if (at.getDisplayName() != null) {
+			String nickname = EscapedcharactersProcessing.convert(at
+					.getDisplayName());
+			target = " <user id='" + at.getmUserId() + "' nickname='"
+					+ nickname + "' />";
+		} else {
 			V2Log.e("XmlAttributeExtractor buildAttendeeUsersXml--> when build attendee user list , "
 					+ " the user's name is null , id is : " + at.getmUserId());
 			target = " <user id='" + at.getmUserId() + "' />";
 		}
 		return target;
 	}
-	
-	public static String buildAttendeeUsersXml(List<User> list){
+
+	public static String buildAttendeeUsersXml(List<User> list) {
 		StringBuffer attendees = new StringBuffer();
 		attendees.append("<userlist> ");
 		for (User at : list) {
@@ -486,67 +503,63 @@ public class XmlAttributeExtractor {
 		}
 
 	}
-	
-	
-    /**
-     *
-     * @param xml
-     * @return
-     */
-    public static V2User fromGroupXml(String xml){
-        String id = extractAttribute(xml, "id");
-        if(TextUtils.isEmpty(id))
-            return null;
-        else
-            return fromXml(Long.valueOf(id) , xml);
-    }
+
+	/**
+	 * 
+	 * @param xml
+	 * @return
+	 */
+	public static BoUserInfoBase fromGroupXml(String xml) {
+		String id = extractAttribute(xml, "id");
+		if (TextUtils.isEmpty(id))
+			return null;
+		else
+			return fromXml(Long.valueOf(id), xml);
+	}
 
 	/**
 	 * @param xml
 	 * @return
 	 */
-	public static V2User fromXml(long userID , String oldXml) {
+	public static BoUserInfoBase fromXml(long userID, String oldXml) {
 		String xml = EscapedcharactersProcessing.reverse(oldXml);
 		String nickName = extractAttribute(xml, "nickname");
-		String signature = extractAttribute(xml,"sign");
-		String job = extractAttribute(xml,"job");
-		String telephone = extractAttribute(xml,"telephone");
-		String mobile = extractAttribute(xml,"mobile");
-		String address = extractAttribute(xml,"address");
-		String gender = extractAttribute(xml,"sex");
-		String email = extractAttribute(xml,"email");
-		String bir = extractAttribute(xml,"birthday");
-		String account = extractAttribute(xml,"account");
-		String fax = extractAttribute(xml,"fax");
-		String commentname = extractAttribute(xml,"commentname");
-		String authtype = extractAttribute(xml,"authtype");
+		String signature = extractAttribute(xml, "sign");
+		String job = extractAttribute(xml, "job");
+		String telephone = extractAttribute(xml, "telephone");
+		String mobile = extractAttribute(xml, "mobile");
+		String address = extractAttribute(xml, "address");
+		String gender = extractAttribute(xml, "sex");
+		String email = extractAttribute(xml, "email");
+		String bir = extractAttribute(xml, "birthday");
+		String account = extractAttribute(xml, "account");
+		String fax = extractAttribute(xml, "fax");
+		String commentname = extractAttribute(xml, "commentname");
+		String authtype = extractAttribute(xml, "authtype");
+
 		DateFormat dp = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
-		V2User u = new V2User(userID, nickName);
-		u.setmSignature(signature);
-		u.mJob=job;
-		u.mTelephone = telephone;
-		u.mMobile = mobile;
-		u.mAddress =address;
-		u.mSex = gender;
-		u.mEmail = email;
-		u.mFax = fax;
-		u.setmCommentname(commentname);
-		u.mAccount = account;
-		if (authtype != null && authtype != "") {
-			u.mAuthtype = Integer.parseInt(authtype);
-		} else {
-			u.mAuthtype = 0;
-		}
+		BoUserInfoBase boUserBaseInfo = new BoUserInfoBase(userID, nickName);
+		boUserBaseInfo.setmSignature(signature);
+		boUserBaseInfo.mJob = job;
+		boUserBaseInfo.mTelephone = telephone;
+		boUserBaseInfo.mMobile = mobile;
+		boUserBaseInfo.mAddress = address;
+		boUserBaseInfo.mSex = gender;
+		boUserBaseInfo.mEmail = email;
+		boUserBaseInfo.mFax = fax;
+		boUserBaseInfo.mAccount = account;
+		boUserBaseInfo.setCommentName(commentname);
+		boUserBaseInfo.mAuthtype = authtype;
 
 		if (bir != null && bir.length() > 0) {
 			try {
-				u.mBirthday = dp.parse(bir);
+				boUserBaseInfo.mBirthday = dp.parse(bir);
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
 		}
-		return u;
+		return boUserBaseInfo;
 	}
-	
+
 }

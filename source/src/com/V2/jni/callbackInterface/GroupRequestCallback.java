@@ -3,11 +3,12 @@ package com.V2.jni.callbackInterface;
 import java.util.List;
 
 import com.V2.jni.GroupRequest;
+import com.V2.jni.ind.BoUserInfoShort;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 
 /**
  * 
@@ -71,10 +72,10 @@ public interface GroupRequestCallback {
 	
 	/**
 	 * Add contact relation request.
-	 * @param user 
+	 * @param boUserBaseInfo 
 	 * @param additInfo 
 	 */
-	public void OnRequestCreateRelationCallback(V2User user,
+	public void OnRequestCreateRelationCallback(BoUserInfoBase boUserBaseInfo,
 			String additInfo);
 
 	/**
@@ -100,7 +101,7 @@ public interface GroupRequestCallback {
 	 * The function called when a new friend coming 增加好友成功时的回调
 	 * @param obj
 	 */
-	public void OnAddGroupUserInfoCallback(int groupType, long nGroupID, V2User user);
+	public void OnAddGroupUserInfoCallback(int groupType, long nGroupID, BoUserInfoShort boUserInfoShort);
 
 	/**
 	 * new group created call back
@@ -118,7 +119,7 @@ public interface GroupRequestCallback {
 	 * @param u
 	 */
 	public void OnMoveUserToGroup(int groupType, V2Group srcGroup,
-			V2Group desGroup, V2User u);
+			V2Group desGroup, BoUserInfoBase u);
 
 	/**
 	 * Callback of accept join crowd invitation
@@ -150,7 +151,7 @@ public interface GroupRequestCallback {
 	 * 
 	 * @param group
 	 */
-	public void OnApplyJoinGroup(V2Group group, V2User user, String reason);
+	public void OnApplyJoinGroup(V2Group group, BoUserInfoShort boUserInfoShort, String reason);
 
 	
 	/**

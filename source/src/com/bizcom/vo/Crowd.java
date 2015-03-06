@@ -58,7 +58,7 @@ public class Crowd implements Parcelable {
 		par.writeLong(id);
 		par.writeString(name);
 		par.writeLong(creator.getmUserId());
-		par.writeString(creator.getName());
+		par.writeString(creator.getDisplayName());
 		par.writeString(brief);
 		par.writeString(announce);
 		par.writeInt(auth);

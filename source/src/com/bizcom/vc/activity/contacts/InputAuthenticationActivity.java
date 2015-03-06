@@ -73,7 +73,7 @@ public class InputAuthenticationActivity extends Activity {
 		if (detailUser.getAvatarBitmap() != null) {
 			mHeadIconIV.setImageBitmap(detailUser.getAvatarBitmap());
 		}
-		mNameTitleIV.setText(detailUser.getName());
+		mNameTitleIV.setText(detailUser.getDisplayName());
 		mSignTV.setText(detailUser.getSignature());
 	}
 

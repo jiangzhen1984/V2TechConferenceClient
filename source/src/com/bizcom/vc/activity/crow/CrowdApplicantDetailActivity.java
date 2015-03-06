@@ -126,7 +126,7 @@ public class CrowdApplicantDetailActivity extends Activity {
 
 	private void updateView() {
 		((TextView) findViewById(R.id.crowd_applicant_name)).setText(applicant
-				.getName());
+				.getDisplayName());
 		((TextView) findViewById(R.id.crowd_applicant_signature))
 				.setText(applicant.getSignature());
 		((TextView) findViewById(R.id.contact_user_detail_title_tv))

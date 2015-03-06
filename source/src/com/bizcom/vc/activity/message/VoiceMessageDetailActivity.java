@@ -109,7 +109,7 @@ public class VoiceMessageDetailActivity extends Activity implements
 				this.bitmapChangedListener);
 		
 		User user = GlobalHolder.getInstance().getUser(remoteID);
-		userName.setText(user.getName());
+		userName.setText(user.getDisplayName());
 		userRemark.setText(user.getSignature());
 		User remoteUser = GlobalHolder.getInstance().getUser(remoteID);
 		if (remoteUser.getAvatarBitmap() != null) {

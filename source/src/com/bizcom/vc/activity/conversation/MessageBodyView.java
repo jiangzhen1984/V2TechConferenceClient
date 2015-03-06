@@ -226,7 +226,7 @@ public class MessageBodyView extends LinearLayout {
 			timeTV.setVisibility(View.GONE);
 		}
 
-		if (mMsg.getFromUser() != null && mMsg.getFromUser().isDirty()) {
+		if (mMsg.getFromUser() != null && mMsg.getFromUser().isFromService()) {
 			User fromUser = GlobalHolder.getInstance().getUser(
 					mMsg.getFromUser().getmUserId());
 			if (fromUser != null) {
@@ -755,7 +755,7 @@ public class MessageBodyView extends LinearLayout {
 				name = (TextView) rootView
 						.findViewById(R.id.message_body_person_name_left);
 				if (fromUser != null) {
-					name.setText(fromUser.getName());
+					name.setText(fromUser.getDisplayName());
 				}
 			}
 
@@ -766,7 +766,7 @@ public class MessageBodyView extends LinearLayout {
 				name = (TextView) rootView
 						.findViewById(R.id.message_body_person_name_right);
 				if (localUser != null)
-					name.setText(localUser.getName());
+					name.setText(localUser.getDisplayName());
 			}
 
 		}

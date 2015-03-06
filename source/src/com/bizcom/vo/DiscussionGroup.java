@@ -32,15 +32,15 @@ public class DiscussionGroup extends Group {
 		StringBuilder sb = new StringBuilder();
 		List<User> users = getUsers();
 		if (mOwnerUser != null && isCreatorExist) {
-			if (TextUtils.isEmpty(mOwnerUser.getName()))
+			if (TextUtils.isEmpty(mOwnerUser.getDisplayName()))
 				mOwnerUser = GlobalHolder.getInstance().getUser(
 						mOwnerUser.getmUserId());
-			sb.append(mOwnerUser.getName());
+			sb.append(mOwnerUser.getDisplayName());
 			for (User user : users) {
 				if (user.getmUserId() == this.mOwnerUser.getmUserId())
 					continue;
 
-				sb.append(" ").append(user.getName());
+				sb.append(" ").append(user.getDisplayName());
 				if (sb.toString().length() >= 30)
 					break;
 			}
@@ -53,9 +53,9 @@ public class DiscussionGroup extends Group {
 						isAddOwner = false;
 
 					if (i == 0)
-						sb.append(users.get(i).getName());
+						sb.append(users.get(i).getDisplayName());
 					else
-						sb.append(" ").append(users.get(i).getName());
+						sb.append(" ").append(users.get(i).getDisplayName());
 					if (sb.toString().length() >= 30)
 						break;
 				}
@@ -64,7 +64,7 @@ public class DiscussionGroup extends Group {
 			if (isAddOwner) {
 				this.addUserToGroup(GlobalHolder.getInstance().getCurrentUser());
 				sb.append(" ").append(
-						GlobalHolder.getInstance().getCurrentUser().getName());
+						GlobalHolder.getInstance().getCurrentUser().getDisplayName());
 			}
 		}
 		return sb.toString();

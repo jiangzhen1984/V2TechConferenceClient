@@ -217,7 +217,7 @@ public class Conference implements Parcelable {
 				.append("\" ")
 				.append("chairnickname=\"")
 				.append(loggedUser == null ? "" : EscapedcharactersProcessing
-						.convert(loggedUser.getName()))
+						.convert(loggedUser.getDisplayName()))
 				.append("\"  starttime=\"" + getDate().getTime() / 1000
 						+ "\" >").append("</conf>");
 		return sb.toString();
@@ -230,7 +230,7 @@ public class Conference implements Parcelable {
 		for (User u : this.invitedList) {
 			sb.append("<user id=\"").append(u.getmUserId()).append("\" ")
 					.append("nickname=\"")
-					.append(EscapedcharactersProcessing.convert(u.getName()))
+					.append(EscapedcharactersProcessing.convert(u.getDisplayName()))
 					.append("\"/>");
 		}
 

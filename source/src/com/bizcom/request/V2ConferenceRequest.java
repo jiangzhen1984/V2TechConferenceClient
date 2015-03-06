@@ -15,8 +15,9 @@ import com.V2.jni.callbacAdapter.ConfRequestCallbackAdapter;
 import com.V2.jni.callbacAdapter.GroupRequestCallbackAdapter;
 import com.V2.jni.callbacAdapter.VideoRequestCallbackAdapter;
 import com.V2.jni.callbackInterface.VideoMixerRequestCallback;
+import com.V2.jni.ind.BoUserInfoShort;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.bizcom.request.jni.JNIIndication;
@@ -448,7 +449,8 @@ public class V2ConferenceRequest extends DeviceRequest {
 		if (conf == null || szMediaID == null) {
 			return;
 		}
-		GroupRequest.getInstance().groupDestroyWBoard(GroupType.CONFERENCE.intValue(),conf.getId(), szMediaID);
+		GroupRequest.getInstance().groupDestroyWBoard(
+				GroupType.CONFERENCE.intValue(), conf.getId(), szMediaID);
 
 	}
 
@@ -621,17 +623,9 @@ public class V2ConferenceRequest extends DeviceRequest {
 
 		@Override
 		public void OnConfMemberEnterCallback(long nConfID, long nTime,
-				V2User v2user) {
-			User user = null;
-			if (v2user.type == V2GlobalEnum.USER_ACCOUT_TYPE_NON_REGISTERED) {
-				user = new User(v2user.uid, v2user.getName());
-				user.setDeviceType(User.DeviceType.fromInt(v2user.deviceType));
-				user.setRapidInitiation(true);
-				GlobalHolder.getInstance().putUser(user.getmUserId(), user);
-			} else {
-				user = GlobalHolder.getInstance().getUser(v2user.uid);
-				user.setDeviceType(User.DeviceType.fromInt(v2user.deviceType));
-			}
+				BoUserInfoShort boUserInfoShort) {
+			User user = GlobalHolder.getInstance().putOrUpdateUser(
+					boUserInfoShort);
 			notifyListenerWithPending(KEY_ATTENDEE_ENTER_OR_EXIT_LISTNER, 1, 0,
 					user);
 		}
@@ -659,9 +653,9 @@ public class V2ConferenceRequest extends DeviceRequest {
 		}
 
 		@Override
-		public void OnConfHostRequest(V2User user, int permission) {
+		public void OnConfHostRequest(BoUserInfoBase user, int permission) {
 			super.OnConfHostRequest(user, permission);
-			JNIIndication jniInd = new PermissionRequestIndication(user.uid,
+			JNIIndication jniInd = new PermissionRequestIndication(user.mId,
 					permission, PermissionState.APPLYING.intValue());
 			notifyListenerWithPending(KEY_LECTURE_REQUEST_LISTNER, 0, 0, jniInd);
 

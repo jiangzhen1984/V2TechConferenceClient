@@ -40,7 +40,7 @@ public class DepartmentConversation extends Conversation {
 			if (departmentGroup != null) {
 				User u = departmentGroup.getOwnerUser();
 				// TODO need use localization
-				return u == null ? "" :  u.getName();
+				return u == null ? "" :  u.getDisplayName();
 			}
 			return msg;
 		}

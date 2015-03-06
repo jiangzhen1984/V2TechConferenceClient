@@ -38,15 +38,15 @@ public class V2Group {
 	public long id;
 	private String name;
 	public int type;
-	public V2User owner;
+	public BoUserInfoBase owner;
 
 	public V2Group parent;
 	public Set<V2Group> childs = new HashSet<V2Group>();
-	public List<V2User> members;
+	public List<BoUserInfoBase> members;
 
 	// for conference
 	public Date createTime;
-	public V2User chairMan;
+	public BoUserInfoBase chairMan;
 	// remote user update sync attribute or note
 	public boolean isUpdateSync;
 	public boolean isSync;
@@ -57,7 +57,7 @@ public class V2Group {
 	public boolean canInvitation;
 
 	// for crowd
-	public V2User creator;
+	public BoUserInfoBase creator;
 	public int authType;
 	private String brief;
 	private String announce;
@@ -82,16 +82,16 @@ public class V2Group {
 		this(id, name, type, null, null, null);
 	}
 
-	public V2Group(long id, String name, int type, V2User owner) {
+	public V2Group(long id, String name, int type, BoUserInfoBase owner) {
 		this(id, name, type, owner, null, null);
 	}
 
-	public V2Group(long id, String name, int type, V2User owner, Date createTime) {
+	public V2Group(long id, String name, int type, BoUserInfoBase owner, Date createTime) {
 		this(id, name, type, owner, createTime, null);
 	}
 
-	public V2Group(long id, String name, int type, V2User owner,
-			Date createTime, V2User chairMan) {
+	public V2Group(long id, String name, int type, BoUserInfoBase owner,
+			Date createTime, BoUserInfoBase chairMan) {
 		super();
 		this.id = id;
 		this.name = EscapedcharactersProcessing.reverse(name);

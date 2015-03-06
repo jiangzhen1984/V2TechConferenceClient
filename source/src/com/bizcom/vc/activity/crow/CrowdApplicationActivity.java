@@ -110,7 +110,7 @@ public class CrowdApplicationActivity extends Activity {
 
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
-		mCreatorTV.setText(crowd.getCreator().getName());
+		mCreatorTV.setText(crowd.getCreator().getDisplayName());
 
 		String cid = String.valueOf(crowd.getId());
 		// mNoTV.setText(cid.length() > 4 ? cid.substring(5) :

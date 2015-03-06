@@ -803,7 +803,7 @@ public class VerificationProvider extends DatabaseProvider {
 			return -1;
 		}
 
-		long userID = crowd.owner.uid;
+		long userID = crowd.owner.mId;
 		long groupID = crowd.id;
 
 		CrowdGroup crowdGroup = (CrowdGroup) GlobalHolder.getInstance()
@@ -1372,7 +1372,7 @@ public class VerificationProvider extends DatabaseProvider {
 				crowdGroupID);
 		if (group == null) {
 			group = new CrowdGroup(crowdGroupID, v2Group.getName(), GlobalHolder
-					.getInstance().getUser(v2Group.owner.uid), new Date());
+					.getInstance().getUser(v2Group.owner.mId), new Date());
 			group.setBrief(v2Group.getBrief());
 			group.setAnnouncement(v2Group.getAnnounce());
 			group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
@@ -1380,7 +1380,7 @@ public class VerificationProvider extends DatabaseProvider {
 
 		long fromUserID = cursor.getLong(cursor.getColumnIndex("FromUserID"));
 		long toUserID = cursor.getLong(cursor.getColumnIndex("ToUserID"));
-		if (v2Group.creator.uid == fromUserID) {
+		if (v2Group.creator.mId == fromUserID) {
 			VMessageQualificationInvitationCrowd inviteCrowd = new VMessageQualificationInvitationCrowd(
 					group, GlobalHolder.getInstance().getUser(toUserID));
 			inviteCrowd.setRejectReason(refuseReason);

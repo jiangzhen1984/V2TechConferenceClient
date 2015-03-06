@@ -97,7 +97,7 @@ public class InputRemarkActivity extends Activity {
 		}
 
 		detailUser = GlobalHolder.getInstance().getUser(mUid);
-		commentNameET.setHint(detailUser.getName());
+		commentNameET.setHint(detailUser.getDisplayName());
 		tvGroupName.setText(selectGroupName);
 
 	}

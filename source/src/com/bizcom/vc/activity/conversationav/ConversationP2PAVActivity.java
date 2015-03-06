@@ -288,10 +288,10 @@ public class ConversationP2PAVActivity extends Activity implements
 				if (uad.getUser() != null) {
 					String name = null;
 					boolean friend = GlobalHolder.getInstance().isFriend(uad.getUser());
-					if(friend && !TextUtils.isEmpty(uad.getUser().getNickName())){
-						name = uad.getUser().getNickName();
+					if(friend && !TextUtils.isEmpty(uad.getUser().getCommentName_NickName())){
+						name = uad.getUser().getCommentName_NickName();
 					} else {
-						name = uad.getUser().getName();
+						name = uad.getUser().getDisplayName();
 					}
 					
 					if (name != null) {
@@ -503,10 +503,10 @@ public class ConversationP2PAVActivity extends Activity implements
 			return ;
 		
 		boolean friend = GlobalHolder.getInstance().isFriend(remoteUser);
-		if(friend && !TextUtils.isEmpty(remoteUser.getNickName())){
-			view.setText(remoteUser.getNickName());
+		if(friend && !TextUtils.isEmpty(remoteUser.getCommentName_NickName())){
+			view.setText(remoteUser.getCommentName_NickName());
 		} else
-			view.setText(remoteUser.getName());
+			view.setText(remoteUser.getDisplayName());
 	}
 
 	private void initTelephonyManagerListener() {
@@ -1481,7 +1481,7 @@ public class ConversationP2PAVActivity extends Activity implements
 			if (uad.isVideoType()) {
 				TextView tv = (TextView) findViewById(R.id.conversation_fragment_connected_title_text);
 				tv.setText(tv.getText().toString()
-						.replace("[]", uad.getUser().getName()));
+						.replace("[]", uad.getUser().getDisplayName()));
 
 				mReverseCameraButton = findViewById(R.id.fragment_conversation_reverse_camera_button);
 				mReverseCameraButton

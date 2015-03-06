@@ -426,10 +426,10 @@ public class ConversationTextActivity extends Activity implements
 				remoteChatUser = new User(remoteChatUserID);
 			}
 
-			if (!TextUtils.isEmpty(remoteChatUser.getNickName()))
-				mUserTitleTV.setText(remoteChatUser.getNickName());
+			if (!TextUtils.isEmpty(remoteChatUser.getCommentName_NickName()))
+				mUserTitleTV.setText(remoteChatUser.getCommentName_NickName());
 			else
-				mUserTitleTV.setText(remoteChatUser.getName());
+				mUserTitleTV.setText(remoteChatUser.getDisplayName());
 			mButtonCreateMetting.setVisibility(View.GONE);
 			mVideoCallButton.setVisibility(View.VISIBLE);
 			mAudioCallButton.setVisibility(View.VISIBLE);
@@ -2530,12 +2530,12 @@ public class ConversationTextActivity extends Activity implements
 						return;
 					}
 					// 自己上传文件不提示
-					if (list.get(0).user.uid == currentLoginUserID
+					if (list.get(0).user.mId == currentLoginUserID
 							|| groupID != remoteGroupID)
 						return;
 					for (FileJNIObject fileJNIObject : list) {
 						User user = GlobalHolder.getInstance().getUser(
-								list.get(0).user.uid);
+								list.get(0).user.mId);
 						VMessage vm = new VMessage(cov.getConversationType(),
 								remoteGroupID, user, null, new Date(
 										GlobalConfig.getGlobalServerTime()));

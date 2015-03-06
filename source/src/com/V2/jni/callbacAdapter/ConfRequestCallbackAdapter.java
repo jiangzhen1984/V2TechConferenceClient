@@ -1,8 +1,9 @@
 package com.V2.jni.callbacAdapter;
 
 import com.V2.jni.callbackInterface.ConfRequestCallback;
+import com.V2.jni.ind.BoUserInfoShort;
 import com.V2.jni.ind.V2Conference;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 
 public abstract class ConfRequestCallbackAdapter implements ConfRequestCallback {
 
@@ -13,7 +14,8 @@ public abstract class ConfRequestCallbackAdapter implements ConfRequestCallback 
 	}
 
 	@Override
-	public void OnConfMemberEnterCallback(long nConfID, long nTime, V2User user) {
+	public void OnConfMemberEnterCallback(long nConfID, long nTime,
+			BoUserInfoShort boEnterConfUserInfo) {
 
 	}
 
@@ -33,12 +35,12 @@ public abstract class ConfRequestCallbackAdapter implements ConfRequestCallback 
 	}
 
 	@Override
-	public void OnConfNotify(V2Conference v2conf, V2User user) {
+	public void OnConfNotify(V2Conference v2conf, BoUserInfoBase user) {
 
 	}
 
 	@Override
-	public void OnConfHostRequest(V2User user, int permission) {
+	public void OnConfHostRequest(BoUserInfoBase user, int permission) {
 
 	}
 

@@ -12,7 +12,7 @@ import com.V2.jni.callbackInterface.FileRequestCallback;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.util.V2Log;
 
 /**
@@ -167,7 +167,7 @@ public class FileRequest {
 			WeakReference<FileRequestCallback> wrf = mCallbacks.get(i);
 			if (wrf != null && wrf.get() != null) {
 				((FileRequestCallback) wrf.get())
-						.OnFileTransInvite(new FileJNIObject(new V2User(userid), szFileID,
+						.OnFileTransInvite(new FileJNIObject(new BoUserInfoBase(userid), szFileID,
 								szFileName, nFileBytes, linetype));
 			}
 		}

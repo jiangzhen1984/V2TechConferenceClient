@@ -81,7 +81,7 @@ public class CommonCreateAdapter extends BaseAdapter {
 			tag.headIcon.setImageResource(R.drawable.avatar);
 		}
 
-		tag.name.setText(user.getName());
+		tag.name.setText(user.getDisplayName());
 		
 		if(tag.mSignature != null)
 			tag.mSignature.setText(user.getSignature() == null ? "" : user
@@ -136,7 +136,7 @@ public class CommonCreateAdapter extends BaseAdapter {
 		TextView tv = new TextView(mContext);
 		tag.name = tv;
 		
-		tv.setText(u.getName());
+		tv.setText(u.getDisplayName());
 		tv.setEllipsize(TruncateAt.END);
 		tv.setSingleLine(true);
 		tv.setTextSize(8);

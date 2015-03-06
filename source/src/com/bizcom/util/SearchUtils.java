@@ -454,7 +454,7 @@ public class SearchUtils {
 		case TYPE_CONVERSATION:
 			return ((ScrollItem) obj).cov.getName();
 		case TYPE_ITEM_DATA:
-			return ((User) obj).getName();
+			return ((User) obj).getDisplayName();
 		case TYPE_WRAPPER:
 			return ((Wrapper) obj).a.getAttName();
 		default:

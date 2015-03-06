@@ -19,7 +19,7 @@ public class ContactConversation extends Conversation {
 	@Override
 	public String getName() {
 		if (u != null) {
-			return u.getName();
+			return u.getDisplayName();
 		}
 		return super.getName();
 	}

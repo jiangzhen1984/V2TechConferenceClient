@@ -1,8 +1,9 @@
 package com.V2.jni.callbackInterface;
 
 import com.V2.jni.ConfRequest;
+import com.V2.jni.ind.BoUserInfoShort;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.ind.V2Conference;
-import com.V2.jni.ind.V2User;
 
 public interface ConfRequestCallback {
 
@@ -37,7 +38,8 @@ public interface ConfRequestCallback {
 	 * @param nTime
 	 * @param user
 	 */
-	public void OnConfMemberEnterCallback(long nConfID, long nTime, V2User user);
+	public void OnConfMemberEnterCallback(long nConfID, long nTime,
+			BoUserInfoShort boUserInfoShort);
 
 	/**
 	 * <ul>
@@ -82,7 +84,7 @@ public interface ConfRequestCallback {
 	 * @param v2conf
 	 * @param user
 	 */
-	public void OnConfNotify(V2Conference v2conf, V2User user);
+	public void OnConfNotify(V2Conference v2conf, BoUserInfoBase user);
 
 	/**
 	 * Notify user request host event
@@ -91,13 +93,14 @@ public interface ConfRequestCallback {
 	 *            request user
 	 * @param permission
 	 */
-	public void OnConfHostRequest(V2User user, int permission);
+	public void OnConfHostRequest(BoUserInfoBase user, int permission);
 
 	public void OnConfSyncOpenVideo(String str);
 
 	public void OnConfSyncCloseVideo(long gid, String str);
 
-	public void OnConfSyncCloseVideoToMobile(long nDstUserID,String sDstMediaID);
+	public void OnConfSyncCloseVideoToMobile(long nDstUserID, String sDstMediaID);
+
 	public void OnConfSyncOpenVideoToMobile(String sSyncVideoMsgXML);
 
 }

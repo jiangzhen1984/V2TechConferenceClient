@@ -10,7 +10,7 @@ import com.V2.jni.ImRequest;
 import com.V2.jni.callbacAdapter.GroupRequestCallbackAdapter;
 import com.V2.jni.callbacAdapter.ImRequestCallbackAdapter;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.bizcom.request.jni.JNIResponse;
 import com.bizcom.request.util.HandlerWrap;
 import com.bizcom.request.util.V2AbstractHandler;
@@ -86,11 +86,11 @@ public class V2SearchRequest extends V2AbstractHandler {
 		}
 
 		@Override
-		public void OnSearchUserCallback(List<V2User> list) {
+		public void OnSearchUserCallback(List<BoUserInfoBase> list) {
 			SearchedResult result = new SearchedResult();
-			for (V2User u : list) {
-				GlobalHolder.getInstance().getUser(u.uid);
-				result.addItem(SearchedResult.Type.USER, u.uid, u.getName());
+			for (BoUserInfoBase u : list) {
+				GlobalHolder.getInstance().getUser(u.mId);
+				result.addItem(SearchedResult.Type.USER, u.mId, u.getNickName());
 			}
 			JNIResponse jniRES = new JNIResponse(JNIResponse.Result.SUCCESS);
 			jniRES.resObj = result;
@@ -110,7 +110,7 @@ public class V2SearchRequest extends V2AbstractHandler {
 		public void OnSearchCrowdCallback(List<V2Group> list) {
 			SearchedResult result = new SearchedResult();
 			for (V2Group g : list) {
-				User creator = new User(g.creator.uid, g.creator.getName());
+				User creator = new User(g.creator.mId, g.creator.getNickName());
 				result.addCrowdItem(g.id, g.getName(), creator, g.getBrief(), g.authType);
 			}
 			JNIResponse jniRES = new JNIResponse(JNIResponse.Result.SUCCESS);

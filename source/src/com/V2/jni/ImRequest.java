@@ -1,15 +1,20 @@
 package com.V2.jni;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
+
 import android.content.Context;
 import android.util.Log;
 
 import com.V2.jni.callbackInterface.ImRequestCallback;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 
@@ -101,7 +106,7 @@ public class ImRequest {
 	 *            password
 	 * @param status
 	 *            TODO add comment
-	 * @param type
+	 * @param accounttype
 	 *            TODO add comment
 	 * @param isAnonymous
 	 * 
@@ -182,6 +187,7 @@ public class ImRequest {
 	/**
 	 * <ul>
 	 * call back function. This function only is called by JNI.
+	 * 自己和和自己有关系的人的个人信息更变时都会回调
 	 * </ul>
 	 * <ul>
 	 * {@link #getUserBaseInfo(long)} callback.
@@ -196,8 +202,18 @@ public class ImRequest {
 				"CLASS = ImRequest METHOD = OnUpdateBaseInfo() nUserID= "
 						+ nUserID + " updatexml = " + updatexml);
 
-		V2User user = XmlAttributeExtractor.fromXml(nUserID, updatexml);
-		if (user == null) {
+		// BoUserBaseInfo boUserBaseInfo =
+		// XmlAttributeExtractor.fromXml(nUserID, updatexml);
+		BoUserInfoBase boUserBaseInfo = null;
+		try {
+			boUserBaseInfo = BoUserInfoBase.parserXml(updatexml);
+		} catch (Exception e) {
+			V2Log.e("ImRequest OnUpdateBaseInfo --> Parsed the xml convert to a V2User Object failed... userID is : "
+					+ "" + nUserID + " and xml is : " + updatexml);
+			return;
+		}
+
+		if (boUserBaseInfo == null) {
 			V2Log.e("ImRequest OnUpdateBaseInfo --> Parsed the xml convert to a V2User Object failed... userID is : "
 					+ "" + nUserID + " and xml is : " + updatexml);
 			return;
@@ -208,7 +224,7 @@ public class ImRequest {
 
 			if (obj != null) {
 				ImRequestCallback callback = (ImRequestCallback) obj;
-				callback.OnUpdateBaseInfoCallback(user);
+				callback.OnUpdateBaseInfoCallback(boUserBaseInfo);
 			}
 		}
 	}
@@ -399,8 +415,8 @@ public class ImRequest {
 		V2Log.d(V2Log.JNI_CALLBACK,
 				"CLASS = ImRequest METHOD = OnGetSearchMember()"
 						+ " xmlinfo = " + xmlinfo);
-		List<V2User> list = XmlAttributeExtractor
-				.parseUserList(xmlinfo, "user");
+		List<BoUserInfoBase> list = XmlAttributeExtractor.parseUserList(
+				xmlinfo, "user");
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ImRequestCallback> wf = this.mCallbacks.get(i);
 			Object obj = wf.get();

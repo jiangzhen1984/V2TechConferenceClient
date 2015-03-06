@@ -63,7 +63,7 @@ public class MainApplication extends Application {
 	private Vector<WeakReference<Activity>> list = new Vector<WeakReference<Activity>>();
 	private final String DATABASE_FILENAME = "hzpy.db";
 	private boolean needCopy;
-	private boolean isPad = false;
+	public boolean isPad = false;
 	private int startedActivityCount = 0;
 
 	@Override

@@ -80,7 +80,7 @@ public class CreateConfOrCrowdAdapter extends BaseAdapter {
 			tag.headIcon.setImageResource(R.drawable.avatar);
 		}
 
-		tag.name.setText(user.getName());
+		tag.name.setText(user.getDisplayName());
 	}
 
 	private View getAttendeeView(ViewTag tag, final User u) {
@@ -102,7 +102,7 @@ public class CreateConfOrCrowdAdapter extends BaseAdapter {
 		TextView tv = new TextView(mContext);
 		tag.name = tv;
 		
-		tv.setText(u.getName());
+		tv.setText(u.getDisplayName());
 		tv.setEllipsize(TruncateAt.END);
 		tv.setSingleLine(true);
 		tv.setTextSize(8);

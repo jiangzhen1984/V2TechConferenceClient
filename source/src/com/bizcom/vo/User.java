@@ -55,13 +55,12 @@ public class User implements Comparable<User> {
 	private long mUserId;
 	private String mJob;
 	private String mMobile;
-	// 登录后显示的昵称
-	private String mNickName;
+
 	// privacy='0'
 	private String mSex;
 	private String mSignature;
 	private String mTelephone;
-	private String mCommentname;
+
 	// group
 	private String mCompany;
 	private String mDepartment;
@@ -71,7 +70,10 @@ public class User implements Comparable<User> {
 	private NetworkStateCode mResult;
 	private DeviceType mType;
 	private Status mStatus;
-	private String mName;
+	// 登录后显示的昵称
+	private String mNickName;
+	private String mCommentName;
+
 	private Set<Group> mBelongsGroup;
 	private String mAvatarPath;
 	private String abbra;
@@ -80,7 +82,7 @@ public class User implements Comparable<User> {
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
 	// This value indicate this object is dirty, construct locally without any
 	// user information
-	private boolean isDirty;
+	private boolean isFromService;
 	// 会议中的快速入会用户
 	private boolean isRapidInitiation = false;
 
@@ -88,32 +90,27 @@ public class User implements Comparable<User> {
 		this(mUserId, null, null, null);
 	}
 
-	public User(long mUserId, String name) {
-		this(mUserId, name, null, null);
+	public User(long mUserId, String nickName) {
+		this(mUserId, nickName, null, null);
 	}
 
-	public User(long mUserId, String name, NetworkStateCode mResult) {
-		this(mUserId, name, null, null);
-		this.mResult = mResult;
-	}
-
-	public User(long mUserId, String name, String email, String signature) {
+	private User(long mUserId, String name, String email, String signature) {
 		this.mUserId = mUserId;
-		this.mName = name;
+		this.mNickName = name;
 		this.mEmail = email;
 		this.mSignature = signature;
 		mBelongsGroup = new CopyOnWriteArraySet<Group>();
 		isCurrentLoggedInUser = false;
 		this.mStatus = Status.OFFLINE;
 		initAbbr();
-		this.isDirty = true;
+		this.isFromService = false;
 	}
 
 	private void initAbbr() {
 		abbra = "";
-		if (this.mName != null) {
+		if (this.mNickName != null) {
 			format.setToneType(HanyuPinyinToneType.WITHOUT_TONE);
-			char[] cs = this.mName.toCharArray();
+			char[] cs = this.mNickName.toCharArray();
 			for (char c : cs) {
 				try {
 					String[] ars = PinyinHelper.toHanyuPinyinStringArray(c,
@@ -126,7 +123,7 @@ public class User implements Comparable<User> {
 				}
 			}
 			if (abbra.equals("")) {
-				abbra = this.mName.toLowerCase(Locale.getDefault());
+				abbra = this.mNickName.toLowerCase(Locale.getDefault());
 			}
 		}
 	}
@@ -147,14 +144,6 @@ public class User implements Comparable<User> {
 		this.mUserId = mUserId;
 	}
 
-	public void setmCommentname(String mCommentname) {
-		this.mCommentname = mCommentname;
-	}
-
-	public String getmCommentname() {
-		return this.mCommentname;
-	}
-
 	public NetworkStateCode getmResult() {
 		return mResult;
 	}
@@ -163,20 +152,20 @@ public class User implements Comparable<User> {
 		this.mResult = mResult;
 	}
 
-	public String getRealName() {
-		return mName;
+	public String getNickName() {
+		return mNickName;
 	}
 
-	public String getName() {
+	public String getDisplayName() {
 		boolean isFriend = GlobalHolder.getInstance().isFriend(this);
-		if (isFriend && !TextUtils.isEmpty(mNickName))
-			return mNickName;
+		if (isFriend && !TextUtils.isEmpty(mCommentName))
+			return mCommentName;
 		else
-			return mName;
+			return mNickName;
 	}
 
-	public void setName(String mName) {
-		this.mName = mName;
+	public void setNickName(String nickName) {
+		this.mNickName = nickName;
 		initAbbr();
 	}
 
@@ -373,20 +362,20 @@ public class User implements Comparable<User> {
 		this.mBelongsGroup.remove(g);
 	}
 
-	public String getNickName() {
-		return mNickName;
+	public String getCommentName_NickName() {
+		return mCommentName;
 	}
 
-	public void setNickName(String nickName) {
-		this.mNickName = nickName;
+	public void setCommentName(String comentName) {
+		this.mCommentName = comentName;
 	}
 
-	public boolean isDirty() {
-		return isDirty;
+	public boolean isFromService() {
+		return isFromService;
 	}
 
-	public void updateUser(boolean dirty) {
-		this.isDirty = dirty;
+	public void setFromService(boolean isFromService) {
+		this.isFromService = isFromService;
 	}
 
 	public Group getFirstBelongsGroup() {
@@ -531,8 +520,9 @@ public class User implements Comparable<User> {
 						.convert(this.getMobile()))
 				+ "' "
 				+ "nickname='"
-				+ (this.getName() == null ? "" : EscapedcharactersProcessing
-						.convert(this.getName()))
+				+ (this.getDisplayName() == null ? ""
+						: EscapedcharactersProcessing.convert(this
+								.getDisplayName()))
 				+ "'  "
 				+ "sex='"
 				+ (this.getSex() == null ? "" : this.getSex())
@@ -557,7 +547,7 @@ public class User implements Comparable<User> {
 	 *            sign='签名' telephone='03702561038'/></xml>
 	 * @return
 	 */
-	public static List<User> fromXml(String xml) {
+	public static List<User> paserXml(String xml) {
 		List<User> l = new ArrayList<User>();
 
 		InputStream is = null;
@@ -581,8 +571,8 @@ public class User implements Comparable<User> {
 
 				User u = new User(Long.parseLong(strId));
 
-				u.setName(getAttribute(element, "nickname"));
-				u.setNickName(getAttribute(element, "commentname"));
+				u.setNickName(getAttribute(element, "nickname"));
+				u.setCommentName(getAttribute(element, "commentname"));
 
 				u.setAccount(getAttribute(element, "account"));
 				u.setSignature(getAttribute(element, "sign"));
@@ -603,11 +593,7 @@ public class User implements Comparable<User> {
 				} else {
 					u.setAuthtype(Integer.parseInt(authType));
 				}
-
-				// 如果此时是服务器第一次传来的数据，则构造User的时候，需要把dirty属性置为false
-				if (!GlobalHolder.getInstance().getGlobalState()
-						.isGroupLoaded())
-					u.updateUser(false);
+				u.setFromService(true);
 				l.add(u);
 			}
 		} catch (ParserConfigurationException e) {

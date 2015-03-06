@@ -65,7 +65,7 @@ public class SearchedResult implements Parcelable {
 		}
 		SearchedResultItem item = new SearchedResultItem(Type.CROWD, id, name);
 		item.creator = creator.getmUserId();
-		item.creatorName= creator.getName();
+		item.creatorName= creator.getDisplayName();
 		item.brief = brief;
 		item.authType = authType;
 		mList.add(item);

@@ -464,7 +464,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 		enterConference.putExtra("conf", conf);
 		enterConference.putExtra("initFragment", 3);
 		Notificator.updateSystemNotification(mContext, creator == null ? ""
-				: creator.getName(), mContext.getString(R.string.conversation_attend_the_meeting)
+				: creator.getDisplayName(), mContext.getString(R.string.conversation_attend_the_meeting)
 				+ conf.getName(), 1, enterConference,
 				PublicIntent.VIDEO_NOTIFICATION_ID);
 	}
@@ -558,7 +558,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 						if (newGroup != null) {
 							User owner = GlobalHolder.getInstance().getUser(
 									newGroup.getOwnerUser().getmUserId());
-							if (TextUtils.isEmpty(owner.getName())) {
+							if (TextUtils.isEmpty(owner.getDisplayName())) {
 								Log.i("20150203 1", "7");
 								ImRequest.getInstance().proxy.getUserBaseInfo(
 										owner.getmUserId());
@@ -573,7 +573,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 												+ " and"
 												+ " creator name is : "
 												+ newGroup.getOwnerUser()
-														.getName());
+														.getDisplayName());
 							}
 						}
 					}

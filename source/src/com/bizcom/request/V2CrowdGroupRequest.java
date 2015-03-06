@@ -10,11 +10,12 @@ import com.V2.jni.FileRequest;
 import com.V2.jni.GroupRequest;
 import com.V2.jni.callbacAdapter.FileRequestCallbackAdapter;
 import com.V2.jni.callbacAdapter.GroupRequestCallbackAdapter;
+import com.V2.jni.ind.BoUserInfoShort;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupAddUserJNIObject;
 import com.V2.jni.ind.GroupFileJNIObject;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.bizcom.request.jni.CreateCrowdResponse;
@@ -626,7 +627,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 		 */
 		public void onAddGroupInfo(V2Group group) {
 			if (group.type == V2Group.TYPE_CROWD) {
-				if (GlobalHolder.getInstance().getCurrentUserId() == group.owner.uid) {
+				if (GlobalHolder.getInstance().getCurrentUserId() == group.owner.mId) {
 					JNIResponse jniRes = new CreateCrowdResponse(group.id,
 							CreateCrowdResponse.Result.SUCCESS);
 					Message.obtain(mCallbackHandler, CREATE_DISCUSSION_BOARD,
@@ -641,7 +642,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 					}
 				}
 			} else if (group.type == V2Group.TYPE_DISCUSSION_BOARD) {
-				if (GlobalHolder.getInstance().getCurrentUserId() == group.owner.uid) {
+				if (GlobalHolder.getInstance().getCurrentUserId() == group.owner.mId) {
 					JNIResponse jniRes = new CreateDiscussionBoardResponse(group.id,
 							JNIResponse.Result.SUCCESS);
 					Message.obtain(mCallbackHandler, CREATE_DISCUSSION_BOARD,
@@ -653,15 +654,15 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 		
 		@Override
 		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
-				V2User user) {
+				BoUserInfoShort boUserInfoShort) {
 			//JNIService中的 OnAddGroupUserInfoCallback 来处理数据库更新
 			if (groupType == V2Group.TYPE_CROWD
-					&& user.uid != GlobalHolder.getInstance()
+					&& boUserInfoShort.mId != GlobalHolder.getInstance()
 							.getCurrentUserId() && !isInvoked) {
 				JNIResponse jniRes = new JNIResponse(
 						CreateCrowdResponse.Result.SUCCESS);
 				jniRes.resObj = new GroupAddUserJNIObject(groupType, nGroupID,
-						user.uid, "");
+						boUserInfoShort.mId, "");
 				Message.obtain(mCallbackHandler, ACCEPT_APPLICATION_CROWD,
 						jniRes).sendToTarget();
 			}
@@ -758,7 +759,7 @@ public class V2CrowdGroupRequest extends V2AbstractHandler {
 				// If event is removed file, then user is null
 				if (f.user != null) {
 					vcf.setUploader(GlobalHolder.getInstance().getUser(
-							f.user.uid));
+							f.user.mId));
 				}
 				vcf.setPath(GlobalConfig.getGlobalFilePath() + "/" + f.fileName);
 				vfList.add(vcf);

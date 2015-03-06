@@ -903,10 +903,10 @@ public class MessageAuthenticationActivity extends Activity {
 			// 设置姓名
 			User remoteUser = GlobalHolder.getInstance().getUser(
 					data.remoteUserID);
-			if (remoteUser == null || TextUtils.isEmpty(remoteUser.getName()))
+			if (remoteUser == null || TextUtils.isEmpty(remoteUser.getDisplayName()))
 				viewTag.tvName.setText(data.name);
 			else
-				viewTag.tvName.setText(remoteUser.getName());
+				viewTag.tvName.setText(remoteUser.getDisplayName());
 
 			// 设置验证状态
 			// 别人加我：允许任何人：0已添加您为好友，需要验证：1未处理，2已同意，3已拒绝
@@ -1161,7 +1161,7 @@ public class MessageAuthenticationActivity extends Activity {
 				if (vqic.getInvitationUser() != null) {
 					String name;
 					User user = vqic.getInvitationUser();
-					name = user.getName();
+					name = user.getDisplayName();
 					item.mContentTV
 							.setText(name
 									+ mContext
@@ -1178,7 +1178,7 @@ public class MessageAuthenticationActivity extends Activity {
 					item.mMsgBanneriv.setImageResource(R.drawable.avatar);
 				}
 
-				item.mNameTV.setText(vqac.getApplicant().getName());
+				item.mNameTV.setText(vqac.getApplicant().getDisplayName());
 				updateApplyMessageView(item, vqac);
 			}
 

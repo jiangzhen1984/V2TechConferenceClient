@@ -90,7 +90,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 	private void setViewContent() {
 		mMsgBodyContainer.setTag(this.mVMessage);
 		mMsgBodyTV.setText("");
-		senderTV.setText(this.mVMessage.getFromUser().getName() + "  "
+		senderTV.setText(this.mVMessage.getFromUser().getDisplayName() + "  "
 				+ DateUtil.getStringDate(mVMessage.getDate().getTime()));
 
 		List<VMessageAbstractItem> items = mVMessage.getItems();

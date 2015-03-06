@@ -409,7 +409,7 @@ public class MessageLoader {
 				currentMedia = tempList.get(remoteID);
 				if (currentMedia == null) {
 					AudioVideoMessageBean tempMedia = new AudioVideoMessageBean();
-					tempMedia.name = remoteUser.getName();
+					tempMedia.name = remoteUser.getDisplayName();
 					tempMedia.isCallOut = isCallOut;
 					tempMedia.fromUserID = formID;
 					tempMedia.toUserID = toID;
@@ -669,7 +669,7 @@ public class MessageLoader {
 	 * 查询指定群组中聊天中收发的文件，并转换为VCrowdFile对象集合
 	 * 
 	 * @param mContext
-	 * @param type
+	 * @param accounttype
 	 * @param gid
 	 * @return
 	 */

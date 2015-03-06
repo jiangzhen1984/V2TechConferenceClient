@@ -92,7 +92,7 @@ public class GroupMemberView extends LinearLayout {
 		root.addView(mContentLayout, rootParams);
 
 		mNameTV = new TextView(context);
-		mNameTV.setText(user.getName());
+		mNameTV.setText(user.getDisplayName());
 		mNameTV.setGravity(Gravity.CENTER_VERTICAL);
 		mNameTV.setTextColor(context.getResources().getColor(
 				R.color.common_black));
@@ -173,7 +173,7 @@ public class GroupMemberView extends LinearLayout {
 		}
 		this.mUser = user;
 
-		mNameTV.setText(user.getName());
+		mNameTV.setText(user.getDisplayName());
 		if (user.getAvatarBitmap() != null) {
 			mPhotoIV.setImageBitmap(user.getAvatarBitmap());
 		} else {

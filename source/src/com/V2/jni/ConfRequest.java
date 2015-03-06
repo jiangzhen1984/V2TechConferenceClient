@@ -11,8 +11,9 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.V2.jni.callbackInterface.ConfRequestCallback;
+import com.V2.jni.ind.BoUserInfoShort;
 import com.V2.jni.ind.V2Conference;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.bizcom.vc.application.GlobalConfig;
@@ -137,35 +138,30 @@ public class ConfRequest {
 	 * @see ConfRequestCallback
 	 */
 	private void OnConfMemberEnter(long nConfID, long nTime, String szUserInfos) {
-		V2Log.d(TAG , "OnConfMemberEnter -> nConfID : " + nConfID + " | nTime : " + nTime + " | szUserInfos : "
-				+ szUserInfos);
+		V2Log.d(V2Log.JNI_CALLBACK,
+				"CLASS = ConfRequest METHOD = OnConfMemberEnter()"
+						+ " nConfID = " + nConfID + " nTime = " + nTime
+						+ " szUserInfos = " + szUserInfos);
 
-		String uid = XmlAttributeExtractor.extract(szUserInfos, "id='", "'");
-		String act = XmlAttributeExtractor.extract(szUserInfos,
-				"accounttype='", "'");
-		String nickName = XmlAttributeExtractor.extract(szUserInfos,
-				"nickname='", "'");
-		String strDeviceType = XmlAttributeExtractor.extract(szUserInfos,
-				"uetype='", "'");
-		if (uid == null) {
-			V2Log.e("Can not dispatch request for member joined, cause by uid is null");
+		BoUserInfoShort boUserInfoShort = null;
+		try {
+			boUserInfoShort = BoUserInfoShort.parserXml(szUserInfos);
+		} catch (Exception e) {
+			e.printStackTrace();
 			return;
 		}
 
-		V2User v2user = new V2User();
-		v2user.uid = Long.parseLong(uid);
-		if (act != null) {
-			v2user.type = Integer.parseInt(act);
+		if (boUserInfoShort == null) {
+			return;
 		}
-		v2user.setName(nickName);
-		v2user.deviceType=Integer.parseInt(strDeviceType);
 
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ConfRequestCallback> we = this.mCallbacks.get(i);
 			Object obj = we.get();
 			if (obj != null) {
 				ConfRequestCallback cb = (ConfRequestCallback) obj;
-				cb.OnConfMemberEnterCallback(nConfID, nTime, v2user);
+				cb.OnConfMemberEnterCallback(nConfID, nTime,
+						boUserInfoShort);
 			}
 		}
 	}
@@ -244,12 +240,12 @@ public class ConfRequest {
 			V2Log.e("confId is null  can not pasrse");
 			return;
 		}
-		
+
 		String startTime = XmlAttributeExtractor.extract(confXml,
 				" starttime='", "'");
 		String subject = XmlAttributeExtractor.extract(confXml, " subject='",
 				"'");
-		
+
 		conf.cid = Long.parseLong(confId);
 		conf.name = subject;
 		if (!TextUtils.isEmpty(startTime))
@@ -259,13 +255,13 @@ public class ConfRequest {
 			conf.startTime = new Date(GlobalConfig.getGlobalServerTime());
 		}
 
-		V2User user = new V2User();
+		BoUserInfoBase user = new BoUserInfoBase();
 		String uid = XmlAttributeExtractor.extract(creatorXml, " id='", "'");
 		if (uid == null || uid.isEmpty()) {
 			V2Log.e("uid is null  can not pasrse");
 			return;
 		}
-		user.uid = Long.parseLong(uid);
+		user.mId = Long.parseLong(uid);
 		conf.creator = user;
 
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
@@ -287,7 +283,7 @@ public class ConfRequest {
 	 */
 	private void OnNotifyChair(long userid, int type) {
 		V2Log.d("OnNotifyChair user:" + userid + " permission:" + type);
-		V2User user = new V2User(userid);
+		BoUserInfoBase user = new BoUserInfoBase(userid);
 		for (int i = 0; i < this.mCallbacks.size(); i++) {
 			WeakReference<ConfRequestCallback> we = this.mCallbacks.get(i);
 			Object obj = we.get();
@@ -416,9 +412,10 @@ public class ConfRequest {
 	 */
 	public native void TestConfSipCloseVideo(long nGroupID, long nSipUserID,
 			long nDstUserID, String sDstDevID);
-	
+
 	/**
 	 * 获得会场内所有通知消息
+	 * 
 	 * @param nGroupID
 	 */
 	public native void notifyAllMessage(long nGroupID);
@@ -432,8 +429,7 @@ public class ConfRequest {
 	}
 
 	private void OnConfMute() {
-		V2Log.d(V2Log.JNI_CALLBACK,
-				"CLASS = ConfRequest METHOD = OnConfMute()");
+		V2Log.d(V2Log.JNI_CALLBACK, "CLASS = ConfRequest METHOD = OnConfMute()");
 	}
 
 	// 浼氳琚垹闄ょ殑鍥炶皟

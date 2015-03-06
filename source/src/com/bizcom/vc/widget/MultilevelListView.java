@@ -241,7 +241,7 @@ public class MultilevelListView extends ListView {
 				int pos = updateUserPosition(((GroupItemData) item), start,
 						end, user, us);
 				V2Log.d("GroupListView", user.getmUserId() + " the user "
-						+ user.getName() + " add pos is : " + pos
+						+ user.getDisplayName() + " add pos is : " + pos
 						+ " state is : " + us.name() + " start : " + start
 						+ " - end : " + end);
 			}
@@ -1395,7 +1395,7 @@ public class MultilevelListView extends ListView {
 		void search(List<ItemData> list, Group g, CharSequence constraint) {
 			List<User> uList = g.getUsers();
 			for (User u : uList) {
-				if (u.getName().contains(constraint)
+				if (u.getDisplayName().contains(constraint)
 						|| u.getArra().contains(constraint)) {
 					list.add(getItem(g, u));
 				}
@@ -1701,7 +1701,7 @@ public class MultilevelListView extends ListView {
 
 			TextView mUserNameTV = (TextView) mRoot
 					.findViewById(R.id.user_name);
-			mUserNameTV.setText(u.getName());
+			mUserNameTV.setText(u.getDisplayName());
 
 			TextView mUserSignatureTV = (TextView) mRoot
 					.findViewById(R.id.user_signature);

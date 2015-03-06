@@ -45,13 +45,15 @@ import com.V2.jni.callbacAdapter.ImRequestCallbackAdapter;
 import com.V2.jni.callbacAdapter.VideoRequestCallbackAdapter;
 import com.V2.jni.callbackInterface.ImRequestCallback;
 import com.V2.jni.ind.AudioJNIObjectInd;
+import com.V2.jni.ind.BoUserInfoGroup;
+import com.V2.jni.ind.BoUserInfoShort;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupJoinErrorJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.SendingResultJNIObjectInd;
 import com.V2.jni.ind.V2Conference;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.ind.VideoJNIObjectInd;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.GroupUserObject;
@@ -345,29 +347,31 @@ public class JNIService extends Service implements
 				mContext, isAdd, remoteID, tag);
 	}
 
-	private User v2UserToUser(V2User user) {
-		if (user == null) {
+	private User boUserToUser(BoUserInfoBase boUserBaseInfo) {
+		if (boUserBaseInfo == null) {
 			return null;
 		}
 
-		User u = new User(user.uid, user.getName());
-		u.setSignature(user.getmSignature());
-		u.setJob(user.mJob);
-		u.setTelephone(user.mTelephone);
-		u.setMobile(user.mMobile);
-		u.setAddress(user.mAddress);
-		u.setSex(user.mSex);
-		u.setEmail(user.mEmail);
-		u.setFax(user.mFax);
-		String commentname = user.getmCommentname();
+		User user = new User(boUserBaseInfo.mId, boUserBaseInfo.getNickName());
+		user.setSignature(boUserBaseInfo.getmSignature());
+		user.setJob(boUserBaseInfo.mJob);
+		user.setTelephone(boUserBaseInfo.mTelephone);
+		user.setMobile(boUserBaseInfo.mMobile);
+		user.setAddress(boUserBaseInfo.mAddress);
+		user.setSex(boUserBaseInfo.mSex);
+		user.setEmail(boUserBaseInfo.mEmail);
+		user.setFax(boUserBaseInfo.mFax);
+		user.setAccount(boUserBaseInfo.mAccount);
+		user.setAuthtype(Integer.valueOf(boUserBaseInfo.mAuthtype));
+		user.setBirthday(boUserBaseInfo.mBirthday);
+
+		String commentname = boUserBaseInfo.mCommentName;
+
 		if (!TextUtils.isEmpty(commentname)) {
-			u.setNickName(user.getmCommentname());
+			user.setCommentName(boUserBaseInfo.mCommentName);
 		}
-		u.setmCommentname(user.getmCommentname());
-		u.setAccount(user.mAccount);
-		u.setAuthtype(user.mAuthtype);
-		u.setBirthday(user.mBirthday);
-		return u;
+
+		return user;
 	}
 
 	private void broadcastNetworkState(NetworkStateCode code) {
@@ -410,22 +414,23 @@ public class JNIService extends Service implements
 			switch (msg.what) {
 
 			case JNI_UPDATE_USER_INFO:
-				V2User v2User = (V2User) msg.obj;
-				User user = v2UserToUser(v2User);
-				GlobalHolder.getInstance().putUser(user.getmUserId(), user);
+				BoUserInfoBase boUserBaseInfo = (BoUserInfoBase) msg.obj;
+				// User user = boUserToUser(boUserBaseInfo);
+				// GlobalHolder.getInstance().putUser(user.getmUserId(), user);
+				GlobalHolder.getInstance().putOrUpdateUser(boUserBaseInfo);
 
-				Intent userInfos = new Intent(
-						JNI_BROADCAST_USER_UPDATE_BASE_INFO);
-				userInfos.addCategory(JNI_BROADCAST_CATEGROY);
-				userInfos.putExtra("uid", v2User.uid);
-				mContext.sendBroadcast(userInfos);
+				Intent intent = new Intent(JNI_BROADCAST_USER_UPDATE_BASE_INFO);
+				intent.addCategory(JNI_BROADCAST_CATEGROY);
+				intent.putExtra("uid", boUserBaseInfo.mId);
+				mContext.sendBroadcast(intent);
 				break;
 			case JNI_UPDATE_USER_STATE:
 				UserStatusObject uso = (UserStatusObject) msg.obj;
-				Intent iun = new Intent(JNI_BROADCAST_USER_STATUS_NOTIFICATION);
-				iun.addCategory(JNI_BROADCAST_CATEGROY);
-				iun.putExtra("status", uso);
-				mContext.sendBroadcast(iun);
+				Intent intent1 = new Intent(
+						JNI_BROADCAST_USER_STATUS_NOTIFICATION);
+				intent1.addCategory(JNI_BROADCAST_CATEGROY);
+				intent1.putExtra("status", uso);
+				mContext.sendBroadcast(intent1);
 				break;
 			case JNI_LOG_OUT:
 				Toast.makeText(mContext,
@@ -444,73 +449,80 @@ public class JNIService extends Service implements
 										+ msg.arg1);
 						delayBroadcast.add(msg.arg1);
 					} else {
-						Intent gi = new Intent(JNI_BROADCAST_GROUP_NOTIFICATION);
-						gi.putExtra("gtype", msg.arg1);
-						gi.addCategory(JNI_BROADCAST_CATEGROY);
-						mContext.sendBroadcast(gi);
+						Intent intent2 = new Intent(
+								JNI_BROADCAST_GROUP_NOTIFICATION);
+						intent2.putExtra("gtype", msg.arg1);
+						intent2.addCategory(JNI_BROADCAST_CATEGROY);
+						mContext.sendBroadcast(intent2);
 					}
 				}
 				break;
 			case JNI_GROUP_USER_INFO_NOTIFICATION:
 				GroupUserInfoOrig go = (GroupUserInfoOrig) msg.obj;
 				if (go != null && go.xml != null) {
-					List<User> lu = User.fromXml(go.xml);
+					List<BoUserInfoGroup> boGroupUserInfoList = BoUserInfoGroup
+							.paserXml(go.xml);
 					Group group = GlobalHolder.getInstance().findGroupById(
 							go.gId);
-					for (User tu : lu) {
-						User existU = GlobalHolder.getInstance().putUser(
-								tu.getmUserId(), tu);
-						if (existU.isDirty()
+					for (BoUserInfoGroup tempBoGroupUserInfo : boGroupUserInfoList) {
+						User existUser = GlobalHolder.getInstance()
+								.putOrUpdateUser(tempBoGroupUserInfo);
+						if (existUser.isFromService()
 								&& !GlobalHolder.getInstance().getGlobalState()
 										.isGroupLoaded()) {
 							V2Log.e(TAG,
 									"The User that id is : "
-											+ existU.getmUserId() + " dirty!"
+											+ existUser.getmUserId()
+											+ " dirty!"
 											+ " Need to get user base infos");
-							Log.i("20150203 1", "2");
+
 							ImRequest.getInstance().proxy
-									.getUserBaseInfo(existU.getmUserId());
+									.getUserBaseInfo(existUser.getmUserId());
 						}
 
-						if (existU.getmUserId() == GlobalHolder.getInstance()
-								.getCurrentUserId()) {
+						if (existUser.getmUserId() == GlobalHolder
+								.getInstance().getCurrentUserId()) {
 							// Update logged user object.
-							GlobalHolder.getInstance().setCurrentUser(existU);
+							GlobalHolder.getInstance()
+									.setCurrentUser(existUser);
 						}
 
-						UserStatusObject userStatusObject = onLineUsers.get(tu
-								.getmUserId());
+						UserStatusObject userStatusObject = onLineUsers
+								.get(tempBoGroupUserInfo.mId);
 						if (userStatusObject != null) {
-							existU.updateStatus(User.Status
+							existUser.updateStatus(User.Status
 									.fromInt(userStatusObject.getStatus()));
-							existU.setDeviceType(User.DeviceType
+							existUser.setDeviceType(User.DeviceType
 									.fromInt(userStatusObject.getDeviceType()));
 						}
 
 						if (group == null) {
 							V2Log.e(TAG,
 									"Load Group users , didn't find group information , user"
-											+ " id is : " + tu.getmUserId()
+											+ " id is : "
+											+ tempBoGroupUserInfo.mId
 											+ " group id is : " + go.gId);
 						} else {
-							group.addUserToGroup(existU);
+							group.addUserToGroup(existUser);
 						}
 					}
+
 					V2Log.w(TAG, "The Group -" + go.gId
 							+ "- users info have update over! " + " type is : "
-							+ go.gType + "- user size is : " + lu.size());
+							+ go.gType + "- user size is : "
+							+ boGroupUserInfoList.size());
 					if (!noNeedBroadcast) {
 						V2Log.d(TAG,
 								"TabFragmentMessage no builed successfully! Need to delay sending , type is "
 										+ msg.arg1);
 						delayUserBroadcast.add(go);
 					} else {
-						Intent i = new Intent(
+						Intent intent3 = new Intent(
 								JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-						i.addCategory(JNI_BROADCAST_CATEGROY);
-						i.putExtra("gid", go.gId);
-						i.putExtra("gtype", go.gType);
-						mContext.sendBroadcast(i);
+						intent3.addCategory(JNI_BROADCAST_CATEGROY);
+						intent3.putExtra("gid", go.gId);
+						intent3.putExtra("gtype", go.gType);
+						mContext.sendBroadcast(intent3);
 					}
 				} else {
 					V2Log.e("Invalid group user data");
@@ -523,10 +535,10 @@ public class JNIService extends Service implements
 							"TabFragmentMessage no builed successfully! Need to delay sending , type is 锛欽NI_GROUP_LOADED");
 					delayBroadcast.add(JNI_GROUP_LOADED);
 				} else {
-					Intent loaded = new Intent();
-					loaded.addCategory(JNI_BROADCAST_CATEGROY);
-					loaded.setAction(JNI_BROADCAST_GROUPS_LOADED);
-					sendBroadcast(loaded);
+					Intent intent4 = new Intent();
+					intent4.addCategory(JNI_BROADCAST_CATEGROY);
+					intent4.setAction(JNI_BROADCAST_GROUPS_LOADED);
+					sendBroadcast(intent4);
 				}
 				break;
 			case JNI_OFFLINE_LOADED:
@@ -668,12 +680,13 @@ public class JNIService extends Service implements
 				long serverTime, String sDBID) {
 			if (JNIResponse.Result.fromInt(nResult) == JNIResponse.Result.SUCCESS) {
 				// Just request current logged in user information
-				ImRequest.getInstance().proxy.getUserBaseInfo(nUserID);
+				// ImRequest.getInstance().proxy.getUserBaseInfo(nUserID);
 			}
 		}
 
 		@Override
 		public void OnLogoutCallback(int nUserID) {
+			Log.i("20150304 1", "OnLogoutCallback()");
 			// FIXME optimize code
 			Message.obtain(mLocalHandlerThreadHandler, JNI_LOG_OUT)
 					.sendToTarget();
@@ -718,8 +731,8 @@ public class JNIService extends Service implements
 		}
 
 		@Override
-		public void OnUpdateBaseInfoCallback(V2User user) {
-			if (user == null || user.uid <= 0) {
+		public void OnUpdateBaseInfoCallback(BoUserInfoBase user) {
+			if (user == null || user.mId <= 0) {
 				return;
 			}
 			Message.obtain(mLocalHandlerThreadHandler, JNI_UPDATE_USER_INFO,
@@ -732,7 +745,7 @@ public class JNIService extends Service implements
 			UserStatusObject uso = new UserStatusObject(nUserID, type, nStatus);
 			User u = GlobalHolder.getInstance().getUser(nUserID);
 			V2Log.e(TAG,
-					nUserID + " : the '" + u.getName()
+					nUserID + " : the '" + u.getDisplayName()
 							+ "' user is updating state...."
 							+ User.Status.fromInt(nStatus).name());
 			u.updateStatus(User.Status.fromInt(nStatus));
@@ -853,15 +866,17 @@ public class JNIService extends Service implements
 		}
 
 		@Override
-		public void OnApplyJoinGroup(V2Group group, V2User user, String reason) {
-			if (group == null || user == null) {
+		public void OnApplyJoinGroup(V2Group group,
+				BoUserInfoShort boUserInfoShort, String reason) {
+			if (group == null || boUserInfoShort == null) {
 				V2Log.d(TAG,
 						"OnApplyJoinGroup --> Receive failed! Because V2Group or V2User is null");
 				return;
 			}
 
 			VMessageQualification qualication = VerificationProvider
-					.queryCrowdQualMessageByCrowdId(user.uid, group.id);
+					.queryCrowdQualMessageByCrowdId(boUserInfoShort.mId,
+							group.id);
 			if (qualication != null) {
 				V2Log.d(TAG, "OnApplyJoinGroup --> qualication : "
 						+ qualication.getReadState().name()
@@ -882,10 +897,14 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			User remoteUser = GlobalHolder.getInstance().getUser(user.uid);
-			if (remoteUser.isDirty()) {
-				remoteUser = v2UserToUser(user);
-				GlobalHolder.getInstance().putUser(user.uid, remoteUser);
+			User remoteUser = GlobalHolder.getInstance().getUser(
+					boUserInfoShort.mId);
+			if (remoteUser.isFromService()) {
+				// remoteUser = boUserToUser(boUserBaseInfo);
+				// GlobalHolder.getInstance().putUser(boUserBaseInfo.mId,
+				// remoteUser);
+				remoteUser = GlobalHolder.getInstance().putOrUpdateUser(
+						boUserInfoShort);
 			}
 
 			checkMessageAndSendBroadcast(
@@ -914,16 +933,16 @@ public class JNIService extends Service implements
 			GroupType gType = GroupType.fromInt(group.type);
 			if (gType == GroupType.CONFERENCE) {
 				User owner = GlobalHolder.getInstance()
-						.getUser(group.owner.uid);
+						.getUser(group.owner.mId);
 				User chairMan = GlobalHolder.getInstance().getUser(
-						group.chairMan.uid);
+						group.chairMan.mId);
 				ConferenceGroup g = new ConferenceGroup(group.id,
 						group.getName(), owner, group.createTime, chairMan);
 				Message.obtain(mLocalHandlerThreadHandler,
 						JNI_CONFERENCE_INVITATION, g).sendToTarget();
 			} else if (gType == GroupType.CHATING) {
 				VMessageQualification qualication = VerificationProvider
-						.queryCrowdQualMessageByCrowdId(group.creator.uid,
+						.queryCrowdQualMessageByCrowdId(group.creator.mId,
 								group.id);
 				if (qualication != null) {
 					V2Log.d(TAG, "OnInviteJoinGroupCallback --> qualication : "
@@ -938,18 +957,18 @@ public class JNIService extends Service implements
 				} else {
 					V2Log.d(TAG, "OnInviteJoinGroupCallback --> group id : "
 							+ group.id + " group name : " + group.getName()
-							+ " group user id : " + group.creator.uid);
+							+ " group user id : " + group.creator.mId);
 				}
 				User owner = GlobalHolder.getInstance().getUser(
-						group.creator.uid);
-				if (owner.isDirty()) {
-					if (!TextUtils.isEmpty(owner.getName())
-							&& TextUtils.isEmpty(group.creator.getName())) {
+						group.creator.mId);
+				if (owner.isFromService()) {
+					if (!TextUtils.isEmpty(owner.getDisplayName())
+							&& TextUtils.isEmpty(group.creator.getNickName())) {
 						V2Log.e(TAG,
 								"OnInviteJoinGroupCallback --> Get Create User Name is empty and older user"
 										+ "name not empty , dirty is mistake");
 					} else
-						owner.setName(group.creator.getName());
+						owner.setNickName(group.creator.getNickName());
 				}
 
 				CrowdGroup cg = new CrowdGroup(group.id, group.getName(), owner);
@@ -968,7 +987,7 @@ public class JNIService extends Service implements
 				}
 
 				User owner = GlobalHolder.getInstance().getUser(
-						group.creator.uid);
+						group.creator.mId);
 				DiscussionGroup cg = new DiscussionGroup(group.id,
 						group.getName(), owner);
 				GlobalHolder.getInstance().addGroupToList(
@@ -982,16 +1001,16 @@ public class JNIService extends Service implements
 		}
 
 		@Override
-		public void OnRequestCreateRelationCallback(V2User user,
-				String additInfo) {
-			if (user == null) {
+		public void OnRequestCreateRelationCallback(
+				BoUserInfoBase boUserBaseInfo, String additInfo) {
+			if (boUserBaseInfo == null) {
 				V2Log.e(TAG,
 						"OnRequestCreateRelationCallback ---> Create relation failed...get user is null");
 				return;
 			}
 
 			AddFriendHistorieNode node = VerificationProvider
-					.queryFriendQualMessageByUserId(user.uid);
+					.queryFriendQualMessageByUserId(boUserBaseInfo.mId);
 			if (node != null && node.addState == 0
 					&& node.readState == ReadState.READ.intValue()) {
 				V2Log.d(TAG,
@@ -1005,26 +1024,28 @@ public class JNIService extends Service implements
 			} else {
 				V2Log.d(TAG,
 						"OnRequestCreateRelationCallback --> user id is : "
-								+ user.uid);
+								+ boUserBaseInfo.mId);
 			}
 
 			boolean isOutORG = false;
-			User vUser = GlobalHolder.getInstance().getUser(user.uid);
-			if (!vUser.isDirty()) {
+			User vUser = GlobalHolder.getInstance().getUser(boUserBaseInfo.mId);
+			if (!vUser.isFromService()) {
 				AddFriendHistroysHandler.addMeNeedAuthentication(
 						getApplicationContext(), vUser, additInfo);
 			} else {
 				isOutORG = true;
-				User newUser = v2UserToUser(user);
-				GlobalHolder.getInstance().putUser(newUser.getmUserId(),
-						newUser);
+				// User newUser = boUserToUser(boUserBaseInfo);
+				// GlobalHolder.getInstance().putUser(newUser.getmUserId(),
+				// newUser);
+				User newUser = GlobalHolder.getInstance().putOrUpdateUser(
+						boUserBaseInfo);
 				AddFriendHistroysHandler.addMeNeedAuthentication(
 						getApplicationContext(), newUser, additInfo);
 			}
 			Intent intent = new Intent();
 			intent.putExtra("isOutORG", isOutORG);
-			intent.putExtra("v2User", user);
-			intent.putExtra("uid", user.uid);
+			intent.putExtra("v2User", boUserBaseInfo);
+			intent.putExtra("uid", boUserBaseInfo.mId);
 			intent.setAction(JNI_BROADCAST_CONTACTS_AUTHENTICATION);
 			intent.addCategory(JNI_BROADCAST_CATEGROY);
 			sendBroadcast(intent);
@@ -1196,16 +1217,22 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnAddGroupUserInfoCallback(int groupType, long nGroupID,
-				V2User user) {
-			if (user == null) {
+				BoUserInfoShort boUserInfoShort) {
+			if (boUserInfoShort == null) {
 				V2Log.e("JNIServie OnAddGroupUserInfoCallback --> : get null GroupAddUserJNIObject Object!");
 				return;
 			}
 
-			User newUser = v2UserToUser(user);
+			// User newUser = boUserToUser(boUserBaseInfo);
+			// GroupType gType = GroupType.fromInt(groupType);
+			// newUser =
+			// GlobalHolder.getInstance().putUser(newUser.getmUserId(),
+			// newUser);
+
 			GroupType gType = GroupType.fromInt(groupType);
-			newUser = GlobalHolder.getInstance().putUser(newUser.getmUserId(),
-					newUser);
+			User newUser = GlobalHolder.getInstance().putOrUpdateUser(
+					boUserInfoShort);
+
 			GlobalHolder.getInstance().addUserToGroup(newUser, nGroupID);
 
 			if (gType == GroupType.CONTACT) {
@@ -1213,10 +1240,11 @@ public class JNIService extends Service implements
 						nGroupID, newUser);
 			} else if (gType == GroupType.CHATING) {
 				long msgID = -1;
-				if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
+				if (boUserInfoShort.mId != GlobalHolder.getInstance()
+						.getCurrentUserId()) {
 					long waitMessageExist = VerificationProvider
-							.queryCrowdInviteWaitingQualMessageById(user.uid,
-									nGroupID);
+							.queryCrowdInviteWaitingQualMessageById(
+									boUserInfoShort.mId, nGroupID);
 					if (waitMessageExist != -1) {
 						boolean isTrue = VerificationProvider
 								.deleteCrowdInviteWattingQualMessage(waitMessageExist);
@@ -1233,7 +1261,7 @@ public class JNIService extends Service implements
 						state.isUpdateTime = false;
 						msgID = VerificationProvider
 								.updateCrowdQualicationMessageState(nGroupID,
-										user.uid, state);
+										boUserInfoShort.mId, state);
 					} else {
 						CrowdGroup group = (CrowdGroup) GlobalHolder
 								.getInstance()
@@ -1252,7 +1280,7 @@ public class JNIService extends Service implements
 								state.isUpdateTime = false;
 								msgID = VerificationProvider
 										.updateCrowdQualicationMessageState(
-												nGroupID, user.uid, state);
+												nGroupID, boUserInfoShort.mId, state);
 							}
 						}
 					}
@@ -1268,7 +1296,7 @@ public class JNIService extends Service implements
 				DiscussionGroup dis = (DiscussionGroup) GlobalHolder
 						.getInstance().getGroupById(groupType, nGroupID);
 				if (dis != null) {
-					if (dis.getOwnerUser().getmUserId() == user.uid) {
+					if (dis.getOwnerUser().getmUserId() == boUserInfoShort.mId) {
 						if (!dis.isCreatorExist()) {
 							dis.setCreatorExist(true);
 						}
@@ -1297,7 +1325,7 @@ public class JNIService extends Service implements
 					.getGroupById(V2GlobalConstants.GROUP_TYPE_CROWD, group.id);
 			if (g == null) {
 				User user = GlobalHolder.getInstance().getUser(
-						group.creator.uid);
+						group.creator.mId);
 				g = new CrowdGroup(group.id, group.getName(), user, null);
 				g.setBrief(group.getBrief());
 				g.setAnnouncement(group.getAnnounce());
@@ -1316,7 +1344,7 @@ public class JNIService extends Service implements
 								+ group.id
 								+ " user id"
 								+ ": "
-								+ group.creator.uid);
+								+ group.creator.mId);
 				return;
 			}
 			isAcceptApply = true;
@@ -1438,15 +1466,15 @@ public class JNIService extends Service implements
 			}
 
 			if (crowd.type == V2Group.TYPE_CROWD
-					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.owner.uid) {
+					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.owner.mId) {
 				V2Log.e(TAG, "onAddGroupInfo--> add a new group , id is : "
 						+ crowd.id);
 				User user = GlobalHolder.getInstance().getUser(
-						crowd.creator.uid);
+						crowd.creator.mId);
 				if (user == null) {
 					V2Log.e(TAG,
 							"onAddGroupInfo--> add a new group failed , get user is null , id is : "
-									+ crowd.creator.uid);
+									+ crowd.creator.mId);
 					return;
 				}
 				CrowdGroup g = new CrowdGroup(crowd.id, crowd.getName(), user,
@@ -1471,8 +1499,8 @@ public class JNIService extends Service implements
 						V2GlobalConstants.GROUP_TYPE_CROWD, crowd.id, -1));
 				sendBroadcast(i);
 			} else if (crowd.type == V2Group.TYPE_DISCUSSION_BOARD
-					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.owner.uid) {
-				if (GlobalHolder.getInstance().getCurrentUserId() == crowd.creator.uid) {
+					&& GlobalHolder.getInstance().getCurrentUserId() != crowd.owner.mId) {
+				if (GlobalHolder.getInstance().getCurrentUserId() == crowd.creator.mId) {
 					Group existGroup = GlobalHolder.getInstance().getGroupById(
 							V2GlobalConstants.GROUP_TYPE_DISCUSSION, crowd.id);
 					if (existGroup != null)
@@ -1483,11 +1511,11 @@ public class JNIService extends Service implements
 						"onAddGroupInfo--> add a new discussion group , id is : "
 								+ crowd.id);
 				User user = GlobalHolder.getInstance().getUser(
-						crowd.creator.uid);
+						crowd.creator.mId);
 				if (user == null) {
 					V2Log.e(TAG,
 							"onAddGroupInfo--> add a new group failed , get user is null , id is : "
-									+ crowd.creator.uid);
+									+ crowd.creator.mId);
 					return;
 				}
 				DiscussionGroup g = new DiscussionGroup(crowd.id,
@@ -1522,7 +1550,7 @@ public class JNIService extends Service implements
 			}
 
 			for (FileJNIObject fileJNIObject : list) {
-				long uploadUserID = fileJNIObject.user.uid;
+				long uploadUserID = fileJNIObject.user.mId;
 				// 鑷繁涓婁紶涓嶆彁绀�
 				if (GlobalHolder.getInstance().getCurrentUserId() == uploadUserID)
 					continue;
@@ -1780,14 +1808,21 @@ public class JNIService extends Service implements
 						ind.getDeviceId());
 				return;
 			}
+			
+			ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
+			List<RunningTaskInfo> listRunningTaskInfo = activityManager
+					.getRunningTasks(1);
+			if ((listRunningTaskInfo != null) && listRunningTaskInfo.size() > 0) {
+				if (listRunningTaskInfo.get(0).topActivity.getClassName()
+						.equals(ConversationP2PAVActivity.class.getName())) {
+					V2Log.i("OnVideoChatInvite --> The video chat invite coming ! Ignore video call ");
+					updateVideoRecord(ind);
+					VideoRequest.getInstance().refuseVideoChat(
+							ind.getSzSessionID(), ind.getFromUserId(),
+							ind.getDeviceId());
+					return;
+				}
 
-			if (((MainApplication) mContext.getApplicationContext())
-					.isRunningBackgound()) {
-				updateVideoRecord(ind);
-				VideoRequest.getInstance().refuseVideoChat(
-						ind.getSzSessionID(), ind.getFromUserId(),
-						ind.getDeviceId());
-				return;
 			}
 
 			Message.obtain(mLocalHandlerThreadHandler,
@@ -1877,13 +1912,13 @@ public class JNIService extends Service implements
 		// }
 
 		@Override
-		public void OnConfNotify(V2Conference v2conf, V2User user) {
+		public void OnConfNotify(V2Conference v2conf, BoUserInfoBase user) {
 			if (v2conf == null || user == null) {
 				V2Log.e(" v2conf is " + v2conf + " or user is null" + user);
 				return;
 			}
 
-			User owner = GlobalHolder.getInstance().getUser(user.uid);
+			User owner = GlobalHolder.getInstance().getUser(user.mId);
 			Group g = new ConferenceGroup(v2conf.cid, v2conf.name, owner,
 					v2conf.startTime, owner);
 			GlobalHolder.getInstance().addGroupToList(
@@ -2212,11 +2247,11 @@ public class JNIService extends Service implements
 
 		@Override
 		public void OnFileTransInvite(FileJNIObject file) {
-			User fromUser = GlobalHolder.getInstance().getUser(file.user.uid);
+			User fromUser = GlobalHolder.getInstance().getUser(file.user.mId);
 			// If doesn't receive user information from server side,
 			// construct new user object
 			if (fromUser == null) {
-				fromUser = new User(file.user.uid);
+				fromUser = new User(file.user.mId);
 			}
 			// FIXME input date as null
 			VMessage vm = new VMessage(0, 0, fromUser, GlobalHolder

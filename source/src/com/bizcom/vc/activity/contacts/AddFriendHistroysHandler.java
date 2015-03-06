@@ -55,7 +55,7 @@ public class AddFriendHistroysHandler {
 		node.ownerUserID = currentUser.getmUserId();
 		node.ownerAuthType = 1;
 		node.remoteUserID = remoteUser.getmUserId();
-		node.remoteUserNickname = remoteUser.getName();
+		node.remoteUserNickname = remoteUser.getDisplayName();
 		node.fromUserID = node.remoteUserID;
 		node.toUserID = node.ownerUserID;
 		node.applyReason = additInfo;
@@ -170,7 +170,7 @@ public class AddFriendHistroysHandler {
 		node.ownerUserID = currentUser.getmUserId();
 		node.ownerAuthType = currentUser.getAuthtype();
 		node.remoteUserID = remoteUser.getmUserId();
-		node.remoteUserNickname = remoteUser.getName();
+		node.remoteUserNickname = remoteUser.getDisplayName();
 		node.fromUserID = node.ownerUserID;
 		node.toUserID = node.remoteUserID;
 		node.applyReason = applyReason;
@@ -285,7 +285,7 @@ public class AddFriendHistroysHandler {
 			node.ownerUserID = currentUser.getmUserId();
 			node.ownerAuthType = currentUser.getAuthtype();
 			node.remoteUserID = remoteUser.getmUserId();
-			node.remoteUserNickname = remoteUser.getName();
+			node.remoteUserNickname = remoteUser.getDisplayName();
 			node.fromUserID = node.remoteUserID;
 			node.toUserID = node.ownerUserID;
 			node.applyReason = null;

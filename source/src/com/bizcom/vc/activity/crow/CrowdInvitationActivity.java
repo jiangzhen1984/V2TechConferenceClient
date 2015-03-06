@@ -122,7 +122,7 @@ public class CrowdInvitationActivity extends Activity {
 
 		mNameTV.setText(crowd.getName());
 		mBriefTV.setText(crowd.getBrief());
-		mCreatorTV.setText(crowd.getCreator().getName());
+		mCreatorTV.setText(crowd.getCreator().getDisplayName());
 		mAnnounceTV.setText(crowd.getAnnounce());
 
 		Group group = GlobalHolder.getInstance().getGroupById(

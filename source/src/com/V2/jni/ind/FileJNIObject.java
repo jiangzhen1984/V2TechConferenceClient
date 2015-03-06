@@ -7,7 +7,7 @@ import com.bizcom.util.FileUitls;
 
 public class FileJNIObject extends JNIObjectInd implements Parcelable {
 
-	public V2User user;
+	public BoUserInfoBase user;
 	public String vMessageID;
 	public String fileId;
 	public String fileName;
@@ -18,7 +18,7 @@ public class FileJNIObject extends JNIObjectInd implements Parcelable {
 	// For crowd file type
 	public String url;
 
-	public FileJNIObject(V2User user , String szFileID, String szFileName,
+	public FileJNIObject(BoUserInfoBase user , String szFileID, String szFileName,
 			long nFileBytes, int linetype) {
 		this(user , szFileID, szFileName, nFileBytes, linetype, null);
 	}
@@ -33,7 +33,7 @@ public class FileJNIObject extends JNIObjectInd implements Parcelable {
 	 * 			 2: offline file 1: online file
 	 * @param url
 	 */
-	public FileJNIObject(V2User user , String fileId, String fileName,
+	public FileJNIObject(BoUserInfoBase user , String fileId, String fileName,
 			long fileSize, int linetype, String url) {
 		super();
 		this.user = user;
@@ -49,7 +49,7 @@ public class FileJNIObject extends JNIObjectInd implements Parcelable {
 	
 	public FileJNIObject(Parcelable user, String vMessageID , String szFileID, String szFileName,
 			long nFileBytes, int linetype, int fileType , String url) {
-		this.user = (V2User) user;
+		this.user = (BoUserInfoBase) user;
 		this.vMessageID = vMessageID;
 		this.fileId = szFileID;
 		this.fileName = szFileName;
@@ -86,7 +86,7 @@ public class FileJNIObject extends JNIObjectInd implements Parcelable {
 
 		@Override
 		public FileJNIObject createFromParcel(Parcel parcel) {
-			return new FileJNIObject(parcel.readParcelable(V2User.class
+			return new FileJNIObject(parcel.readParcelable(BoUserInfoBase.class
 					.getClassLoader()), parcel.readString(),parcel.readString(),
 					parcel.readString(), parcel.readLong(), parcel.readInt(),
 					parcel.readInt(), parcel.readString());

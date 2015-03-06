@@ -131,10 +131,10 @@ public class Attendee implements Comparable<Attendee> {
 
 	public String getAttName() {
 		if (getUser() != null) {
-			if (!TextUtils.isEmpty(getUser().getNickName()))
-				return getUser().getNickName();
+			if (!TextUtils.isEmpty(getUser().getCommentName_NickName()))
+				return getUser().getCommentName_NickName();
 			else
-				return getUser().getName();
+				return getUser().getDisplayName();
 
 		}
 		return null;

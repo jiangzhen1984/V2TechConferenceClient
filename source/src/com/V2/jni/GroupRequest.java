@@ -9,11 +9,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import android.util.Log;
 
 import com.V2.jni.callbackInterface.GroupRequestCallback;
+import com.V2.jni.ind.BoUserInfoBase;
+import com.V2.jni.ind.BoUserInfoBase;
+import com.V2.jni.ind.BoUserInfoShort;
 import com.V2.jni.ind.FileJNIObject;
 import com.V2.jni.ind.GroupQualicationJNIObject;
 import com.V2.jni.ind.V2Document;
 import com.V2.jni.ind.V2Group;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
 import com.bizcom.vc.application.V2GlobalConstants;
@@ -424,9 +427,9 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aafa40f4
-	 * b f b 2 4 f d b 8 d 1 0 3 4 f 7 8 f 0 f 7 3 6 1 8 0 1 . g i f ' / > < / f
-	 * i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aaf
+	 * a 4 0 f 4 b f b 2 4 f d b 8 d 1 0 3 4 f 7 8 f 0 f 7 3 6 1 8 0 1 . g i f '
+	 * / > < / f i l e l i s t >
 	 * 
 	 * @param groupType
 	 * @param nGroupId
@@ -498,7 +501,7 @@ public class GroupRequest {
 
 	/**
 	 * @comment-user:wenzl 2014年9月25日
-	 * @overview:
+	 * @overview: 没有请求登录后直接回调
 	 * 
 	 * @param groupType
 	 * @param nGroupID
@@ -516,6 +519,7 @@ public class GroupRequest {
 				"CLASS = GroupRequest METHOD = OnGetGroupUserInfo()"
 						+ " groupType = " + groupType + " nGroupID = "
 						+ nGroupID + " sXml = " + sXml);
+
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
@@ -527,8 +531,8 @@ public class GroupRequest {
 	}
 
 	/**
-	 * 10-28 10:21:14.740: D/V2TECH(4636): OnAddGroupUserInfo ->1:61111:<user
-	 * id='11112131'/>
+	 * <user account='wenzl2' accounttype='1' bsystemavatar='1' id='11123'
+	 * nickname='wenzl2' uetype='2'/>
 	 * 
 	 * @param groupType
 	 * @param nGroupID
@@ -539,22 +543,31 @@ public class GroupRequest {
 				"CLASS = GroupRequest METHOD = OnAddGroupUserInfo()"
 						+ " groupType = " + groupType + " nGroupID = "
 						+ nGroupID + " sXml = " + sXml);
-		V2User remoteUser = XmlAttributeExtractor.fromGroupXml(sXml);
-		if (remoteUser == null) {
+		// BoUserBaseInfo remoteUser = XmlAttributeExtractor.fromGroupXml(sXml);
+		BoUserInfoShort boUserInfoShort = null;
+		try {
+			boUserInfoShort = BoUserInfoShort.parserXml(sXml);
+		} catch (Exception e) {
+			e.printStackTrace();
+			V2Log.e("OnAddGroupUserInfo -> parse xml failed ...get null user : "
+					+ sXml);
+			return;
+		}
+		if (boUserInfoShort == null) {
 			V2Log.e("OnAddGroupUserInfo -> parse xml failed ...get null user : "
 					+ sXml);
 			return;
 		}
 
 		Log.i("20150203 1", "4");
-		ImRequest.getInstance().proxy.getUserBaseInfo(remoteUser.uid);
+		ImRequest.getInstance().proxy.getUserBaseInfo(boUserInfoShort.mId);
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
 				callback.OnAddGroupUserInfoCallback(groupType, nGroupID,
-						remoteUser);
+						boUserInfoShort);
 			}
 		}
 	}
@@ -606,7 +619,7 @@ public class GroupRequest {
 				" creatoruserid='", "'");
 		V2Group vg = new V2Group(Long.parseLong(gid), name, groupType);
 		if (gid != null && !gid.isEmpty() && createUesrID != null) {
-			vg.owner = new V2User(Long.valueOf(createUesrID));
+			vg.owner = new BoUserInfoBase(Long.valueOf(createUesrID));
 			vg.creator = vg.owner;
 			if (groupType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 				vg.setAnnounce(announcement);
@@ -725,7 +738,7 @@ public class GroupRequest {
 						+ groupInfo + " userInfo = " + userInfo
 						+ " additInfo = " + additInfo);
 		V2Group group = null;
-		V2User user = null;
+		BoUserInfoBase boUserInfoBase = null;
 		if (groupType == V2Group.TYPE_CONF) {
 			String id = XmlAttributeExtractor.extract(groupInfo, " id='", "'");
 
@@ -734,29 +747,35 @@ public class GroupRequest {
 				return;
 			}
 			group = new V2Group(Long.parseLong(id), groupType);
+
 			String name = XmlAttributeExtractor.extract(groupInfo,
 					" subject='", "'");
 			String starttime = XmlAttributeExtractor.extract(groupInfo,
 					" starttime='", "'");
 			String createuserid = XmlAttributeExtractor.extract(groupInfo,
 					" createuserid='", "'");
+
 			group.setName(name);
 			group.createTime = new Date(Long.parseLong(starttime) * 1000);
-			group.chairMan = new V2User(Long.valueOf(createuserid));
-			group.owner = new V2User(Long.valueOf(createuserid));
+			group.chairMan = new BoUserInfoBase(Long.valueOf(createuserid));
+			group.owner = new BoUserInfoBase(Long.valueOf(createuserid));
 
 		} else if (groupType == V2Group.TYPE_CROWD) {
 			group = XmlAttributeExtractor.parseSingleCrowd(groupInfo, userInfo);
 		} else if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
-			String id = XmlAttributeExtractor.extract(userInfo, " id='", "'");
-			if (id == null || id.isEmpty()) {
-				V2Log.e(" Unknow user information:" + userInfo);
+			try {
+				boUserInfoBase = BoUserInfoBase.parserXml(userInfo);
+			} catch (Exception e) {
+				V2Log.d("CLASS = GroupRequest METHOD = OnInviteJoinGroup() xml解析失败");
+				e.printStackTrace();
 				return;
 			}
-			user = new V2User(Long.parseLong(id));
-			String name = XmlAttributeExtractor.extract(userInfo,
-					" nickname='", "'");
-			user.setName(name);
+
+			if (boUserInfoBase == null) {
+				V2Log.d("CLASS = GroupRequest METHOD = OnInviteJoinGroup() xml解析失败");
+				return;
+			}
+
 		} else if (groupType == V2Group.TYPE_DISCUSSION_BOARD) {
 			String id = XmlAttributeExtractor.extractAttribute(groupInfo, "id");
 			if (id == null || id.isEmpty()) {
@@ -774,7 +793,8 @@ public class GroupRequest {
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
 				if (groupType == V2Group.TYPE_CONTACTS_GROUP) {
-					callback.OnRequestCreateRelationCallback(user, additInfo);
+					callback.OnRequestCreateRelationCallback(boUserInfoBase,
+							additInfo);
 				} else {
 					callback.OnInviteJoinGroupCallback(group);
 				}
@@ -839,15 +859,14 @@ public class GroupRequest {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
 				callback.OnMoveUserToGroup(groupType, new V2Group(srcGroupID,
 						"", groupType), new V2Group(dstGroupID, "", groupType),
-						new V2User(nUserID));
+						new BoUserInfoBase(nUserID));
 			}
 		}
 	}
 
 	/**
-	 * 10-18 16:45:50.096: E/ImRequest UI(31807): OnApplyJoinGroup:: 3:431:<user
-	 * account='bbb' accounttype='1' bsystemavatar='1' id='12176' nickname='bbb'
-	 * uetype='1'/>:nnn
+	 * <user account='wenzl1' accounttype='1' bsystemavatar='1' id='11122'
+	 * nickname='wenzl1' uetype='1'/>
 	 * 
 	 * @param groupType
 	 * @param nGroupID
@@ -862,20 +881,27 @@ public class GroupRequest {
 						+ nGroupID + " userInfo = " + userInfo + " reason = "
 						+ reason);
 
-		String id = XmlAttributeExtractor.extractAttribute(userInfo, "id");
-		String nickname = XmlAttributeExtractor.extractAttribute(userInfo,
-				"nickname");
-		if (id == null || id.trim().isEmpty()) {
+		BoUserInfoShort boUserInfoShort = null;
+		try {
+			boUserInfoShort = BoUserInfoShort.parserXml(userInfo);
+		} catch (Exception e) {
+			V2Log.d("CLASS = GroupRequest METHOD = OnApplyJoinGroup() xml 解析错误");
+			e.printStackTrace();
 			return;
 		}
+
+		if (boUserInfoShort == null) {
+			V2Log.d("CLASS = GroupRequest METHOD = OnApplyJoinGroup() xml 解析错误");
+			return;
+		}
+
 		V2Group vg = new V2Group(nGroupID, groupType);
-		V2User vu = new V2User(Long.parseLong(id), nickname);
 
 		for (WeakReference<GroupRequestCallback> wrcb : mCallbacks) {
 			Object obj = wrcb.get();
 			if (obj != null) {
 				GroupRequestCallback callback = (GroupRequestCallback) obj;
-				callback.OnApplyJoinGroup(vg, vu, reason);
+				callback.OnApplyJoinGroup(vg, boUserInfoShort, reason);
 			}
 		}
 	}

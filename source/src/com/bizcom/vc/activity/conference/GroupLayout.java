@@ -137,7 +137,7 @@ public class GroupLayout extends LinearLayout {
 
 		if (currentUser != null) {
 			boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
-			String nickName = currentUser.getNickName();
+			String nickName = currentUser.getCommentName_NickName();
 			if (isFriend && !TextUtils.isEmpty(nickName))
 				mGroupNameTV.setText(nickName);
 			else
@@ -223,7 +223,7 @@ public class GroupLayout extends LinearLayout {
 			currentUser = conf.getGroup().getOwnerUser();
 		}
 
-		if (currentUser == null || TextUtils.isEmpty(currentUser.getName())) {
+		if (currentUser == null || TextUtils.isEmpty(currentUser.getDisplayName())) {
 			return;
 		}
 
@@ -232,7 +232,7 @@ public class GroupLayout extends LinearLayout {
 		mGroupDateTV.setText(group.getStrCreateDate());
 
 		boolean isFriend = GlobalHolder.getInstance().isFriend(currentUser);
-		String nickName = currentUser.getNickName();
+		String nickName = currentUser.getCommentName_NickName();
 
 		if (isFriend && !TextUtils.isEmpty(nickName)) {
 			V2Log.d(TAG, "updateName ---> Update NickName successfully!");
@@ -242,7 +242,7 @@ public class GroupLayout extends LinearLayout {
 		} else {
 			mGroupOwnerTV.setText(getResources().getString(
 					R.string.conference_groupLayout_creation)
-					+ currentUser.getName());
+					+ currentUser.getDisplayName());
 		}
 	}
 

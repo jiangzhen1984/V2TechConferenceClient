@@ -100,6 +100,7 @@ public class LoginActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.i("20150304 2","LoginActivity onCreate()");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
 		mContext = this;
@@ -176,6 +177,7 @@ public class LoginActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		Log.i("20150304 2","LoginActivity onDestroy()");
 		super.onDestroy();
 		mUserService.clearCalledBack();
 

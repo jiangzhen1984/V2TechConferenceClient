@@ -3,7 +3,7 @@ package com.V2.jni.callbackInterface;
 import java.util.List;
 
 import com.V2.jni.ImRequest;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 
 
 /**
@@ -51,7 +51,7 @@ public interface ImRequestCallback {
 	 * @param nUserID  user id
 	 * @param user
 	 */
-	public void OnUpdateBaseInfoCallback(V2User user);
+	public void OnUpdateBaseInfoCallback(BoUserInfoBase user);
 	
 	
 	
@@ -91,7 +91,7 @@ public interface ImRequestCallback {
 	 * 
 	 * @param list
 	 */
-	public void OnSearchUserCallback(List<V2User> list);
+	public void OnSearchUserCallback(List<BoUserInfoBase> list);
 	
 	/**
 	 * <ul>Indicate the all group info or group's users info  has already received! over! </ul>

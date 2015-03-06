@@ -31,7 +31,7 @@ public class ConferenceConversation extends Conversation {
 		if (g != null) {
 			User u = g.getOwnerUser();
 			// TODO need use localization
-			return u == null ? "" : u.getName();
+			return u == null ? "" : u.getDisplayName();
 		}
 		return super.getMsg();
 	}

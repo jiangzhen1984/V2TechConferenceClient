@@ -292,7 +292,7 @@ public abstract class Group implements Comparable<Group> {
 		}
 		List<User> list = g.getUsers();
 		for (User u : list) {
-			if ((u != null && u.getName() != null && u.getName().contains(text))
+			if ((u != null && u.getDisplayName() != null && u.getDisplayName().contains(text))
 					|| (u.getArra().equals(text))) {
 				l.add(u);
 			}

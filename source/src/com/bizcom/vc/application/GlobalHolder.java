@@ -1,9 +1,13 @@
 package com.bizcom.vc.application;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -16,6 +20,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.ImRequest;
+import com.V2.jni.ind.BoUserInfoGroup;
+import com.V2.jni.ind.BoUserInfoBase;
+import com.V2.jni.ind.BoUserInfoShort;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
 import com.bizcom.request.util.BitmapManager;
@@ -30,45 +37,33 @@ import com.bizcom.vo.Group;
 import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.OrgGroup;
 import com.bizcom.vo.User;
+import com.bizcom.vo.User.DeviceType;
 import com.bizcom.vo.UserDeviceConfig;
 import com.v2tech.R;
 
 public enum GlobalHolder {
 
 	INSTANCE;
-
 	private User mCurrentUser;
-
-	private List<Group> mOrgGroup = new ArrayList<Group>();
-
-	private List<Group> mConfGroup = new ArrayList<Group>();
-
-	private List<Group> mContactsGroup = new ArrayList<Group>();
-
-	private List<Group> mCrowdGroup = new ArrayList<Group>();
-
-	private List<Group> mDiscussionBoardGroup = new ArrayList<Group>();
 
 	private Map<Long, User> mUserHolder = new HashMap<Long, User>();
 	private Map<Long, Group> mGroupHolder = new HashMap<Long, Group>();
+
+	private List<Group> mOrgGroup = new ArrayList<Group>();
+	private List<Group> mConfGroup = new ArrayList<Group>();
+	private List<Group> mContactsGroup = new ArrayList<Group>();
+	private List<Group> mCrowdGroup = new ArrayList<Group>();
+	private List<Group> mDiscussionBoardGroup = new ArrayList<Group>();
+
 	private Map<Long, String> mAvatarHolder = new HashMap<Long, String>();
-
 	public List<AddFriendHistorieNode> addFriendHistorieList = new ArrayList<AddFriendHistorieNode>();
-
 	private Map<Long, List<UserDeviceConfig>> mUserDeviceList = new HashMap<Long, List<UserDeviceConfig>>();
-
 	private Map<Long, Bitmap> mAvatarBmHolder = new HashMap<Long, Bitmap>();
-
 	private GlobalState mState = new GlobalState();
-
 	private List<String> dataBaseTableCacheName = new ArrayList<String>();
-
 	public Map<String, FileDownLoadBean> globleFileProgress = new HashMap<String, FileDownLoadBean>();
-
 	public Map<String, String> mTransingLockFiles = new HashMap<String, String>();
-
 	public List<String> mFailedFiles = new ArrayList<String>();
-
 	private volatile boolean p2pAVNeedStickyBraodcast = false;
 
 	public static GlobalHolder getInstance() {
@@ -106,68 +101,248 @@ public enum GlobalHolder {
 
 	private Object mUserLock = new Object();
 
-	public User putUser(long id, User u) {
-		if (id <= 0 || u == null) {
+	public boolean putUser(User user) {
+		if (user == null) {
+			return false;
+		}
+
+		boolean ret = false;
+		synchronized (mUserLock) {
+			Long key = Long.valueOf(user.getmUserId());
+			User cu = mUserHolder.get(key);
+			if (cu == null) {
+				mUserHolder.put(key, user);
+				Bitmap avatar = mAvatarBmHolder.get(key);
+				if (avatar != null) {
+					user.setAvatarBitmap(avatar);
+				}
+				ret = true;
+			} else {
+				ret = false;
+			}
+
+		}
+		return ret;
+	}
+
+	public User putOrUpdateUser(BoUserInfoGroup boGroupUserInfo) {
+		if (boGroupUserInfo == null || boGroupUserInfo.mId <= 0) {
 			return null;
 		}
-		synchronized (mUserLock) {
-			Long key = Long.valueOf(id);
-			User cu = mUserHolder.get(key);
-			
-			//不为空时更新
-			if (cu != null) {
-				// Update user property for received user information
-				cu.updateUser(false);
 
-				if (u.getAddress() != null) {
-					cu.setAddress(u.getAddress());
-				}
-				if (u.getAccount() != null) {
-					cu.setAccount(u.getAccount());
-				}
-				cu.setAuthtype(u.getAuthtype());
-				if (u.getBirthday() != null) {
-					cu.setBirthday(u.getBirthday());
-				}
-				if (u.getmStringBirthday() != null) {
-					cu.setmStringBirthday(u.getmStringBirthday());
-				}
-				if (u.getmEmail() != null) {
-					cu.setEmail(u.getmEmail());
-				}
-				if (u.getFax() != null) {
-					cu.setFax(u.getFax());
-				}
-				if (u.getJob() != null) {
-					cu.setJob(u.getJob());
-				}
-				if (u.getMobile() != null) {
-					cu.setMobile(u.getMobile());
-				}
-				if (u.getNickName() != null) {
-					cu.setNickName(u.getNickName());
-				}
-				if (u.getSex() != null) {
-					cu.setSex(u.getSex());
-				}
-				if (u.getSignature() != null) {
-					cu.setSignature(u.getSignature());
-				}
-				if (u.getTelephone() != null) {
-					cu.setTelephone(u.getTelephone());
-				}
-				if (u.getName() != null) {
-					cu.setName(u.getName());
-				}
-				return cu;
+		User user = null;
+		synchronized (mUserLock) {
+			boolean isContained = true;
+			user = mUserHolder.get(Long.valueOf(boGroupUserInfo.mId));
+			if (user == null) {
+				isContained = false;
+				user = new User(boGroupUserInfo.mId);
 			}
-			mUserHolder.put(key, u);
-			Bitmap avatar = mAvatarBmHolder.get(key);
+
+			user.setFromService(true);
+
+			if (boGroupUserInfo.mAccount != null) {
+				user.setAccount(boGroupUserInfo.mAccount);
+			}
+			if (boGroupUserInfo.mNickName != null) {
+				user.setNickName(boGroupUserInfo.mNickName);
+			}
+			if (boGroupUserInfo.mCommentName != null) {
+				user.setCommentName(boGroupUserInfo.mCommentName);
+			}
+			if (boGroupUserInfo.mSign != null) {
+				user.setSignature(boGroupUserInfo.mSign);
+			}
+
+			if (boGroupUserInfo.mAuthtype != null) {
+				try {
+					int authtype = Integer.valueOf(boGroupUserInfo.mAuthtype);
+					user.setAuthtype(authtype);
+				} catch (NumberFormatException e) {
+					V2Log.e("CLASS = GlobalHolder MOTHERD = putOrUpdateUser(BoUserInfoGroup boGroupUserInfo) mAuthtype 转整数失败 ");
+				}
+			}
+			if (boGroupUserInfo.mSex != null) {
+				user.setSex(boGroupUserInfo.mSex);
+			}
+			if (boGroupUserInfo.mStringBirthday != null) {
+				user.setmStringBirthday(boGroupUserInfo.mStringBirthday);
+			}
+			if (boGroupUserInfo.mMobile != null) {
+				user.setMobile(boGroupUserInfo.mMobile);
+			}
+			if (boGroupUserInfo.mTelephone != null) {
+				user.setTelephone(boGroupUserInfo.mTelephone);
+			}
+			if (boGroupUserInfo.mEmail != null) {
+				user.setEmail(boGroupUserInfo.mEmail);
+			}
+			if (boGroupUserInfo.mFax != null) {
+				user.setFax(boGroupUserInfo.mFax);
+			}
+			if (boGroupUserInfo.mJob != null) {
+				user.setJob(boGroupUserInfo.mJob);
+			}
+
+			if (boGroupUserInfo.mAddress != null) {
+				user.setAddress(boGroupUserInfo.mAddress);
+			}
+
+			if (boGroupUserInfo.mBirthday != null) {
+				user.setBirthday(boGroupUserInfo.mBirthday);
+			}
+
+			Bitmap avatar = mAvatarBmHolder.get(boGroupUserInfo.mId);
 			if (avatar != null) {
-				u.setAvatarBitmap(avatar);
+				user.setAvatarBitmap(avatar);
 			}
+
+			if (!isContained) {
+				mUserHolder.put(user.getmUserId(), user);
+			}
+
 		}
-		return u;
+		return user;
+	}
+
+	public User putOrUpdateUser(BoUserInfoShort boUserInfoShort) {
+		if (boUserInfoShort == null || boUserInfoShort.mId <= 0) {
+			return null;
+		}
+
+		User user = null;
+		synchronized (mUserLock) {
+			boolean isContained = true;
+			user = mUserHolder.get(Long.valueOf(boUserInfoShort.mId));
+			if (user == null) {
+				isContained = false;
+				user = new User(boUserInfoShort.mId);
+			}
+
+			user.setFromService(true);
+
+			if (boUserInfoShort.mAccount != null) {
+				user.setAccount(boUserInfoShort.mAccount);
+			}
+			if (boUserInfoShort.mNickName != null) {
+				user.setNickName(boUserInfoShort.mNickName);
+			}
+
+			if (boUserInfoShort.mUeType != null) {
+				try {
+					int deviceType = Integer.valueOf(boUserInfoShort.mUeType);
+					user.setDeviceType(DeviceType.fromInt(deviceType));
+				} catch (NumberFormatException e) {
+					V2Log.e("CLASS = GlobalHolder MOTHERD = putOrUpdateUser(BoUserInfoShort boUserInfoShort) mUeType 转整数失败 ");
+				}
+			}
+
+			if (boUserInfoShort.mAccountType != null) {
+				try {
+					int accountType = Integer
+							.valueOf(boUserInfoShort.mAccountType);
+
+					if (accountType == V2GlobalEnum.USER_ACCOUT_TYPE_NON_REGISTERED) {
+						user.setRapidInitiation(true);
+					} else {
+						user.setRapidInitiation(false);
+					}
+				} catch (NumberFormatException e) {
+					V2Log.e("CLASS = GlobalHolder MOTHERD = putOrUpdateUser(BoUserInfoShort boUserInfoShort) mAccountType 转整数失败 ");
+				}
+			}
+
+			Bitmap avatar = mAvatarBmHolder.get(boUserInfoShort.mId);
+			if (avatar != null) {
+				user.setAvatarBitmap(avatar);
+			}
+
+			if (!isContained) {
+				mUserHolder.put(user.getmUserId(), user);
+			}
+
+		}
+		return user;
+	}
+
+	public User putOrUpdateUser(BoUserInfoBase boUserBaseInfo) {
+		if (boUserBaseInfo == null || boUserBaseInfo.mId <= 0) {
+			return null;
+		}
+
+		User user = null;
+		synchronized (mUserLock) {
+			boolean isContained = true;
+			user = mUserHolder.get(Long.valueOf(boUserBaseInfo.mId));
+			if (user == null) {
+				isContained = false;
+				user = new User(boUserBaseInfo.mId);
+			}
+
+			user.setFromService(true);
+
+			if (boUserBaseInfo.mAccount != null) {
+				user.setAccount(boUserBaseInfo.mAccount);
+			}
+			if (boUserBaseInfo.mNickName != null) {
+				user.setNickName(boUserBaseInfo.mNickName);
+			}
+			if (boUserBaseInfo.mCommentName != null) {
+				user.setCommentName(boUserBaseInfo.mCommentName);
+			}
+			if (boUserBaseInfo.mSign != null) {
+				user.setSignature(boUserBaseInfo.mSign);
+			}
+
+			if (boUserBaseInfo.mAuthtype != null) {
+				try {
+					int authtype = Integer.valueOf(boUserBaseInfo.mAuthtype);
+					user.setAuthtype(authtype);
+				} catch (NumberFormatException e) {
+					V2Log.e("CLASS = GlobalHolder MOTHERD = putOrUpdateUser(BoUserInfoGroup boGroupUserInfo) mAuthtype 转整数失败 ");
+				}
+			}
+			if (boUserBaseInfo.mSex != null) {
+				user.setSex(boUserBaseInfo.mSex);
+			}
+			if (boUserBaseInfo.mStringBirthday != null) {
+				user.setmStringBirthday(boUserBaseInfo.mStringBirthday);
+			}
+			if (boUserBaseInfo.mMobile != null) {
+				user.setMobile(boUserBaseInfo.mMobile);
+			}
+			if (boUserBaseInfo.mTelephone != null) {
+				user.setTelephone(boUserBaseInfo.mTelephone);
+			}
+			if (boUserBaseInfo.mEmail != null) {
+				user.setEmail(boUserBaseInfo.mEmail);
+			}
+			if (boUserBaseInfo.mFax != null) {
+				user.setFax(boUserBaseInfo.mFax);
+			}
+			if (boUserBaseInfo.mJob != null) {
+				user.setJob(boUserBaseInfo.mJob);
+			}
+
+			if (boUserBaseInfo.mAddress != null) {
+				user.setAddress(boUserBaseInfo.mAddress);
+			}
+
+			if (boUserBaseInfo.mBirthday != null) {
+				user.setBirthday(boUserBaseInfo.mBirthday);
+			}
+
+			Bitmap avatar = mAvatarBmHolder.get(boUserBaseInfo.mId);
+			if (avatar != null) {
+				user.setAvatarBitmap(avatar);
+			}
+
+			if (!isContained) {
+				mUserHolder.put(user.getmUserId(), user);
+			}
+
+		}
+		return user;
 	}
 
 	/**
@@ -175,7 +350,7 @@ public enum GlobalHolder {
 	 * If id is negative, will return null.<br>
 	 * Otherwise user never return null. If application doesn't receive user
 	 * information from server.<br>
-	 * User property is dirty {@link User#isDirty()}
+	 * User property is dirty {@link User#isFromService()}
 	 * 
 	 * @param userID
 	 * @param isGetUserInfo
@@ -197,7 +372,7 @@ public enum GlobalHolder {
 					Log.i("20150203 1", "1");
 					ImRequest.getInstance().proxy.getUserBaseInfo(userID);
 				}
-			} else if (TextUtils.isEmpty(tmp.getName())) {
+			} else if (TextUtils.isEmpty(tmp.getDisplayName())) {
 				if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
 					// if receive this callback , the dirty change false;
 					Log.i("20150203 1", "1");
@@ -239,7 +414,7 @@ public enum GlobalHolder {
 
 				if (flag) {
 					User owner = GlobalHolder.getInstance().getUser(
-							vg.owner.uid);
+							vg.owner.mId);
 					g = new CrowdGroup(vg.id, vg.getName(), owner);
 					((CrowdGroup) g).setBrief(vg.getBrief());
 					((CrowdGroup) g).setAnnouncement(vg.getAnnounce());
@@ -247,9 +422,9 @@ public enum GlobalHolder {
 					mCrowdGroup.add(g);
 				}
 			} else if (gType == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
-				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
+				User owner = GlobalHolder.getInstance().getUser(vg.owner.mId);
 				User chairMan = GlobalHolder.getInstance().getUser(
-						vg.chairMan.uid);
+						vg.chairMan.mId);
 				g = new ConferenceGroup(vg.id, vg.getName(), owner,
 						vg.createTime, chairMan);
 				mConfGroup.add(g);
@@ -265,7 +440,7 @@ public enum GlobalHolder {
 
 				mContactsGroup.add(g);
 			} else if (gType == V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
-				User owner = GlobalHolder.getInstance().getUser(vg.owner.uid);
+				User owner = GlobalHolder.getInstance().getUser(vg.owner.mId);
 				g = new DiscussionGroup(vg.id, vg.getName(), owner, null);
 				mDiscussionBoardGroup.add(g);
 			} else {
@@ -327,13 +502,13 @@ public enum GlobalHolder {
 			} else {
 				if (groupType == V2GlobalConstants.GROUP_TYPE_CROWD) {
 					User owner = GlobalHolder.getInstance().getUser(
-							vg.owner.uid);
+							vg.owner.mId);
 					g = new CrowdGroup(vg.id, vg.getName(), owner);
 				} else if (groupType == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
 					User owner = GlobalHolder.getInstance().getUser(
-							vg.owner.uid);
+							vg.owner.mId);
 					User chairMan = GlobalHolder.getInstance().getUser(
-							vg.chairMan.uid);
+							vg.chairMan.mId);
 					g = new ConferenceGroup(vg.id, vg.getName(), owner,
 							vg.createTime, chairMan);
 				} else if (groupType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {

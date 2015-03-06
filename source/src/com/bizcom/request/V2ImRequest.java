@@ -5,7 +5,7 @@ import android.os.Message;
 import com.V2.jni.ImRequest;
 import com.V2.jni.callbacAdapter.ImRequestCallbackAdapter;
 import com.V2.jni.ind.V2ClientType;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.bizcom.request.jni.JNIResponse;
@@ -58,7 +58,7 @@ public class V2ImRequest extends V2AbstractHandler {
 			ImRequest.getInstance().modifyBaseInfo(user.toXml());
 		} else {
 			ImRequest.getInstance().modifyCommentName(user.getmUserId(),
-					EscapedcharactersProcessing.convert(user.getNickName()));
+					EscapedcharactersProcessing.convert(user.getCommentName_NickName()));
 		}
 	}
 
@@ -115,8 +115,8 @@ public class V2ImRequest extends V2AbstractHandler {
 		}
 
 		@Override
-		public void OnUpdateBaseInfoCallback(V2User user) {
-			if (user.uid != GlobalHolder.getInstance().getCurrentUserId()) {
+		public void OnUpdateBaseInfoCallback(BoUserInfoBase user) {
+			if (user.mId != GlobalHolder.getInstance().getCurrentUserId()) {
 				return;
 			}
 			Message m = Message.obtain(V2ImRequest.this,

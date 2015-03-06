@@ -230,7 +230,7 @@ public class MainActivity extends FragmentActivity implements
 		if (exitedFlag) {
 			this.getApplicationContext().stopService(
 					new Intent(this.getApplicationContext(), JNIService.class));
-			finish();
+			//finish();
 			((MainApplication) this.getApplicationContext()).requestQuit();
 
 		} else {

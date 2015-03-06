@@ -71,7 +71,7 @@ public class ContactUserView extends LinearLayout {
 		mUserSignatureTV = (TextView) view
 				.findViewById(R.id.contact_user_signature);
 		
-		mUserNameTV.setText(u.getName());
+		mUserNameTV.setText(u.getDisplayName());
 		mUserSignatureTV.setText(mUser.getSignature() == null ? "" : mUser
 				.getSignature());
 
@@ -128,7 +128,7 @@ public class ContactUserView extends LinearLayout {
 
 	public void updateSign() {
 		mUserSignatureTV.setText(this.mUser.getSignature());
-		mUserNameTV.setText(mUser.getName());
+		mUserNameTV.setText(mUser.getDisplayName());
 	}
 
 	public void removePadding() {

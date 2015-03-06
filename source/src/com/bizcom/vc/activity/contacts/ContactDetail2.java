@@ -196,7 +196,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		super.onNewIntent(intent);
 		String receiveNickName = intent.getStringExtra("nickName");
 		if (u != null)
-			u.setNickName(receiveNickName);
+			u.setCommentName(receiveNickName);
 	}
 
 	@Override
@@ -418,11 +418,11 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		}
 
 		mNickNameET.addTextChangedListener(tw);
-		if (!mNickNameET.getText().toString().equals(u.getNickName())) {
-			mNickNameET.setText(u.getNickName());
+		if (!mNickNameET.getText().toString().equals(u.getCommentName_NickName())) {
+			mNickNameET.setText(u.getCommentName_NickName());
 		}
 
-		mNameTitleIV.setText(u.getRealName());
+		mNameTitleIV.setText(u.getNickName());
 		mAccountTV.setText(u.getAccount());
 		if (u.getSex() != null) {
 			if (u.getSex().equals("0")) {
@@ -494,7 +494,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 
 		@Override
 		public void afterTextChanged(Editable ed) {
-			if(!ed.toString().equals(u.getName()))
+			if(!ed.toString().equals(u.getDisplayName()))
 				isNeedUpdate = true;
 		}
 
@@ -577,7 +577,7 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 	};
 
 	private void gatherUserData() {
-		u.setNickName(mNickNameET.getText().toString());
+		u.setCommentName(mNickNameET.getText().toString());
 	}
 
 	class LocalHandler extends Handler {
@@ -593,14 +593,14 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 			case UPDATE_USER_INFO_DONE:
 				JNIResponse userRes = (JNIResponse) msg.obj;
 				if (userRes.getResult() == JNIResponse.Result.SUCCESS) {
-					V2Log.d("ContactDetail2 --> update user info SUCCESS! user name is : " + u.getName());
+					V2Log.d("ContactDetail2 --> update user info SUCCESS! user name is : " + u.getDisplayName());
 					Intent intent = new Intent();
 					intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 					intent.putExtra("modifiedUser", u.getmUserId());
 					sendBroadcast(intent);
 				} else {
-					V2Log.d("ContactDetail2 --> update user info TIME_OUT! user name is : " + u.getName());
+					V2Log.d("ContactDetail2 --> update user info TIME_OUT! user name is : " + u.getDisplayName());
 				}
 				break;
 			case DELETE_CONTACT_USER:

@@ -40,11 +40,11 @@ public class CrowdConversation extends Conversation {
 			if (group != null) {
 				User u = group.getOwnerUser();
 				if(u != null){
-					if(TextUtils.isEmpty(u.getName())){
+					if(TextUtils.isEmpty(u.getDisplayName())){
 						u = GlobalHolder.getInstance().getUser(u.getmUserId());
 						group.setOwnerUser(u);
 					}
-					return u.getName();
+					return u.getDisplayName();
 				}
 			}
 			return msg;

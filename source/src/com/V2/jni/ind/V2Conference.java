@@ -7,7 +7,7 @@ public class V2Conference {
 	
 	public long cid;
 	public String name;
-	public V2User creator;
+	public BoUserInfoBase creator;
 	public Date startTime;
 	
 }

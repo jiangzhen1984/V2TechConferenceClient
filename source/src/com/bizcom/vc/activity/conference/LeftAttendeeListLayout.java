@@ -226,11 +226,11 @@ public class LeftAttendeeListLayout extends LinearLayout {
 					User aUser = wr.a.getUser();
 					if (aUser != null) {
 						if (aUser.isRapidInitiation()) {
-							nameTV.setText("<" + aUser.getName() + ">");
-							Log.i("20150203 2","快速入会name="+aUser.getName());
+							nameTV.setText("<" + aUser.getDisplayName() + ">");
+							Log.i("20150203 2","快速入会name="+aUser.getDisplayName());
 						} else {
-							nameTV.setText(aUser.getName());
-							Log.i("20150203 2","普通用户name="+aUser.getName());
+							nameTV.setText(aUser.getDisplayName());
+							Log.i("20150203 2","普通用户name="+aUser.getDisplayName());
 						}
 					} else {
 						Log.i("20150203 2","不是参与者name");

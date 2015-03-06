@@ -38,7 +38,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 import com.V2.jni.util.V2Log;
 import com.bizcom.bo.ConversationNotificationObject;
 import com.bizcom.bo.GroupUserObject;
@@ -946,8 +946,8 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 		else {
 			User user = GlobalHolder.getInstance().getUser(
 					tempNode.remoteUserID);
-			if (!TextUtils.isEmpty(user.getName()))
-				name = user.getName();
+			if (!TextUtils.isEmpty(user.getDisplayName()))
+				name = user.getDisplayName();
 			else
 				name = tempNode.remoteUserNickname;
 		}
@@ -1054,15 +1054,15 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 			if (inviteUser == null || crowdGroup == null)
 				content = null;
 			else {
-				if (TextUtils.isEmpty(invitation.getInvitationUser().getName())) {
+				if (TextUtils.isEmpty(invitation.getInvitationUser().getDisplayName())) {
 					User user = GlobalHolder.getInstance().getUser(
 							invitation.getInvitationUser().getmUserId());
-					if (!user.isDirty()) {
-						invitationName = user.getName();
+					if (!user.isFromService()) {
+						invitationName = user.getDisplayName();
 					}
 				} else {
 					User user = invitation.getInvitationUser();
-					invitationName = user.getName();
+					invitationName = user.getDisplayName();
 				}
 
 				String inviteGroupName = crowdGroup.getName();
@@ -1089,15 +1089,15 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 			if (applyUser == null || applyGroup == null)
 				content = null;
 			else {
-				if (TextUtils.isEmpty(applyUser.getName())) {
+				if (TextUtils.isEmpty(applyUser.getDisplayName())) {
 					User user = GlobalHolder.getInstance().getUser(
 							apply.getApplicant().getmUserId());
-					if (!user.isDirty()) {
-						applyName = user.getName();
+					if (!user.isFromService()) {
+						applyName = user.getDisplayName();
 					}
 				} else {
 					User user = apply.getApplicant();
-					applyName = user.getName();
+					applyName = user.getDisplayName();
 				}
 
 				String applyGroupName = applyGroup.getName();
@@ -1496,7 +1496,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 		resultIntent.addCategory(PublicIntent.DEFAULT_CATEGORY);
 		if (vm.getMsgCode() == V2GlobalConstants.GROUP_TYPE_USER) {
 			Notificator.updateSystemNotification(mContext, vm.getFromUser()
-					.getName(), content, 0, resultIntent,
+					.getDisplayName(), content, 0, resultIntent,
 					PublicIntent.MESSAGE_NOTIFICATION_ID);
 		} else {
 			Group group = GlobalHolder.getInstance().getGroupById(
@@ -1561,7 +1561,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 
 				if (uid != -1) {
 					User remote = GlobalHolder.getInstance().getUser(uid);
-					if (remote.isDirty()) {
+					if (remote.isFromService()) {
 						// The user info need to get
 						isOutOrgShow = true;
 						V2Log.e(TAG,
@@ -1585,7 +1585,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 				boolean isFinish = false;
 				User user = GlobalHolder.getInstance().getUser(
 						remoteUsers.get(i));
-				if (user.isDirty()) {
+				if (user.isFromService()) {
 					break;
 				}
 
@@ -1947,7 +1947,7 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 							adapter.notifyDataSetChanged();
 							V2Log.w(TAG,
 									"Successfully updated the user infos , user name is :"
-											+ user.getName());
+											+ user.getDisplayName());
 						} else {
 							V2Log.d(TAG,
 									"update the user infos failed ... beacuse get user is null from globleHolder! id is : "
@@ -2080,8 +2080,8 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 
 				boolean isOutORG = intent.getBooleanExtra("isOutORG", false);
 				if (isOutORG) {
-					V2User v2User = intent.getParcelableExtra("v2User");
-					updateFriendVerificationConversation(v2User.getName(), node);
+					BoUserInfoBase v2User = intent.getParcelableExtra("v2User");
+					updateFriendVerificationConversation(v2User.getNickName(), node);
 				} else
 					updateFriendVerificationConversation(node);
 			} else if (JNIService.JNI_BROADCAST_NEW_QUALIFICATION_MESSAGE

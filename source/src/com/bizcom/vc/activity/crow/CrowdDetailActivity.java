@@ -125,10 +125,10 @@ public class CrowdDetailActivity extends Activity implements CommonNotifyCrowdDe
 		mNoTV.setText(cid);
 		
 		boolean isFriend = GlobalHolder.getInstance().isFriend(crowd.getOwnerUser());
-		if(isFriend && !TextUtils.isEmpty(crowd.getOwnerUser().getNickName()))
-			mCreatorTV.setText(crowd.getOwnerUser().getNickName());
+		if(isFriend && !TextUtils.isEmpty(crowd.getOwnerUser().getCommentName_NickName()))
+			mCreatorTV.setText(crowd.getOwnerUser().getCommentName_NickName());
 		else
-			mCreatorTV.setText(crowd.getOwnerUser().getName());
+			mCreatorTV.setText(crowd.getOwnerUser().getDisplayName());
 		mCreatorTV.setSingleLine();
 		
 		mNameTV.setText(crowd.getName());

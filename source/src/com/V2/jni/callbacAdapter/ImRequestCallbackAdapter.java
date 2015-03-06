@@ -3,7 +3,7 @@ package com.V2.jni.callbacAdapter;
 import java.util.List;
 
 import com.V2.jni.callbackInterface.ImRequestCallback;
-import com.V2.jni.ind.V2User;
+import com.V2.jni.ind.BoUserInfoBase;
 
 public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 
@@ -23,7 +23,7 @@ public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 	}
 
 	@Override
-	public void OnUpdateBaseInfoCallback(V2User user) {
+	public void OnUpdateBaseInfoCallback(BoUserInfoBase user) {
 
 	}
 
@@ -46,7 +46,7 @@ public abstract class ImRequestCallbackAdapter implements ImRequestCallback {
 
 
 	@Override
-	public void OnSearchUserCallback(List<V2User> list) {
+	public void OnSearchUserCallback(List<BoUserInfoBase> list) {
 		
 	}
 

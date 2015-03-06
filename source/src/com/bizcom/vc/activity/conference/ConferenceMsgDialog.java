@@ -179,7 +179,7 @@ public class ConferenceMsgDialog extends Dialog {
 			listViewItemData itemData = mList.get(position);
 			((TextView) convertView
 					.findViewById(R.id.conference_request_host_user_name))
-					.setText(itemData.user.getName());
+					.setText(itemData.user.getDisplayName());
 			View acceptButton = convertView
 					.findViewById(R.id.conference_request_host_button_accept);
 			View rejectButton = convertView

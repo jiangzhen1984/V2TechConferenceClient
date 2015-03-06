@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.widget.TextView;
 import com.V2.jni.util.V2Log;
 import com.bizcom.db.provider.SearchContentProvider;
 import com.bizcom.util.LocalSharedPreferencesStorage;
+import com.bizcom.vc.activity.conference.ConferenceActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.MainApplication;
 import com.v2tech.R;
@@ -24,25 +27,25 @@ public class SplashActivity extends Activity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Log.i("20150304 2","onCreate()");
 		super.onCreate(savedInstanceState);
 		if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
 			finish();
 			return;
 		}
-
 		setContentView(R.layout.load);
 		((TextView) findViewById(R.id.versionNumber))
 				.setText(GlobalConfig.GLOBAL_VERSION_NAME);
 		new LoaderThread().start();
 	}
-
+	
 	@Override
 	protected void onDestroy() {
+		Log.i("20150304 2","onDestroy()");
 		super.onDestroy();
 		if (!isFward) {
 			((MainApplication) getApplication()).uninitForExitProcess();
 		}
-
 	}
 
 	class LoaderThread extends Thread {

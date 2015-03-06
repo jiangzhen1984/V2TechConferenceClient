@@ -55,9 +55,9 @@
         <!-- activity -->
         <activity
             android:name="com.bizcom.vc.activity.main.SplashActivity"
+            android:configChanges="orientation|screenSize"
             android:launchMode="singleTop"
             android:screenOrientation="nosensor"
-            android:configChanges="orientation|screenSize"
             android:theme="@style/AppTheme.Splash" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -79,9 +79,9 @@
         </activity>
         <activity
             android:name="com.bizcom.vc.activity.main.LoginActivity"
+            android:configChanges="orientation|screenSize"
             android:launchMode="singleTop"
             android:screenOrientation="nosensor"
-            android:configChanges="orientation|screenSize"
             android:windowSoftInputMode="stateHidden|adjustUnspecified" >
         </activity>
         <activity

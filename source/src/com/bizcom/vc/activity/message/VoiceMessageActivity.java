@@ -590,7 +590,7 @@ public class VoiceMessageActivity extends Activity {
 				if (newestMediaMessage.readSatate == AudioVideoMessageBean.STATE_UNREAD) {
 					bean.callNumbers += 1;
 				}
-				bean.name = GlobalHolder.getInstance().getUser(newestMediaMessage.remoteUserID).getName();
+				bean.name = GlobalHolder.getInstance().getUser(newestMediaMessage.remoteUserID).getDisplayName();
 				bean.fromUserID = newestMediaMessage.formUserID;
 				bean.toUserID = newestMediaMessage.toUserID;
 				bean.remoteUserID = newestMediaMessage.remoteUserID;

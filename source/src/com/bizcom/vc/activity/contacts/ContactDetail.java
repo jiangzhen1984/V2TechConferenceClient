@@ -495,11 +495,11 @@ public class ContactDetail extends Activity implements OnTouchListener {
 			mHeadIconIV.setImageBitmap(u.getAvatarBitmap());
 		}
 
-		if (TextUtils.isEmpty(u.getName())
+		if (TextUtils.isEmpty(u.getDisplayName())
 				&& !TextUtils.isEmpty(remoteNickName)) {
 			mNameTitleIV.setText(remoteNickName);
 		} else {
-			mNameTitleIV.setText(u.getRealName());
+			mNameTitleIV.setText(u.getNickName());
 		}
 
 		// for self
