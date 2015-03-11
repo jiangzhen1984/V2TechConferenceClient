@@ -14,7 +14,7 @@
         android:layout_marginTop="35dp"
         android:gravity="center_horizontal"
         android:padding="15dp"
-        android:text="确定删除好友吗"
+        android:text="@string/contacts_delete_confirm"
         android:textColor="#000000"
         android:textSize="25sp" />
 
@@ -30,7 +30,7 @@
             android:layout_width="120dp"
             android:layout_height="45dp"
             android:background="@drawable/button_bg_blue_bound"
-            android:text="确   定"
+            android:text="@string/conversation_quit_dialog_confirm_text"
             android:textColor="@color/button_text_color_blue"
             android:textSize="18sp" />
 
@@ -40,7 +40,7 @@
             android:layout_height="45dp"
             android:layout_marginLeft="20dp"
             android:background="@drawable/button_bg_blue_bound"
-            android:text="取   消"
+            android:text="@string/conversation_quit_dialog_cancel_text"
             android:textColor="@color/button_text_color_blue"
             android:textSize="18sp" />
     </LinearLayout>

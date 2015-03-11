@@ -202,6 +202,8 @@ public class ImRequest {
 				"CLASS = ImRequest METHOD = OnUpdateBaseInfo() nUserID= "
 						+ nUserID + " updatexml = " + updatexml);
 
+		
+		
 		// BoUserBaseInfo boUserBaseInfo =
 		// XmlAttributeExtractor.fromXml(nUserID, updatexml);
 		BoUserInfoBase boUserBaseInfo = null;
@@ -218,6 +220,8 @@ public class ImRequest {
 					+ "" + nUserID + " and xml is : " + updatexml);
 			return;
 		}
+		
+		boUserBaseInfo.mId=nUserID;
 
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			Object obj = mCallbacks.get(i).get();

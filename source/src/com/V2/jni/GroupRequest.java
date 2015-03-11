@@ -50,7 +50,7 @@ public class GroupRequest {
 
 		public void getGroupInfo(int type, long groupId) {
 			V2Log.d(V2Log.JNI_REQUEST,
-					"CLASS = GroupRequest METHOD = getGroupInfo()" + " type = "
+					"CLASS = GroupRequest.Proxy METHOD = getGroupInfo()" + " type = "
 							+ type + " groupId = " + groupId);
 			GroupRequest.this.getGroupInfo(type, groupId);
 		}
@@ -427,9 +427,9 @@ public class GroupRequest {
 	 * <filelist><file encrypttype='1' id='C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA'
 	 * name='83025aafa40f4bfb24fdb8d1034f78f0f7361801.gif' size='497236'
 	 * time='1411112464' uploader='11029' url=
-	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025aaf
-	 * a 4 0 f 4 b f b 2 4 f d b 8 d 1 0 3 4 f 7 8 f 0 f 7 3 6 1 8 0 1 . g i f '
-	 * / > < / f i l e l i s t >
+	 * 'http://192.168.0.38:8090/crowd/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/C2A65B9B-63C7-4C9E-A8DD-F15F74ABA6CA/83025
+	 * a a f a 4 0 f 4 b f b 2 4 f d b 8 d 1 0 3 4 f 7 8 f 0 f 7 3 6 1 8 0 1 . g
+	 * i f ' / > < / f i l e l i s t >
 	 * 
 	 * @param groupType
 	 * @param nGroupId
@@ -465,6 +465,7 @@ public class GroupRequest {
 				"CLASS = GroupRequest METHOD = OnGetGroupInfo()"
 						+ " groupType = " + groupType + " sXml = " + sXml);
 		List<V2Group> list = null;
+
 		if (groupType == V2Group.TYPE_CONF) {
 			list = XmlAttributeExtractor.parseConference(sXml);
 		} else if (groupType == V2Group.TYPE_CROWD) {

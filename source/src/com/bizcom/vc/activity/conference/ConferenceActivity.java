@@ -224,7 +224,7 @@ public class ConferenceActivity extends Activity {
 	private ConferenceGroup cg;
 	private Conference conf;
 
-	private V2ConferenceRequest cb;
+	private V2ConferenceRequest v2ConferenceRequest;
 	private V2DocumentRequest ds;
 	private V2ChatRequest cs = new V2ChatRequest();
 
@@ -427,9 +427,9 @@ public class ConferenceActivity extends Activity {
 	protected void onStart() {
 		super.onStart();
 
-//		 if (audioManager != null) {
-//		 audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-//		 }
+		// if (audioManager != null) {
+		// audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		// }
 
 		if (mServiceBound) {
 			suspendOrResume(true);
@@ -963,8 +963,8 @@ public class ConferenceActivity extends Activity {
 				return;
 			}
 			String filePath = data.getStringExtra("checkedImage");
-			cb.shareDoc(conf, filePath, null);
-			cb.modifyGroupLayout(conf);
+			v2ConferenceRequest.shareDoc(conf, filePath, null);
+			v2ConferenceRequest.modifyGroupLayout(conf);
 		}
 	}
 
@@ -997,7 +997,7 @@ public class ConferenceActivity extends Activity {
 	private void showConferenceMsgDialog() {
 		if (mConferenceMsgDialog == null) {
 			mConferenceMsgDialog = new ConferenceMsgDialog(mContext,
-					mHostRequestUsers, cb);
+					mHostRequestUsers, v2ConferenceRequest);
 		} else {
 			mConferenceMsgDialog.resetList(mHostRequestUsers);
 		}
@@ -1234,17 +1234,17 @@ public class ConferenceActivity extends Activity {
 		}
 
 		if (mServiceBound) {
-			cb.unRegisterPermissionUpdateListener(mLocalHandler,
-					NOTIFY_USER_PERMISSION_UPDATED, null);
-			cb.removeRegisterOfKickedConfListener(mLocalHandler,
-					NOTIFICATION_KICKED, null);
-			cb.removeAttendeeEnterOrExitListener(this.mLocalHandler,
-					ATTENDEE_ENTER_OR_EXIT_LISTNER, null);
+			v2ConferenceRequest.unRegisterPermissionUpdateListener(
+					mLocalHandler, NOTIFY_USER_PERMISSION_UPDATED, null);
+			v2ConferenceRequest.removeRegisterOfKickedConfListener(
+					mLocalHandler, NOTIFICATION_KICKED, null);
+			v2ConferenceRequest.removeAttendeeEnterOrExitListener(
+					this.mLocalHandler, ATTENDEE_ENTER_OR_EXIT_LISTNER, null);
 
-			cb.unRegisterPermissionUpdateListener(this.mLocalHandler,
-					NOTIFY_HOST_PERMISSION_REQUESTED, null);
+			v2ConferenceRequest.unRegisterPermissionUpdateListener(
+					this.mLocalHandler, NOTIFY_HOST_PERMISSION_REQUESTED, null);
 
-			cb.unRegisterVideoMixerListener(mLocalHandler,
+			v2ConferenceRequest.unRegisterVideoMixerListener(mLocalHandler,
 					VIDEO_MIX_NOTIFICATION, null);
 
 			ds.unRegisterNewDocNotification(mLocalHandler,
@@ -1257,21 +1257,21 @@ public class ConferenceActivity extends Activity {
 					DOC_ADDED_ONE_PAGE_NOTIFICATION, null);
 			ds.unRegisterPageCanvasUpdateNotification(mLocalHandler,
 					DOC_PAGE_CANVAS_NOTIFICATION, null);
-			cb.removeSyncStateListener(mLocalHandler, SYNC_STATE_NOTIFICATION,
-					null);
-			cb.removeInvitationStateListener(mLocalHandler,
+			v2ConferenceRequest.removeSyncStateListener(mLocalHandler,
+					SYNC_STATE_NOTIFICATION, null);
+			v2ConferenceRequest.removeInvitationStateListener(mLocalHandler,
 					INVITATION_STATE_NOTIFICATION, null);
 
-			cb.removeVoiceActivationListener(mLocalHandler,
+			v2ConferenceRequest.removeVoiceActivationListener(mLocalHandler,
 					VOICEACTIVATION_NOTIFICATION, null);
-			cb.removeAttendeeDeviceListener(mLocalHandler,
+			v2ConferenceRequest.removeAttendeeDeviceListener(mLocalHandler,
 					ATTENDEE_DEVICE_LISTENER, null);
 
 			unbindService(mLocalServiceConnection);
 		}
 		// call clear function from all service
 		ds.clearCalledBack();
-		cb.clearCalledBack();
+		v2ConferenceRequest.clearCalledBack();
 		cs.clearCalledBack();
 
 		mContext.stopService(new Intent(mContext,
@@ -1343,9 +1343,9 @@ public class ConferenceActivity extends Activity {
 					@Override
 					public void confirmCallBack() {
 						mQuitDialog.dismiss();
-						MessageLoader.deleteMessageByID(mContext, 
-								V2GlobalConstants.GROUP_TYPE_CONFERENCE, conf.getId(),
-								-1, false);
+						MessageLoader.deleteMessageByID(mContext,
+								V2GlobalConstants.GROUP_TYPE_CONFERENCE,
+								conf.getId(), -1, false);
 						finish();
 					}
 
@@ -1370,7 +1370,7 @@ public class ConferenceActivity extends Activity {
 					public void confirmCallBack() {
 						mQuitDialog.dismiss();
 						isMuteCamera = true;
-						cb.enableVideoDev("", false);
+						v2ConferenceRequest.enableVideoDev("", false);
 						updateMCameraIVState(false);
 					}
 
@@ -1390,7 +1390,8 @@ public class ConferenceActivity extends Activity {
 		boolean flag = VideoCaptureDevInfo.CreateVideoCaptureDevInfo()
 				.reverseCamera();
 		if (flag) {
-			cb.updateCameraParameters(new CameraConfiguration(""), null);
+			v2ConferenceRequest.updateCameraParameters(new CameraConfiguration(
+					""), null);
 		}
 		return;
 	}
@@ -1413,7 +1414,7 @@ public class ConferenceActivity extends Activity {
 			// because update state will update isSpeaking value
 			updateSpeakerState(currentAttendee.isSpeaking());
 			// Resume audio
-			cb.updateAudio(true);
+			v2ConferenceRequest.updateAudio(true);
 
 			// close local camera
 			openLocalCamera();
@@ -1425,7 +1426,7 @@ public class ConferenceActivity extends Activity {
 
 			mVideoLayout.removeAllViews();
 			// suspend audio
-			cb.updateAudio(false);
+			v2ConferenceRequest.updateAudio(false);
 
 			// close local camera
 			closeLocalCamera();
@@ -1457,7 +1458,6 @@ public class ConferenceActivity extends Activity {
 		// if bound, then conference service is initialized. Otherwise not.
 		if (mServiceBound) {
 			updateAllRemoteDevice(TAG_CLOSE_DEVICE);
-
 			// close local camera
 			closeLocalCamera();
 		}
@@ -1474,9 +1474,11 @@ public class ConferenceActivity extends Activity {
 
 	private void doApplyOrReleaseSpeak(boolean flag) {
 		if (!flag) {
-			cb.applyForReleasePermission(ConferencePermission.SPEAKING, null);
+			v2ConferenceRequest.applyForReleasePermission(
+					ConferencePermission.SPEAKING, null);
 		} else {
-			cb.applyForControlPermission(ConferencePermission.SPEAKING, null);
+			v2ConferenceRequest.applyForControlPermission(
+					ConferencePermission.SPEAKING, null);
 		}
 	}
 
@@ -2191,7 +2193,7 @@ public class ConferenceActivity extends Activity {
 
 					@Override
 					public void onClick(View v) {
-						cb.muteConf();
+						v2ConferenceRequest.muteConf();
 						mChairControlWindow.dismiss();
 
 					}
@@ -2203,8 +2205,8 @@ public class ConferenceActivity extends Activity {
 							@Override
 							public void onCheckedChanged(
 									CompoundButton buttonView, boolean isChecked) {
-								cb.updateConferenceAttribute(conf, cg.isSyn(),
-										isChecked, null);
+								v2ConferenceRequest.updateConferenceAttribute(
+										conf, cg.isSyn(), isChecked, null);
 								mChairControlWindow.dismiss();
 							}
 						});
@@ -2351,6 +2353,17 @@ public class ConferenceActivity extends Activity {
 				if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
 					((LeftShareDocLayout) content)
 							.updateLectureStateGranted(true);
+					if (mCurrentLecturerActivateDocIdStr != null) {
+						V2Doc v2doc = mDocs
+								.get(mCurrentLecturerActivateDocIdStr);
+						if (v2doc != null) {
+							v2ConferenceRequest.modifyGroupLayout(conf);
+							ds.switchDoc(
+									currentAttendee.getAttId(),
+									mDocs.get(mCurrentLecturerActivateDocIdStr),
+									true, null);
+						}
+					}
 				} else {
 					((LeftShareDocLayout) content)
 							.updateLectureStateGranted(false);
@@ -2413,11 +2426,19 @@ public class ConferenceActivity extends Activity {
 		public void onClick(View view) {
 			if (isMuteCamera) {
 				isMuteCamera = false;
-				cb.enableVideoDev("", true);
+				v2ConferenceRequest.enableVideoDev("", true);
 				updateMCameraIVState(true);
 			} else {
 				isMuteCamera = true;
-				cb.enableVideoDev("", false);
+				v2ConferenceRequest.enableVideoDev("", false);
+				for (Attendee attendee : mAttendeeList) {
+					if (attendee instanceof AttendeeMixedDevice) {
+						MixVideo mv = ((AttendeeMixedDevice) attendee).getMV();
+						v2ConferenceRequest.delVideoMixerDevID(mv.getId(),
+								currentAttendee.getAttId(), currentAttendee.getAttId()+":Camera");//固定格式111030:Camera
+					}
+				}
+
 				updateMCameraIVState(false);
 
 			}
@@ -2448,7 +2469,8 @@ public class ConferenceActivity extends Activity {
 					.getLectureState() == Attendee.LECTURE_STATE_APPLYING)) {
 				// updateCurrentAttendeeLectureState(PermissionState.NORMAL,
 				// false);
-				cb.applyForReleasePermission(ConferencePermission.CONTROL, null);
+				v2ConferenceRequest.applyForReleasePermission(
+						ConferencePermission.CONTROL, null);
 				// 释放主讲
 			} else {
 				// updateCurrentAttendeeLectureState(PermissionState.APPLYING,
@@ -2460,7 +2482,8 @@ public class ConferenceActivity extends Activity {
 				}
 				currentAttendee
 						.setLectureState(Attendee.LECTURE_STATE_APPLYING);
-				cb.applyForControlPermission(ConferencePermission.CONTROL, null);
+				v2ConferenceRequest.applyForControlPermission(
+						ConferencePermission.CONTROL, null);
 				// 申请主讲中
 			}
 		}
@@ -3028,83 +3051,88 @@ public class ConferenceActivity extends Activity {
 							xml = xml.substring(indexDstDeviceID);
 						}
 
-						long dstUserID = -1;
-						try {
-							dstUserID = Long.valueOf(dstUserIDStr);
-						} catch (NumberFormatException e) {
-							V2Log.e(V2Log.XML_ERROR,
-									" CLASS =ConferenceActivity.BroadcastReceiver METHOD = onReceive()"
-											+ "dstUserIDStr = " + dstUserIDStr
-											+ "is not long");
-							return;
-						}
-
-						UserDeviceConfig userDeviceConfig = null;
-						for (Attendee attendee : mAttendeeList) {
-
-							if (attendee.getAttId() == dstUserID) {
-								if (attendee.isSelf()) {
-									V2Log.i("20141210 1", "指给移动端打开视频:"
-											+ "是自己跳过");
-									return;
-								}
-								List<UserDeviceConfig> list = attendee
-										.getmDevices();
-								if (list == null) {
-									return;
-								}
-
-								boolean ret = false;
-								for (UserDeviceConfig udc : list) {
-									if (udc.getDeviceID().equals(dstDeviceID)) {
-										userDeviceConfig = udc;
-										ret = true;
-										break;
-									}
-								}
-
-								if (ret) {
-									break;
-								}
-
-							}
-
-							// 混合视频的情况
-							if (attendee.getType() == Attendee.TYPE_MIXED_VIDEO) {
-
-								List<UserDeviceConfig> list = ((AttendeeMixedDevice) attendee)
-										.getmDevices();
-
-								if (list == null) {
-									return;
-								}
-
-								boolean ret = false;
-								for (UserDeviceConfig udc : list) {
-									if (udc.getDeviceID().equals(dstDeviceID)) {
-										userDeviceConfig = udc;
-										ret = true;
-										break;
-									}
-								}
-
-								if (ret) {
-									break;
-								}
-							}
-
-						}
-						if (userDeviceConfig == null) {
-							return;
-						}
-						V2Log.i("20141210 1",
-								"指给移动端打开视频:" + userDeviceConfig.getDeviceID());
-						openAttendeeVideo(userDeviceConfig);
+						checkAndOpenAttendeeVideo(dstUserIDStr, dstDeviceID);
 					}
 
 				}
 
 			}
+		}
+
+		private void checkAndOpenAttendeeVideo(String dstUserIDStr,
+				String dstDeviceID) {
+			long dstUserID = -1;
+			try {
+				dstUserID = Long.valueOf(dstUserIDStr);
+			} catch (NumberFormatException e) {
+				V2Log.e(V2Log.XML_ERROR,
+						" CLASS =ConferenceActivity.BroadcastReceiver METHOD = onReceive()"
+								+ "dstUserIDStr = " + dstUserIDStr
+								+ "is not long");
+				return;
+			}
+
+			UserDeviceConfig userDeviceConfig = null;
+			for (Attendee attendee : mAttendeeList) {
+
+				if (attendee.getAttId() == dstUserID) {
+					if (attendee.isSelf()) {
+						V2Log.i("20141210 1", "指给移动端打开视频:"
+								+ "是自己跳过");
+						return;
+					}
+					List<UserDeviceConfig> list = attendee
+							.getmDevices();
+					if (list == null) {
+						return;
+					}
+
+					boolean ret = false;
+					for (UserDeviceConfig udc : list) {
+						if (udc.getDeviceID().equals(dstDeviceID)) {
+							userDeviceConfig = udc;
+							ret = true;
+							break;
+						}
+					}
+
+					if (ret) {
+						break;
+					}
+
+				}
+
+				// 混合视频的情况
+				if (attendee.getType() == Attendee.TYPE_MIXED_VIDEO) {
+
+					List<UserDeviceConfig> list = ((AttendeeMixedDevice) attendee)
+							.getmDevices();
+
+					if (list == null) {
+						return;
+					}
+
+					boolean ret = false;
+					for (UserDeviceConfig udc : list) {
+						if (udc.getDeviceID().equals(dstDeviceID)) {
+							userDeviceConfig = udc;
+							ret = true;
+							break;
+						}
+					}
+
+					if (ret) {
+						break;
+					}
+				}
+
+			}
+			if (userDeviceConfig == null) {
+				return;
+			}
+			V2Log.i("20141210 1",
+					"指给移动端打开视频:" + userDeviceConfig.getDeviceID());
+			openAttendeeVideo(userDeviceConfig);
 		}
 	}
 
@@ -3125,30 +3153,30 @@ public class ConferenceActivity extends Activity {
 			mServiceBound = true;
 			ConferencMessageSyncService cms = ((ConferencMessageSyncService.LocalBinder) binder)
 					.getService();
-			cb = cms.getConferenceService();
+			v2ConferenceRequest = cms.getConferenceService();
 
 			ds = cms.getDocService();
 
 			// register listener for conference service
-			cb.registerPermissionUpdateListener(mLocalHandler,
+			v2ConferenceRequest.registerPermissionUpdateListener(mLocalHandler,
 					NOTIFY_USER_PERMISSION_UPDATED, null);
-			cb.registerAttendeeEnterOrExitListener(mLocalHandler,
-					ATTENDEE_ENTER_OR_EXIT_LISTNER, null);
-			cb.registerKickedConfListener(mLocalHandler, NOTIFICATION_KICKED,
-					null);
-			cb.registerSyncStateListener(mLocalHandler,
+			v2ConferenceRequest.registerAttendeeEnterOrExitListener(
+					mLocalHandler, ATTENDEE_ENTER_OR_EXIT_LISTNER, null);
+			v2ConferenceRequest.registerKickedConfListener(mLocalHandler,
+					NOTIFICATION_KICKED, null);
+			v2ConferenceRequest.registerSyncStateListener(mLocalHandler,
 					SYNC_STATE_NOTIFICATION, null);
-			cb.registerInvitationStateListener(mLocalHandler,
+			v2ConferenceRequest.registerInvitationStateListener(mLocalHandler,
 					INVITATION_STATE_NOTIFICATION, null);
-			cb.registerVoiceActivationListener(mLocalHandler,
+			v2ConferenceRequest.registerVoiceActivationListener(mLocalHandler,
 					VOICEACTIVATION_NOTIFICATION, null);
-			cb.registerVideoMixerListener(mLocalHandler,
+			v2ConferenceRequest.registerVideoMixerListener(mLocalHandler,
 					VIDEO_MIX_NOTIFICATION, null);
 
-			cb.registerLectureRequestListener(mLocalHandler,
+			v2ConferenceRequest.registerLectureRequestListener(mLocalHandler,
 					NOTIFY_HOST_PERMISSION_REQUESTED, null);
 
-			cb.registerAttendeeDeviceListener(mLocalHandler,
+			v2ConferenceRequest.registerAttendeeDeviceListener(mLocalHandler,
 					ATTENDEE_DEVICE_LISTENER, null);
 
 			// Register listen to document notification
@@ -3170,7 +3198,7 @@ public class ConferenceActivity extends Activity {
 					DOC_PAGE_CANVAS_NOTIFICATION, null);
 
 			Message.obtain(mLocalHandler, ONLY_SHOW_LOCAL_VIDEO).sendToTarget();
-			cb.notifyAllMessage(cg.getmGId());
+			v2ConferenceRequest.notifyAllMessage(cg.getmGId());
 			suspendOrResume(true);
 
 			// 定义能收了
@@ -3474,7 +3502,7 @@ public class ConferenceActivity extends Activity {
 				}
 			}
 			// ignore call back;
-			cb.inviteAttendee(conf, attendUsers, null);
+			v2ConferenceRequest.inviteAttendee(conf, attendUsers, null);
 			// Hide invitation layout
 			mMenuInviteAttendeeButton.performClick();
 			// 用该函数隐藏，会有按钮背景色异常的问题
@@ -3522,7 +3550,7 @@ public class ConferenceActivity extends Activity {
 				}
 			}
 
-			cb.closeShareDoc(conf, willCloseDocIDStr);
+			v2ConferenceRequest.closeShareDoc(conf, willCloseDocIDStr);
 
 		}
 	}
@@ -3726,12 +3754,14 @@ public class ConferenceActivity extends Activity {
 
 			case REQUEST_OPEN_OR_CLOSE_DEVICE:
 				if (msg.arg1 == TAG_CLOSE_DEVICE) {
-					cb.requestCloseVideoDevice(cg, (UserDeviceConfig) msg.obj,
-							new HandlerWrap(mLocalHandler,
+					v2ConferenceRequest.requestCloseVideoDevice(cg,
+							(UserDeviceConfig) msg.obj, new HandlerWrap(
+									mLocalHandler,
 									REQUEST_CLOSE_DEVICE_RESPONSE, null));
 				} else if (msg.arg1 == TAG_OPEN_DEVICE) {
-					cb.requestOpenVideoDevice(cg, (UserDeviceConfig) msg.obj,
-							new HandlerWrap(mLocalHandler,
+					v2ConferenceRequest.requestOpenVideoDevice(cg,
+							(UserDeviceConfig) msg.obj, new HandlerWrap(
+									mLocalHandler,
 									REQUEST_OPEN_DEVICE_RESPONSE, null));
 				}
 				break;
@@ -3862,6 +3892,19 @@ public class ConferenceActivity extends Activity {
 						if (mDocContainer != null) {
 							if (currentAttendee.getLectureState() == Attendee.LECTURE_STATE_GRANTED) {
 								mDocContainer.updateLectureStateGranted(true);
+								if (mCurrentLecturerActivateDocIdStr != null) {
+									V2Doc v2doc = mDocs
+											.get(mCurrentLecturerActivateDocIdStr);
+									if (v2doc != null) {
+										v2ConferenceRequest
+												.modifyGroupLayout(conf);
+										ds.switchDoc(
+												currentAttendee.getAttId(),
+												mDocs.get(mCurrentLecturerActivateDocIdStr),
+												true, null);
+									}
+								}
+
 							} else {
 								mDocContainer.updateLectureStateGranted(false);
 							}
@@ -4010,21 +4053,29 @@ public class ConferenceActivity extends Activity {
 						}
 					}
 
-					// add mixed video device
-				} /*
-				 * else if (msg.arg1 == 3) { MixVideo.MixVideoDevice mv =
-				 * (MixVideo.MixVideoDevice) msg.obj; MixVideo mix =
-				 * mMixerWrapper.get(mv.getMx().getId()).mix; if (mix == null) {
-				 * V2Log.e(" Doesn't cache mix: " + mv.getMx().getId()); } else
-				 * { mix.addDevice(mv.getUdc(), mv.getPos()); } //remove mixed
-				 * video device } else if (msg.arg1 == 4) {
-				 * MixVideo.MixVideoDevice mv = (MixVideo.MixVideoDevice)
-				 * msg.obj; MixVideo mix =
-				 * mMixerWrapper.get(mv.getMx().getId()).mix; if (mix == null) {
-				 * V2Log.e(" Doesn't cache mix: " + mv.getMx().getId()); } else
-				 * { MixVideo.MixVideoDevice cacheMVD = mix.removeDevice(mv);
-				 * //TODO close device } }
-				 */
+				}
+				// else if (msg.arg1 == 3) {
+				// MixVideo.MixVideoDevice mv = (MixVideo.MixVideoDevice)
+				// msg.obj;
+				// MixVideo mix = mAttendeeList.get(mv.getMx().getId()).mix;
+				// if (mix == null) {
+				// V2Log.e(" Doesn't cache mix: " + mv.getMx().getId());
+				// } else {
+				// mix.addDevice(mv.getUdc(), mv.getPos());
+				// }
+				// } else if (msg.arg1 == 4) {
+				// // remove mixed video device
+				// MixVideo.MixVideoDevice mv = (MixVideo.MixVideoDevice)
+				// msg.obj;
+				// MixVideo mix = mMixerWrapper.get(mv.getMx().getId()).mix;
+				// if (mix == null) {
+				// V2Log.e(" Doesn't cache mix: " + mv.getMx().getId());
+				// } else {
+				// MixVideo.MixVideoDevice cacheMVD = mix.removeDevice(mv);
+				// // TODO close device
+				// }
+				// }
+
 				break;
 			}
 		}

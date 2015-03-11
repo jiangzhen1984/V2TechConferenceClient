@@ -79,7 +79,7 @@ public class MainActivity extends FragmentActivity implements
 			new TabWrap(PublicIntent.TAG_GROUP, R.string.tab_group_name,
 					R.string.tab_group_name,
 					R.drawable.selector_tab_group_button,
-					TabFragmentCrow.class.getName()),
+					TabFragmentCrowd.class.getName()),
 			new TabWrap(PublicIntent.TAG_CONF, R.string.tab_conference_name,
 					R.string.tab_conference_name,
 					R.drawable.selector_tab_conference_button,
@@ -375,7 +375,7 @@ public class MainActivity extends FragmentActivity implements
 			if (tab.mTabName.equals(PublicIntent.TAG_CONTACT)) {
 			} else if (tab.mTabName.equals(PublicIntent.TAG_ORG)) {
 			} else if (tab.mTabName.equals(PublicIntent.TAG_GROUP)) {
-				((TabFragmentCrow) fragment).updateSearchState();
+				((TabFragmentCrowd) fragment).updateSearchState();
 			} else if (tab.mTabName.equals(PublicIntent.TAG_CONF)) {
 				((TabFragmentConference) fragment).updateSearchState();
 			} else if (tab.mTabName.equals(PublicIntent.TAG_COV)) {

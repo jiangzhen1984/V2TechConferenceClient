@@ -420,17 +420,22 @@ public class VoiceMessageActivity extends Activity {
 			if (childMessageBean != null) 
 				time = DateUtil
 						.getStringDate(childMessageBean.childSaveDate);
-			if(!TextUtils.isEmpty(time)){
+			if (!TextUtils.isEmpty(time)) {
 				if (audioVideoMessageBean.mediaType == AudioVideoMessageBean.TYPE_AUDIO)
-					holder.voiceHoldingTime.setText("[语音] " + time);
+					holder.voiceHoldingTime.setText(getResources().getString(
+							R.string.contact_message_auto_voice)
+							+ time);
 				else
-					holder.voiceHoldingTime.setText("[视频] " + time);
-			} 
-			else{
+					holder.voiceHoldingTime.setText(getResources().getString(
+							R.string.contact_message_auto_video)
+							+ time);
+			} else {
 				if (audioVideoMessageBean.mediaType == AudioVideoMessageBean.TYPE_AUDIO)
-					holder.voiceHoldingTime.setText("[语音] ");
+					holder.voiceHoldingTime.setText(getResources().getString(
+							R.string.contact_message_auto_voice));
 				else
-					holder.voiceHoldingTime.setText("[视频] ");
+					holder.voiceHoldingTime.setText(getResources().getString(
+							R.string.contact_message_auto_video));
 			}
 			// 处理图标
 			if (audioVideoMessageBean.isCallOut == AudioVideoMessageBean.STATE_CALL_OUT){

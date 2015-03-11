@@ -37,33 +37,34 @@ import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
 public class TabFragmentOrganization extends Fragment implements TextWatcher {
+	public static final String TAG = "OrganizationTabFragment";
 
 	private static final int FILL_CONTACTS_GROUP = 2;
 	private static final int UPDATE_GROUP_STATUS = 4;
 	private static final int UPDATE_USER_STATUS = 5;
 	private static final int UPDATE_USER_SIGN = 8;
 
-	private LocalReceiver receiver = new LocalReceiver();
-	private IntentFilter intentFilter;
-
-	private MultilevelListView mContactsContainer;
+	private MultilevelListView mOrganizationContainer;
 	private View rootView;
+	private LocalHandler mHandler = new LocalHandler();
+	private LocalReceiver receiver = new LocalReceiver();
+	private BitmapManager.BitmapChangedListener mUserAvatarChangedListener = new UserAvatarChangedListener();
+	private MultilevelListView.MultilevelListViewListener mOrganizationContainerListener = new OrganizationContainerListener();
+
+	private IntentFilter intentFilter;
 	private List<Group> mGroupList;
 
+	private Object mLock = new Object();
 	private boolean mLoaded;
-
-	private LocalHandler mHandler = new LocalHandler();
-
-	public static final String TAG = "OrganizationTabFragment";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.i("20150303 1", "TabFragmentOrganization onCreate()");
 		super.onCreate(savedInstanceState);
 		mGroupList = new ArrayList<Group>();
-		getActivity().registerReceiver(receiver, getIntentFilter());
+		initReceiver();
 		BitmapManager.getInstance().registerBitmapChangedListener(
-				this.bitmapChangedListener);
+				mUserAvatarChangedListener);
 	}
 
 	@Override
@@ -75,14 +76,27 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher {
 		}
 		rootView = inflater.inflate(R.layout.tab_fragment_organization,
 				container, false);
-		mContactsContainer = (MultilevelListView) rootView
+		mOrganizationContainer = (MultilevelListView) rootView
 				.findViewById(R.id.contacts_container);
-
-		mContactsContainer.setListener(mListener);
-		mContactsContainer.setTextFilterEnabled(true);
-
-		mContactsContainer.setDivider(null);
+		mOrganizationContainer.setListener(mOrganizationContainerListener);
+		mOrganizationContainer.setTextFilterEnabled(true);
+		mOrganizationContainer.setDivider(null);
 		return rootView;
+	}
+	
+	@Override
+	public void onStart() {
+		Log.i("20150303 1", "TabFragmentOrganization onStart()");
+		super.onStart();
+		if (!mLoaded) {
+			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
+		}
+	}
+
+	@Override
+	public void onStop() {
+		Log.i("20150303 1", "TabFragmentOrganization onStop()");
+		super.onStop();
 	}
 
 	@Override
@@ -99,33 +113,19 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher {
 		mLoaded = false;
 		getActivity().unregisterReceiver(receiver);
 		BitmapManager.getInstance().unRegisterBitmapChangedListener(
-				this.bitmapChangedListener);
-	}
-
-	@Override
-	public void onStart() {
-		Log.i("20150303 1","TabFragmentOrganization onStart()");
-		super.onStart();
-		if (!mLoaded) {
-			Message.obtain(mHandler, FILL_CONTACTS_GROUP).sendToTarget();
-		}
-	}
-
-	@Override
-	public void onStop() {
-		Log.i("20150303 1","TabFragmentOrganization onStop()");
-		super.onStop();
+				mUserAvatarChangedListener);
 	}
 
 	@Override
 	public void setUserVisibleHint(boolean isVisibleToUser) {
+		//isVisibleToUser 此fragment对用户是不是可见的。
 		super.setUserVisibleHint(isVisibleToUser);
-		if (mContactsContainer != null) {
-			mContactsContainer.clearTextFilter();
+		if (mOrganizationContainer != null) {
+			mOrganizationContainer.clearTextFilter();
 		}
 	}
 
-	private IntentFilter getIntentFilter() {
+	private void initReceiver() {
 		if (intentFilter == null) {
 			intentFilter = new IntentFilter();
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
@@ -143,26 +143,19 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher {
 					.addAction(JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO);
 
 		}
-		return intentFilter;
-	}
-
-	private synchronized void fillContactsGroup() {
-		if (mLoaded) {
-			return;
-		}
-		new AsyncTaskLoader().execute();
+		getActivity().registerReceiver(receiver, intentFilter);
 	}
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		if (mContactsContainer == null) {
+		if (mOrganizationContainer == null) {
 			return;
 		}
 		String str = s.toString();
 		if (TextUtils.isEmpty(str)) {
-			mContactsContainer.clearTextFilter();
+			mOrganizationContainer.clearTextFilter();
 		} else {
-			mContactsContainer.setFilterText(str);
+			mOrganizationContainer.setFilterText(str);
 		}
 	}
 
@@ -177,35 +170,47 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher {
 
 	}
 
-	private Object mLock = new Object();
+	
 
-	class AsyncTaskLoader extends AsyncTask<Void, Void, Void> {
-
-		@Override
-		protected Void doInBackground(Void... params) {
-			synchronized (mLock) {
-				if (mLoaded) {
-					return null;
-				}
-
-				mGroupList = GlobalHolder.getInstance().getGroup(
-						GroupType.ORG.intValue());
-
-				if (mGroupList != null && mGroupList.size() > 0) {
-					mLoaded = true;
-				}
-			}
-			return null;
+	private synchronized void fillContactsGroup() {
+		if (mLoaded) {
+			return;
 		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			mContactsContainer.setContactsGroupList(mGroupList);
-		}
-
+		new AsyncTaskLoader().execute();
 	}
 
-	class LocalReceiver extends BroadcastReceiver {
+
+
+	private class LocalHandler extends Handler {
+	
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+			case FILL_CONTACTS_GROUP:
+				fillContactsGroup();
+				break;
+			case UPDATE_GROUP_STATUS:
+				// Just notify group statist information
+				mOrganizationContainer.notifiyDataSetChanged();
+				break;
+			case UPDATE_USER_STATUS:
+				UserStatusObject uso = (UserStatusObject) msg.obj;
+				User.Status us = User.Status.fromInt(uso.getStatus());
+				User user = GlobalHolder.getInstance().getUser(uso.getUid());
+				mOrganizationContainer.updateUserStatus(user, us);
+				break;
+			case UPDATE_USER_SIGN:
+				Long uid = (Long) msg.obj;
+				mOrganizationContainer.updateUser(GlobalHolder.getInstance()
+						.getUser(uid));
+				break;
+			}
+	
+		}
+	
+	}
+
+	private class LocalReceiver extends BroadcastReceiver {
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
@@ -234,8 +239,8 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher {
 				// FIXME now just support contacts remove do not support
 				if (obj.getmType() == Group.GroupType.ORG.intValue()) {
 					// update user name
-					mContactsContainer.updateUser(GlobalHolder.getInstance()
-							.getUser(obj.getmUserId()));
+					mOrganizationContainer.updateUser(GlobalHolder
+							.getInstance().getUser(obj.getmUserId()));
 				}
 
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
@@ -252,7 +257,7 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher {
 				}
 
 				if (guo.getmType() == Group.GroupType.ORG.intValue()) {
-					mContactsContainer.addUser(
+					mOrganizationContainer.addUser(
 							GlobalHolder.getInstance()
 									.getGroupById(GroupType.ORG.intValue(),
 											guo.getmGroupId()), GlobalHolder
@@ -273,7 +278,7 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher {
 						GroupType.CONTACT.intValue(), srcGroupId);
 				Group dest = GlobalHolder.getInstance().getGroupById(
 						GroupType.CONTACT.intValue(), destGroupId);
-				mContactsContainer.updateUserGroup(u, src, dest);
+				mOrganizationContainer.updateUserGroup(u, src, dest);
 			} else if (JNIService.JNI_BROADCAST_USER_UPDATE_BASE_INFO
 					.equals(intent.getAction())) {
 				long uid = intent.getLongExtra("uid", -1);
@@ -293,15 +298,17 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher {
 
 	}
 
-	private BitmapManager.BitmapChangedListener bitmapChangedListener = new BitmapManager.BitmapChangedListener() {
+	private class UserAvatarChangedListener implements
+			BitmapManager.BitmapChangedListener {
 
 		@Override
 		public void notifyAvatarChanged(User user, Bitmap bm) {
-			mContactsContainer.updateUser(user);
+			mOrganizationContainer.updateUser(user);
 		}
-	};
+	}
 
-	private MultilevelListView.MultilevelListViewListener mListener = new MultilevelListView.MultilevelListViewListener() {
+	private class OrganizationContainerListener implements
+			MultilevelListView.MultilevelListViewListener {
 
 		@Override
 		public void onItemClicked(AdapterView<?> parent, View view,
@@ -324,35 +331,32 @@ public class TabFragmentOrganization extends Fragment implements TextWatcher {
 			// TODO Auto-generated method stub
 			return false;
 		}
-	};
+	}
 
-	private class LocalHandler extends Handler {
-
+	private class AsyncTaskLoader extends AsyncTask<Void, Void, Void> {
+	
 		@Override
-		public void handleMessage(Message msg) {
-			switch (msg.what) {
-			case FILL_CONTACTS_GROUP:
-				fillContactsGroup();
-				break;
-			case UPDATE_GROUP_STATUS:
-				// Just notify group statist information
-				mContactsContainer.notifiyDataSetChanged();
-				break;
-			case UPDATE_USER_STATUS:
-				UserStatusObject uso = (UserStatusObject) msg.obj;
-				User.Status us = User.Status.fromInt(uso.getStatus());
-				User user = GlobalHolder.getInstance().getUser(uso.getUid());
-				mContactsContainer.updateUserStatus(user, us);
-				break;
-			case UPDATE_USER_SIGN:
-				Long uid = (Long) msg.obj;
-				mContactsContainer.updateUser(GlobalHolder.getInstance()
-						.getUser(uid));
-				break;
+		protected Void doInBackground(Void... params) {
+			synchronized (mLock) {
+				if (mLoaded) {
+					return null;
+				}
+	
+				mGroupList = GlobalHolder.getInstance().getGroup(
+						GroupType.ORG.intValue());
+	
+				if (mGroupList != null && mGroupList.size() > 0) {
+					mLoaded = true;
+				}
 			}
-
+			return null;
 		}
-
+	
+		@Override
+		protected void onPostExecute(Void result) {
+			mOrganizationContainer.setContactsGroupList(mGroupList);
+		}
+	
 	}
 
 }

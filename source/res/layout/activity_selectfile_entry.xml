@@ -72,7 +72,7 @@
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
                     android:layout_marginLeft="@dimen/select_file_entry_interval"
-                    android:text="图片"
+                    android:text="@string/contact_message_pic_text"
                     android:textColor="#000000"
                     android:textSize="@dimen/select_file_adapter_size" />
                 <ImageView
@@ -100,7 +100,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="文件"
+                    android:text="@string/contact_message_send_file"
                     android:layout_marginLeft="@dimen/select_file_entry_interval"
                     android:textColor="#000000"
                     android:textSize="@dimen/select_file_adapter_size" />

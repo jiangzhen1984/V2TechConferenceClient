@@ -113,15 +113,13 @@ public class BoUserInfoBase implements Parcelable {
 					// public String mAccountType;// 参会类型1普通，2快速入会
 
 					String id = attributes.getValue("id");
-					if (id == null) {
-						boUserBaseInfo.mId = -1;
-						return;
-					}
 
-					try {
-						boUserBaseInfo.mId = Integer.valueOf(id);
-					} catch (NumberFormatException e) {
-						boUserBaseInfo.mId = -1;
+					if (id != null) {
+						try {
+							boUserBaseInfo.mId = Integer.valueOf(id);
+						} catch (NumberFormatException e) {
+							boUserBaseInfo.mId = -1;
+						}
 					}
 
 					boUserBaseInfo.mNickName = attributes.getValue("nickname");
@@ -176,7 +174,7 @@ public class BoUserInfoBase implements Parcelable {
 			}
 		});
 		byteArrayInputStream.close();
-		
+
 		if (boUserBaseInfo.mId == -1) {
 			return null;
 		} else {

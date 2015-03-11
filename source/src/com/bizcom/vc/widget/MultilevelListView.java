@@ -38,89 +38,35 @@ import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
 import com.v2tech.R;
 
-/**
- * Group List view wrapper.<br>
- * 
- * @author jiangzhen
- * 
- */
 public class MultilevelListView extends ListView {
-
 	private static final String TAG = "GroupListView";
 
-	private Context mContext;
-
-	/**
-	 * This list hold all group data and use to search
-	 */
-	private List<Group> mGroupList;
-
-	/**
-	 * This list use to hold origin data.<br>
-	 * Once use clear searched text, we use this list recover origin list First
-	 * time to show list, this list is same with mFilterList. If use input
-	 * searched, then use mFilterList to show seached list
-	 */
-	private List<ItemData> mBaseList;
-
-	/**
-	 * This list use to display current list collection. First time this is same
-	 * with mBaseList. But use input searched text, then this list is searched
-	 * text.
-	 */
-	private List<ItemData> mShowItemDataList;
-
 	private MultilevelListViewAdapter adapter;
+	private MultilevelListViewListener mListener;
+	private OnScrollListener mOutScrollListener;
+	private OnItemClickListener mMyOnItemClickListener = new MyOnItemClickListener();
+	private OnItemLongClickListener mMyOnItemLongClickListener = new MyOnItemLongClickListener();
 
-	/**
-	 * Searched filter
-	 */
 	private SearchedFilter searchedFilter;
 
-	/**
-	 * Flag to indicate show check box or not
-	 */
-	private boolean mCBFlag;
-
-	/**
-	 * To holder outer listener
-	 */
-	private MultilevelListViewListener mListener;
-
-	/**
-	 * 
-	 */
-	private OnScrollListener mOutScrollListener;
-
-	/**
-	 * Flag to indicate doesn't show current logged in User
-	 */
-	private boolean mIgnoreCurrentUser;
-
-	private int mFirstVisibleIndex;
-	private int mLastVisibleIndex;
-
-	/**
-	 * Use to record group item. key group id
-	 */
+	private Context mContext;
+	// This list hold all group data and use to search
+	private List<Group> mGroupList;
+	private List<ItemData> mBaseList;
+	private List<ItemData> mShowItemDataList;
 	private LongSparseArray<ItemData> mItemMap;
-
-	/**
-	 * Use to record all same user items. key: user id<br>
-	 * One user can belong to different group
-	 */
 	private LongSparseArray<Set<ItemData>> mUserItemListMap;
-
-	/**
-	 * Use to record all user items which belongs to same group. key : group id
-	 * 提供一个从User转换成UserItemData的缓存
-	 */
+	// 提供一个从User转换成UserItemData的缓存
 	private LongSparseArray<LongSparseArray<ItemData>> mUserItemDataMapOfMap;
 
-	/**
-	 * Use to indicate current data set is filtered or not
-	 * 只有listView要显示的数据，可以是GroupItemData或是UserItemData
-	 */
+	// Flag to indicate show check box or not
+	private boolean mCBFlag;
+	// Flag to indicate doesn't show current logged in User
+	private boolean mIgnoreCurrentUser;
+	private int mFirstVisibleIndex;
+	private int mLastVisibleIndex;
+	// Use to indicate current data set is filtered or not
+	// 只有listView要显示的数据，可以是GroupItemData或是UserItemData
 	private boolean mIsInFilter;
 
 	public MultilevelListView(Context context, AttributeSet attrs, int defStyle) {
@@ -148,10 +94,10 @@ public class MultilevelListView extends ListView {
 		adapter = new MultilevelListViewAdapter();
 		searchedFilter = new SearchedFilter();
 		mContext = this.getContext();
-		this.setAdapter(adapter);
-		this.setOnItemClickListener(mItemClickedListener);
-		this.setOnItemLongClickListener(mItemLongClickListener);
-		this.setOnScrollListener(mLocalScrollListener);
+		setAdapter(adapter);
+		setOnItemClickListener(mMyOnItemClickListener);
+		setOnItemLongClickListener(mMyOnItemLongClickListener);
+		setOnScrollListener(mLocalScrollListener);
 	}
 
 	public void initCreateMode() {
@@ -187,21 +133,10 @@ public class MultilevelListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
-	/**
-	 * set flag to show or hide item check box view
-	 * 
-	 * @param flag
-	 *            true for show, false for hide
-	 */
 	public void setShowedCheckedBox(boolean flag) {
 		mCBFlag = flag;
 	}
 
-	/**
-	 * Set flag to hide current logged user or not
-	 * 
-	 * @param flag
-	 */
 	public void setIgnoreCurrentUser(boolean flag) {
 		this.mIgnoreCurrentUser = flag;
 	}
@@ -210,25 +145,15 @@ public class MultilevelListView extends ListView {
 		return mListener;
 	}
 
-	/**
-	 * Set item listener
-	 * 
-	 * @param listener
-	 */
 	public void setListener(MultilevelListViewListener listener) {
 		this.mListener = listener;
 	}
-	
+
 	public List<Group> getmGroupList() {
 		return mGroupList;
 	}
 
-	/**
-	 * Update User online status and update user item position
-	 * 
-	 * @param user
-	 * @param us
-	 */
+	// Update User online status and update user item position
 	public void updateUserStatus(User user, User.Status us) {
 		// boolean sort = false;
 		for (int i = 0; i < mShowItemDataList.size(); i++) {
@@ -253,12 +178,7 @@ public class MultilevelListView extends ListView {
 		// }
 	}
 
-	/**
-	 * Update user's checked status of item
-	 * 
-	 * @param u
-	 * @param flag
-	 */
+	// Update user's checked status of item
 	public void updateCheckItem(User u, boolean flag) {
 		if (u == null) {
 			throw new NullPointerException("user is null");
@@ -268,12 +188,7 @@ public class MultilevelListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
-	/**
-	 * Update all group's checked status of item
-	 * 
-	 * @param group
-	 * @param flag
-	 */
+	// Update all group's checked status of item
 	public void updateCheckItem(Group group, boolean flag) {
 		if (group == null) {
 			throw new NullPointerException("Group is null");
@@ -299,16 +214,12 @@ public class MultilevelListView extends ListView {
 			for (int i = 0; i < childGroup.size(); i++) {
 				updateAllGroupItemCheck(childGroup.get(i));
 			}
-		} 
+		}
 		updateCheckItemWithoutNotification(group, false);
 		adapter.notifyDataSetChanged();
 	}
 
-	/**
-	 * Update user's checked status of item
-	 * 
-	 * @param flag
-	 */
+	// Update user's checked status of item
 	public void updateUserItemcCheck(List<User> user, boolean flag) {
 		for (int i = 0; i < user.size(); i++) {
 			updateCheckItem(user.get(i), false);
@@ -320,13 +231,8 @@ public class MultilevelListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
-	/**
-	 * if all users were checek in a group , the group item checkBox should was
-	 * checked..
-	 * 
-	 * @param group
-	 * @param list
-	 */
+	// if all users were checek in a group , the group item checkBox should was
+	// checked..
 	public ItemData checkBelongGroupAllChecked(Group group, List<User> list) {
 		int count = 0;
 		for (User u : list) {
@@ -357,11 +263,7 @@ public class MultilevelListView extends ListView {
 		return item;
 	}
 
-	/**
-	 * Remote list view item according user
-	 * 
-	 * @param user
-	 */
+	// Remote list view item according user
 	public void removeItem(User user) {
 		if (user == null) {
 			return;
@@ -391,12 +293,7 @@ public class MultilevelListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
-	/**
-	 * Add new user to group
-	 * 
-	 * @param group
-	 * @param user
-	 */
+	// Add new user to group
 	public void addUser(Group group, User user) {
 		if (group == null || user == null) {
 			V2Log.e(" incorrect group:" + group + " or user: " + user);
@@ -468,15 +365,6 @@ public class MultilevelListView extends ListView {
 		adapter.notifyDataSetInvalidated();
 	}
 
-	/**
-	 * Update User group
-	 * 
-	 * @param user
-	 * @param src
-	 *            from group
-	 * @param dest
-	 *            to group
-	 */
 	public void updateUserGroup(User user, Group src, Group dest) {
 		if (user == null) {
 			V2Log.e("Incorrect paramters: user is null");
@@ -621,22 +509,13 @@ public class MultilevelListView extends ListView {
 		adapter.notifyDataSetChanged();
 	}
 
-	/**
-	 * Use to update user signature or avatar
-	 * 
-	 * @param user
-	 */
+	// Use to update user signature or avatar
 	public void updateUser(User user) {
 		// FIXME optimze for avatar
 		adapter.notifyDataSetChanged();
 	}
 
-	/**
-	 * Update user item check status according to flag
-	 * 
-	 * @param u
-	 * @param flag
-	 */
+	// Update user item check status according to flag
 	private void updateCheckItemWithoutNotification(User u, boolean flag) {
 		Set<ItemData> itemDataSet = mUserItemListMap.get(u.getmUserId());
 		if (itemDataSet == null || itemDataSet.size() <= 0) {
@@ -656,12 +535,7 @@ public class MultilevelListView extends ListView {
 		}
 	}
 
-	/**
-	 * Update group item check status according to flag
-	 * 
-	 * @param group
-	 * @param flag
-	 */
+	// Update group item check status according to flag
 	private void updateCheckItemWithoutNotification(Group group, boolean flag) {
 		ItemData item = mItemMap.get(group.getmGId());
 		if (item != null) {
@@ -748,9 +622,9 @@ public class MultilevelListView extends ListView {
 			start++;
 			end--;
 		}
-		
+
 		// 如果start与end相等而break，则说明目标user的位置就是start再加1的位置
-		if(start == end)
+		if (start == end)
 			pos = start++;
 
 		// Update user new position;
@@ -856,12 +730,7 @@ public class MultilevelListView extends ListView {
 		return groupLength;
 	}
 
-	/**
-	 * According ItemData , get pos in mFilterList;
-	 * 
-	 * @param item
-	 * @return
-	 */
+	// According ItemData , get pos in mFilterList;
 	public int getGroupItemPos(GroupItemData item) {
 		for (int i = 0; i < mShowItemDataList.size(); i++) {
 			ItemData itemData = mShowItemDataList.get(i);
@@ -929,14 +798,7 @@ public class MultilevelListView extends ListView {
 		return pos;
 	}
 
-	/**
-	 * continue is false , break is true
-	 * 
-	 * @param comparedUser
-	 * @param beComparedUser
-	 * @param compUserStus
-	 * @return
-	 */
+	// continue is false , break is true
 	private boolean compareUserSort(User comparedUser, User beComparedUser,
 			User.Status compUserStus) {
 		if (beComparedUser == null
@@ -999,8 +861,6 @@ public class MultilevelListView extends ListView {
 		return item;
 	}
 
-	/**
-	 */
 	private ItemData getItem(Group g, User u) {
 		LongSparseArray<ItemData> map = mUserItemDataMapOfMap.get(g.getmGId());
 		if (map == null) {
@@ -1071,7 +931,7 @@ public class MultilevelListView extends ListView {
 	}
 
 	public void setOnItemClickListener(OnItemClickListener listener) {
-		if (listener != mItemClickedListener) {
+		if (listener != mMyOnItemClickListener) {
 			throw new RuntimeException(
 					"Can not set others item listeners User setListener instead");
 		}
@@ -1080,7 +940,7 @@ public class MultilevelListView extends ListView {
 
 	@Override
 	public void setOnItemLongClickListener(OnItemLongClickListener listener) {
-		if (listener != mItemLongClickListener) {
+		if (listener != mMyOnItemLongClickListener) {
 			throw new RuntimeException(
 					"Can not set others item listeners Use setListener instead");
 		}
@@ -1104,12 +964,7 @@ public class MultilevelListView extends ListView {
 		}
 	}
 
-	/**
-	 * collapse current expanded group
-	 * 
-	 * @param item
-	 * @param pos
-	 */
+	// collapse current expanded group
 	private void collapse(GroupItemData item, int pos) {
 		int level = item.getLevel();
 		int start = pos;
@@ -1181,10 +1036,7 @@ public class MultilevelListView extends ListView {
 		return pos;
 	}
 
-	/**
-	 * Local item clicked listener
-	 */
-	private OnItemClickListener mItemClickedListener = new OnItemClickListener() {
+	private class MyOnItemClickListener implements OnItemClickListener {
 
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -1211,7 +1063,7 @@ public class MultilevelListView extends ListView {
 
 	};
 
-	private OnItemLongClickListener mItemLongClickListener = new OnItemLongClickListener() {
+	private class MyOnItemLongClickListener implements OnItemLongClickListener {
 
 		@Override
 		public boolean onItemLongClick(AdapterView<?> parent, View view,
@@ -1243,9 +1095,6 @@ public class MultilevelListView extends ListView {
 
 	};
 
-	/**
-	 * 
-	 */
 	private OnScrollListener mLocalScrollListener = new OnScrollListener() {
 
 		@Override
@@ -1313,12 +1162,7 @@ public class MultilevelListView extends ListView {
 
 	}
 
-	/**
-	 * Use to query item
-	 * 
-	 * @author jiangzhen
-	 * 
-	 */
+	// Use to query item
 	class SearchedFilter extends Filter {
 
 		private boolean isFirstSearch = true;
@@ -1408,12 +1252,7 @@ public class MultilevelListView extends ListView {
 
 	}
 
-	/**
-	 * Item response Listener
-	 * 
-	 * @author jiangzhen
-	 * 
-	 */
+	// Item response Listener
 	public interface MultilevelListViewListener {
 		public void onItemClicked(AdapterView<?> parent, View view,
 				int position, long id, ItemData item);
@@ -1559,12 +1398,7 @@ public class MultilevelListView extends ListView {
 
 	}
 
-	/**
-	 * Adapter item view
-	 * 
-	 * @author jiangzhen
-	 * 
-	 */
+	// Adapter item view
 	class MultilevelListViewItemView extends LinearLayout {
 
 		private ItemData mItem;

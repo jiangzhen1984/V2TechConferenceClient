@@ -348,9 +348,13 @@ public class LeftAttendeeListLayout extends LinearLayout {
 				} else {
 					if (atDeviceType != null
 							&& atDeviceType == DeviceType.CELL_PHONE) {
-						cameraIV.setImageResource(R.drawable.phone_camera_pressed);
+						//FIXME 此处做了修改
+						cameraIV.setVisibility(GONE);
+						//cameraIV.setImageResource(R.drawable.phone_camera_pressed);
 					} else {
-						cameraIV.setImageResource(R.drawable.camera_pressed);
+						//FIXME 此处做了修改
+						cameraIV.setVisibility(GONE);
+						//cameraIV.setImageResource(R.drawable.camera_pressed);
 					}
 				}
 			} else {
@@ -358,9 +362,14 @@ public class LeftAttendeeListLayout extends LinearLayout {
 			}
 		} else {
 			if (atDeviceType != null && atDeviceType == DeviceType.CELL_PHONE) {
-				cameraIV.setImageResource(R.drawable.phone_camera_pressed);
+				//FIXME 此处做了修改
+				cameraIV.setVisibility(GONE);
+				//cameraIV.setImageResource(R.drawable.phone_camera_pressed);
 			} else {
-				cameraIV.setImageResource(R.drawable.camera_pressed);
+				//FIXME 此处做了修改
+				cameraIV.setVisibility(GONE);
+				//cameraIV.setImageResource(R.drawable.camera_pressed);
+				
 			}
 		}
 
@@ -379,9 +388,13 @@ public class LeftAttendeeListLayout extends LinearLayout {
 		if (udc != null && !udc.isEnable()
 				&& at.getType() == Attendee.TYPE_ATTENDEE) {
 			if (atDeviceType != null && atDeviceType == DeviceType.CELL_PHONE) {
-				cameraIV.setImageResource(R.drawable.phone_camera_pressed);
+				//FIXME 此处做了修改
+				cameraIV.setVisibility(GONE);
+				//cameraIV.setImageResource(R.drawable.phone_camera_pressed);
 			} else {
-				cameraIV.setImageResource(R.drawable.camera_pressed);
+				//FIXME 此处做了修改
+				cameraIV.setVisibility(GONE);
+				//cameraIV.setImageResource(R.drawable.camera_pressed);
 			}
 		}
 

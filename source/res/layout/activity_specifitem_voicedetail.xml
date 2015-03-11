@@ -129,7 +129,7 @@
             android:layout_marginBottom="@dimen/conversation_view_margin"
             android:layout_marginLeft="15dp"
             android:layout_marginTop="@dimen/conversation_view_margin"
-            android:text="通话历史"
+            android:text="@string/specificItem_voiceDetail_phoneHistories"
             android:textColor="#6C6C6C"
             android:textSize="20sp" />
         <TextView
@@ -140,7 +140,7 @@
             android:layout_marginBottom="@dimen/conversation_view_margin"
             android:layout_marginRight="15dp"
             android:layout_marginTop="@dimen/conversation_view_margin"
-            android:text="清除全部"
+            android:text="@string/specificItem_voiceDetail_clearHistories"
             android:textColor="#0060D3"
             android:textSize="20sp" />
     </RelativeLayout>

@@ -15,10 +15,13 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import com.V2.jni.util.EscapedcharactersProcessing;
 
 //由GroupRequest 的 OnGetGroupUserInfo()登陆后自动传来
 //<xml>
@@ -63,26 +66,24 @@ public class BoUserInfoGroup {
 				element = (Element) gList.item(i);
 
 				BoUserInfoGroup boGroupUserInfo = new BoUserInfoGroup();
-				String strId = element.getAttribute("id");
+				String strId = getAttribute(element,"id");
 				if (strId == null || strId.isEmpty()) {
 					continue;
 				}
 				boGroupUserInfo.mId = Long.parseLong(strId);
-				boGroupUserInfo.mAccount = element.getAttribute("account");
-				boGroupUserInfo.mNickName = element.getAttribute("nickname");
-				boGroupUserInfo.mCommentName = element
-						.getAttribute("commentname");
-				boGroupUserInfo.mSign = element.getAttribute("sign");
-				boGroupUserInfo.mAuthtype = element.getAttribute("authtype");
-				boGroupUserInfo.mSex = element.getAttribute("sex");
-				boGroupUserInfo.mStringBirthday = element
-						.getAttribute("birthday");
-				boGroupUserInfo.mMobile = element.getAttribute("mobile");
-				boGroupUserInfo.mTelephone = element.getAttribute("telephone");
-				boGroupUserInfo.mEmail = element.getAttribute("email");
-				boGroupUserInfo.mFax = element.getAttribute("fax");
-				boGroupUserInfo.mJob = element.getAttribute("job");
-				boGroupUserInfo.mAddress = element.getAttribute("address");
+				boGroupUserInfo.mAccount =getAttribute(element,"account");
+				boGroupUserInfo.mNickName = getAttribute(element,"nickname");
+				boGroupUserInfo.mCommentName = getAttribute(element,"commentname");
+				boGroupUserInfo.mSign = getAttribute(element,"sign");
+				boGroupUserInfo.mAuthtype = getAttribute(element,"authtype");
+				boGroupUserInfo.mSex = getAttribute(element,"sex");
+				boGroupUserInfo.mStringBirthday = getAttribute(element,"birthday");
+				boGroupUserInfo.mMobile = getAttribute(element,"mobile");
+				boGroupUserInfo.mTelephone = getAttribute(element,"telephone");
+				boGroupUserInfo.mEmail = getAttribute(element,"email");
+				boGroupUserInfo.mFax = getAttribute(element,"fax");
+				boGroupUserInfo.mJob = getAttribute(element,"job");
+				boGroupUserInfo.mAddress = getAttribute(element,"address");
 
 				if (boGroupUserInfo.mStringBirthday != null
 						&& boGroupUserInfo.mStringBirthday.length() > 0) {
@@ -114,6 +115,14 @@ public class BoUserInfoGroup {
 			}
 		}
 		return boGroupUserInfoList;
+	}
+	
+	private static String getAttribute(Element el, String name) {
+		Attr atr = el.getAttributeNode(name);
+		if (atr != null) {
+			return atr.getValue();
+		}
+		return null;
 	}
 
 }

@@ -19,7 +19,9 @@
     <string name="messageAuthenticationActivity_message_waitingForOtherAuthentication">等待对方验证</string>
     <string name="messageAuthenticationActivity_message_refused">已拒绝</string>
     <string name="messageAuthenticationActivity_message_allowed">已同意</string>
+    <string name="messageAuthenticationActivity_message_verification">好友验证</string>
     <string name="messageAuthenticationActivity_message_addedYouAsFriend">已添加您为好友</string>
+    <string name="messageAuthenticationActivity_message_group_verification">群验证</string>
 
     <!-- ContactDetail -->
     <string name="contactDetail_titlebar_title_text">@string/common_personal_data</string>
@@ -56,6 +58,8 @@
     <string name="conference_create_conf_end_time">结束时间</string>
     <string name="conference_create_confirm">确定</string>
     <string name="conference_create_cancel">返回</string>
+    <string name="conference_create_mute">会场静音</string>
+    <string name="conference_create_invite">邀请其他人</string>
     <string name="error_conf_title_required">会议名称不能为空!</string>
     <string name="error_conf_start_time_required">会议开始时间不能为空!</string>
     <string name="error_conf_end_time_required">会议结束时间不能为空!</string>
@@ -65,6 +69,7 @@
     <string name="error_create_conference_failed_no_network">当前网络不可用，请检查网络连接</string>
     <string name="error_conf_start_time_format_failed">会议开始时间格式错误: yyyy-MM-dd HH:mm</string>
     <string name="error_conf_do_not_permit_create_piror_conf">不允许创建历史会议</string>
+
     <!-- &#8230;=... -->
     <string name="notification_watiing_process">正在处理请稍后 &#8230;</string>
     <string name="error_create_discussion_board_failed_no_network">当前网络不可用，请检查网络连接</string>
@@ -151,7 +156,9 @@
     <string name="contact_message_send_image">图片</string>
     <string name="contact_message_expression">表情</string>
     <string name="contact_message_auto_reply">[自动回复]</string>
-
+    <string name="contact_message_auto_voice">[语音] </string>
+    <string name="contact_message_auto_video">[视频] </string>
+   
     <!-- activity_contacts_group -->
     <string name="activiy_contact_group_update_title">分组管理</string>
     <string name="activiy_contact_group_title">移至分组</string>
@@ -285,6 +292,7 @@
     <string name="conversation_select_file_entry_picture">@string/conversation_select_file_picture</string>
     <string name="conversation_select_file_entry_pictures_limited">图片大小超过了3m无法发送</string>
     <string name="conversation_select_file_entry_picture_anomaly">@string/conversation_select_file_picture_anomaly</string>
+    <string name="conversation_select_file_entry_need_validation_messages">需要验证消息</string>
     <!-- activity_conversation_message_bodyView -->
     <string name="conversation_message_bodyView_network_connection_not_availabl">网络连接不可用，请稍候再试</string>
 

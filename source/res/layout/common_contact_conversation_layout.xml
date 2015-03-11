@@ -85,7 +85,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/button_bg_blue_bound"
             android:gravity="center"
-            android:text="删除好友"
+            android:text="@string/contacts_user_detail_delete_friend"
             android:textColor="#ff0000"
             android:textSize="@dimen/common_item_text_size"
             android:visibility="gone" />

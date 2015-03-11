@@ -277,6 +277,12 @@ public class V2ConferenceRequest extends DeviceRequest {
 		VideoRequest.getInstance().enableVideoDev(szDeviceID, _bInuse);
 	}
 
+	public void delVideoMixerDevID(String szMediaId, long dstUserId,
+			String dstDevId) {
+		VideoMixerRequest.getInstance().proxy.delVideoMixerDevID(szMediaId,
+				dstUserId, dstDevId);
+	}
+
 	/**
 	 * User request speak permission on the conference.
 	 * 

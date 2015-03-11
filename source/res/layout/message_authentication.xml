@@ -17,7 +17,7 @@
             android:paddingLeft="15dp"
             android:paddingRight="8dp"
             android:paddingTop="10dp"
-            android:text="消息"
+            android:text="@string/tab_conversation_name"
             android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size" />
         <TextView
@@ -27,7 +27,7 @@
             android:ellipsize="end"
             android:gravity="center"
             android:singleLine="true"
-            android:text="验证消息"
+            android:text="@string/group_create_group_qualification"
             android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
         <!-- 用它保持高度 -->
@@ -43,7 +43,7 @@
             android:paddingLeft="15dp"
             android:paddingRight="8dp"
             android:paddingTop="10dp"
-            android:text="完成"
+            android:text="@string/friendManagementActivity_titlebar_right_text"
             android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size"
             android:visibility="gone" />
@@ -82,7 +82,7 @@
                 android:background="@drawable/friend_authentication"
                 android:button="@null"
                 android:gravity="center"
-                android:text="好友验证"
+                android:text="@string/messageAuthenticationActivity_message_verification"
                 android:textColor="#ffffff" />
             <RadioButton
                 android:id="@+id/rb_group_authentication"
@@ -92,7 +92,7 @@
                 android:background="@drawable/group_authentication"
                 android:button="@null"
                 android:gravity="center"
-                android:text="群验证"
+                android:text="@string/messageAuthenticationActivity_message_group_verification"
                 android:textColor="@color/button_text_color_blue" />
         </RadioGroup>
         <LinearLayout

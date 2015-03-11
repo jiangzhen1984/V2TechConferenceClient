@@ -19,7 +19,7 @@
             android:paddingLeft="15dp"
             android:paddingRight="8dp"
             android:paddingTop="10dp"
-            android:text="设置"
+            android:text="@string/date_time_picker_set"
             android:textColor="@color/button_text_color_blue"
             android:textSize="@dimen/common_item_text_size" />
 
@@ -30,7 +30,7 @@
             android:ellipsize="end"
             android:gravity="center"
             android:singleLine="true"
-            android:text="身份验证"
+            android:text="@string/friendManagementActivity_titlebar_left_text2"
             android:textColor="@color/activiy_contact_detail_title_color"
             android:textSize="@dimen/common_item_text_size" />
 
@@ -86,7 +86,7 @@
                     android:drawableRight="@android:drawable/btn_radio"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
-                    android:text="允许任何人"
+                    android:text="@string/crowd_detail_qulification_rule_no_rule"
                     android:textColor="#000000" />
 
                 <View
@@ -104,7 +104,7 @@
                     android:drawableRight="@android:drawable/btn_radio"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
-                    android:text="需要验证消息"
+                    android:text="@string/conversation_select_file_entry_need_validation_messages"
                     android:textColor="#000000" />
 
                 <View
@@ -122,7 +122,7 @@
                     android:drawableRight="@android:drawable/btn_radio"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
-                    android:text="不允许任何人"
+                    android:text="@string/crowd_detail_qulification_rule_never"
                     android:textColor="#000000" />
 
             </RadioGroup>

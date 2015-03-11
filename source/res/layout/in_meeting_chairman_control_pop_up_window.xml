@@ -40,7 +40,7 @@
                     android:drawablePadding="5dp"
                     android:editable="false"
                     android:enabled="true"
-                    android:text="会场静音"
+                    android:text="@string/conference_create_mute"
                     android:textColor="@color/common_item_text_color_black"
                     android:textSize="@dimen/common_menu_text_font_size" />
 
@@ -74,7 +74,7 @@
                     android:checked="true"
                     android:drawableLeft="@drawable/check_state"
                     android:drawablePadding="5dp"
-                    android:text="邀请其他人"
+                    android:text="@string/conference_create_invite"
                     android:textColor="@color/common_item_text_color_black"
                     android:textSize="@dimen/common_menu_text_font_size" />
 
