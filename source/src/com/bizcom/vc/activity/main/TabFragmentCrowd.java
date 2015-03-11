@@ -119,7 +119,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		Log.i("20150303 1","TabFragmentCrow onCreate()");
+		Log.i("20150303 1", "TabFragmentCrow onCreate()");
 
 		mContext = getActivity();
 		service = Executors.newCachedThreadPool();
@@ -132,7 +132,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		Log.i("20150303 1","TabFragmentCrow onCreateView()");
+		Log.i("20150303 1", "TabFragmentCrow onCreateView()");
 		if (rootView == null) {
 			rootView = inflater.inflate(R.layout.tab_fragment_conversations,
 					container, false);
@@ -188,7 +188,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 
 	@Override
 	public void onDestroy() {
-		Log.i("20150303 1","TabFragmentCrow onDestroy()");
+		Log.i("20150303 1", "TabFragmentCrow onDestroy()");
 		super.onDestroy();
 		getActivity().unregisterReceiver(receiver);
 		mItemList = null;
@@ -196,33 +196,34 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 
 	@Override
 	public void onDestroyView() {
-		Log.i("20150303 1","TabFragmentCrow onDestroyView()");
+		Log.i("20150303 1", "TabFragmentCrow onDestroyView()");
 		super.onDestroyView();
 		((ViewGroup) rootView.getParent()).removeView(rootView);
 	}
-	
+
 	@Override
 	public void onStop() {
-		Log.i("20150303 1","TabFragmentCrow onStop()");
+		Log.i("20150303 1", "TabFragmentCrow onStop()");
 		super.onStop();
 	}
-	
+
 	@Override
 	public void onStart() {
-		Log.i("20150303 1","TabFragmentCrow onStart()");
+		Log.i("20150303 1", "TabFragmentCrow onStart()");
 		super.onStart();
 	}
-	
+
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if(requestCode == V2GlobalConstants.REQUEST_CONVERSATION_TEXT_RETURN && data != null){
+		if (requestCode == V2GlobalConstants.REQUEST_CONVERSATION_TEXT_RETURN
+				&& data != null) {
 			int groupType = data.getIntExtra("groupType", -1);
 			long groupID = data.getLongExtra("groupID", -1);
 			Intent intent = new Intent(PublicIntent.REQUEST_UPDATE_CONVERSATION);
 			intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-			ConversationNotificationObject obj = new ConversationNotificationObject(groupType,
-						groupID , false);
+			ConversationNotificationObject obj = new ConversationNotificationObject(
+					groupType, groupID, false);
 			intent.putExtra("fromCrowdTab", true);
 			intent.putExtra("obj", obj);
 			mContext.sendBroadcast(intent);
@@ -242,7 +243,8 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUP_NOTIFICATION);
 			intentFilter
 					.addAction(JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION);
-			intentFilter.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+			intentFilter
+					.addAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_GROUPS_LOADED);
 			intentFilter.addAction(JNIService.JNI_BROADCAST_KICED_CROWD);
 			intentFilter
@@ -454,7 +456,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 			currentItem.cov.setReadFlag(Conversation.READ_FLAG_READ);
 		}
 		adapter.notifyDataSetChanged();
-		if(isAdd)
+		if (isAdd)
 			scrollToTop();
 	}
 
@@ -468,7 +470,8 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 				"obj",
 				new ConversationNotificationObject(cov.getType(), cov
 						.getExtId()));
-		startActivityForResult(i, V2GlobalConstants.REQUEST_CONVERSATION_TEXT_RETURN);
+		startActivityForResult(i,
+				V2GlobalConstants.REQUEST_CONVERSATION_TEXT_RETURN);
 	}
 
 	/**
@@ -625,8 +628,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 												groupID);
 								((CrowdConversation) currentConversation)
 										.setGroup(newGroup);
-								updateCovContent(currentGroupLayout, newGroup,
-										false);
+								updateCovContent(currentGroupLayout, newGroup);
 								V2Log.d(TAG,
 										"update converstaion over , type is : "
 												+ groupType + " and"
@@ -642,7 +644,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 									((DiscussionConversation) currentConversation)
 											.setDiscussionGroup(newGroup);
 									updateCovContent(currentGroupLayout,
-											newGroup, false);
+											newGroup);
 									V2Log.d(TAG,
 											"update crowd or diss converstaion over , type is : "
 													+ groupType + " and"
@@ -660,22 +662,17 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 	}
 
 	private void updateCovContent(final GroupLayout currentGroupLayout,
-			final Group newGroup, final boolean isConference) {
+			final Group newGroup) {
 		getActivity().runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
-				if (isConference) {
-					currentGroupLayout.updateConversationNotificator(true);
-				} else {
-					currentGroupLayout.update();
-				}
 				currentGroupLayout.updateGroupContent(newGroup);
 			}
 		});
 	}
-	
-	private void scrollToTop(){
+
+	private void scrollToTop() {
 		mConversationsListView.post(new Runnable() {
 
 			@Override
@@ -761,7 +758,6 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 				return searchList.get(position).gp;
 			} else {
 				GroupLayout view = (GroupLayout) mItemList.get(position).gp;
-				view.update();
 				return view;
 			}
 		}
@@ -776,24 +772,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 					.getAction())) {
 				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 				// From this broadcast, user has already read conversation
-			} 
-//			else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
-//					.equals(intent.getAction())) {
-//				int groupType = intent.getIntExtra("gtype", -1);
-//				long groupID = intent.getLongExtra("gid", -1);
-//				if (groupType != V2GlobalConstants.GROUP_TYPE_CROWD
-//						|| groupType != V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
-//					V2Log.w(TAG,
-//							"the GROUP_USER_UPDATEED Comming over , type is : "
-//									+ groupType + " id is : " + groupID);
-//					if (isLoadedCov) {
-//						initUpdateCovGroupList(groupType, groupID);
-//					} else {
-//						covCacheList.add(new CovCache(groupType, groupID));
-//					}
-//				}
-//			} 
-			else if (JNIService.JNI_BROADCAST_GROUPS_LOADED.equals(intent
+			} else if (JNIService.JNI_BROADCAST_GROUPS_LOADED.equals(intent
 					.getAction())) {
 				// 刷新群组列表
 				for (int i = 0; i < covCacheList.size(); i++) {
@@ -879,7 +858,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 					for (int i = 0; i < mItemList.size(); i++) {
 						ScrollItem item = mItemList.get(i);
 						if (item.cov.getExtId() == g.getmGId()) {
-							((GroupLayout) item.gp).update();
+							((GroupLayout) item.gp).updateGroupContent(g);
 						}
 					}
 				}
@@ -902,6 +881,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 											.getmUserId() == uid) {
 								((GroupLayout) mItemList.get(i).gp)
 										.updateGroupContent(crowd.getGroup());
+								break;
 							}
 						}
 					}
@@ -918,12 +898,13 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 				}
 
 				if (mCurrentSubTab == SUB_TAB_DISCUSSION) {
+					Group g = GlobalHolder.INSTANCE.
+							getGroupById(V2GlobalConstants.GROUP_TYPE_DISCUSSION, obj.getmGroupId());
 					for (int i = 0; i < mItemList.size(); i++) {
 						Conversation cov = mItemList.get(i).cov;
 						if (cov.getExtId() == obj.getmGroupId()) {
 							GroupLayout layout = (GroupLayout) mItemList.get(i).gp;
-							layout.update();
-							adapter.notifyDataSetChanged();
+							layout.updateGroupContent(g);
 							break;
 						}
 					}
@@ -935,12 +916,13 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 					if (groupType == V2GlobalConstants.GROUP_TYPE_DISCUSSION
 							&& mCurrentSubTab == SUB_TAB_DISCUSSION) {
 						long gid = intent.getLongExtra("gid", -1);
+						Group g = GlobalHolder.INSTANCE.getGroupById(V2GlobalConstants.GROUP_TYPE_DISCUSSION, gid);
 						for (int i = 0; i < mItemList.size(); i++) {
 							Conversation cov = mItemList.get(i).cov;
 							if (cov.getExtId() == gid) {
 								GroupLayout layout = (GroupLayout) mItemList
 										.get(i).gp;
-								layout.update();
+								layout.updateGroupContent(g);
 								adapter.notifyDataSetChanged();
 								break;
 							}
@@ -969,7 +951,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 											V2GlobalConstants.GROUP_TYPE_DISCUSSION,
 											obj.getmGroupId());
 							disCon.setDiscussionGroup(dis);
-							layout.update();
+							layout.updateGroupContent(dis);
 						}
 					}
 				}

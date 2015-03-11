@@ -51,6 +51,7 @@ public class GroupMemberActivity extends Activity {
 	private List<User> deleteMemberList;
 	private ListView mMembersContainer;
 	private TextView mInvitationButton;
+	private TextView mTitleTV;
 	private View mReturnButton;
 	private MembersAdapter adapter;
 
@@ -127,6 +128,7 @@ public class GroupMemberActivity extends Activity {
 				mInvitationButton.setVisibility(View.INVISIBLE);
 			}
 		} else {
+			mTitleTV.setText(getResources().getString(R.string.discussion_board_detail_members));
 			memberGroup = GlobalHolder.getInstance().getGroupById(
 					GroupType.DISCUSSION.intValue(), cid);
 		}
@@ -156,6 +158,7 @@ public class GroupMemberActivity extends Activity {
 		mMembersContainer = (ListView) findViewById(R.id.crowd_members_list);
 		mInvitationButton = (TextView) findViewById(R.id.crowd_members_invitation_button);
 		mReturnButton = findViewById(R.id.crowd_members_return_button);
+		mTitleTV = (TextView) findViewById(R.id.crowd_members_title);
 	}
 
 	private void setListener() {
@@ -290,6 +293,7 @@ public class GroupMemberActivity extends Activity {
 			service.removeMember(memberGroup, user, null);
 			mMembers.remove(user);
 			deleteMemberList.remove(user);
+			user.isShowDelete = false;
 			adapter.notifyDataSetChanged();
 		}
 

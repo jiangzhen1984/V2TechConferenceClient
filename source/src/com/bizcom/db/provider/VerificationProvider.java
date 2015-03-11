@@ -297,8 +297,7 @@ public class VerificationProvider extends DatabaseProvider {
 			}
 		}
 	}
-	
-	
+
 	public static List<FriendMAData> loadFriendsVerifyMessages(int limit) {
 		List<FriendMAData> tempList = new ArrayList<FriendMAData>();
 		// // 把所有的改为已读
@@ -475,7 +474,7 @@ public class VerificationProvider extends DatabaseProvider {
 	 * 
 	 * @param groupID
 	 */
-	public static int deleteCrowdVerificationMessage(long groupID , long userID) {
+	public static int deleteCrowdVerificationMessage(long groupID, long userID) {
 		int ret;
 		if (groupID == -1)
 			ret = mContext.getContentResolver().delete(
@@ -483,14 +482,18 @@ public class VerificationProvider extends DatabaseProvider {
 		else if (userID == -1)
 			ret = mContext.getContentResolver().delete(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + "= ?",
-							new String[] { String.valueOf(groupID)});
+					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
+							+ "= ?", new String[] { String.valueOf(groupID) });
 		else
-			ret = mContext.getContentResolver().delete(
-					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
-					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + "= ? and " +
-					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ? ",
-							new String[] { String.valueOf(groupID) , String.valueOf(userID)});
+			ret = mContext
+					.getContentResolver()
+					.delete(ContentDescriptor.HistoriesCrowd.CONTENT_URI,
+							ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
+									+ "= ? and "
+									+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
+									+ " = ? ",
+							new String[] { String.valueOf(groupID),
+									String.valueOf(userID) });
 		if (ret <= 0)
 			V2Log.d(MessageLoader.TAG,
 					"May delete CrowdVerificationMessage failed...groupID : "
@@ -505,13 +508,24 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @return
 	 */
 	public static int updateCrowdQualicationMessage(VMessageQualification msg) {
-		return updateCrowdQualicationMessage(null, msg , true);
-	}
-	
-	public static int updateCrowdQualicationMessage(CrowdGroup oldCrowd , VMessageQualification msg) {
-		return updateCrowdQualicationMessage(oldCrowd, msg , true);
+		return updateCrowdQualicationMessage(null, msg, true);
 	}
 
+	public static int updateCrowdQualicationMessage(CrowdGroup oldCrowd,
+			VMessageQualification msg) {
+		return updateCrowdQualicationMessage(oldCrowd, msg, true);
+	}
+
+	public static int updateCrowdQualicationLocalInvite(long colsID,
+			long crowdID) {
+		ContentValues values = new ContentValues();
+		values.put(HistoriesCrowd.Cols.HISTORY_CROWD_ID, crowdID);
+		String where = HistoriesCrowd.Cols.ID + " = ? ";
+		String[] selectionArgs = new String[] { String.valueOf(colsID) };
+		return mContext.getContentResolver().update(
+				ContentDescriptor.HistoriesCrowd.CONTENT_URI, values, where,
+				selectionArgs);
+	}
 
 	/**
 	 * Update a qualification message to database
@@ -521,7 +535,7 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @return
 	 */
 	public static int updateCrowdQualicationMessage(CrowdGroup oldCrowd,
-			VMessageQualification msg , boolean isUpdateTime) {
+			VMessageQualification msg, boolean isUpdateTime) {
 		if (msg == null) {
 			V2Log.e("To store failed...please check the given VMessageQualification Object in the databases");
 			return -1;
@@ -617,8 +631,8 @@ public class VerificationProvider extends DatabaseProvider {
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ? and "
 				+ HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
-		
-		if(isUpdateTime){
+
+		if (isUpdateTime) {
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 					GlobalConfig.getGlobalServerTime());
@@ -721,11 +735,11 @@ public class VerificationProvider extends DatabaseProvider {
 		values.put(
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
 				obj.readState.intValue());
-		if(obj.isUpdateTime){
+		if (obj.isUpdateTime) {
 			values.put(HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 					GlobalConfig.getGlobalServerTime());
 		}
-		
+
 		String where = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
 				+ " = ? and "
 				+ HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID + " = ?";
@@ -862,7 +876,7 @@ public class VerificationProvider extends DatabaseProvider {
 				ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_READ_STATE,
 				obj.readState.intValue());
 		String where = ContentDescriptor.HistoriesCrowd.Cols.ID + " = ?";
-		if(obj.isUpdateTime){
+		if (obj.isUpdateTime) {
 			values.put(
 					ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_SAVEDATE,
 					GlobalConfig.getGlobalServerTime());
@@ -1085,19 +1099,20 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @param userID
 	 * @return
 	 */
-	public static VMessageQualification queryCrowdApplyQualMessageByUserId(long crowdID , 
-			long userID) {
+	public static VMessageQualification queryCrowdApplyQualMessageByUserId(
+			long crowdID, long userID) {
 
 		Cursor cursor = null;
 		try {
 
 			String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
 					+ "= ? and "
-					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID + " = ? and "
+					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_ID
+					+ " = ? and "
 					+ ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_RECEIVER_STATE
 					+ "= ?";
 			String[] selectionArgs = new String[] {
-					String.valueOf(userID) ,
+					String.valueOf(userID),
 					String.valueOf(crowdID),
 					String.valueOf(ReceiveQualificationType.REMOTE_APPLY_TYPE
 							.intValue()) };
@@ -1192,7 +1207,8 @@ public class VerificationProvider extends DatabaseProvider {
 	 * @param remoteUserID
 	 * @return
 	 */
-	public static long queryCrowdInviteWaitingQualMessageById(long remoteUserID , long groupID) {
+	public static long queryCrowdInviteWaitingQualMessageById(
+			long remoteUserID, long groupID) {
 		Cursor cursor = null;
 		try {
 			String selection = ContentDescriptor.HistoriesCrowd.Cols.HISTORY_CROWD_REMOTE_USER_ID
@@ -1204,8 +1220,7 @@ public class VerificationProvider extends DatabaseProvider {
 			String[] selectionArgs = new String[] {
 					String.valueOf(remoteUserID),
 					String.valueOf(ReceiveQualificationType.LOCAL_INVITE_TYPE
-							.intValue()) ,
-					String.valueOf(groupID)};
+							.intValue()), String.valueOf(groupID) };
 			cursor = MessageBuilder.mContext.getContentResolver().query(
 					ContentDescriptor.HistoriesCrowd.CONTENT_URI,
 					ContentDescriptor.HistoriesCrowd.Cols.ALL_CLOS, selection,
@@ -1371,8 +1386,9 @@ public class VerificationProvider extends DatabaseProvider {
 		group = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
 				crowdGroupID);
 		if (group == null) {
-			group = new CrowdGroup(crowdGroupID, v2Group.getName(), GlobalHolder
-					.getInstance().getUser(v2Group.owner.mId), new Date());
+			group = new CrowdGroup(crowdGroupID, v2Group.getName(),
+					GlobalHolder.getInstance().getUser(v2Group.owner.mId),
+					new Date());
 			group.setBrief(v2Group.getBrief());
 			group.setAnnouncement(v2Group.getAnnounce());
 			group.setAuthType(CrowdGroup.AuthType.fromInt(authType));
@@ -1519,8 +1535,9 @@ public class VerificationProvider extends DatabaseProvider {
 
 	/**
 	 * 从数据库获取验证消息，判断是否有未读的。
+	 * 
 	 * @param isFriend
-	 * 			true verification message type is friend , false is crowd!
+	 *            true verification message type is friend , false is crowd!
 	 * @return
 	 */
 	public static boolean getUNReandMessage(boolean isFriend) {
@@ -1530,7 +1547,7 @@ public class VerificationProvider extends DatabaseProvider {
 					+ "= ?";
 			String[] selectionArgs = new String[] { String
 					.valueOf(ReadState.UNREAD.intValue()) };
-			if(isFriend)
+			if (isFriend)
 				cursor = mContext.getContentResolver().query(
 						ContentDescriptor.HistoriesAddFriends.CONTENT_URI,
 						ContentDescriptor.HistoriesAddFriends.Cols.ALL_CLOS,
@@ -1547,8 +1564,8 @@ public class VerificationProvider extends DatabaseProvider {
 			if (cursor.getCount() < 0) {
 				return false;
 			}
-			
-			if(cursor.moveToFirst()){
+
+			if (cursor.moveToFirst()) {
 				return true;
 			}
 			return false;

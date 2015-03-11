@@ -8,6 +8,7 @@ import java.util.Set;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ContentUris;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
@@ -70,13 +71,13 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 	private EditText mCrowdTitleET;
 
 	private List<Group> mGroupList;
+	private List<Long> updatedMessage;
 	private CrowdGroup crowd;
 	private V2CrowdGroupRequest cg = new V2CrowdGroupRequest();
 
 	private boolean isInInvitationMode = false;
 	private boolean isHandling;
 
-	private ProgressDialog mWaitingDialog;
 	private ProgressDialog mCreateWaitingDialog;
 
 	@Override
@@ -98,6 +99,7 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 		mRuleSpinner = (Spinner) findViewById(R.id.group_create_group_rule);
 		loadCache();
 
+		updatedMessage = new ArrayList<Long>();
 		String hint = getResources().getString(
 				R.string.crowd_create_name_input_hint);
 		SpannableStringBuilder style = new SpannableStringBuilder(hint);
@@ -284,6 +286,8 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
+		updatedMessage.clear();
+		mGroupList.clear();
 		// call clear to remove callback from JNI.
 		cg.clearCalledBack();
 	}
@@ -339,7 +343,7 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 							.getmUserId() + "");
 			return;
 		}
-
+		
 		VMessageQualificationApplicationCrowd crowdQuion = new VMessageQualificationApplicationCrowd(
 				crowd, user);
 		Uri uri = VerificationProvider.saveQualicationMessage(crowdQuion, true);
@@ -359,6 +363,10 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 					+ "the Uri is null...groupID is : "
 					+ crowd.getmGId()
 					+ " userID is : " + user.getmUserId());
+		}
+		
+		if(crowd.getmGId() == 0){
+			updatedMessage.add(ContentUris.parseId(uri));
 		}
 	}
 
@@ -403,6 +411,13 @@ public class CrowdCreateActivity extends BaseCreateActivity {
 					cg.setGId(id);
 					cg.setCreateDate(new Date());
 
+					if(updatedMessage.size() > 0){
+						for (int i = 0; i < updatedMessage.size(); i++) {
+							long colsID = updatedMessage.get(i);
+							VerificationProvider.updateCrowdQualicationLocalInvite(colsID, id);
+						}
+					}
+					
 					// Create a new crowd group by current logined user
 					V2Log.d(TAG , "successful create a new crowd group , id is : "
 							+ cg.getmGId() + " group name is : " + cg.getName());

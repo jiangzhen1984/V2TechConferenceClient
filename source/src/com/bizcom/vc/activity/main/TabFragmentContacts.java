@@ -432,9 +432,12 @@ public class TabFragmentContacts extends Fragment implements TextWatcher {
 				break;
 			case UPDATE_USER_STATUS:
 				UserStatusObject uso = (UserStatusObject) msg.obj;
-				User.Status us = User.Status.fromInt(uso.getStatus());
-				User user = GlobalHolder.getInstance().getUser(uso.getUid());
-				mContactsContainer.updateUserStatus(user, us);
+				boolean friend = GlobalHolder.INSTANCE.isFriend(uso.getUid());
+				if(friend) {
+					User.Status us = User.Status.fromInt(uso.getStatus());
+					User user = GlobalHolder.getInstance().getUser(uso.getUid());
+					mContactsContainer.updateUserStatus(user, us);
+				}
 				break;
 			case UPDATE_USER_SIGN:
 				Long uid = (Long) msg.obj;

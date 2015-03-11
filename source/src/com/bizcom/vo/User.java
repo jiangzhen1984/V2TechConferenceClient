@@ -28,9 +28,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import android.graphics.Bitmap;
-import android.provider.ContactsContract.CommonDataKinds.Nickname;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
@@ -77,7 +75,7 @@ public class User implements Comparable<User> {
 	private Set<Group> mBelongsGroup;
 	private String mAvatarPath;
 	private String abbra;
-	// For Discussion Member Activity , onItemLongClick
+	// For GroupMemberActivity 
 	public boolean isShowDelete;
 	private static HanyuPinyinOutputFormat format = new HanyuPinyinOutputFormat();
 	// This value indicate this object is dirty, construct locally without any

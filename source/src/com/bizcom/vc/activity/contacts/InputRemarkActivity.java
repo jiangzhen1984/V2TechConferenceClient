@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -157,13 +156,14 @@ public class InputRemarkActivity extends Activity {
 					i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(i);
 					
-					if(!TextUtils.isEmpty(commentNameET.getText())){
-						Intent intent = new Intent();
-						intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
-						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
-						intent.putExtra("modifiedUser", detailUser.getmUserId());
-						sendBroadcast(intent);
-					}
+					User user = GlobalHolder.INSTANCE.getUser(detailUser.getmUserId());
+					user.setCommentName(commentNameET.getText().toString());
+					
+					Intent intent = new Intent();
+					intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+					intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+					intent.putExtra("modifiedUser", detailUser.getmUserId());
+					sendBroadcast(intent);
 				}
 			});
 		} else {

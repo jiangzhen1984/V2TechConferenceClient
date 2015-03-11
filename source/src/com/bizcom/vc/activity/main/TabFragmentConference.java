@@ -459,13 +459,18 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 			return;
 		}
 
+		if (!((MainApplication) mContext.getApplicationContext())
+				.isRunningBackgound()) {
+			return ;
+		}
+		
 		Intent enterConference = new Intent(mContext, MainActivity.class);
 		User creator = GlobalHolder.getInstance().getUser(conf.getCreator());
 		enterConference.putExtra("conf", conf);
 		enterConference.putExtra("initFragment", 3);
 		Notificator.updateSystemNotification(mContext, creator == null ? ""
 				: creator.getDisplayName(), mContext.getString(R.string.conversation_attend_the_meeting)
-				+ conf.getName(), 1, enterConference,
+				+ conf.getName(), 0, enterConference,
 				PublicIntent.VIDEO_NOTIFICATION_ID);
 	}
 
@@ -571,8 +576,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 							} else {
 								newGroup.setOwnerUser(owner);
 								currentConversation.setG(newGroup);
-								updateCovContent(currentGroupLayout, newGroup,
-										true);
+								updateCovContent(currentGroupLayout, newGroup);
 								V2Log.d(TAG,
 										"update conference converstaion over , cov name is : "
 												+ currentConversation.getName()
@@ -590,17 +594,13 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 	}
 
 	private void updateCovContent(final GroupLayout currentGroupLayout,
-			final Group newGroup, final boolean isConference) {
+			final Group newGroup) {
 		getActivity().runOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
-				if (isConference) {
-					if (offLineConf.contains(newGroup.getmGId())) {
-						currentGroupLayout.updateConversationNotificator(true);
-					}
-				} else {
-					currentGroupLayout.update();
+				if (offLineConf.contains(newGroup.getmGId())) {
+					currentGroupLayout.updateConversationNotificator(true);
 				}
 				currentGroupLayout.updateGroupContent(newGroup);
 			}
@@ -952,6 +952,8 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 					addConversation(g, true);
 				}
 				Conference c = new Conference((ConferenceGroup) g);
+				
+				sendVoiceNotify();
 				// Notify status bar
 				updateConferenceNotification(c);
 			} else if (JNIService.JNI_BROADCAST_CONFERENCE_REMOVED
@@ -1000,7 +1002,7 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 						User newUser = GlobalHolder.getInstance().getUser(uid);
 						con.getGroup().setOwnerUser(newUser);
 						GroupLayout layout = (GroupLayout) mItemList.get(i).gp;
-						layout.update();
+						layout.updateGroupContent(con.getGroup());
 
 						if (offLineConf.contains(con.getGroup().getmGId()))
 							layout.updateConversationNotificator(true);
