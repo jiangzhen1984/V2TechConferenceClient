@@ -288,8 +288,8 @@ public class ConversationP2PAVActivity extends Activity implements
 				if (uad.getUser() != null) {
 					String name = null;
 					boolean friend = GlobalHolder.getInstance().isFriend(uad.getUser());
-					if(friend && !TextUtils.isEmpty(uad.getUser().getCommentName_NickName())){
-						name = uad.getUser().getCommentName_NickName();
+					if(friend && !TextUtils.isEmpty(uad.getUser().getCommentName())){
+						name = uad.getUser().getCommentName();
 					} else {
 						name = uad.getUser().getDisplayName();
 					}
@@ -503,8 +503,8 @@ public class ConversationP2PAVActivity extends Activity implements
 			return ;
 		
 		boolean friend = GlobalHolder.getInstance().isFriend(remoteUser);
-		if(friend && !TextUtils.isEmpty(remoteUser.getCommentName_NickName())){
-			view.setText(remoteUser.getCommentName_NickName());
+		if(friend && !TextUtils.isEmpty(remoteUser.getCommentName())){
+			view.setText(remoteUser.getCommentName());
 		} else
 			view.setText(remoteUser.getDisplayName());
 	}

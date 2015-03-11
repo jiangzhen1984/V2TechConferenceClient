@@ -419,8 +419,8 @@ public class ContactDetail2 extends Activity implements OnTouchListener {
 		}
 
 		mNickNameET.addTextChangedListener(tw);
-		if (!mNickNameET.getText().toString().equals(u.getCommentName_NickName())) {
-			mNickNameET.setText(u.getCommentName_NickName());
+		if (!mNickNameET.getText().toString().equals(u.getCommentName())) {
+			mNickNameET.setText(u.getCommentName());
 		}
 
 		mNameTitleIV.setText(u.getNickName());

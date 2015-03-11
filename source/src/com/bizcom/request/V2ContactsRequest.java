@@ -8,8 +8,8 @@ import android.os.Message;
 
 import com.V2.jni.GroupRequest;
 import com.V2.jni.callbacAdapter.GroupRequestCallbackAdapter;
-import com.V2.jni.ind.V2Group;
 import com.V2.jni.ind.BoUserInfoBase;
+import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.EscapedcharactersProcessing;
 import com.V2.jni.util.V2Log;
 import com.V2.jni.util.XmlAttributeExtractor;
@@ -21,10 +21,9 @@ import com.bizcom.request.util.V2AbstractHandler;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vo.ContactGroup;
-import com.bizcom.vo.DiscussionGroup;
 import com.bizcom.vo.Group;
-import com.bizcom.vo.User;
 import com.bizcom.vo.Group.GroupType;
+import com.bizcom.vo.User;
 
 /**
  * 
@@ -40,7 +39,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	private static final int DELETE_CONTACT_USER = 14;
 
 	private long mWatingGid = 0;
-	
+
 	private long mWatingUserID = 0;
 
 	private GroupRequestCB crCB;
@@ -54,7 +53,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	/**
 	 * @comment-user:wenzl 2014年9月19日
 	 * @overview:
-	 *
+	 * 
 	 * @param contactGroup
 	 * @param user
 	 * @param additInfo
@@ -64,9 +63,9 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	public void addContact(Group contactGroup, User user, String additInfo,
 			String commentName) {
 
-		additInfo=EscapedcharactersProcessing.convert(additInfo);
-		commentName=EscapedcharactersProcessing.convert(commentName);
-		
+		additInfo = EscapedcharactersProcessing.convert(additInfo);
+		commentName = EscapedcharactersProcessing.convert(commentName);
+
 		String groupInfo = "<friendgroup" + " id='" + contactGroup.getmGId()
 				+ "'/>";
 
@@ -81,58 +80,51 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	/**
 	 * @comment-user:wenzl 2014年9月19日
 	 * @overview:删除联系人
-	 *
+	 * 
 	 * @param user
 	 * @return:
 	 */
-	public void delContact(User user , HandlerWrap caller) {
-		
-		if(user == null)
-			return ;
-		
+	public void delContact(User user, HandlerWrap caller) {
+
+		if (user == null)
+			return;
+
 		mWatingUserID = user.getmUserId();
 		long nGroupID = -1;
-//		Iterator<Group> iterator = user.getBelongsGroup().iterator();
 		boolean ret = false;
 		boolean isAdd = false;
-//		while (iterator.hasNext()) {
-//			Group temp = iterator.next();
-//			if (temp.getGroupType() == Group.GroupType.CONTACT) {
-//				nGroupID = temp.getmGId();
-//				ret = true;
-//			}
-//		}
 
-        List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
-                GroupType.CONTACT.intValue());
-        for (Group group : friendGroup) {
-            if ((group.findUser(user)) != null) {
-                nGroupID = group.getmGId();
-                Iterator<Group> iterator = user.getBelongsGroup().iterator();
-                while (iterator.hasNext()) {
-                    Group temp = iterator.next();
-                    if (temp.getGroupType() == Group.GroupType.CONTACT) {
-                        nGroupID = temp.getmGId();
-                        isAdd = true;
-                    }
-                }
+		List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
+				GroupType.CONTACT.intValue());
+		for (Group group : friendGroup) {
+			if ((group.findUser(user)) != null) {
+				nGroupID = group.getmGId();
+				Iterator<Group> iterator = user.getBelongsGroup().iterator();
+				while (iterator.hasNext()) {
+					Group temp = iterator.next();
+					if (temp.getGroupType() == Group.GroupType.CONTACT) {
+						nGroupID = temp.getmGId();
+						isAdd = true;
+					}
+				}
 
-                if(!isAdd){
-                    user.addUserToGroup(group);
-                }
-                ret = true;
-                break;
-            }
-        }
-
+				if (!isAdd) {
+					user.addUserToGroup(group);
+				}
+				ret = true;
+				break;
+			}
+		}
 
 		if (!ret) {
-			V2Log.e("ContactsService delContact --> ", "Delete User Failed... Because The user isn't belong to CONTACT GROUP!");
+			V2Log.e("ContactsService delContact --> ",
+					"Delete User Failed... Because The user isn't belong to CONTACT GROUP!");
 			return;
 		}
 
 		initTimeoutMessage(DELETE_CONTACT_USER, DEFAULT_TIME_OUT_SECS, caller);
 		long nUserID = user.getmUserId();
+		GlobalHolder.INSTANCE.getUser(nUserID).setCommentName(null);
 		GroupRequest.getInstance().delGroupUser(
 				Group.GroupType.CONTACT.intValue(), nGroupID, nUserID);
 	}
@@ -140,7 +132,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	/**
 	 * @comment-user:wenzl 2014年9月19日
 	 * @overview:同意被加为联系人
-	 *
+	 * 
 	 * @param groupId
 	 * @param nUserID
 	 * @return:
@@ -153,14 +145,14 @@ public class V2ContactsRequest extends V2AbstractHandler {
 	/**
 	 * @comment-user:wenzl 2014年9月19日
 	 * @overview:拒绝被加为联系人
-	 *
+	 * 
 	 * @param nGroupID
 	 * @param nUserID
 	 * @param reason
 	 * @return:
 	 */
 	public void refuseAddedAsContact(long nGroupID, long nUserID, String reason) {
-		reason=EscapedcharactersProcessing.convert(reason);
+		reason = EscapedcharactersProcessing.convert(reason);
 		GroupRequest.getInstance().refuseInviteJoinGroup(
 				Group.GroupType.CONTACT.intValue(), nGroupID, nUserID, reason);
 	}
@@ -256,8 +248,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 			GroupRequest.getInstance().inviteJoinGroup(
 					GroupType.CONTACT.intValue(),
 					"<friendgroup id =\"" + desGroup.getmGId() + "\" />",
-					XmlAttributeExtractor.buildAttendeeUsersXml(user), 
-					"");
+					XmlAttributeExtractor.buildAttendeeUsersXml(user), "");
 			// remove contact
 		} else if (desGroup == null && srcGroup != null) {
 			GroupRequest.getInstance().delGroupUser(
@@ -271,7 +262,7 @@ public class V2ContactsRequest extends V2AbstractHandler {
 			GroupRequest.getInstance().moveUserToGroup(
 					Group.GroupType.CONTACT.intValue(), srcGroup.getmGId(),
 					desGroup.getmGId(), user.getmUserId());
-			//Update cache
+			// Update cache
 			srcGroup.removeUserFromGroup(user);
 			desGroup.addUserToGroup(user);
 		}
@@ -292,13 +283,15 @@ public class V2ContactsRequest extends V2AbstractHandler {
 
 		@Override
 		public void OnModifyGroupInfoCallback(V2Group group) {
-			if (group == null || group.type != Group.GroupType.CONTACT.intValue()) {
+			if (group == null
+					|| group.type != Group.GroupType.CONTACT.intValue()) {
 				return;
 			}
 			// If equals, means we are waiting for modified response
 			if (group.id == mWatingGid) {
-				ContactGroup conGroup = (ContactGroup) GlobalHolder.getInstance().
-						getGroupById(V2GlobalConstants.GROUP_TYPE_CONTACT, group.id);
+				ContactGroup conGroup = (ContactGroup) GlobalHolder
+						.getInstance().getGroupById(
+								V2GlobalConstants.GROUP_TYPE_CONTACT, group.id);
 				conGroup.setName(group.getName());
 				JNIResponse jniRes = new GroupServiceJNIResponse(
 						RequestConfCreateResponse.Result.SUCCESS);
@@ -334,8 +327,8 @@ public class V2ContactsRequest extends V2AbstractHandler {
 			if (groupType != Group.GroupType.CONTACT.intValue()) {
 				return;
 			}
-			
-			if(mWatingUserID == nUserID){
+
+			if (mWatingUserID == nUserID) {
 				JNIResponse jniRes = new GroupServiceJNIResponse(
 						GroupServiceJNIResponse.Result.SUCCESS);
 				Message.obtain(mCallbackHandler, DELETE_CONTACT_USER, jniRes)
@@ -364,7 +357,6 @@ public class V2ContactsRequest extends V2AbstractHandler {
 			Message.obtain(mCallbackHandler, UPDATE_CONTACT_BELONGS_GROUP,
 					jniRes).sendToTarget();
 		}
-
 
 	}
 

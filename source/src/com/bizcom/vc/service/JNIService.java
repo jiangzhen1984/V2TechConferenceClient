@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -464,11 +465,26 @@ public class JNIService extends Service implements
 							.paserXml(go.xml);
 					Group group = GlobalHolder.getInstance().findGroupById(
 							go.gId);
+					long currentUserId = GlobalHolder.getInstance()
+							.getCurrentUserId();
 					for (BoUserInfoGroup tempBoGroupUserInfo : boGroupUserInfoList) {
+						boolean isFriend = GlobalHolder.getInstance().isFriend(
+								tempBoGroupUserInfo.mId);
+						if (isFriend) {
+							User existUser = GlobalHolder.getInstance()
+									.getExistUser(tempBoGroupUserInfo.mId);
+							if (existUser != null) {
+								String commentName = existUser.getCommentName();
+								if (!TextUtils.isEmpty(commentName)) {
+									tempBoGroupUserInfo.mCommentName = commentName;
+								}
+							}
+						}
+
 						User existUser = GlobalHolder.getInstance()
 								.putOrUpdateUser(tempBoGroupUserInfo);
-						if (existUser.isFromService()
-								&& !GlobalHolder.getInstance().getGlobalState()
+						if (!existUser.isContain
+								&& GlobalHolder.getInstance().getGlobalState()
 										.isGroupLoaded()) {
 							V2Log.e(TAG,
 									"The User that id is : "
@@ -480,8 +496,7 @@ public class JNIService extends Service implements
 									.getUserBaseInfo(existUser.getmUserId());
 						}
 
-						if (existUser.getmUserId() == GlobalHolder
-								.getInstance().getCurrentUserId()) {
+						if (existUser.getmUserId() == currentUserId) {
 							// Update logged user object.
 							GlobalHolder.getInstance()
 									.setCurrentUser(existUser);
@@ -1141,20 +1156,19 @@ public class JNIService extends Service implements
 
 			// 好友删除：被删除的时候，nGroupID 为 0
 			if (groupType == GroupType.CONTACT.intValue()) {
-
 				Set<Group> groupSet = GlobalHolder.getInstance()
 						.getUser(nUserID).getBelongsGroup();
-
-				for (Group gg : groupSet) {
-					if (gg.getGroupType() == GroupType.CONTACT) {
-						nGroupID = gg.getmGId();
+				Iterator<Group> iterator = groupSet.iterator();
+				while (iterator.hasNext()) {
+					Group temp = iterator.next();
+					if (temp.getGroupType() == GroupType.CONTACT) {
+						nGroupID = temp.getmGId();
 						V2Log.d(TAG,
 								"OnDelGroupUserCallback --> delete group id is : "
 										+ nGroupID);
 						break;
 					}
 				}
-
 			} else if (groupType == GroupType.CHATING.intValue()
 					&& GlobalHolder.getInstance().getCurrentUserId() == nUserID) {
 				GlobalHolder.getInstance().removeGroup(
@@ -1193,26 +1207,22 @@ public class JNIService extends Service implements
 			}
 
 			GlobalHolder.getInstance().removeGroupUser(nGroupID, nUserID);
+
 			GroupUserObject obj = new GroupUserObject(groupType, nGroupID,
 					nUserID);
-
-			// if (groupType == GroupType.CONTACT.intValue()) {
-			// List<Group> groupList = GlobalHolder.getInstance().getGroup(
-			// GroupType.CONTACT.intValue());
-			// for (int i = 0; i < groupList.size(); i++) {
-			// Group group = groupList.get(i);
-			//
-			// Log.i("20141201 2",
-			// group.getName() + "(浜烘暟):"
-			// + String.valueOf(group.getUserCount()));
-			// }
-			// }
-
 			Intent i = new Intent();
 			i.setAction(JNIService.JNI_BROADCAST_GROUP_USER_REMOVED);
 			i.addCategory(JNIService.JNI_BROADCAST_CATEGROY);
 			i.putExtra("obj", obj);
 			sendBroadcast(i);
+
+			if (groupType == GroupType.CONTACT.intValue()) {
+				Intent intent = new Intent();
+				intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+				intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+				intent.putExtra("modifiedUser", nUserID);
+				sendBroadcast(intent);
+			}
 		}
 
 		@Override
@@ -1280,7 +1290,8 @@ public class JNIService extends Service implements
 								state.isUpdateTime = false;
 								msgID = VerificationProvider
 										.updateCrowdQualicationMessageState(
-												nGroupID, boUserInfoShort.mId, state);
+												nGroupID, boUserInfoShort.mId,
+												state);
 							}
 						}
 					}
@@ -1711,7 +1722,6 @@ public class JNIService extends Service implements
 				return;
 			}
 
-			// 濡傛灉鍦╬2p鐣岄潰鍒欐嫆缁�
 			ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
 			List<RunningTaskInfo> listRunningTaskInfo = activityManager
 					.getRunningTasks(1);
@@ -1808,7 +1818,7 @@ public class JNIService extends Service implements
 						ind.getDeviceId());
 				return;
 			}
-			
+
 			ActivityManager activityManager = (ActivityManager) getSystemService(Activity.ACTIVITY_SERVICE);
 			List<RunningTaskInfo> listRunningTaskInfo = activityManager
 					.getRunningTasks(1);

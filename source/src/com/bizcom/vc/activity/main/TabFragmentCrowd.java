@@ -760,7 +760,9 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 			if (mIsStartedSearch) {
 				return searchList.get(position).gp;
 			} else {
-				return mItemList.get(position).gp;
+				GroupLayout view = (GroupLayout) mItemList.get(position).gp;
+				view.update();
+				return view;
 			}
 		}
 
@@ -774,22 +776,24 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 					.getAction())) {
 				Message.obtain(mHandler, FILL_CONFS_LIST).sendToTarget();
 				// From this broadcast, user has already read conversation
-			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
-					.equals(intent.getAction())) {
-				int groupType = intent.getIntExtra("gtype", -1);
-				long groupID = intent.getLongExtra("gid", -1);
-				if (groupType != V2GlobalConstants.GROUP_TYPE_CROWD
-						|| groupType != V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
-					V2Log.w(TAG,
-							"the GROUP_USER_UPDATEED Comming over , type is : "
-									+ groupType + " id is : " + groupID);
-					if (isLoadedCov) {
-						initUpdateCovGroupList(groupType, groupID);
-					} else {
-						covCacheList.add(new CovCache(groupType, groupID));
-					}
-				}
-			} else if (JNIService.JNI_BROADCAST_GROUPS_LOADED.equals(intent
+			} 
+//			else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
+//					.equals(intent.getAction())) {
+//				int groupType = intent.getIntExtra("gtype", -1);
+//				long groupID = intent.getLongExtra("gid", -1);
+//				if (groupType != V2GlobalConstants.GROUP_TYPE_CROWD
+//						|| groupType != V2GlobalConstants.GROUP_TYPE_DISCUSSION) {
+//					V2Log.w(TAG,
+//							"the GROUP_USER_UPDATEED Comming over , type is : "
+//									+ groupType + " id is : " + groupID);
+//					if (isLoadedCov) {
+//						initUpdateCovGroupList(groupType, groupID);
+//					} else {
+//						covCacheList.add(new CovCache(groupType, groupID));
+//					}
+//				}
+//			} 
+			else if (JNIService.JNI_BROADCAST_GROUPS_LOADED.equals(intent
 					.getAction())) {
 				// 刷新群组列表
 				for (int i = 0; i < covCacheList.size(); i++) {
@@ -920,6 +924,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 							GroupLayout layout = (GroupLayout) mItemList.get(i).gp;
 							layout.update();
 							adapter.notifyDataSetChanged();
+							break;
 						}
 					}
 				}
@@ -937,6 +942,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 										.get(i).gp;
 								layout.update();
 								adapter.notifyDataSetChanged();
+								break;
 							}
 						}
 					}

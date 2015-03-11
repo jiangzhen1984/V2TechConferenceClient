@@ -50,33 +50,8 @@ public class Notificator {
 		Notification build = builder.build();
 		build.flags = Notification.FLAG_AUTO_CANCEL;
 		// mId allows you to update the notification later on.
-		mNotificationManager.notify(notificationID, build);
-	}
-
-	public static void updateSystemNotification(Context context, String title,
-			String content, int tone, int notificationID) {
-		if (tone > 0
-				&& ((System.currentTimeMillis() / 1000) - lastNotificatorTime) > 2) {
-			Uri notification = RingtoneManager
-					.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-			Ringtone r = RingtoneManager.getRingtone(context, notification);
-			r.play();
-			lastNotificatorTime = System.currentTimeMillis() / 1000;
-			// MediaPlayer mPlayer = MediaPlayer.create(context,
-			// R.raw.chat_audio);
-			// if (!mPlayer.isPlaying())
-			// mPlayer.start();
-		}
-
-		NotificationCompat.Builder builder = new NotificationCompat.Builder(
-				context).setSmallIcon(R.drawable.ic_launcher)
-				.setContentTitle(title).setContentText(content);
-
-		NotificationManager mNotificationManager = (NotificationManager) context
-				.getSystemService(Context.NOTIFICATION_SERVICE);
-		// mId allows you to update the notification later on.
 		mNotificationManager.cancelAll();
-		mNotificationManager.notify(notificationID, builder.build());
+		mNotificationManager.notify(notificationID, build);
 	}
 
 	public static void cancelSystemNotification(Context context, int nId) {

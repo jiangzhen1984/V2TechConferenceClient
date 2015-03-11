@@ -61,6 +61,7 @@ import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
 import com.bizcom.vc.activity.message.VoiceMessageActivity;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
+import com.bizcom.vc.application.MainApplication;
 import com.bizcom.vc.application.PublicIntent;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.listener.CommonCallBack;
@@ -964,8 +965,11 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 		}
 
 		if (hasUnread) {
-			updateVerificationStateBar(msg,
-					VerificationMessageType.CONTACT_TYPE);
+			if (((MainApplication) mContext.getApplicationContext())
+					.isRunningBackgound()) {
+				updateVerificationStateBar(msg,
+						VerificationMessageType.CONTACT_TYPE);
+			}
 			verificationMessageItemData
 					.setReadFlag(Conversation.READ_FLAG_UNREAD);
 			sendVoiceNotify();
@@ -1442,6 +1446,11 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 	private void updateStatusBar(VMessage vm) {
 		if (checkSendingState()) {
 			return;
+		}
+		
+		if (!((MainApplication) mContext.getApplicationContext())
+				.isRunningBackgound()) {
+			return ;
 		}
 
 		String content;
@@ -2097,9 +2106,13 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 						"having new crowd verification message coming ... update..");
 				updateCrowdVerificationConversation();
 				sendVoiceNotify();
-				updateVerificationStateBar(verificationMessageItemData
-						.getMsg().toString(),
-						VerificationMessageType.CROWD_TYPE);
+				if (((MainApplication) mContext.getApplicationContext())
+						.isRunningBackgound()) {
+					updateVerificationStateBar(verificationMessageItemData
+							.getMsg().toString(),
+							VerificationMessageType.CROWD_TYPE);
+
+				}
 
 				isShowVerificationNotify = true;
 				ConversationFirendAuthenticationData verification = ((ConversationFirendAuthenticationData) verificationMessageItemData);
@@ -2384,11 +2397,16 @@ public class TabFragmentMessage extends Fragment implements TextWatcher,
 				content = String.format(
 						res.getString(R.string.friend_was_reject_apply), name);
 			}
-		} else if ((tempNode.fromUserID == tempNode.ownerUserID)
-				&& (tempNode.addState == 0)) {// 我加别人等待验证
-			content = String.format(
-					res.getString(R.string.friend_apply_add_waiting_verify),
-					name);
+		} else if (tempNode.fromUserID == tempNode.ownerUserID) {// 我加别人等待验证
+			if(tempNode.addState == 0){
+				content = String.format(
+						res.getString(R.string.friend_apply_add_waiting_verify),
+						name);
+			} else if(tempNode.addState == 1){
+				content = String.format(
+						res.getString(R.string.friend_relation),
+						name);
+			}
 		}
 		return content;
 	}

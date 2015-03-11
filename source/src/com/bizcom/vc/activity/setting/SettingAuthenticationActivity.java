@@ -43,7 +43,8 @@ public class SettingAuthenticationActivity extends Activity {
 				});
 
 		rgAutentication = (RadioGroup) findViewById(R.id.rg_authentication);
-		switch (GlobalHolder.getInstance().getCurrentUser().getAuthtype()) {
+		User currentUser = GlobalHolder.getInstance().getCurrentUser();
+		switch (currentUser.getAuthtype()) {
 		case 0:
 			rgAutentication.check(R.id.rb_allow_anybogy);
 			break;

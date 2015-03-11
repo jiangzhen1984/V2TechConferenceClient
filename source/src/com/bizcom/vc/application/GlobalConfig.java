@@ -5,14 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
-import android.content.ComponentName;
 import android.content.Context;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 
 import com.bizcom.util.LocalSharedPreferencesStorage;
 import com.v2tech.R;

@@ -1,17 +1,10 @@
 package com.V2.jni;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
-
 import android.content.Context;
-import android.util.Log;
 
 import com.V2.jni.callbackInterface.ImRequestCallback;
 import com.V2.jni.ind.BoUserInfoBase;
@@ -223,6 +216,7 @@ public class ImRequest {
 		
 		boUserBaseInfo.mId=nUserID;
 
+		boUserBaseInfo.mId = nUserID;
 		for (int i = 0; i < mCallbacks.size(); i++) {
 			Object obj = mCallbacks.get(i).get();
 

@@ -113,7 +113,6 @@ public class BoUserInfoBase implements Parcelable {
 					// public String mAccountType;// 参会类型1普通，2快速入会
 
 					String id = attributes.getValue("id");
-
 					if (id != null) {
 						try {
 							boUserBaseInfo.mId = Integer.valueOf(id);

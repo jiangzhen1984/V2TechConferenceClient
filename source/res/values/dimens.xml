@@ -213,4 +213,6 @@
     <dimen name="conference_activity_request_host_list_width">400dp</dimen>
     <dimen name="conference_activity_request_host_list_height">300dp</dimen>
 
+    <!-- discussion_board_detail_activity.xml -->
+    <dimen name="discussion_board_detail_common_width">100dp</dimen>
 </resources>

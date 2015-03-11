@@ -2,23 +2,11 @@ package com.bizcom.vc.activity.contacts;
 
 import java.util.List;
 
-import com.bizcom.request.V2ContactsRequest;
-import com.bizcom.vc.activity.ConversationsTabFragment;
-import com.bizcom.vc.activity.main.MainActivity;
-import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
-import com.bizcom.vc.application.GlobalHolder;
-import com.bizcom.vc.application.MainApplication;
-import com.bizcom.vc.application.PublicIntent;
-import com.bizcom.vo.FriendGroup;
-import com.bizcom.vo.Group;
-import com.bizcom.vo.User;
-import com.bizcom.vo.Group.GroupType;
-import com.v2tech.R;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,6 +16,16 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bizcom.request.V2ContactsRequest;
+import com.bizcom.vc.activity.message.MessageAuthenticationActivity;
+import com.bizcom.vc.application.GlobalHolder;
+import com.bizcom.vc.application.PublicIntent;
+import com.bizcom.vo.FriendGroup;
+import com.bizcom.vo.Group;
+import com.bizcom.vo.Group.GroupType;
+import com.bizcom.vo.User;
+import com.v2tech.R;
 
 public class InputRemarkActivity extends Activity {
 	private static final int SELECT_GROUP_REQUEST_CODE = 0;
@@ -158,6 +156,14 @@ public class InputRemarkActivity extends Activity {
 							MessageAuthenticationActivity.class);
 					i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 					startActivity(i);
+					
+					if(!TextUtils.isEmpty(commentNameET.getText())){
+						Intent intent = new Intent();
+						intent.setAction(PublicIntent.BROADCAST_USER_COMMENT_NAME_NOTIFICATION);
+						intent.addCategory(PublicIntent.DEFAULT_CATEGORY);
+						intent.putExtra("modifiedUser", detailUser.getmUserId());
+						sendBroadcast(intent);
+					}
 				}
 			});
 		} else {
@@ -192,7 +198,7 @@ public class InputRemarkActivity extends Activity {
 							i.setAction(PublicIntent.BROADCAST_ADD_OTHER_FRIEND_WAITING_NOTIFICATION);
 							i.addCategory(PublicIntent.DEFAULT_CATEGORY);
 							sendBroadcast(i);
-
+							
 						} else if (detailUser.getAuthtype() == 2) {
 							// 不让任何人加为好
 							Toast.makeText(

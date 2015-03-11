@@ -119,4 +119,6 @@
     <dimen name="conference_activity_title_bar_button_padding">5dp</dimen>
     <dimen name="conference_activity_request_host_list_height">200dp</dimen>
     
+    <!-- discussion_board_detail_activity.xml -->
+    <dimen name="discussion_board_detail_common_width">90dp</dimen>
 </resources>

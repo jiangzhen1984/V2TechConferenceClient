@@ -1,13 +1,9 @@
 package com.bizcom.vc.application;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -16,12 +12,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.V2.jni.ImRequest;
-import com.V2.jni.ind.BoUserInfoGroup;
 import com.V2.jni.ind.BoUserInfoBase;
+import com.V2.jni.ind.BoUserInfoGroup;
 import com.V2.jni.ind.BoUserInfoShort;
 import com.V2.jni.ind.V2Group;
 import com.V2.jni.util.V2Log;
@@ -137,6 +132,9 @@ public enum GlobalHolder {
 			if (user == null) {
 				isContained = false;
 				user = new User(boGroupUserInfo.mId);
+				user.isContain = false;
+			} else {
+				user.isContain = true;
 			}
 
 			user.setFromService(true);
@@ -369,18 +367,30 @@ public enum GlobalHolder {
 				mUserHolder.put(key, tmp);
 				if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
 					// if receive this callback , the dirty change false;
-					Log.i("20150203 1", "1");
+					V2Log.i("test" , "user is null , invoke!");
 					ImRequest.getInstance().proxy.getUserBaseInfo(userID);
 				}
-			} else if (TextUtils.isEmpty(tmp.getDisplayName())) {
+			} else if (TextUtils.isEmpty(tmp.getNickName())) {
 				if (GlobalHolder.getInstance().getGlobalState().isGroupLoaded()) {
 					// if receive this callback , the dirty change false;
-					Log.i("20150203 1", "1");
+					V2Log.i("test" , "user display name is null , invoke");
 					ImRequest.getInstance().proxy.getUserBaseInfo(userID);
 				}
 			}
 
 			return tmp;
+		}
+	}
+
+	public User getExistUser(long userID) {
+		Long key = Long.valueOf(userID);
+		synchronized (key) {
+			User tmp = mUserHolder.get(key);
+			if (tmp == null) {
+				return null;
+			} else {
+				return tmp;
+			}
 		}
 	}
 
@@ -846,21 +856,22 @@ public enum GlobalHolder {
 	}
 
 	public boolean isFriend(User user) {
+		if (user == null) {
+			V2Log.e("GlobalHolder isFriend ---> get user is null , please check conversation user is exist");
+			return false;
+		}
+		return isFriend(user.getmUserId());
+	}
 
+	public boolean isFriend(long nUserId) {
 		synchronized (mState) {
-			if (user == null) {
-				V2Log.e("GlobalHolder isFriend ---> get user is null , please check conversation user is exist");
-				return false;
-			}
-
-			long currentUserID = user.getmUserId();
 			List<Group> friendGroup = GlobalHolder.getInstance().getGroup(
 					V2GlobalConstants.GROUP_TYPE_CONTACT);
 			if (friendGroup.size() >= 0) {
 				for (Group friend : friendGroup) {
 					List<User> users = friend.getUsers();
 					for (User friendUser : users) {
-						if (currentUserID == friendUser.getmUserId()) {
+						if (nUserId == friendUser.getmUserId()) {
 							return true;
 						}
 					}

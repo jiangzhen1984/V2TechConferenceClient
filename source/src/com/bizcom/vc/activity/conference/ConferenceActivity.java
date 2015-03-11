@@ -70,7 +70,6 @@ import com.V2.jni.util.XmlAttributeExtractor;
 import com.bizcom.bo.GroupUserObject;
 import com.bizcom.bo.MessageObject;
 import com.bizcom.bo.UserStatusObject;
-import com.bizcom.db.provider.VerificationProvider;
 import com.bizcom.request.V2ChatRequest;
 import com.bizcom.request.V2ConferenceRequest;
 import com.bizcom.request.V2DocumentRequest;
@@ -276,12 +275,6 @@ public class ConferenceActivity extends Activity {
 	private boolean isFinish;
 
 	private boolean needToFollowThePage = false;
-
-	/**
-	 * 当Activity从后台切回前台，有可能子布局测量的宽度有问题，导致展开的菜单布局宽度有问题。 在进入Stop状态时，把子布局的宽度记录下来
-	 */
-	private int mSaveWidth;
-	private boolean activityFromStop;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -579,7 +572,6 @@ public class ConferenceActivity extends Activity {
 		Intent i = new Intent(
 				PublicIntent.BROADCAST_JOINED_CONFERENCE_NOTIFICATION);
 		i.addCategory(PublicIntent.DEFAULT_CATEGORY);
-
 		i.putExtra("confid", conf.getId());
 		sendBroadcast(i);
 	}
@@ -821,13 +813,6 @@ public class ConferenceActivity extends Activity {
 			if (mContentHeight == -1) {
 				mContentHeight = mContentLayoutMain.getHeight();
 			}
-
-			// if (activityFromStop) {
-			// mContentWidth = mSaveWidth;
-			// activityFromStop = false;
-			// } else {
-			// mSaveWidth = mContentWidth;
-			// }
 
 			int flag = getSubViewWindowState();
 			// If sub window request full screen
@@ -1198,7 +1183,6 @@ public class ConferenceActivity extends Activity {
 			headsetAndBluetoothHeadsetHandle();
 			// updateAudioSpeaker(false);
 		}
-		activityFromStop = true;
 	}
 
 	@Override
@@ -3600,14 +3584,14 @@ public class ConferenceActivity extends Activity {
 				tv.setMaxWidth(widthDP);
 				tv.setEllipsize(TruncateAt.END);
 				tv.setSingleLine();
-				tv.setBackgroundColor(Color.rgb(138, 138, 138));
+				tv.setBackgroundColor(Color.TRANSPARENT);
 				tv.setPadding(10, 10, 10, 10);
 				tv.setTextSize(14);
 				RelativeLayout.LayoutParams tvrl = new RelativeLayout.LayoutParams(
 						RelativeLayout.LayoutParams.WRAP_CONTENT,
 						RelativeLayout.LayoutParams.WRAP_CONTENT);
-				tvrl.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-				tvrl.addRule(RelativeLayout.ALIGN_PARENT_TOP);
+				tvrl.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+				tvrl.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
 				rl.addView(tv, tvrl);
 				rl.setId(layId);
 			}

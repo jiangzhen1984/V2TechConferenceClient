@@ -530,8 +530,14 @@ public class TabFragmentConference extends Fragment implements TextWatcher,
 		this.startActivityForResult(enterConference, CONFERENCE_ENTER_CODE);
 	}
 
+	boolean isExcute;
 	private void initUpdateCovGroupList(final int groupType, final long groupID) {
-		if (groupType == V2GlobalConstants.GROUP_TYPE_DEPARTMENT) {
+		if (groupType == V2GlobalConstants.GROUP_TYPE_CONFERENCE) {
+			if(isExcute) {
+				return ;
+			}
+			
+			isExcute = true;
 			service.execute(new Runnable() {
 				@Override
 				public void run() {

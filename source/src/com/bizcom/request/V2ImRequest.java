@@ -58,7 +58,7 @@ public class V2ImRequest extends V2AbstractHandler {
 			ImRequest.getInstance().modifyBaseInfo(user.toXml());
 		} else {
 			ImRequest.getInstance().modifyCommentName(user.getmUserId(),
-					EscapedcharactersProcessing.convert(user.getCommentName_NickName()));
+					EscapedcharactersProcessing.convert(user.getCommentName()));
 		}
 	}
 

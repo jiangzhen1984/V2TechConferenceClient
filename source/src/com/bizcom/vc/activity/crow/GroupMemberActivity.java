@@ -32,6 +32,7 @@ import com.bizcom.vc.service.JNIService;
 import com.bizcom.vc.widget.cus.GroupMemberView;
 import com.bizcom.vc.widget.cus.GroupMemberView.ClickListener;
 import com.bizcom.vo.CrowdGroup;
+import com.bizcom.vo.DiscussionGroup;
 import com.bizcom.vo.Group;
 import com.bizcom.vo.Group.GroupType;
 import com.bizcom.vo.User;
@@ -63,6 +64,7 @@ public class GroupMemberActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.crowd_members_activity);
 		mContext = this;
+		activityType = getIntent().getIntExtra("memberType", 0);
 		initView();
 		setListener();
 		initReceiver();
@@ -75,7 +77,7 @@ public class GroupMemberActivity extends Activity {
 		mMembers.clear();
 		if (activityType == GROUP_MEMBER_TYPE_CROWD) {
 			this.unregisterReceiver(localReceiver);
-		}
+		} 
 		service.clearCalledBack();
 		super.onDestroy();
 	}
@@ -117,7 +119,6 @@ public class GroupMemberActivity extends Activity {
 		deleteMemberList = new ArrayList<User>();
 
 		long cid = getIntent().getLongExtra("cid", 0);
-		activityType = getIntent().getIntExtra("memberType", 0);
 		if (activityType == GROUP_MEMBER_TYPE_CROWD) {
 			memberGroup = GlobalHolder.getInstance().getGroupById(
 					GroupType.CHATING.intValue(), cid);
@@ -230,9 +231,15 @@ public class GroupMemberActivity extends Activity {
 	}
 
 	private void updateMembersChange() {
-		memberGroup = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
-				GroupType.CHATING.intValue(),
-				getIntent().getLongExtra("cid", 0));
+		if (activityType == GROUP_MEMBER_TYPE_CROWD) {
+			memberGroup = (CrowdGroup) GlobalHolder.getInstance().getGroupById(
+					GroupType.CHATING.intValue(),
+					getIntent().getLongExtra("cid", 0));
+		} else {
+			memberGroup = (DiscussionGroup) GlobalHolder.getInstance().getGroupById(
+					GroupType.DISCUSSION.intValue(),
+					getIntent().getLongExtra("cid", 0));
+		}
 		mMembers = memberGroup.getUsers();
 		adapter.notifyDataSetChanged();
 	}

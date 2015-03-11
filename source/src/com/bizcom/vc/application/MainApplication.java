@@ -23,7 +23,6 @@ import android.content.SharedPreferences.Editor;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -502,7 +501,7 @@ public class MainApplication extends Application {
 			// 测试证明activity跳转时，先start后stop
 			startedActivityCount++;
 			if (startedActivityCount == 1) {
-
+				Notificator.cancelAllSystemNotification(getApplicationContext());
 			}
 
 		}

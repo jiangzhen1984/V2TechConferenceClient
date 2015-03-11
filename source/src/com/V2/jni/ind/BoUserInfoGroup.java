@@ -66,24 +66,27 @@ public class BoUserInfoGroup {
 				element = (Element) gList.item(i);
 
 				BoUserInfoGroup boGroupUserInfo = new BoUserInfoGroup();
-				String strId = getAttribute(element,"id");
+				String strId = getAttribute(element, "id");
 				if (strId == null || strId.isEmpty()) {
 					continue;
 				}
 				boGroupUserInfo.mId = Long.parseLong(strId);
-				boGroupUserInfo.mAccount =getAttribute(element,"account");
-				boGroupUserInfo.mNickName = getAttribute(element,"nickname");
-				boGroupUserInfo.mCommentName = getAttribute(element,"commentname");
-				boGroupUserInfo.mSign = getAttribute(element,"sign");
-				boGroupUserInfo.mAuthtype = getAttribute(element,"authtype");
-				boGroupUserInfo.mSex = getAttribute(element,"sex");
-				boGroupUserInfo.mStringBirthday = getAttribute(element,"birthday");
-				boGroupUserInfo.mMobile = getAttribute(element,"mobile");
-				boGroupUserInfo.mTelephone = getAttribute(element,"telephone");
-				boGroupUserInfo.mEmail = getAttribute(element,"email");
-				boGroupUserInfo.mFax = getAttribute(element,"fax");
-				boGroupUserInfo.mJob = getAttribute(element,"job");
-				boGroupUserInfo.mAddress = getAttribute(element,"address");
+
+				boGroupUserInfo.mAccount = getAttribute(element, "account");
+				boGroupUserInfo.mNickName = getAttribute(element, "nickname");
+				boGroupUserInfo.mCommentName = getAttribute(element,
+						"commentname");
+				boGroupUserInfo.mSign = getAttribute(element, "sign");
+				boGroupUserInfo.mAuthtype = getAttribute(element, "authtype");
+				boGroupUserInfo.mSex = getAttribute(element, "sex");
+				boGroupUserInfo.mStringBirthday = getAttribute(element,
+						"birthday");
+				boGroupUserInfo.mMobile = getAttribute(element, "mobile");
+				boGroupUserInfo.mTelephone = getAttribute(element, "telephone");
+				boGroupUserInfo.mEmail = getAttribute(element, "email");
+				boGroupUserInfo.mFax = getAttribute(element, "fax");
+				boGroupUserInfo.mJob = getAttribute(element, "job");
+				boGroupUserInfo.mAddress = getAttribute(element, "address");
 
 				if (boGroupUserInfo.mStringBirthday != null
 						&& boGroupUserInfo.mStringBirthday.length() > 0) {
@@ -116,13 +119,12 @@ public class BoUserInfoGroup {
 		}
 		return boGroupUserInfoList;
 	}
-	
+
 	private static String getAttribute(Element el, String name) {
 		Attr atr = el.getAttributeNode(name);
 		if (atr != null) {
-			return atr.getValue();
+			return EscapedcharactersProcessing.reverse(atr.getValue());
 		}
 		return null;
 	}
-
 }

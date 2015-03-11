@@ -55,7 +55,7 @@
     <dimen name="video_doc_bottom_button_padding">5dp</dimen>
     <dimen name="conf_create_contacts_user_text_max_width">40dp</dimen>
     <dimen name="conf_create_contacts_user_signature_max_width">60dp</dimen>
-    <dimen name="contact_detail_2_item_margin_horizontal">20dp</dimen>
+    <dimen name="contact_detail_2_item_margin_horizontal">15dp</dimen>
     <dimen name="contact_detail_2_item_margin_vertical">10dp</dimen>
 
     <!-- activity contact message -->
@@ -129,4 +129,6 @@
     
      <dimen name="message_selected_pop_up_window">-8dp</dimen>
 
+     <!-- discussion_board_detail_activity.xml -->
+    <dimen name="discussion_board_detail_common_width">120dp</dimen>
 </resources>

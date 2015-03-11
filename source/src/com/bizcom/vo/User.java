@@ -85,6 +85,7 @@ public class User implements Comparable<User> {
 	private boolean isFromService;
 	// 会议中的快速入会用户
 	private boolean isRapidInitiation = false;
+	public boolean isContain;
 
 	public User(long mUserId) {
 		this(mUserId, null, null, null);
@@ -362,7 +363,7 @@ public class User implements Comparable<User> {
 		this.mBelongsGroup.remove(g);
 	}
 
-	public String getCommentName_NickName() {
+	public String getCommentName() {
 		return mCommentName;
 	}
 
