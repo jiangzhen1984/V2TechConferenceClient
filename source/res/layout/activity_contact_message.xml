@@ -146,7 +146,7 @@
                 android:layout_toRightOf="@+id/contact_message_plus"
                 android:orientation="horizontal" >
                 <RelativeLayout
-                    android:visibility="invisible" 
+                    android:visibility="visible" 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" >
                     <EditText
@@ -192,8 +192,8 @@
                     android:layout_gravity="center_vertical"
                     android:background="@drawable/input_bg"
                     android:text="@string/contact_message_button_send_audio_msg"
-                    android:textSize="@dimen/activity_contact_audio_button_text_size"
-                    android:visibility="visible" />
+                    android:textSize="14sp"
+                    android:visibility="invisible" />
             </FrameLayout>
         </RelativeLayout>
         <FrameLayout

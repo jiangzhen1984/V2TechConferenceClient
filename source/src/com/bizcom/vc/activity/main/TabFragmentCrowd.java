@@ -881,12 +881,11 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 											.getmUserId() == uid) {
 								((GroupLayout) mItemList.get(i).gp)
 										.updateGroupContent(crowd.getGroup());
-								break;
 							}
 						}
 					}
+					adapter.notifyDataSetChanged();
 				}
-				adapter.notifyDataSetChanged();
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_ADDED.equals(intent
 					.getAction())) {
 				GroupUserObject obj = (GroupUserObject) intent.getExtras().get(
@@ -908,6 +907,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 							break;
 						}
 					}
+					adapter.notifyDataSetChanged();
 				}
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_UPDATED_NOTIFICATION
 					.equals(intent.getAction())) {
@@ -916,17 +916,7 @@ public class TabFragmentCrowd extends Fragment implements TextWatcher {
 					if (groupType == V2GlobalConstants.GROUP_TYPE_DISCUSSION
 							&& mCurrentSubTab == SUB_TAB_DISCUSSION) {
 						long gid = intent.getLongExtra("gid", -1);
-						Group g = GlobalHolder.INSTANCE.getGroupById(V2GlobalConstants.GROUP_TYPE_DISCUSSION, gid);
-						for (int i = 0; i < mItemList.size(); i++) {
-							Conversation cov = mItemList.get(i).cov;
-							if (cov.getExtId() == gid) {
-								GroupLayout layout = (GroupLayout) mItemList
-										.get(i).gp;
-								layout.updateGroupContent(g);
-								adapter.notifyDataSetChanged();
-								break;
-							}
-						}
+						initUpdateCovGroupList(groupType, gid);
 					}
 				}
 			} else if (JNIService.JNI_BROADCAST_GROUP_USER_REMOVED

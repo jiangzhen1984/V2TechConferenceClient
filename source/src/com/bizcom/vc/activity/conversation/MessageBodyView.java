@@ -47,6 +47,7 @@ import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vc.application.V2GlobalConstants;
 import com.bizcom.vc.listener.CommonCallBack;
+import com.bizcom.vc.widget.cus.ChatTextView;
 import com.bizcom.vo.FileDownLoadBean;
 import com.bizcom.vo.User;
 import com.bizcom.vo.VMessage;
@@ -247,7 +248,7 @@ public class MessageBodyView extends LinearLayout {
 
 	public void initTextView() {
 
-		TextView contentView = new TextView(getContext());
+		ChatTextView contentView = new ChatTextView(getContext());
 		contentView.setOnClickListener(messageClickListener);
 		contentView.setBackgroundColor(Color.TRANSPARENT);
 		contentView.setTextColor(Color.BLACK);
@@ -326,6 +327,7 @@ public class MessageBodyView extends LinearLayout {
 	private void initListener() {
 		mContentContainer.setOnLongClickListener(messageLongClickListener);
 		mContentContainer.setOnTouchListener(touchListener);
+		mContentContainer.setOnClickListener(messageClickListener);
 	}
 
 	private void initPopupWindow() {
@@ -1165,6 +1167,8 @@ public class MessageBodyView extends LinearLayout {
 								&& mMsg.getItems().get(0).getType() == VMessageFileItem.ITEM_TYPE_FILE) {
 							VMessageFileItem fileItem = (VMessageFileItem) mMsg
 									.getItems().get(0);
+							lastUpdateTime = 0;
+							fileItem.setDownloadedSize(0);
 							updateFileItemView(fileItem, fileRootView);
 						}
 					} else {

@@ -1,5 +1,9 @@
 package com.bizcom.vc.activity.conversation;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.UUID;
 
 import android.app.Activity;
@@ -15,6 +19,7 @@ import android.widget.RelativeLayout;
 
 import com.V2.jni.util.V2Log;
 import com.bizcom.vc.application.GlobalConfig;
+import com.bizcom.vc.widget.cus.GifImageView;
 import com.bizcom.vc.widget.cus.SubsamplingScaleImageView;
 import com.bizcom.vc.widget.cus.TouchImageView;
 import com.bizcom.vo.VMessage;
@@ -55,84 +60,118 @@ public class PlaceSlideFragment extends Fragment {
 		v = inflater.inflate(R.layout.image_view, container, false);
 		rlContainer = (RelativeLayout) v.findViewById(R.id.image_view_root);
 		rlContainer.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+		View cusView;
 		if (vim == null)
 			vim = new VMessageImageItem(new VMessage(0, 0, null, null), UUID
 					.randomUUID().toString(), filePath, 0);
-		// if(".gif".equals(vim.getExtension())){
-		// GifView view = (GifView) v.findViewById(R.id.imageview_smile);
-		// view.setGIFResource(filePath);
-		// }
-		// else{
+		if (".gif".equals(vim.getExtension())) {
+			cusView = v.findViewById(R.id.image_view_gif);
+			GifImageView gifView = (GifImageView) cusView;
 
-		View cusView;
-		Size fullBitmapSize = vim.getFullBitmapSize();
-		if (fullBitmapSize.width > GlobalConfig.BITMAP_MAX_SIZE
-				|| fullBitmapSize.height > GlobalConfig.BITMAP_MAX_SIZE) {
-			cusView = new SubsamplingScaleImageView(this.getActivity());
-			SubsamplingScaleImageView subImage = (SubsamplingScaleImageView) cusView;
-			subImage.setFitScreen(true);
-			subImage.setImageFile(filePath);
+			File file = new File(filePath);
+			if (file.exists()) {
+				FileInputStream is = null;
+				ByteArrayOutputStream out = null;
+				try {
+					is = new FileInputStream(file);
+					out = new ByteArrayOutputStream();
+					byte[] buf = new byte[1024 * 1024];
+					while (is.read(buf) != -1) {
+						out.write(buf, 0, buf.length);
+						out.flush();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					if (is != null)
+						try {
+							is.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+					if (out != null)
+						try {
+							out.close();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+				}
+
+				gifView.setBytes(out.toByteArray());
+				gifView.startAnimation();
+			}
 		} else {
-			cusView = new TouchImageView(getActivity());
-			final TouchImageView iv = (TouchImageView) cusView;
-			mHoldPlaceBitmap = Bitmap.createBitmap(50, 50,
-					Bitmap.Config.RGB_565);
-			iv.setImageBitmap(mHoldPlaceBitmap);
+			Size fullBitmapSize = vim.getFullBitmapSize();
+			if (fullBitmapSize.width > GlobalConfig.BITMAP_MAX_SIZE
+					|| fullBitmapSize.height > GlobalConfig.BITMAP_MAX_SIZE) {
+				cusView = new SubsamplingScaleImageView(this.getActivity());
+				SubsamplingScaleImageView subImage = (SubsamplingScaleImageView) cusView;
+				subImage.setFitScreen(true);
+				subImage.setImageFile(filePath);
+			} else {
 
-			at = new AsyncTask<Void, Void, Bitmap>() {
+				cusView = new TouchImageView(getActivity());
+				final TouchImageView iv = (TouchImageView) cusView;
+				mHoldPlaceBitmap = Bitmap.createBitmap(50, 50,
+						Bitmap.Config.RGB_565);
+				iv.setImageBitmap(mHoldPlaceBitmap);
 
-				@Override
-				protected Bitmap doInBackground(Void... params) {
-					synchronized (mLock) {
-						if (vim != null) {
-							return vim.getFullQuantityBitmap();
-						}
-						return null;
-					}
-				}
+				at = new AsyncTask<Void, Void, Bitmap>() {
 
-				@Override
-				protected void onPostExecute(Bitmap result) {
-					if (result == null) {
-						V2Log.e("ConversationView",
-								"getFullQuantityBitmap is null");
-						return;
-					}
-					iv.setImageBitmap(result);
-					iv.setFilePath(filePath);
-				}
-
-				@Override
-				protected void onCancelled() {
-					super.onCancelled();
-					synchronized (vim) {
-						if (vim != null) {
-							vim.recycleFull();
+					@Override
+					protected Bitmap doInBackground(Void... params) {
+						synchronized (mLock) {
+							if (vim != null) {
+								return vim.getFullQuantityBitmap();
+							}
+							return null;
 						}
 					}
-					iv.setImageBitmap(null);
-				}
 
-				@Override
-				protected void onCancelled(Bitmap result) {
-					super.onCancelled(result);
-					synchronized (vim) {
-						if (vim != null) {
-							vim.recycle();
+					@Override
+					protected void onPostExecute(Bitmap result) {
+						if (result == null) {
+							V2Log.e("ConversationView",
+									"getFullQuantityBitmap is null");
+							return;
 						}
+						iv.setImageBitmap(result);
+						iv.setFilePath(filePath);
 					}
-					iv.setImageBitmap(null);
-				}
 
-			}.execute();
+					@Override
+					protected void onCancelled() {
+						super.onCancelled();
+						synchronized (vim) {
+							if (vim != null) {
+								vim.recycleFull();
+							}
+						}
+						iv.setImageBitmap(null);
+					}
+
+					@Override
+					protected void onCancelled(Bitmap result) {
+						super.onCancelled(result);
+						synchronized (vim) {
+							if (vim != null) {
+								vim.recycle();
+							}
+						}
+						iv.setImageBitmap(null);
+					}
+
+				}.execute();
+			}
+
+			RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
+					RelativeLayout.LayoutParams.MATCH_PARENT,
+					RelativeLayout.LayoutParams.MATCH_PARENT);
+			rl.addRule(RelativeLayout.CENTER_IN_PARENT);
+			rlContainer.addView(cusView, rl);
 		}
-
-		RelativeLayout.LayoutParams rl = new RelativeLayout.LayoutParams(
-				RelativeLayout.LayoutParams.MATCH_PARENT,
-				RelativeLayout.LayoutParams.MATCH_PARENT);
-		rl.addRule(RelativeLayout.CENTER_IN_PARENT);
-		rlContainer.addView(cusView, rl);
-		// }
 		return v;
 	}
 
@@ -163,6 +202,7 @@ public class PlaceSlideFragment extends Fragment {
 		if (mHoldPlaceBitmap != null) {
 			mHoldPlaceBitmap.recycle();
 		}
+		
 		rlContainer.removeAllViews();
 	}
 

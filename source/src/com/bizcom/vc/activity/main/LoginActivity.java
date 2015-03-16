@@ -532,11 +532,13 @@ public class LoginActivity extends Activity {
 					if (!checkIPorDNS(ets)) {
 						et.setError(mContext
 								.getText(R.string.error_host_invalid));
+						et.requestFocus();
 						return;
 					}
 					if (portStr5 == null || portStr5.isEmpty()) {
 						port.setError(mContext
 								.getText(R.string.error_field_required));
+						port.requestFocus();
 						return;
 					}
 					if (!saveServiceSettingInfo(ets, portStr5)) {

@@ -4,9 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.widget.TextView;
 
-public class ConfChatTextView extends TextView {
+public class ChatTextView extends TextView {
 
-	public ConfChatTextView(Context context) {
+	public ChatTextView(Context context) {
 		super(context);
 	}
 

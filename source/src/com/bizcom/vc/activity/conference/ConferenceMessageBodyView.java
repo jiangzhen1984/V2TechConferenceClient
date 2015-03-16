@@ -22,7 +22,7 @@ import com.V2.jni.util.V2Log;
 import com.bizcom.util.DateUtil;
 import com.bizcom.vc.application.GlobalConfig;
 import com.bizcom.vc.application.PublicIntent;
-import com.bizcom.vc.widget.cus.ConfChatTextView;
+import com.bizcom.vc.widget.cus.ChatTextView;
 import com.bizcom.vo.ConferenceGroup;
 import com.bizcom.vo.VMessage;
 import com.bizcom.vo.VMessageAbstractItem;
@@ -37,7 +37,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 	private View rootView;
 	private TextView senderTV;
 	private LinearLayout mMsgBodyContainer;
-	private ConfChatTextView mMsgBodyTV;
+	private ChatTextView mMsgBodyTV;
 	private OnClickListener mMsgBodyTVOnClickListener = new MsgBodyTVOnClickListener();
 
 	private VMessage mVMessage;
@@ -70,7 +70,7 @@ public class ConferenceMessageBodyView extends LinearLayout {
 		senderTV.setTextColor(Color.BLUE);
 		mMsgBodyContainer = (LinearLayout) rootView
 				.findViewById(R.id.conference_message_body_ly);
-		mMsgBodyTV = new ConfChatTextView(this.getContext());
+		mMsgBodyTV = new ChatTextView(this.getContext());
 		mMsgBodyTV.setBackgroundColor(Color.TRANSPARENT);
 		mMsgBodyTV.setTextColor(Color.BLACK);
 		mMsgBodyTV.setSelected(false);

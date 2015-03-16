@@ -120,7 +120,7 @@ public class ConversationTextActivity extends Activity implements
 	private static final int VOICE_DIALOG_FLAG_RECORDING = 1;
 	private static final int VOICE_DIALOG_FLAG_CANCEL = 2;
 	private static final int VOICE_DIALOG_FLAG_WARING_FOR_TIME_TOO_SHORT = 3;
-	
+
 	private final int START_LOAD_MESSAGE = 1;
 	private final int LOAD_MESSAGE = 2;
 	private final int END_LOAD_MESSAGE = 3;
@@ -133,7 +133,7 @@ public class ConversationTextActivity extends Activity implements
 	private final int RECORD_STATUS_LISTENER = 21;
 
 	private final int BATCH_COUNT = 10;
-	private final int INTERVAL_TIME = 60000; 
+	private final int INTERVAL_TIME = 60000;
 
 	/**
 	 * for activity result
@@ -285,8 +285,8 @@ public class ConversationTextActivity extends Activity implements
 		mGroupChat.registerFileTransStatusListener(this.lh,
 				FILE_STATUS_LISTENER, null);
 		// Start animation
-//		this.overridePendingTransition(R.anim.nonam_scale_center_0_100,
-//				R.anim.nonam_scale_null);
+		// this.overridePendingTransition(R.anim.nonam_scale_center_0_100,
+		// R.anim.nonam_scale_null);
 		// initalize vioce function that showing dialog
 		createVideoDialog();
 		// request ConversationTabFragment to update
@@ -593,8 +593,8 @@ public class ConversationTextActivity extends Activity implements
 	public void onBackPressed() {
 		V2Log.d(TAG, "entry onBackPressed");
 		checkMessageEmpty();
-//		this.overridePendingTransition(R.anim.nonam_scale_null,
-//				R.anim.nonam_scale_center_100_0);
+		// this.overridePendingTransition(R.anim.nonam_scale_null,
+		// R.anim.nonam_scale_center_100_0);
 		super.onBackPressed();
 	}
 
@@ -1868,7 +1868,8 @@ public class ConversationTextActivity extends Activity implements
 		};
 
 		@Override
-		public void requestPlayAudio(MessageBodyView view , VMessage vm, VMessageAudioItem vai) {
+		public void requestPlayAudio(MessageBodyView view, VMessage vm,
+				VMessageAudioItem vai) {
 			if (vai != null && vai.getAudioFilePath() != null) {
 				playingAudioMessage = vm;
 				playingAudioBodyView = view;
@@ -2053,18 +2054,20 @@ public class ConversationTextActivity extends Activity implements
 			array = MessageLoader.loadMessageByPage(mContext,
 					Conversation.TYPE_CONTACT, currentLoginUserID,
 					remoteChatUserID, BATCH_COUNT, offset);
-			for (int i = 0; i < array.size(); i++) {
-				if (array.get(i).getFileItems().size() > 0) {
-					VMessageFileItem vMessageFileItem = array.get(i)
-							.getFileItems().get(0);
-					File check = new File(vMessageFileItem.getFilePath());
-					if (!check.isFile()
-							&& !check.exists()
-							&& vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED) {
-						vMessageFileItem
-								.setState(VMessageAbstractItem.STATE_FILE_UNDOWNLOAD);
-						MessageLoader.updateFileItemState(mContext,
-								vMessageFileItem);
+			if (array != null) {
+				for (int i = 0; i < array.size(); i++) {
+					if (array.get(i).getFileItems().size() > 0) {
+						VMessageFileItem vMessageFileItem = array.get(i)
+								.getFileItems().get(0);
+						File check = new File(vMessageFileItem.getFilePath());
+						if (!check.isFile()
+								&& !check.exists()
+								&& vMessageFileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED) {
+							vMessageFileItem
+									.setState(VMessageAbstractItem.STATE_FILE_UNDOWNLOAD);
+							MessageLoader.updateFileItemState(mContext,
+									vMessageFileItem);
+						}
 					}
 				}
 			}
@@ -2122,6 +2125,7 @@ public class ConversationTextActivity extends Activity implements
 	}
 
 	private boolean pending = false;
+
 	private boolean queryAndAddMessage(final int msgId) {
 
 		VMessage m;
@@ -2194,11 +2198,10 @@ public class ConversationTextActivity extends Activity implements
 	 * @param message
 	 */
 	private void judgeShouldShowTime(VMessage message) {
-		if(lastIntervalTime != 0){
-			if (GlobalConfig.getGlobalServerTime() - lastIntervalTime <= INTERVAL_TIME){
+		if (lastIntervalTime != 0) {
+			if (GlobalConfig.getGlobalServerTime() - lastIntervalTime <= INTERVAL_TIME) {
 				message.setShowTime(false);
-			}
-			else{
+			} else {
 				message.setShowTime(true);
 				lastIntervalTime = GlobalConfig.getGlobalServerTime();
 			}
@@ -2210,25 +2213,31 @@ public class ConversationTextActivity extends Activity implements
 
 	private void updateFileProgressView(String uuid, long tranedSize,
 			int progressType) {
-		if(messageArray != null) {
+		if (messageArray != null) {
 			for (int i = 0; i < messageArray.size(); i++) {
 				VMessage vm = messageArray.get(i);
 				if (vm.getFileItems().size() > 0) {
 					VMessageFileItem item = vm.getFileItems().get(0);
 					if (item.getUuid().equals(uuid)) {
 						VMessageFileItem vfi = ((VMessageFileItem) item);
-						switch (progressType) {
-						case FileTransStatusIndication.IND_TYPE_PROGRESS_END:
-							if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
-								vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
-							} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
-								vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
+						if (currentConversationViewType == V2GlobalConstants.GROUP_TYPE_CROWD
+								&& vfi.getState() == VMessageAbstractItem.STATE_FILE_SENT) {
+							V2Log.e("test",
+									"VMessageAbstractItem.STATE_FILE_SENT！！");
+							return;
+						} else {
+							switch (progressType) {
+							case FileTransStatusIndication.IND_TYPE_PROGRESS_END:
+								if (vfi.getState() == VMessageAbstractItem.STATE_FILE_SENDING) {
+									vfi.setState(VMessageAbstractItem.STATE_FILE_SENT);
+								} else if (vfi.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADING) {
+									vfi.setState(VMessageAbstractItem.STATE_FILE_DOWNLOADED);
+								}
+								break;
 							}
-							break;
+							vfi.setDownloadedSize(tranedSize);
+							Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 						}
-	
-						vfi.setDownloadedSize(tranedSize);
-						Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 					}
 				} else if (vm.getAudioItems().size() > 0) {
 					VMessageAudioItem item = vm.getAudioItems().get(0);
@@ -2390,24 +2399,26 @@ public class ConversationTextActivity extends Activity implements
 				if (fileItems.size() > 0) {
 					adapterFileIcon(fileItems);
 				}
-				
+
 				Boolean isPlay = false;
 				VMessageAudioItem vMessageAudioItem = null;
 				List<VMessageAudioItem> audioItems = vm.getAudioItems();
-				if(audioItems.size() > 0 && audioItems.get(0).isStartPlay()){
+				if (audioItems.size() > 0 && audioItems.get(0).isStartPlay()) {
 					vMessageAudioItem = audioItems.get(0);
 					vMessageAudioItem.setStartPlay(false);
-					vMessageAudioItem.setReadState(VMessageAbstractItem.STATE_READED);
+					vMessageAudioItem
+							.setReadState(VMessageAbstractItem.STATE_READED);
 					MessageLoader.updateBinaryAudioItem(vMessageAudioItem);
 					isPlay = true;
 				}
-				
+
 				mv = (MessageBodyView) convertView;
 				mv.updateView(vm);
 				vm.isUpdateAvatar = false;
-				
-				if(isPlay)
-					mv.getCallback().requestPlayAudio(mv, vm, vMessageAudioItem);
+
+				if (isPlay)
+					mv.getCallback()
+							.requestPlayAudio(mv, vm, vMessageAudioItem);
 			}
 			return convertView;
 		}
@@ -2437,8 +2448,8 @@ public class ConversationTextActivity extends Activity implements
 				} else
 					isReLoading = false;
 				// 用于onNewIntent判断是否需要重新加载界面聊天数据，以及是否阻断广播 , true 后台
-				boolean isAppBack = ((MainApplication) mContext.getApplicationContext())
-						.isRunningBackgound();
+				boolean isAppBack = ((MainApplication) mContext
+						.getApplicationContext()).isRunningBackgound();
 				if (isReLoading && !isLoading) {
 					boolean result = queryAndAddMessage((int) msgID);
 					if (result) {
@@ -2688,10 +2699,9 @@ public class ConversationTextActivity extends Activity implements
 						VMessageFileItem fileItem = vm.getFileItems().get(0);
 						// 如果该文件时其他人上传的，则在下载的时候，强制将聊天界面的状态改成已上传
 						if (vm.getFromUser().getmUserId() != GlobalHolder
-								.getInstance().getCurrentUserId()) {
-							if (fileItem.getState() != VMessageAbstractItem.STATE_FILE_SENT) {
-								fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT);
-							}
+								.getInstance().getCurrentUserId()
+								&& fileItem.getState() != VMessageAbstractItem.STATE_FILE_SENT) {
+							fileItem.setState(VMessageAbstractItem.STATE_FILE_SENT);
 						} else { // 如果该文件是自己上传的，则在下载的时候，强制将聊天界面的状态改成已上传
 							if (fileItem.getState() == VMessageAbstractItem.STATE_FILE_DOWNLOADED_FALIED
 									|| fileItem.getState() == VMessageAbstractItem.STATE_FILE_PAUSED_DOWNLOADING
@@ -2702,16 +2712,15 @@ public class ConversationTextActivity extends Activity implements
 						}
 					}
 					messageArray.add(0, vm);
-					
+
 					// 设置VMessage是否应该显示时间
-					if(lastIntervalTime == 0){
+					if (lastIntervalTime == 0) {
 						lastIntervalTime = vm.getmDateLong();
 						vm.setShowTime(true);
-					}
-					else {
-						
+					} else {
+
 						long currentMsgTime = vm.getmDateLong();
-						if(lastIntervalTime - currentMsgTime < INTERVAL_TIME){
+						if (lastIntervalTime - currentMsgTime < INTERVAL_TIME) {
 							vm.setShowTime(false);
 						} else {
 							vm.setShowTime(true);
@@ -2719,7 +2728,7 @@ public class ConversationTextActivity extends Activity implements
 						}
 					}
 				}
-				
+
 				LastFistItem = LastFistItem + loadSize;
 				currentItemPos = loadSize - 1;
 				if (currentItemPos == -1)
@@ -2915,14 +2924,16 @@ public class ConversationTextActivity extends Activity implements
 	@Override
 	public void notifyChatInterToReplace(final VMessage vm) {
 
-		if(messageArray == null)
-			return ;
-		
+		if (messageArray == null)
+			return;
+
 		for (int i = 0; i < messageArray.size(); i++) {
 			VMessage replaced = messageArray.get(i);
 			if (replaced.getUUID().equals(vm.getUUID())) {
-				V2Log.e("binaryReplace", "ConversationTextActivity -- "
-						+ "Recevice Binary data from server , and replaced wait! id is : " + vm.getmXmlDatas());
+				V2Log.e("binaryReplace",
+						"ConversationTextActivity -- "
+								+ "Recevice Binary data from server , and replaced wait! id is : "
+								+ vm.getmXmlDatas());
 				replaced.setImageItems(vm.getImageItems());
 				Message.obtain(lh, ADAPTER_NOTIFY).sendToTarget();
 				break;

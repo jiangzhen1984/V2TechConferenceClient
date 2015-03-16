@@ -6,23 +6,16 @@ import java.util.List;
 import java.util.Set;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.graphics.drawable.AnimationDrawable;
 import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextUtils.TruncateAt;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -30,7 +23,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,8 +32,8 @@ import com.bizcom.vc.application.GlobalHolder;
 import com.bizcom.vo.Attendee;
 import com.bizcom.vo.Conference;
 import com.bizcom.vo.User;
-import com.bizcom.vo.UserDeviceConfig;
 import com.bizcom.vo.User.DeviceType;
+import com.bizcom.vo.UserDeviceConfig;
 import com.v2tech.R;
 
 public class LeftAttendeeListLayout extends LinearLayout {

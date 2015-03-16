@@ -4,4 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <com.bizcom.vc.widget.cus.GifImageView
+            android:id="@+id/image_view_gif"
+            android:layout_width="300dp"
+            android:layout_height="300dp"
+            android:layout_centerInParent="true"
+            android:onClick="onGifClick" />
 </RelativeLayout>
