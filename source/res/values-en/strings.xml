@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="date_time_picker_plus">+</string>
+    <string name="date_time_picker_minus">-</string>
+    <string name="ip_setting_address_dot">.</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="action_sign_in_short">Sign in</string>
     <string name="common_back">Back</string>
     <string name="common_personal_data">Personal profile</string>
     <string name="common_networkIsDisconnection_retryPlease">Network is not available, please try again a while later.</string>
@@ -551,4 +556,5 @@
     <string name="contact_message_auto_voice">[Audio]</string>
     <string name="contact_message_auto_video">[Video]</string>
     <string name="conversation_select_file_entry_need_validation_messages">Validation required</string>
+
 </resources>
